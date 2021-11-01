@@ -1,0 +1,55 @@
+#include <storm/entities/EntityManager.hpp>
+#include <storm/entities/System.hpp>
+
+using namespace storm;
+using namespace storm::entities;
+
+/////////////////////////////////////
+/////////////////////////////////////
+System::System(EntityManager &manager, core::UInt32 priority, ComponentTypes &&types)
+    : m_manager { &manager }, m_priority { priority }, m_types { std::move(types) } {
+}
+
+/////////////////////////////////////
+/////////////////////////////////////
+System::System(EntityManager &manager, core::UInt32 priority, const ComponentTypes &types)
+    : m_manager { &manager }, m_priority { priority }, m_types { types } {
+}
+
+/////////////////////////////////////
+/////////////////////////////////////
+System::System(System &&) = default;
+
+/////////////////////////////////////
+/////////////////////////////////////
+System &System::operator=(System &&) = default;
+
+/////////////////////////////////////
+/////////////////////////////////////
+System::~System() = default;
+
+/////////////////////////////////////
+/////////////////////////////////////
+void System::preUpdate() {
+}
+
+/////////////////////////////////////
+/////////////////////////////////////
+void System::postUpdate() {
+}
+
+/////////////////////////////////////
+/////////////////////////////////////
+void System::addEntity(Entity e) {
+    STORMKIT_EXPECTS(e != INVALID_ENTITY);
+
+    m_entities.insert(e);
+}
+
+/////////////////////////////////////
+/////////////////////////////////////
+void System::removeEntity(Entity e) {
+    STORMKIT_EXPECTS(e != INVALID_ENTITY);
+
+    m_entities.erase(e);
+}

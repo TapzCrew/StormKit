@@ -1,0 +1,22 @@
+// Copyright (C) 2021 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+// clang-format off
+#pragma once
+
+#include <string_view>
+
+static constexpr auto STORMKIT_VERSION         = std::string_view { "@version@" };
+static constexpr auto STORMKIT_MAJOR_VERSION   = @major_version@;
+static constexpr auto STORMKIT_MINOR_VERSION   = @minor_version@;
+static constexpr auto STORMKIT_PATCH_VERSION   = @patch_version@;
+static constexpr auto STORMKIT_MILESTONE       = std::string_view { "@milestone@" };
+static constexpr auto STORMKIT_BUILD_TYPE      = std::string_view { "@build_type@" };
+static constexpr auto STORMKIT_GIT_COMMIT_HASH = std::string_view { "@git_commit_hash@" };
+static constexpr auto STORMKIT_GIT_BRANCH      = std::string_view { "@git_branch@" };
+
+#mesondefine STORMKIT_ENABLE_XCB
+#mesondefine STORMKIT_ENABLE_WAYLAND
+#mesondefine STORMKIT_ENABLE_WSI
+// clang-format on

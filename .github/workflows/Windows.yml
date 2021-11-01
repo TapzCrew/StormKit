@@ -1,0 +1,98 @@
+name: Windows
+
+on:
+  push:
+    branches: [ master, dev ]
+  pull_request:
+    branches: [ master, dev ]
+
+jobs:
+  build:
+    name: ${{ matrix.os.name }} ( ${{matrix.os.compiler }} ${{ matrix.library_type }}, ${{ matrix.build_type }} )
+    runs-on: ${{ matrix.os.value }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+        - {
+           name: "Windows",
+           compiler: "MSVC 16.9",
+           value: windows-latest,
+           triplet: "x64-windows"
+        }
+            
+        library_type: [static, shared]
+        build_type: [release, debug]
+    env:
+      VCPKG_FEATURE_FLAGS: "binarycaching"
+    steps:
+        - name: Install msvc
+          uses: ilammy/msvc-dev-cmd@v1
+
+        - name: Install python
+          uses: actions/setup-python@v2
+          with:
+            python-version: '3.9'
+            architecture: 'x64'
+
+        - name: Install meson and ninja
+          run: |
+            pip3 install meson ninja
+
+        - uses: lukka/get-cmake@latest
+        - name: Setup vcpkg
+          uses: lukka/run-vcpkg@v6
+          id: runvcpkg
+          with:
+            vcpkgArguments: libpng libjpeg-turbo glm gli fmt rapidjson range-v3 ms-gsl glslang spirv-cross
+            vcpkgDirectory: ${{ runner.workspace }}/vcpkg/
+            vcpkgGitCommitId: fddf97411017bfcd7dd988d754b25efc3d6a1c3e
+            vcpkgTriplet: ${{ matrix.os.triplet }}
+
+        - name: Checkout
+          uses: actions/checkout@v2
+          with:
+            lfs: true
+            fetch-depth: 0
+            
+        - name: Configure & Build
+          id: confandbuild
+          run: |
+            $env:PATH += ";${{ runner.workspace }}/vcpkg/installed/${{ matrix.os.triplet }}/tools"
+            meson builddir -Denable_examples=true -Dexamples_data_dir="../share/" -Dbuildtype=${{ matrix.build_type }} -Dlibrary_type=${{ matrix.library_type }} --cmake-prefix-path=${{ runner.workspace }}/vcpkg/installed/${{ matrix.os.triplet }}/ --prefix=${{ runner.workspace }}/StormKit_Output
+            ninja -C builddir -j7
+
+        - uses: actions/upload-artifact@v1
+          if: failure()
+          with:
+            name: fail-${{ matrix.os.name }}-{{ matrix.library_type }}-${{ matrix.build_type }}-meson-log
+            path: builddir/meson-logs/testlog.txt
+
+        - name: Install
+          id: install
+          run: |
+            ninja -C builddir install -j7
+
+        - name: Copy VCPKG release dependencies
+          id: copyvcpkgreldeps
+          if: ${{ matrix.build_type == 'release' }}
+          run: |
+            copy ${{ runner.workspace }}\vcpkg\installed\x64-windows\bin\jpeg62.dll ${{ runner.workspace }}\StormKit_Output\bin
+            copy ${{ runner.workspace }}\vcpkg\installed\x64-windows\bin\zlib1.dll ${{ runner.workspace }}\StormKit_Output\bin
+            copy ${{ runner.workspace }}\vcpkg\installed\x64-windows\bin\libpng16.dll ${{ runner.workspace }}\StormKit_Output\bin
+
+        - name: Copy VCPKG debug dependencies
+          id: copyvcpkgdebdeps
+          if: ${{ matrix.build_type == 'debug' }}
+          run: |
+            copy ${{ runner.workspace }}\vcpkg\installed\x64-windows\debug\bin\jpeg62.dll ${{ runner.workspace }}\StormKit_Output\bin
+            copy ${{ runner.workspace }}\vcpkg\installed\x64-windows\debug\bin\zlibd1.dll ${{ runner.workspace }}\StormKit_Output\bin
+            copy ${{ runner.workspace }}\vcpkg\installed\x64-windows\debug\bin\libpng16d.dll ${{ runner.workspace }}\StormKit_Output\bin
+
+        - name: Upload artifacts
+          id: upload
+          uses: actions/upload-artifact@v1
+          with:
+            name: ${{ matrix.os.name }}-${{ matrix.os.compiler }}-${{ matrix.library_type }}-${{ matrix.build_type }}
+            path: ${{ runner.workspace }}/StormKit_Output
+ 
