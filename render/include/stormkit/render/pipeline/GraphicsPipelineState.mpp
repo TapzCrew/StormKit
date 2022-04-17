@@ -1,0 +1,136 @@
+// Copyright (C) 2021 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+module;
+
+#pragma once
+
+#include <stormkit/core/HashMacro.hpp>
+
+#if defined(STORMKIT_CXX20_MODULES)
+// clang-format off
+export module stormkit.render.pipeline.graphicspipelinestate;
+// clang-format on
+export {
+#else
+    /////////// - StormKit::core - ///////////
+    #include <stormkit/core/Types.mpp>
+
+    /////////// - StormKit::render - ///////////
+    #include <stormkit/render/core/Fwd.hpp>
+    #include <stormkit/render/core/Types.mpp>
+
+    #include <stormkit/render/resource/Fwd.hpp>
+
+    #include <stormkit/render/pipeline/Fwd.hpp>
+    #include <stormkit/render/pipeline/VertexBindingDescription.mpp>
+    #include <stormkit/render/pipeline/VertexInputAttributeDescription.mpp>
+#endif
+
+    namespace stormkit::render {
+        struct GraphicsPipelineVertexInputState {
+            std::vector<VertexBindingDescription> binding_descriptions;
+            std::vector<VertexInputAttributeDescription> input_attribute_descriptions;
+        };
+
+        struct GraphicsPipelineInputAssemblyState {
+            PrimitiveTopology topology    = PrimitiveTopology::Triangle_List;
+            bool primitive_restart_enable = false;
+        };
+
+        struct GraphicsPipelineViewportState {
+            std::vector<Viewport> viewports;
+            std::vector<Scissor> scissors;
+        };
+
+        struct GraphicsPipelineRasterizationState {
+            bool depth_clamp_enable        = false;
+            bool rasterizer_discard_enable = false;
+            PolygonMode polygon_mode       = PolygonMode::Fill;
+            float line_width               = 1;
+            CullModeFlag cull_mode         = CullModeFlag::Back;
+            FrontFace front_face           = FrontFace::Clockwise;
+        };
+
+        struct GraphicsPipelineMultiSampleState {
+            bool sample_shading_enable            = false;
+            SampleCountFlag rasterization_samples = SampleCountFlag::C1;
+        };
+
+        struct GraphicsPipelineColorBlendAttachmentState {
+            ColorComponentFlag color_write_mask = ColorComponentFlag::RGBA;
+            bool blend_enable                   = false;
+
+            BlendFactor src_color_blend_factor   = BlendFactor::One;
+            BlendFactor dst_color_blend_factor   = BlendFactor::Zero;
+            BlendOperation color_blend_operation = BlendOperation::Add;
+
+            BlendFactor src_alpha_blend_factor   = BlendFactor::One;
+            BlendFactor dst_alpha_blend_factor   = BlendFactor::Zero;
+            BlendOperation alpha_blend_operation = BlendOperation::Substract;
+        };
+
+        struct GraphicsPipelineColorBlendState {
+            bool logic_operation_enable    = false;
+            LogicOperation logic_operation = LogicOperation::Copy;
+            std::vector<GraphicsPipelineColorBlendAttachmentState> attachments;
+            std::array<float, 4> blend_constants = { 0.f, 0.f, 0.f, 0.f };
+        };
+
+        struct GraphicsPipelineDynamicState {
+            std::vector<DynamicState> dynamics;
+        };
+
+        struct GraphicsPipelineShaderState {
+            std::vector<const Shader *> shaders;
+        };
+
+        struct GraphicsPipelineDepthStencilState {
+            bool depth_test_enable  = false;
+            bool depth_write_enable = false;
+
+            CompareOperation depth_compare_op = CompareOperation::Less;
+
+            bool depth_bounds_test_enable = false;
+
+            float min_depth_bounds = 0.f;
+            float max_depth_bounds = 1.f;
+        };
+
+        struct GraphicsPipelineLayout {
+            std::vector<const DescriptorSetLayout *> descriptor_set_layouts;
+            std::vector<PushConstantRange> push_constant_ranges;
+        };
+
+        struct GraphicsPipelineState {
+            GraphicsPipelineInputAssemblyState input_assembly_state;
+            GraphicsPipelineViewportState viewport_state;
+            GraphicsPipelineRasterizationState rasterization_state;
+            GraphicsPipelineMultiSampleState multisample_state;
+            GraphicsPipelineColorBlendState color_blend_state;
+            GraphicsPipelineDynamicState dynamic_state;
+            GraphicsPipelineShaderState shader_state;
+            GraphicsPipelineVertexInputState vertex_input_state;
+            GraphicsPipelineDepthStencilState depth_stencil_state;
+            GraphicsPipelineLayout layout;
+        };
+
+    } // namespace stormkit::render
+
+    HASH_FUNC(stormkit::render::GraphicsPipelineVertexInputState)
+    HASH_FUNC(stormkit::render::GraphicsPipelineInputAssemblyState)
+    HASH_FUNC(stormkit::render::GraphicsPipelineViewportState)
+    HASH_FUNC(stormkit::render::GraphicsPipelineRasterizationState)
+    HASH_FUNC(stormkit::render::GraphicsPipelineMultiSampleState)
+    HASH_FUNC(stormkit::render::GraphicsPipelineColorBlendAttachmentState)
+    HASH_FUNC(stormkit::render::GraphicsPipelineColorBlendState)
+    HASH_FUNC(stormkit::render::GraphicsPipelineDynamicState)
+    HASH_FUNC(stormkit::render::GraphicsPipelineShaderState)
+    HASH_FUNC(stormkit::render::GraphicsPipelineDepthStencilState)
+    HASH_FUNC(stormkit::render::GraphicsPipelineLayout)
+    HASH_FUNC(stormkit::render::GraphicsPipelineState)
+
+#if defined(STORMKIT_CXX20_MODULES)
+}
+#endif

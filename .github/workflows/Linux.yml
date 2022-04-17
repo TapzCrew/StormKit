@@ -1,0 +1,113 @@
+name: Linux
+
+on:
+  push:
+    branches: [ master, dev ]
+  pull_request:
+    branches: [ master, dev ]
+
+jobs:
+  build:
+    name: ${{ matrix.os.name }} ( ${{matrix.os.compiler }} ${{ matrix.library_type }}, ${{ matrix.build_type }} )
+    runs-on: ${{ matrix.os.value }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+        - {
+           name: "Ubuntu",
+           compiler: "GCC10",
+           value: ubuntu-latest,
+           triplet: "x64-linux"
+        }
+            
+        library_type: [static, shared]
+        build_type: [release, debug]
+    env:
+      VCPKG_FEATURE_FLAGS: "binarycaching"
+      CC: "gcc-10"
+      CXX: "g++-10"
+    steps:
+        - name: Install apt deps
+          id: aptdeps
+          run: |
+            wget -qO - https://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo apt-key add -
+            sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-focal.list https://packages.lunarg.com/vulkan/lunarg-vulkan-focal.list
+            sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+            sudo add-apt-repository -y ppa:deadsnakes/ppa
+            sudo apt -q update
+            sudo apt -y install vulkan-sdk \
+              gcc-10 \
+              g++-10 \
+              libxcb-util0-dev \
+              tar \
+              curl \
+              zip \
+              unzip \
+              libxcb-xinput-dev \
+              libwayland-dev \
+              libxkbcommon-dev \
+              libxkbcommon-x11-dev \
+              libxcb-randr0-dev \
+              libxcb1-dev \
+              libxcb-icccm4-dev \
+              libxcb-xkb-dev \
+              libxcb-keysyms1-dev \
+              libxcb-xfixes0-dev
+
+        - name: Install python
+          uses: actions/setup-python@v2
+          with:
+            python-version: '3.9'
+            architecture: 'x64'
+
+        - name: Install meson and ninja
+          run: |
+            pip3 install meson ninja
+
+        - uses: lukka/get-cmake@latest
+        - name: Setup vcpkg
+          uses: lukka/run-vcpkg@v6
+          id: runvcpkg
+          with:
+            vcpkgArguments: libpng libjpeg-turbo glm gli fmt rapidjson range-v3 ms-gsl
+            vcpkgDirectory: ${{ runner.workspace }}/vcpkg/
+            vcpkgGitCommitId: fddf97411017bfcd7dd988d754b25efc3d6a1c3e
+            vcpkgTriplet: ${{ matrix.os.triplet }}
+            
+        - name: Checkout
+          uses: actions/checkout@v2
+          with:
+            lfs: true
+            fetch-depth: 0
+            
+        - name: Configure & Build
+          id: confandbuild
+          run: |
+            meson builddir \
+              -Denable_examples=true \
+              -Dexamples_data_dir="../share/" \
+              -Dbuildtype=${{ matrix.build_type }} \
+              -Dlibrary_type=${{ matrix.library_type }} \
+              --cmake-prefix-path=${{ runner.workspace }}/vcpkg/installed/${{ matrix.os.triplet }}/ \
+              --prefix=${{ runner.workspace }}/StormKit_Output
+            ninja -C builddir -j7
+
+        - uses: actions/upload-artifact@v1
+          if: failure()
+          with:
+            name: fail-${{ matrix.os.name }}-{{ matrix.library_type }}-${{ matrix.build_type }}-meson-log
+            path: builddir/meson-logs/testlog.txt
+
+        - name: Install
+          id: install
+          run: |
+            ninja -C builddir install -j7
+
+        - name: Upload artifacts
+          id: upload
+          uses: actions/upload-artifact@v1
+          with:
+            name: ${{ matrix.os.name }}-${{ matrix.os.compiler }}-${{ matrix.library_type }}-${{ matrix.build_type }}
+            path: ${{ runner.workspace }}/StormKit_Output
+ 

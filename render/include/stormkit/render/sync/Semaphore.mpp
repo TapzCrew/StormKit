@@ -1,0 +1,55 @@
+// Copyright (C) 2021 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+#pragma once
+
+#include <stormkit/core/PlatformMacro.hpp>
+
+#if defined(STORMKIT_CXX20_MODULES)
+// clang-format off
+export module stormkit.render.sync.semaphore;
+// clang-format on
+export {
+#else
+    /////////// - StormKit::core - ///////////
+    #include <stormkit/core/Memory.mpp>
+    #include <stormkit/core/Types.mpp>
+
+    /////////// - StormKit::render - ///////////
+    #include <stormkit/render/core/Enums.mpp>
+    #include <stormkit/render/core/Fwd.hpp>
+    #include <stormkit/render/core/Vulkan.mpp>
+#endif
+
+    namespace stormkit::render {
+        class STORMKIT_PUBLIC Semaphore {
+          public:
+            static constexpr auto DEBUG_TYPE = DebugObjectType::Semaphore;
+
+            explicit Semaphore(const Device &device);
+            ~Semaphore();
+
+            Semaphore(const Semaphore &) = delete;
+            auto operator=(const Semaphore &) -> Semaphore & = delete;
+
+            Semaphore(Semaphore &&) noexcept;
+            auto operator=(Semaphore &&) noexcept -> Semaphore &;
+
+            [[nodiscard]] operator VkSemaphore() const noexcept;
+            [[nodiscard]] auto vkHandle() const noexcept -> VkSemaphore;
+            [[nodiscard]] constexpr auto vkObjectType() const noexcept -> VkObjectType;
+
+            DEVICE_CONST_GETTER
+          private:
+            const Device *m_device = nullptr;
+
+            VkSemaphore m_semaphore = VK_NULL_HANDLE;
+        };
+    } // namespace stormkit::render
+
+#if defined(STORMKIT_CXX20_MODULES)
+}
+#endif
+
+#include "Semaphore.inl"

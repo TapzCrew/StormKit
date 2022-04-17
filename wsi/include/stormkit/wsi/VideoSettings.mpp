@@ -1,0 +1,39 @@
+// Copyright (C) 2021 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+module;
+
+#pragma once
+
+#if defined(STORMKIT_CXX20_MODULES)
+// clang-format off
+export module stormkit.wsi.videosettings;
+
+/////////// - StormKit::core - ///////////
+import stormkit.core.format;
+import stormkit.core.types;
+// clang-format on
+export {
+#else
+    /////////// - StormKit::core - ///////////
+    #include <stormkit/core/Types.mpp>
+#endif
+
+    namespace stormkit::wsi {
+        struct VideoSettings {
+            core::ExtentU size;
+            core::UInt8 bpp  = 32u;
+            core::UInt16 dpi = 1u;
+
+            [[nodiscard]] constexpr auto operator<=>(const VideoSettings &other) const noexcept
+                -> std::strong_ordering;
+        };
+
+    } // namespace stormkit::wsi
+
+#if defined(STORMKIT_CXX20_MODULES)
+}
+#endif
+
+#include "VideoSettings.inl"

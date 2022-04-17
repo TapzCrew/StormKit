@@ -1,0 +1,4 @@
+#include <string>
+
+void dummy() {
+}

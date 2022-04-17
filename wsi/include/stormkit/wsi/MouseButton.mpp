@@ -1,0 +1,56 @@
+// Copyright (C) 2021 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+module;
+
+#pragma once
+
+#include <stormkit/core/FormatMacro.hpp>
+
+#if defined(STORMKIT_CXX20_MODULES)
+// clang-format off
+export module stormkit.wsi.mousebutton;
+
+/////////// - STL - ///////////
+import <string_view>;
+
+/////////// - StormKit::core - ///////////
+import stormkit.core.format;
+import stormkit.core.types;
+// clang-format on
+export {
+#else
+    /////////// - STL - ///////////
+    #include <string_view>
+
+    /////////// - StormKit::core - ///////////
+    #include <stormkit/core/Format.mpp>
+    #include <stormkit/core/Types.mpp>
+#endif
+
+    namespace stormkit::wsi {
+        enum class MouseButton : core::UInt8 {
+            Unknow,
+            Left,
+            Right,
+            Middle,
+            Button1,
+            Button2,
+            ButtonCount
+        };
+
+        static constexpr auto MOUSE_BUTTON_COUNT = core::as<core::USize>(MouseButton::ButtonCount);
+
+        ////////////////////////////////////////
+        ////////////////////////////////////////
+        [[nodiscard]] constexpr auto mouseButtonToString(MouseButton value) -> std::string_view;
+    } // namespace stormkit::wsi
+
+    CUSTOM_FORMAT(stormkit::wsi::MouseButton, stormkit::wsi::mouseButtonToString(data));
+
+#if defined(STORMKIT_CXX20_MODULES)
+}
+#endif
+
+#include "MouseButton.inl"

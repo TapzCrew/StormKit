@@ -1,0 +1,28 @@
+// Copryright (C) 2022 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+module;
+
+#pragma once
+
+#include <stormkit/core/details/expected.hpp>
+
+#if defined(STORMKIT_CXX20_MODULES)
+// clang-format off
+export module stormkit.core.expected;
+// clang-format on
+export {
+#endif
+
+    namespace stormkit::core {
+        template<class T, class E>
+        using Expected = tl::expected<T, E>;
+
+        template<class E>
+        using Unexpected = tl::unexpected<E>;
+    } // namespace stormkit::core
+
+#if defined(STORMKIT_CXX20_MODULES)
+}
+#endif

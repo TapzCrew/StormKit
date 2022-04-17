@@ -1,0 +1,49 @@
+#pragma once
+
+#include <stormkit/core/App.mpp>
+
+#include <stormkit/wsi/Fwd.hpp>
+
+#include <stormkit/render/core/CommandBuffer.mpp>
+#include <stormkit/render/core/Fwd.hpp>
+
+#include <stormkit/render/pipeline/Framebuffer.mpp>
+#include <stormkit/render/pipeline/Fwd.hpp>
+
+#include <stormkit/render/resource/Fwd.hpp>
+
+class App: public stormkit::core::App {
+  public:
+    App();
+    ~App() override;
+
+    auto run(const int argc, const char **argv) -> stormkit::core::Int32 override;
+
+  private:
+    auto doInitWindow() -> void;
+    auto doInitBaseRenderObjects() -> void;
+    auto doInitMeshRenderObjects() -> void;
+
+    stormkit::wsi::WindowOwnedPtr m_window;
+
+    stormkit::render::InstanceOwnedPtr m_instance;
+    stormkit::render::DeviceOwnedPtr m_device;
+    stormkit::render::WindowSurfaceOwnedPtr m_surface;
+    const stormkit::render::Queue *m_queue = nullptr;
+    std::vector<stormkit::render::ImageView> m_surface_views;
+
+    stormkit::render::ShaderOwnedPtr m_vertex_shader;
+    stormkit::render::ShaderOwnedPtr m_fragment_shader;
+
+    stormkit::render::RenderPassOwnedPtr m_render_pass;
+    stormkit::render::GraphicsPipelineOwnedPtr m_pipeline;
+
+    stormkit::render::BufferOwnedPtr m_vertex_buffer;
+
+    struct Frame {
+        stormkit::render::Framebuffer framebuffer;
+        stormkit::render::CommandBuffer commandbuffer;
+    };
+
+    std::vector<Frame> m_frame_datas;
+};

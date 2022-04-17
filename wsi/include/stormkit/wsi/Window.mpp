@@ -1,0 +1,129 @@
+// Copyright (C) 2021 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+module;
+
+#pragma once
+
+#include <stormkit/core/FlagsMacro.hpp>
+#include <stormkit/core/PlatformMacro.hpp>
+
+#if defined(STORMKIT_CXX20_MODULES)
+// clang-format off
+export module stormkit.wsi.window;
+
+/////////// - STL - ///////////
+import <string>;
+import <string_view>;
+import <vector>;
+import <memory>;
+import <optional>;
+import <span>;
+import <array>;
+
+/////////// - StormKit::core - ///////////
+import stormkit.core.math;
+import stormkit.core.types;
+import stormkit.core.flags;
+import stormkit.core.pimpl;
+
+/////////// - StormKit::wsi - ///////////
+import stormkit.wsi.event;
+import stormkit.wsi.videosettings;
+import stormkit.wsi.windowstyle;
+// clang-format on
+export {
+#else
+    /////////// - STL - ///////////
+    #include <array>
+    #include <memory>
+    #include <optional>
+    #include <span>
+    #include <string>
+    #include <string_view>
+    #include <vector>
+
+    /////////// - StormKit::core - ///////////
+    #include <stormkit/core/Flags.mpp>
+    #include <stormkit/core/Math.mpp>
+    #include <stormkit/core/Pimpl.mpp>
+    #include <stormkit/core/Types.mpp>
+
+    /////////// - StormKit::wsi - ///////////
+    #include <stormkit/wsi/Event.mpp>
+    #include <stormkit/wsi/VideoSettings.mpp>
+    #include <stormkit/wsi/WindowStyle.mpp>
+#endif
+
+    namespace stormkit::wsi {
+        namespace details {
+            class WindowImpl;
+            using WindowImplPimpl = core::Pimpl<WindowImpl>;
+        } // namespace details
+
+        class STORMKIT_PUBLIC Window {
+          public:
+            using NativeHandle = void *;
+
+            enum class WM { Win32, X11, Wayland, macOS, iOS, Android, Switch };
+
+            Window() noexcept;
+            Window(std::string title, const VideoSettings &settings, WindowStyle style) noexcept;
+            ~Window();
+
+            Window(Window &&);
+            auto operator=(Window &&) -> Window &;
+
+            auto create(std::string title,
+                        const VideoSettings &settings,
+                        WindowStyle style) noexcept -> void;
+            auto close() noexcept -> void;
+
+            [[nodiscard]] auto pollEvent(Event &event) noexcept -> bool;
+            [[nodiscard]] auto waitEvent(Event &event) noexcept -> bool;
+
+            auto setTitle(std::string title) noexcept -> void;
+
+            auto setFullscreenEnabled(bool fullscreen) noexcept -> void;
+
+            auto lockMouse() noexcept -> void;
+            auto unlockMouse() noexcept -> void;
+            auto hideMouse() noexcept -> void;
+
+            [[nodiscard]] auto size() const noexcept -> const core::ExtentU &;
+            [[nodiscard]] auto title() const noexcept -> std::string_view;
+            [[nodiscard]] auto videoSettings() const noexcept -> const VideoSettings &;
+
+            [[nodiscard]] auto isOpen() const noexcept -> bool;
+            [[nodiscard]] auto visible() const noexcept -> bool;
+
+            [[nodiscard]] auto nativeHandle() const noexcept -> NativeHandle;
+
+            [[nodiscard]] auto mouseLocked() const noexcept -> bool;
+            [[nodiscard]] auto fullscreen() const noexcept -> bool;
+
+            auto setKeyRepeatEnabled(bool enabled) noexcept -> void;
+            [[nodiscard]] auto keyRepeatEnabled() const noexcept -> bool;
+
+            auto setVirtualKeyboardVisible(bool visible) noexcept -> void;
+
+            auto setMousePosition(core::Position2i position) noexcept -> void;
+            static auto setMousePositionOnDesktop(core::Position2u position) noexcept -> void;
+
+            [[nodiscard]] static auto getDesktopModes() -> std::vector<VideoSettings>;
+            [[nodiscard]] static auto getDesktopFullscreenSize() -> VideoSettings;
+
+            [[nodiscard]] static auto wm() noexcept -> WM;
+
+          private:
+            details::WindowImplPimpl m_impl;
+        };
+        DECLARE_PTR_AND_REF(Window)
+    } // namespace stormkit::wsi
+
+#if defined(STORMKIT_CXX20_MODULES)
+}
+#endif
+
+#include "Window.inl"

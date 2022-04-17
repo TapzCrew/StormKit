@@ -1,0 +1,63 @@
+// Copyright (C) 2021 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+module;
+
+#pragma once
+
+#include <stormkit/core/PlatformMacro.hpp>
+
+#if defined(STORMKIT_CXX20_MODULES)
+// clang-format off
+export module stormkit.render.pipeline.descriptorsetlayout;
+// clang-format on
+export {
+#else
+    /////////// - StormKit::render - ///////////
+    #include <stormkit/render/core/Fwd.hpp>
+    #include <stormkit/render/core/Types.mpp>
+    #include <stormkit/render/core/Vulkan.mpp>
+
+    #include <stormkit/render/pipeline/Fwd.hpp>
+#endif
+    namespace stormkit::render {
+        class STORMKIT_PUBLIC Framebuffer {
+          public:
+            static constexpr auto DEBUG_TYPE = DebugObjectType::Framebuffer;
+
+            Framebuffer(const RenderPass &render_pass,
+                        const core::ExtentU &size,
+                        std::vector<ImageViewConstRef> attachments);
+            ~Framebuffer();
+
+            Framebuffer(const Framebuffer &) = delete;
+            auto operator=(const Framebuffer &) -> Framebuffer & = delete;
+
+            Framebuffer(Framebuffer &&) noexcept;
+            auto operator=(Framebuffer &&) noexcept -> Framebuffer &;
+
+            [[nodiscard]] auto extent() const noexcept -> const core::ExtentU &;
+            [[nodiscard]] auto attachments() const noexcept -> std::span<const ImageViewConstRef>;
+
+            [[nodiscard]] operator VkFramebuffer() const noexcept;
+            [[nodiscard]] auto vkHandle() const noexcept -> VkFramebuffer;
+            [[nodiscard]] constexpr auto vkObjectType() const noexcept -> VkObjectType;
+
+            DEVICE_CONST_GETTER
+          private:
+            const Device *m_device          = nullptr;
+            const RenderPass *m_render_pass = nullptr;
+
+            core::ExtentU m_extent = { 0, 0 };
+            std::vector<ImageViewConstRef> m_attachments;
+
+            VkFramebuffer m_framebuffer = VK_NULL_HANDLE;
+        };
+    } // namespace stormkit::render
+
+#if defined(STORMKIT_CXX20_MODULES)
+}
+#endif
+
+#include "Framebuffer.inl"

@@ -1,0 +1,71 @@
+// Copyright (C) 2021 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+module;
+
+#pragma once
+
+#include <stormkit/core/PlatformMacro.hpp>
+
+#if defined(STORMKIT_CXX20_MODULES)
+// clang-format off
+export module stormkit.render.pipeline.abstractpipeline;
+// clang-format on
+export {
+#else
+    /////////// - StormKit::core - ///////////
+    #include <stormkit/core/Memory.mpp>
+    #include <stormkit/core/Types.mpp>
+
+    /////////// - StormKit::render - ///////////
+    #include <stormkit/render/core/Enums.mpp>
+    #include <stormkit/render/core/Fwd.hpp>
+    #include <stormkit/render/core/Vulkan.mpp>
+
+    #include <stormkit/render/pipeline/Fwd.hpp>
+#endif
+
+    namespace stormkit::render {
+        class STORMKIT_PUBLIC AbstractPipeline {
+          public:
+            static constexpr auto DEBUG_TYPE = DebugObjectType::Pipeline;
+
+            AbstractPipeline(const Device &device, const PipelineCache *cache = nullptr) noexcept;
+
+            virtual ~AbstractPipeline();
+
+            AbstractPipeline(const AbstractPipeline &) = delete;
+            auto operator=(const AbstractPipeline &) -> AbstractPipeline & = delete;
+
+            AbstractPipeline(AbstractPipeline &&) noexcept;
+            auto operator=(AbstractPipeline &&) noexcept -> AbstractPipeline &;
+
+            [[nodiscard]] auto baked() const noexcept -> bool;
+            virtual auto bake() -> void = 0;
+
+            [[nodiscard]] operator VkPipeline() const noexcept;
+            [[nodiscard]] VkPipeline vkHandle() const noexcept;
+            [[nodiscard]] VkPipelineLayout vkLayout() const noexcept;
+            [[nodiscard]] constexpr auto vkObjectType() const noexcept -> VkObjectType;
+
+            DEVICE_CONST_GETTER
+          protected:
+            const Device *m_device                = nullptr;
+            const PipelineCache *m_pipeline_cache = nullptr;
+
+            bool m_is_baked = false;
+
+            VkPipeline m_pipeline              = VK_NULL_HANDLE;
+            VkPipelineLayout m_pipeline_layout = VK_NULL_HANDLE;
+
+          private:
+            AbstractPipeline() = delete;
+        };
+    } // namespace stormkit::render
+
+#if defined(STORMKIT_CXX20_MODULES)
+}
+#endif
+
+#include "AbstractPipeline.inl"

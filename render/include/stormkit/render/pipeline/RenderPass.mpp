@@ -1,0 +1,74 @@
+// Copyright (C) 2021 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+module;
+
+#pragma once
+
+#include <stormkit/core/HashMacro.hpp>
+
+#if defined(STORMKIT_CXX20_MODULES)
+// clang-format off
+export module stormkit.render.pipeline.vertexbindingdescription;
+// clang-format on
+export {
+#else
+    /////////// - StormKit::core - ///////////
+    #include <stormkit/core/Types.mpp>
+
+    /////////// - StormKit::render - ///////////
+    #include <stormkit/render/core/Fwd.hpp>
+    #include <stormkit/render/core/Types.mpp>
+
+    #include <stormkit/render/pipeline/Fwd.hpp>
+    #include <stormkit/render/pipeline/RenderPassDescription.mpp>
+#endif
+
+    namespace stormkit::render {
+        class STORMKIT_PUBLIC RenderPass {
+          public:
+            static constexpr auto DEBUG_TYPE = DebugObjectType::Render_Pass;
+
+            // RenderPass(const Device &device, vk::RenderPass render_pass);
+            RenderPass(const Device &device, const RenderPassDescription &description);
+            ~RenderPass();
+
+            RenderPass(const RenderPass &) = delete;
+            auto operator=(const RenderPass &) -> RenderPass & = delete;
+
+            RenderPass(RenderPass &&) noexcept;
+            auto operator=(RenderPass &&) noexcept -> RenderPass &;
+
+            [[nodiscard]] auto createFramebuffer(const core::ExtentU &extent,
+                                                 std::vector<ImageViewConstRef> attachments) const
+                -> Framebuffer;
+            [[nodiscard]] auto allocateFramebuffer(const core::ExtentU &extent,
+                                                   std::vector<ImageViewConstRef> attachments) const
+                -> FramebufferOwnedPtr;
+            [[nodiscard]] auto
+                allocateRefCountedFramebuffer(const core::ExtentU &extent,
+                                              std::vector<ImageViewConstRef> attachments) const
+                -> FramebufferSharedPtr;
+
+            [[nodiscard]] auto isCompatible(const RenderPass &render_pass) const noexcept -> bool;
+
+            [[nodiscard]] auto description() const noexcept -> const RenderPassDescription &;
+
+            [[nodiscard]] operator VkRenderPass() const noexcept;
+            [[nodiscard]] auto vkHandle() const noexcept -> VkRenderPass;
+            [[nodiscard]] constexpr auto vkObjectType() const noexcept -> VkObjectType;
+
+            DEVICE_CONST_GETTER
+          private:
+            auto bake() noexcept -> void;
+
+            const Device *m_device = nullptr;
+
+            RenderPassDescription m_description = {};
+
+            VkRenderPass m_render_pass = VK_NULL_HANDLE;
+        };
+    } // namespace stormkit::render
+
+#include "RenderPass.inl"

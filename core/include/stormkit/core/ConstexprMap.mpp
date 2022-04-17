@@ -1,0 +1,39 @@
+// Copyright (C) 2022 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+module;
+
+#pragma once
+
+#if defined(STORMKIT_CXX20_MODULES)
+// clang-format off
+export module stormkit.core.constexprmap;
+
+/////////// - STL - ///////////
+import <array>;
+import <utility>;
+import <algorithm>;
+
+import stormkit.core.concepts;
+import stormkit.core.types;
+
+import <mapbox/eternal.hpp>;
+
+export {
+// clang-format on
+#else
+    /////////// - StormKit::core - ///////////
+    #include <mapbox/eternal.hpp>
+#endif
+
+    namespace stormkit::core {
+        template<typename Key, typename Value, std::size_t N>
+        constexpr auto make_map(const std::pair<const Key, const Value> (&items)[N]) noexcept {
+            return mapbox::eternal::map(items);
+        }
+    } // namespace stormkit::core
+
+#if defined(STORMKIT_CXX20_MODULES)
+}
+#endif

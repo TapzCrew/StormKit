@@ -1,0 +1,51 @@
+// Copyright (C) 2021 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+#pragma once
+
+module;
+
+#pragma once
+
+#include <stormkit/core/FlagsMacro.hpp>
+#include <stormkit/core/FormatMacro.hpp>
+
+#if defined(STORMKIT_CXX20_MODULES)
+// clang-format off
+export module stormkit.log.severity;
+/////////// - STL - ///////////
+import <string_view>;
+import <algorithm>;
+
+/////////// - StormKit::core - ///////////
+import stormkit.core.flags;
+import stormkit.core.format;
+
+// clang-format on
+export {
+#else
+    /////////// - STL - ///////////
+    #include <algorithm>
+    #include <string_view>
+
+    /////////// - StormKit::core - ///////////
+    #include <stormkit/core/Flags.mpp>
+    #include <stormkit/core/Format.mpp>
+#endif
+
+    namespace stormkit::log {
+        enum class Severity { Info, Warning, Error, Fatal, Debug };
+
+        [[nodiscard]] constexpr auto toString(Severity severity) noexcept -> std::string_view;
+    } // namespace stormkit::log
+
+    FLAG_ENUM(stormkit::log::Severity)
+
+    CUSTOM_FORMAT_STRING_VIEW(stormkit::log::Severity, stormkit::log::toString(data));
+
+#if defined(STORMKIT_CXX20_MODULES)
+}
+#endif
+
+#include "Severity.inl"
