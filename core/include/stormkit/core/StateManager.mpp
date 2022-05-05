@@ -43,6 +43,7 @@ export {
     /////////// - StormKit::core - ///////////
     #include <stormkit/core/Concepts.mpp>
     #include <stormkit/core/Fwd.hpp>
+    #include <stormkit/core/Memory.mpp>
     #include <stormkit/core/State.mpp>
     #include <stormkit/core/Types.mpp>
 #endif

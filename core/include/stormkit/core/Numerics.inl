@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Numerics.mpp"
+
 namespace stormkit::core {
     static std::default_random_engine generator {};
 

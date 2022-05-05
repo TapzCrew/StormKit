@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <stormkit/core/Memory.mpp>
+#include "Memory.mpp"
 
 namespace stormkit::core {
     /////////////////////////////////////
@@ -60,7 +60,7 @@ namespace stormkit::core {
     /////////////////////////////////////
     template<NonPointerType T>
     constexpr auto makeConstRef(const T &value) noexcept {
-        return std::cref(std::as_const(value));
+        return std::cref(value);
     }
 
     /////////////////////////////////////
@@ -231,5 +231,30 @@ namespace stormkit::core {
         std::ranges::transform(input, std::back_inserter(output), lambda);
 
         return output;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto printStacktrace() noexcept -> void {
+        using namespace backward;
+        auto st = StackTrace {};
+        st.load_here(32);
+
+        auto p = Printer {};
+        p.print(st);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto setupSignalHandler() noexcept -> void { auto sh = backward::SignalHandling {}; }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    constexpr auto byteSwap(auto value) noexcept -> decltype(auto) {
+        auto *ptr = reinterpret_cast<std::byte *>(&value);
+
+        std::reverse(ptr, ptr + sizeof(decltype(value)));
+
+        return value;
     }
 } // namespace stormkit::core

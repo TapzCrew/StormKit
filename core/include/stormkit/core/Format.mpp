@@ -62,6 +62,24 @@ struct std::formatter<Enum>: std::formatter<std::underlying_type_t<Enum>> {
         return std::formatter<UnderlyingType>::format(stormkit::core::as<UnderlyingType>(e), ctx);
     }
 };
+
+template<std::ranges::range R>
+requires (!stormkit::core::StringLikeType<R>)
+struct std::formatter<R>: std::formatter<typename R::value_type> {
+    auto format(const R &range, format_context &ctx) {
+        auto out = ctx.out();
+
+        format_to(out, "[\n");
+
+        if(!std::empty(range))
+            format_to(out, "    {}", range[0]);
+
+        for(auto i = 1; i < std::ranges::size(range); ++i)
+            format_to(out, ",\n    {}", range[i]);
+
+        return format_to(out, "\n]");
+    }
+};
 #elif defined(STORMKIT_HAS_FMT_FORMAT)
 namespace stormkit::core {
     using fmt::format;

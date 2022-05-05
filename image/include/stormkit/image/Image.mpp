@@ -41,6 +41,7 @@ export {
     /////////// - StormKit::core - ///////////
     #include <stormkit/core/Expected.mpp>
     #include <stormkit/core/Math.mpp>
+    #include <stormkit/core/Memory.mpp>
     #include <stormkit/core/Types.mpp>
 #endif
 
@@ -117,6 +118,7 @@ export {
                 PPM        = 4,
                 HDR        = 5,
                 KTX        = 6,
+                QOI        = 7,
                 Unknown    = 255
             };
 
@@ -159,29 +161,31 @@ export {
             Image(Image &&rhs) noexcept;
             auto operator=(Image &&rhs) noexcept -> Image &;
 
-            auto loadFromFile(std::filesystem::path filepath,
-                              Codec codec = Codec::Autodetect) noexcept
+            [[nodiscard]] auto loadFromFile(std::filesystem::path filepath,
+                                            Codec codec = Codec::Autodetect) noexcept
                 -> core::Expected<void, Error>;
-            auto loadFromMemory(core::ByteConstSpan data, Codec codec = Codec::Autodetect) noexcept
+            [[nodiscard]] auto loadFromMemory(core::ByteConstSpan data,
+                                              Codec codec = Codec::Autodetect) noexcept
                 -> core::Expected<void, Error>;
-            auto saveToFile(std::filesystem::path filename,
-                            Codec codec,
-                            CodecArgs args = CodecArgs::Binary) const noexcept
+            [[nodiscard]] auto saveToFile(std::filesystem::path filename,
+                                          Codec codec,
+                                          CodecArgs args = CodecArgs::Binary) const noexcept
                 -> core::Expected<void, Error>;
 
-            auto saveToMemory(Codec codec, CodecArgs args = CodecArgs::Binary) const noexcept
+            [[nodiscard]] auto saveToMemory(Codec codec,
+                                            CodecArgs args = CodecArgs::Binary) const noexcept
                 -> core::Expected<core::ByteArray, Error>;
 
             auto create(core::ExtentU extent, Format format) noexcept -> void;
 
-            auto toFormat(Format format) const noexcept -> Image;
-            auto scale(const core::ExtentU &scale_to) const noexcept -> Image;
-            auto flipX() const noexcept -> Image;
-            auto flipY() const noexcept -> Image;
-            auto flipZ() const noexcept -> Image;
-            auto rotate90() const noexcept -> Image;
-            auto rotate180() const noexcept -> Image;
-            auto rotate270() const noexcept -> Image;
+            [[nodiscard]] auto toFormat(Format format) const noexcept -> Image;
+            [[nodiscard]] auto scale(const core::ExtentU &scale_to) const noexcept -> Image;
+            [[nodiscard]] auto flipX() const noexcept -> Image;
+            [[nodiscard]] auto flipY() const noexcept -> Image;
+            [[nodiscard]] auto flipZ() const noexcept -> Image;
+            [[nodiscard]] auto rotate90() const noexcept -> Image;
+            [[nodiscard]] auto rotate180() const noexcept -> Image;
+            [[nodiscard]] auto rotate270() const noexcept -> Image;
 
             [[nodiscard]] auto pixel(core::USize id,
                                      core::UInt32 layer = 0u,

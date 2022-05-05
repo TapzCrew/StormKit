@@ -120,9 +120,21 @@ extern "C" {
 #define STORMKIT_STRINGIFY(x) STORMKIT_STRINGIFY_DETAILS(x)
 
 #if defined(STORMKIT_COMPILER_GCC) || defined(STORMKIT_COMPILER_CLANG)
-    #define STORMKIT_CURRENT_FUNCTION STORMKIT_STRINGIFY(__PRETTY_FUNCTION__)
+    #define STORMKIT_CURRENT_FUNCTION_OLD STORMKIT_STRINGIFY(__PRETTY_FUNCTION__)
 #elif defined(STORMKIT_COMPILER_MSVC)
-    #define STORMKIT_CURRENT_FUNCTION STORMKIT_STRINGIFY(__FUNCSIG__)
+    #define STORMKIT_CURRENT_FUNCTION_OLD STORMKIT_STRINGIFY(__FUNCSIG__)
 #else
-    #define STORMKIT_CURRENT_FUNCTION STORMKIT_STRINGIFY(__func__)
+    #define STORMKIT_CURRENT_FUNCTION_OLD STORMKIT_STRINGIFY(__func__)
+#endif
+
+#if __has_include(<source_location>)
+    #include <source_location>
+
+    #define STORMKIT_CURRENT_FILE std::source_location::current().file_name()
+    #define STORMKIT_CURRENT_LINE std::source_location::current().line()
+    #define STORMKIT_CURRENT_FUNCTION std::source_location::current().function_name()
+#else
+    #define STORMKIT_CURRENT_FILE " "
+    #define STORMKIT_CURRENT_LINE 0
+    #define STORMKIT_CURRENT_FUNCTION STORMKIT_CURRENT_FUNCTION_OLD
 #endif

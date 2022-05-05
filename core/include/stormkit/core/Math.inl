@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "Math.mpp"
+
 namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
@@ -20,6 +22,17 @@ namespace stormkit::core {
     constexpr Extent<T>::Extent(const Extent<U> &other) noexcept
         : width { as<UnderlyingType>(other.width) }, height { as<UnderlyingType>(other.height) },
           depth { as<UnderlyingType>(other.depth) } {}
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<ArithmeticType T>
+    constexpr auto Extent<T>::operator<=>(const Extent &other) const noexcept -> OrderingType {
+        if (auto ret = width <=> other.width; ret != 0) return ret;
+        if (auto ret = height <=> other.height; ret != 0) return ret;
+        if (auto ret = depth <=> other.depth; ret != 0) return ret;
+
+        return OrderingType::equivalent;
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////

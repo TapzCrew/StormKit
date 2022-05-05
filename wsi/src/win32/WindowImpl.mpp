@@ -1,4 +1,4 @@
-// Copyright (C) 2021 Arthur LAURENT <arthur.laurent4@gmail.com>
+// Copyright (C) 2022 Arthur LAURENT <arthur.laurent4@gmail.com>
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
@@ -39,7 +39,7 @@ export {
     /////////// - StormKit::wsi - ///////////
     #include <stormkit/wsi/Event.mpp>
     #include <stormkit/wsi/Fwd.hpp>
-    #include <stormkit/wsi/VideoSettings.mpp>
+    #include <stormkit/wsi/Monitor.mpp>
     #include <stormkit/wsi/Window.mpp>
     #include <stormkit/wsi/WindowStyle.mpp>
 
@@ -52,7 +52,7 @@ export {
             WindowImpl(Window::WM wm);
             WindowImpl(Window::WM wm,
                        std::string title,
-                       const VideoSettings &settings,
+                       const core::ExtentU &size,
                        WindowStyle style);
             ~WindowImpl();
 
@@ -62,14 +62,15 @@ export {
             WindowImpl(WindowImpl &&) noexcept;
             auto operator=(WindowImpl &&) noexcept -> WindowImpl &;
 
-            auto create(std::string title, const VideoSettings &settings, WindowStyle style)
-                -> void;
+            auto create(std::string title, const core::ExtentU &size, WindowStyle style) -> void;
             auto close() noexcept -> void;
 
             [[nodiscard]] auto pollEvent(Event &event) noexcept -> bool;
             [[nodiscard]] auto waitEvent(Event &event) noexcept -> bool;
 
             auto setTitle(std::string title) noexcept -> void;
+
+            auto setSize(const core::ExtentU &size) noexcept -> void;
 
             auto setFullscreenEnabled(bool enabled) noexcept -> void;
 
@@ -81,7 +82,7 @@ export {
 
             [[nodiscard]] auto size() const noexcept -> const core::ExtentU &;
             [[nodiscard]] auto title() const noexcept -> std::string_view;
-            [[nodiscard]] auto videoSettings() const noexcept -> const VideoSettings &;
+            [[nodiscard]] auto videoSettings() const noexcept -> const Monitor &;
 
             [[nodiscard]] auto isOpen() const noexcept -> bool;
             [[nodiscard]] auto visible() const noexcept -> bool;
@@ -99,8 +100,8 @@ export {
             static auto setMousePositionOnDesktop(Window::WM wm, core::Position2u position) noexcept
                 -> void;
 
-            [[nodiscard]] static auto getDesktopModes(Window::WM wm) -> std::vector<VideoSettings>;
-            [[nodiscard]] static auto getDesktopFullscreenSize(Window::WM wm) -> VideoSettings;
+            [[nodiscard]] static auto getMonitorSettings(Window::WM wm) -> std::vector<Monitor>;
+            [[nodiscard]] static auto getPrimaryMonitorSettings(Window::WM wm) -> Monitor;
 
             [[nodiscard]] auto nativeHandle() const noexcept -> Window::NativeHandle;
             [[nodiscard]] auto win32Handles() const noexcept -> HWND;
@@ -120,8 +121,13 @@ export {
             bool m_resizing      = false;
             bool m_mouse_inside  = false;
 
+            WindowStyle m_style;
+
+            LONG m_last_style;
+            LONG m_last_style_ex;
             mutable core::ExtentU m_current_size = { 0u, 0u };
             core::ExtentU m_last_size            = { 0u, 0u };
+            core::Vector2u m_last_position       = { 0u, 0u };
 
             HWND m_window_handle = nullptr;
 
@@ -129,8 +135,6 @@ export {
             bool m_mouse_locked       = false;
             bool m_mouse_hided        = false;
             bool m_key_repeat_enabled = false;
-
-            VideoSettings m_video_settings;
         };
     } // namespace stormkit::wsi::details::win32
 

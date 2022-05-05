@@ -1,4 +1,4 @@
-// Copyright (C) 2021 Arthur LAURENT <arthur.laurent4@gmail.com>
+// Copyright (C) 2022 Arthur LAURENT <arthur.laurent4@gmail.com>
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
@@ -32,9 +32,9 @@ namespace stormkit::wsi {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    Window::Window(std::string title, const VideoSettings &settings, WindowStyle style) noexcept
+    Window::Window(std::string title, const core::ExtentU &size, WindowStyle style) noexcept
         : m_impl { wm() } {
-        create(std::move(title), settings, style);
+        create(std::move(title), size, style);
     }
 
     /////////////////////////////////////
@@ -51,10 +51,9 @@ namespace stormkit::wsi {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto Window::create(std::string title,
-                        const VideoSettings &settings,
-                        WindowStyle style) noexcept -> void {
-        m_impl->create(std::move(title), settings, style);
+    auto Window::create(std::string title, const core::ExtentU &size, WindowStyle style) noexcept
+        -> void {
+        m_impl->create(std::move(title), size, style);
     }
     /////////////////////////////////////
     /////////////////////////////////////
@@ -68,9 +67,15 @@ namespace stormkit::wsi {
     /////////////////////////////////////
     auto Window::waitEvent(Event &event) noexcept -> bool { return m_impl->waitEvent(event); }
 
+    /////////////////////////////////////
+    /////////////////////////////////////
     auto Window::setTitle(std::string title) noexcept -> void {
         m_impl->setTitle(std::move(title));
     }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    auto Window::setSize(const core::ExtentU &size) noexcept -> void { m_impl->setSize(size); }
 
     /////////////////////////////////////
     /////////////////////////////////////
@@ -130,7 +135,7 @@ namespace stormkit::wsi {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto Window::videoSettings() const noexcept -> const VideoSettings & {
+    auto Window::videoSettings() const noexcept -> const Monitor & {
         return m_impl->videoSettings();
     }
 
@@ -176,14 +181,14 @@ namespace stormkit::wsi {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto Window::getDesktopModes() -> std::vector<VideoSettings> {
-        return details::WindowImpl::getDesktopModes(wm());
+    auto Window::getMonitorSettings() -> std::vector<Monitor> {
+        return details::WindowImpl::getMonitorSettings(wm());
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto Window::getDesktopFullscreenSize() -> VideoSettings {
-        return details::WindowImpl::getDesktopFullscreenSize(wm());
+    auto Window::getPrimaryMonitorSettings() -> Monitor {
+        return details::WindowImpl::getPrimaryMonitorSettings(wm());
     }
 
 } // namespace stormkit::wsi

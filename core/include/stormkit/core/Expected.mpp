@@ -6,7 +6,15 @@ module;
 
 #pragma once
 
-#include <stormkit/core/details/expected.hpp>
+#if !__has_include(<expected>)
+    #include <stormkit/core/details/expected.hpp>
+
+namespace tl {
+    template<class E>
+    unexpected(E e) -> unexpected<E>;
+}
+
+#endif
 
 #if defined(STORMKIT_CXX20_MODULES)
 // clang-format off
@@ -21,6 +29,7 @@ export {
 
         template<class E>
         using Unexpected = tl::unexpected<E>;
+
     } // namespace stormkit::core
 
 #if defined(STORMKIT_CXX20_MODULES)

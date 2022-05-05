@@ -13,13 +13,14 @@ import stormkit.wsi.key;
 #else
     #include <stormkit/core/AsCast.mpp>
     #include <stormkit/core/Math.mpp>
+    #include <stormkit/core/Memory.mpp>
     #include <stormkit/core/Types.mpp>
 
     #include <stormkit/log/LogHandler.mpp>
 
     #include <stormkit/wsi/Event.mpp>
     #include <stormkit/wsi/Key.mpp>
-    #include <stormkit/wsi/VideoSettings.mpp>
+    #include <stormkit/wsi/Monitor.mpp>
     #include <stormkit/wsi/Window.mpp>
     #include <stormkit/wsi/WindowStyle.mpp>
 #endif
@@ -35,15 +36,14 @@ LOGGER("StormKit.Examples.Log.Polling");
 auto main([[maybe_unused]] const int argc, [[maybe_unused]] const char **argv) -> int {
     using namespace stormkit;
 
+    core::setupSignalHandler();
+
     log::LogHandler::setupDefaultLogger();
 
-    auto window = wsi::Window { "Hello world",
-                                wsi::VideoSettings { .size = { 800u, 600u } },
-                                wsi::WindowStyle::All };
+    ilog("--- Monitors ---");
+    ilog("{}", wsi::Window::getMonitorSettings());
 
-    for (const auto &setting : wsi::Window::getDesktopModes()) ilog("Screen: {}", setting.size);
-
-    ilog("Fullscreen resolution: {}", wsi::Window::getDesktopFullscreenSize().size);
+    auto window = wsi::Window { "Hello world", { 800u, 600u }, wsi::WindowStyle::All };
 
     auto fullscreen        = false;
     auto toggle_fullscreen = false;

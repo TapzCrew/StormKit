@@ -1,0 +1,65 @@
+// Copyright (C) 2022 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+#pragma once
+
+#include <stormkit/core/PlatformMacro.hpp>
+
+#if defined(STORMKIT_CXX20_MODULES)
+// clang-format off
+export module stormkit.gpu.sync.fence;
+// clang-format on
+export {
+#else
+    #include <chrono>
+    #include <optional>
+
+    /////////// - StormKit::core - ///////////
+    #include <stormkit/core/Memory.mpp>
+    #include <stormkit/core/Types.mpp>
+
+    /////////// - StormKit::render - ///////////
+    #include <stormkit/gpu/core/Enums.mpp>
+    #include <stormkit/gpu/core/Fwd.hpp>
+    #include <stormkit/gpu/core/Vulkan.mpp>
+#endif
+
+    namespace stormkit::gpu {
+        class STORMKIT_PUBLIC Fence {
+          public:
+            static constexpr auto DEBUG_TYPE = DebugObjectType::Fence;
+
+            enum class Status { Signaled, Unsignaled };
+
+            explicit Fence(const Device &device, bool signaled = false);
+            ~Fence();
+
+            Fence(const Fence &) = delete;
+            auto operator=(const Fence &) -> Fence & = delete;
+
+            Fence(Fence &&) noexcept;
+            auto operator=(Fence &&) noexcept -> Fence &;
+
+            auto wait(std::chrono::milliseconds wait_for = std::chrono::milliseconds::max()) const
+                -> Result;
+            auto reset() -> void;
+
+            [[nodiscard]] auto status() const noexcept -> Status;
+
+            [[nodiscard]] operator VkFence() const noexcept;
+            [[nodiscard]] auto vkHandle() const noexcept -> VkFence;
+
+            DEVICE_CONST_GETTER
+          private:
+            const Device *m_device = nullptr;
+
+            VkFence m_fence = VK_NULL_HANDLE;
+        };
+    } // namespace stormkit::gpu
+
+#if defined(STORMKIT_CXX20_MODULES)
+}
+#endif
+
+#include "Fence.inl"

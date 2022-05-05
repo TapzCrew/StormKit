@@ -1,4 +1,4 @@
-// Copyright (C) 2021 Arthur LAURENT <arthur.laurent4@gmail.com>
+// Copyright (C) 2022 Arthur LAURENT <arthur.laurent4@gmail.com>
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
@@ -68,11 +68,24 @@ DynamicLoader::~DynamicLoader() {
 
 /////////////////////////////////////
 /////////////////////////////////////
-DynamicLoader::DynamicLoader(DynamicLoader &&other) = default;
+DynamicLoader::DynamicLoader(DynamicLoader &&other) noexcept
+    : m_impl { std::exchange(other.m_impl, {}) }, m_is_loaded { std::exchange(other.m_is_loaded,
+                                                                              false) },
+      m_filepath { std::move(other.m_filepath) } {
+}
 
 /////////////////////////////////////
 /////////////////////////////////////
-auto DynamicLoader::operator=(DynamicLoader &&) -> DynamicLoader & = default;
+auto DynamicLoader::operator=(DynamicLoader &&other) noexcept -> DynamicLoader & {
+    if (&other == this) [[unlikely]]
+        return *this;
+
+    m_impl      = std::exchange(other.m_impl, {});
+    m_is_loaded = std::exchange(other.m_is_loaded, false);
+    m_filepath  = std::move(other.m_filepath);
+
+    return *this;
+}
 
 ////////////////////////////////////////
 ////////////////////////////////////////

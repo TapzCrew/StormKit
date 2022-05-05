@@ -5,6 +5,7 @@ import stormkit.log.consolelogger;
 import stormkit.log.loghandler;
 #else
     #include <stormkit/core/Format.mpp>
+    #include <stormkit/core/Memory.mpp>
     #include <stormkit/core/Types.mpp>
 
     #include <stormkit/log/ConsoleLogger.mpp>
@@ -34,6 +35,8 @@ CUSTOM_FORMAT(Foo,
 int main() {
     using namespace stormkit;
     using log::operator""_module;
+
+    core::setupSignalHandler();
 
     log::LogHandler::setupLogger<log::ConsoleLogger>();
 
