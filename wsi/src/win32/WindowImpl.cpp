@@ -1,4 +1,4 @@
-// Copyright (C) 2021 Arthur LAURENT <arthur.laurent4@gmail.com>
+// Copyright (C) 2022 Arthur LAURENT <arthur.laurent4@gmail.com>
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
@@ -19,6 +19,7 @@ import<locale>;
 #endif
 
 /////////// - Win32API - ///////////
+#include <shellscalingapi.h>
 #include <winuser.h>
 
 namespace stormkit::wsi::details::win32 {
@@ -43,10 +44,10 @@ namespace stormkit::wsi::details::win32 {
     /////////////////////////////////////
     WindowImpl::WindowImpl(Window::WM wm,
                            std::string title,
-                           const VideoSettings &settings,
+                           const core::ExtentU &size,
                            WindowStyle style)
         : WindowImpl { wm } {
-        create(std::move(title), settings, style);
+        create(std::move(title), size, style);
     }
 
     /////////////////////////////////////
@@ -67,7 +68,7 @@ namespace stormkit::wsi::details::win32 {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto WindowImpl::create(std::string title, const VideoSettings &settings, WindowStyle style)
+    auto WindowImpl::create(std::string title, const core::ExtentU &size, WindowStyle style)
         -> void {
         registerWindowClass();
 
@@ -89,8 +90,8 @@ namespace stormkit::wsi::details::win32 {
                                           _style,
                                           CW_USEDEFAULT,
                                           CW_USEDEFAULT,
-                                          settings.size.width,
-                                          settings.size.height,
+                                          size.width,
+                                          size.height,
                                           nullptr,
                                           nullptr,
                                           h_instance,
@@ -103,10 +104,12 @@ namespace stormkit::wsi::details::win32 {
         m_is_fullscreen = false;
         m_resizing      = false;
         m_mouse_inside  = false;
+        m_style         = style;
 
         m_title = std::move(title);
 
-        m_last_size = settings.size;
+        m_last_size    = size;
+        m_current_size = size;
     }
 
     /////////////////////////////////////
@@ -149,30 +152,63 @@ namespace stormkit::wsi::details::win32 {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto WindowImpl::setFullscreenEnabled(bool enabled) noexcept -> void {
-        auto mode = DEVMODE {};
-        ZeroMemory(&mode, sizeof(DEVMODE));
-
-        mode.dmSize       = sizeof(DEVMODE);
-        mode.dmBitsPerPel = m_video_settings.bpp;
-        mode.dmPelsWidth  = m_current_size.width;
-        mode.dmPelsHeight = m_current_size.height;
-        mode.dmFields     = DM_PELSWIDTH | DM_PELSHEIGHT | DM_BITSPERPEL;
-
-        ChangeDisplaySettings(&mode, CDS_FULLSCREEN);
-
-        SetWindowLongW(m_window_handle, GWL_STYLE, WS_POPUP | WS_CLIPCHILDREN | WS_CLIPSIBLINGS);
-        SetWindowLongW(m_window_handle, GWL_EXSTYLE, WS_EX_APPWINDOW);
-
+    auto WindowImpl::setSize(const core::ExtentU &size) noexcept -> void {
         SetWindowPos(m_window_handle,
                      HWND_TOP,
                      0,
                      0,
-                     m_current_size.width,
-                     m_current_size.height,
-                     SWP_FRAMECHANGED);
+                     size.width,
+                     size.height,
+                     SWP_NOMOVE | SWP_FRAMECHANGED);
+    }
 
-        m_is_fullscreen = true;
+    /////////////////////////////////////
+    /////////////////////////////////////
+    auto WindowImpl::setFullscreenEnabled(bool enabled) noexcept -> void {
+        if (enabled) {
+            if (!m_is_fullscreen) {
+                m_last_style    = GetWindowLongW(m_window_handle, GWL_STYLE);
+                m_last_style_ex = GetWindowLongW(m_window_handle, GWL_EXSTYLE);
+
+                auto rect = RECT {};
+                ZeroMemory(&rect, sizeof(RECT));
+
+                GetWindowRect(m_window_handle, &rect);
+
+                m_last_position = { rect.left, rect.top };
+            }
+
+            SetWindowLongW(m_window_handle,
+                           GWL_STYLE,
+                           m_last_style & ~(WS_CAPTION | WS_THICKFRAME));
+            SetWindowLongW(m_window_handle,
+                           GWL_EXSTYLE,
+                           m_last_style_ex & ~(WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE |
+                                               WS_EX_CLIENTEDGE | WS_EX_STATICEDGE));
+
+            SetWindowPos(m_window_handle,
+                         nullptr,
+                         0,
+                         0,
+                         m_current_size.width,
+                         m_current_size.height,
+                         SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
+
+            m_is_fullscreen = true;
+        } else {
+            SetWindowLongW(m_window_handle, GWL_STYLE, m_last_style);
+            SetWindowLongW(m_window_handle, GWL_EXSTYLE, m_last_style_ex);
+
+            SetWindowPos(m_window_handle,
+                         nullptr,
+                         m_last_position.x,
+                         m_last_position.y,
+                         m_last_size.width,
+                         m_last_size.height,
+                         SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
+
+            m_is_fullscreen = false;
+        }
     }
 
     /////////////////////////////////////
@@ -245,44 +281,64 @@ namespace stormkit::wsi::details::win32 {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto WindowImpl::getDesktopModes([[maybe_unused]] Window::WM wm) -> std::vector<VideoSettings> {
-        static auto video_settings = std::vector<VideoSettings> {};
-        static auto init           = false;
+    auto loadMonitor(HMONITOR _monitor, HDC hdc, LPRECT rect, LPARAM data) -> BOOL {
+        if (_monitor == nullptr) return TRUE;
 
-        if (!init) {
-            auto dm = DEVMODE {};
-            ZeroMemory(&dm, sizeof(DEVMODE));
+        auto &monitors = *reinterpret_cast<std::vector<Monitor> *>(data);
 
-            dm.dmSize = sizeof(dm);
+        auto monitor_info = MONITORINFOEX {};
+        ZeroMemory(&monitor_info, sizeof(MONITORINFOEX));
+        monitor_info.cbSize = sizeof(MONITORINFOEX);
 
-            for (auto i = 0; EnumDisplaySettings(nullptr, i, &dm) != 0; ++i) {
-                auto video_setting =
-                    VideoSettings { .size = { core::as<core::UInt16>(dm.dmPelsWidth),
-                                              core::as<core::UInt16>(dm.dmPelsHeight) } };
+        GetMonitorInfo(_monitor, &monitor_info);
 
-                video_settings.emplace_back(video_setting);
-            }
+        auto &monitor  = monitors.emplace_back();
+        monitor.handle = _monitor;
+        if ((monitor_info.dwFlags & MONITORINFOF_PRIMARY) == MONITORINFOF_PRIMARY)
+            monitor.flags = Monitor::Flags::Primary;
 
-            init = true;
+        monitor.name = std::string { monitor_info.szDevice };
+
+        auto dm = DEVMODE {};
+        ZeroMemory(&dm, sizeof(DEVMODE));
+
+        for (auto i = 0; EnumDisplaySettings(monitor_info.szDevice, i, &dm) != 0; ++i) {
+            monitor.sizes.emplace_back(core::as<core::UInt32>(dm.dmPelsWidth),
+                                       core::as<core::UInt32>(dm.dmPelsHeight));
         }
 
-        return video_settings;
+        monitor.sizes.erase(std::unique(std::begin(monitor.sizes), std::end(monitor.sizes)),
+                            std::end(monitor.sizes));
+        std::ranges::sort(monitor.sizes);
+
+        return TRUE;
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto WindowImpl::getDesktopFullscreenSize([[maybe_unused]] Window::WM wm) -> VideoSettings {
-        static auto video_setting = VideoSettings {};
-        static auto init          = false;
+    auto WindowImpl::getMonitorSettings([[maybe_unused]] Window::WM wm) -> std::vector<Monitor> {
+        static auto monitors = std::vector<Monitor> {};
+        static auto init     = false;
 
         if (!init) {
-            video_setting.size.width  = static_cast<core::UInt16>(GetSystemMetrics(SM_CXSCREEN));
-            video_setting.size.height = static_cast<core::UInt16>(GetSystemMetrics(SM_CYSCREEN));
+            EnumDisplayMonitors(nullptr, nullptr, loadMonitor, reinterpret_cast<LPARAM>(&monitors));
 
             init = true;
         }
 
-        return video_setting;
+        return monitors;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    auto WindowImpl::getPrimaryMonitorSettings(Window::WM wm) -> Monitor {
+        const auto settings = getMonitorSettings(wm);
+
+        const auto it = std::ranges::find_if(settings, [](const auto &monitor) {
+            return core::checkFlag(monitor.flags, Monitor::Flags::Primary);
+        });
+
+        return *it;
     }
 
     /////////////////////////////////////

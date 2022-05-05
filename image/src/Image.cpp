@@ -1,5 +1,5 @@
 
-// Copyright (C) 2021 Arthur LAURENT <arthur.laurent4@gmail.com>
+// Copyright (C) 2022 Arthur LAURENT <arthur.laurent4@gmail.com>
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
@@ -42,6 +42,7 @@ import stormkit.image.details.tgaimage;
     #include "details/KTXImage.mpp"
     #include "details/PNGImage.mpp"
     #include "details/PPMImage.mpp"
+    #include "details/QOIImage.mpp"
     #include "details/TARGAImage.mpp"
 #endif
 
@@ -70,6 +71,8 @@ namespace stormkit::image {
                                                               0x1A_b,
                                                               0x0A_b);
 
+        constexpr auto QOI_HEADER = core::makeStaticByteArray(0x71_b, 0x6f_b, 0x69_b, 0x66_b);
+
         constexpr auto JPEG_HEADER = core::makeStaticByteArray(0xFF_b, 0xD8_b);
 
         auto filenameToCodec(const std::filesystem::path &filename) noexcept -> Image::Codec {
@@ -92,6 +95,8 @@ namespace stormkit::image {
                 return Image::Codec::HDR;
             else if (core::toLower(ext) == ".ktx")
                 return Image::Codec::KTX;
+            else if (core::toLower(ext) == ".qoi")
+                return Image::Codec::QOI;
 
             return Image::Codec::Unknown;
         }
@@ -107,6 +112,9 @@ namespace stormkit::image {
             else if (std::memcmp(std::data(data), std::data(JPEG_HEADER), std::size(JPEG_HEADER)) ==
                      0)
                 return Image::Codec::JPEG;
+            else if (std::memcmp(std::data(data), std::data(QOI_HEADER), std::size(QOI_HEADER)) ==
+                     0)
+                return Image::Codec::QOI;
 
             return Image::Codec::Unknown;
         }
@@ -274,6 +282,10 @@ namespace stormkit::image {
                                                   filepath.string(),
                                                   result.error().str_error) } };
                 }
+
+                *this = std::move(*result);
+
+                return {};
             }
             case Image::Codec::PNG: {
                 auto result = details::loadPNG(data);
@@ -284,6 +296,10 @@ namespace stormkit::image {
                                                   filepath.string(),
                                                   result.error().str_error) } };
                 } // namespace stormkit::image
+
+                *this = std::move(*result);
+
+                return {};
             }
             case Image::Codec::TARGA: {
                 auto result = details::loadTGA(data);
@@ -294,6 +310,10 @@ namespace stormkit::image {
                                                   filepath.string(),
                                                   result.error().str_error) } };
                 }
+
+                *this = std::move(*result);
+
+                return {};
             }
             case Image::Codec::PPM: {
                 auto result = details::loadPPM(data);
@@ -304,6 +324,10 @@ namespace stormkit::image {
                                                   filepath.string(),
                                                   result.error().str_error) } };
                 }
+
+                *this = std::move(*result);
+
+                return {};
             }
             case Image::Codec::HDR: {
                 auto result = details::loadHDR(data);
@@ -314,6 +338,10 @@ namespace stormkit::image {
                                                   filepath.string(),
                                                   result.error().str_error) } };
                 }
+
+                *this = std::move(*result);
+
+                return {};
             }
             case Image::Codec::KTX: {
                 auto result = details::loadKTX(data);
@@ -324,8 +352,26 @@ namespace stormkit::image {
                                                   filepath.string(),
                                                   result.error().str_error) } };
                 }
+
+                *this = std::move(*result);
+
+                return {};
             }
-            default: break;
+            case Image::Codec::QOI: {
+                auto result = details::loadQOI(data);
+                if (!result) {
+                    return core::Unexpected { Error {
+                        .reason    = result.error().reason,
+                        .str_error = core::format("Failed to load file {}\n    > {}",
+                                                  filepath.string(),
+                                                  result.error().str_error) } };
+                }
+
+                *this = std::move(*result);
+
+                return {};
+            }
+            default: return {};
         }
 
         return core::Unexpected { Error {
@@ -351,6 +397,10 @@ namespace stormkit::image {
                         .str_error = core::format("Failed to load JPEG image from data\n    > {}",
                                                   result.error().str_error) } };
                 }
+
+                *this = std::move(*result);
+
+                return {};
             }
             case Image::Codec::PNG: {
                 auto result = details::loadPNG(data);
@@ -360,6 +410,10 @@ namespace stormkit::image {
                         .str_error = core::format("Failed to load PNG image from data\n    > {}",
                                                   result.error().str_error) } };
                 }
+
+                *this = std::move(*result);
+
+                return {};
             }
             case Image::Codec::TARGA: {
                 auto result = details::loadTGA(data);
@@ -369,6 +423,10 @@ namespace stormkit::image {
                         .str_error = core::format("Failed to load TARGA image from data\n    > {}",
                                                   result.error().str_error) } };
                 }
+
+                *this = std::move(*result);
+
+                return {};
             }
             case Image::Codec::PPM: {
                 auto result = details::loadPPM(data);
@@ -378,6 +436,10 @@ namespace stormkit::image {
                         .str_error = core::format("Failed to load PPM image from data\n    > {}",
                                                   result.error().str_error) } };
                 }
+
+                *this = std::move(*result);
+
+                return {};
             }
             case Image::Codec::HDR: {
                 auto result = details::loadHDR(data);
@@ -387,6 +449,10 @@ namespace stormkit::image {
                         .str_error = core::format("Failed to load HDR image from data\n    > {}",
                                                   result.error().str_error) } };
                 }
+
+                *this = std::move(*result);
+
+                return {};
             }
             case Image::Codec::KTX: {
                 auto result = details::loadKTX(data);
@@ -396,6 +462,23 @@ namespace stormkit::image {
                         .str_error = core::format("Failed to load KTX image from data\n    > {}",
                                                   result.error().str_error) } };
                 }
+
+                *this = std::move(*result);
+
+                return {};
+            }
+            case Image::Codec::QOI: {
+                auto result = details::loadQOI(data);
+                if (!result) {
+                    return core::Unexpected { Error {
+                        .reason    = result.error().reason,
+                        .str_error = core::format("Failed to load QOI image from data\n    > {}",
+                                                  result.error().str_error) } };
+                }
+
+                *this = std::move(*result);
+
+                return {};
             }
         }
 
@@ -427,6 +510,7 @@ namespace stormkit::image {
                                                   filepath.string(),
                                                   result.error().str_error) } };
                 }
+                return {};
             }
             case Image::Codec::PNG: {
                 auto result = details::savePNG(*this, filepath);
@@ -437,6 +521,7 @@ namespace stormkit::image {
                                                   filepath.string(),
                                                   result.error().str_error) } };
                 }
+                return {};
             }
             case Image::Codec::TARGA: {
                 auto result = details::saveTGA(*this, filepath);
@@ -447,6 +532,7 @@ namespace stormkit::image {
                                                   filepath.string(),
                                                   result.error().str_error) } };
                 }
+                return {};
             }
             case Image::Codec::PPM: {
                 auto result = details::savePPM(*this, args, filepath);
@@ -457,6 +543,7 @@ namespace stormkit::image {
                                                   filepath.string(),
                                                   result.error().str_error) } };
                 }
+                return {};
             }
             case Image::Codec::HDR: {
                 auto result = details::saveHDR(*this, filepath);
@@ -467,6 +554,7 @@ namespace stormkit::image {
                                                   filepath.string(),
                                                   result.error().str_error) } };
                 }
+                return {};
             }
             case Image::Codec::KTX: {
                 auto result = details::saveKTX(*this, filepath);
@@ -477,6 +565,18 @@ namespace stormkit::image {
                                                   filepath.string(),
                                                   result.error().str_error) } };
                 }
+                return {};
+            }
+            case Image::Codec::QOI: {
+                auto result = details::saveQOI(*this, filepath);
+                if (!result) {
+                    return core::Unexpected { Error {
+                        .reason    = result.error().reason,
+                        .str_error = core::format("Failed to load to file {}\n    > {}",
+                                                  filepath.string(),
+                                                  result.error().str_error) } };
+                }
+                return {};
             }
 
             default: break;
@@ -565,6 +665,17 @@ namespace stormkit::image {
 
                 return *result;
             }
+            case Image::Codec::QOI: {
+                auto result = details::saveQOI(*this);
+                if (!result) {
+                    return core::Unexpected { Error {
+                        .reason    = result.error().reason,
+                        .str_error = core::format("Failed to load QOI image from data\n    > {}",
+                                                  result.error().str_error) } };
+                }
+
+                return *result;
+            }
 
             default: break;
         }
@@ -618,21 +729,21 @@ namespace stormkit::image {
 
         image_data.data.resize(pixel_count * image_data.channel_count *
                                    image_data.bytes_per_channel,
-                               core::Byte { 1u });
+                               core::Byte { 255u });
 
         auto image = Image { std::move(image_data) };
 
-        for (auto layer = 0u; layer < image_data.layers; ++layer) {
-            for (auto face = 0u; face < image_data.faces; ++face) {
-                for (auto level = 0u; level < image_data.layers; ++level) {
+        for (auto layer = 0u; layer < image.layers(); ++layer) {
+            for (auto face = 0u; face < image.faces(); ++face) {
+                for (auto level = 0u; level < image.layers(); ++level) {
                     for (auto i = 0u; i < pixel_count; ++i) {
                         const auto from_image = details::map(pixel(i, layer, face, level),
                                                              m_data.bytes_per_channel,
-                                                             image_data.bytes_per_channel);
+                                                             image.bytesPerChannel());
                         auto to_image         = image.pixel(i, layer, face, level);
 
                         std::ranges::copy_n(std::ranges::begin(from_image),
-                                            image_data.channel_count,
+                                            std::min(m_data.channel_count, image.channelCount()),
                                             std::ranges::begin(to_image));
                     }
                 }

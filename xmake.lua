@@ -13,6 +13,7 @@ local allowedmodes = {
     "check",
     "minsizerel"
 }
+
 if not is_plat("windows") then
     table.insert(allowedmodes, "valgrind")
 end
@@ -114,7 +115,8 @@ package("StormKit")
                  "gli",
                  "vulkan-headers",
                  "volk",
-                 "vulkan-memory-allocator")
+                 "vulkan-memory-allocator",
+                 "backward-cpp")
     add_requires("volk", { configs = { header_only = true }})
     if not is_plat("windows") then
         add_requires("fmt")
@@ -184,4 +186,4 @@ package("StormKit")
         includes("wsi/xmake.lua")
     end
 
-    includes("render/xmake.lua")
+    includes("gpu/xmake.lua")

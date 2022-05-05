@@ -73,6 +73,9 @@ export {
 
         template<class T, class U>
         concept IsNot = !Is<T, U>;
+
+        template<class T>
+        concept StringLikeType = std::convertible_to<T, std::string_view>;
     } // namespace stormkit::core
 
 #if defined(STORMKIT_CXX20_MODULES)

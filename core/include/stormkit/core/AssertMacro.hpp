@@ -17,24 +17,24 @@ namespace stormkit::core::details {
     };
 } // namespace stormkit::core::details
 
-    #define STORMKIT_ASSERT_LINE STORMKIT_STRINGIFY(__LINE__)
-    #define STORMKIT_ASSERT_BASE(condition, type, message)                                     \
-        do {                                                                                   \
-            if (!(condition)) [[unlikely]] {                                                   \
-                std::cerr << type " `" #condition "` failed in " << __FILE__ << " line "       \
-                          << __LINE__ << "\n " << STORMKIT_CURRENT_FUNCTION << ": " << message \
-                          << std::endl;                                                        \
-                std::quick_exit(EXIT_FAILURE);                                                 \
-            }                                                                                  \
+    #define STORMKIT_ASSERT_LINE STORMKIT_STRINGIFY(STORMKIT_CURRENT_LINE)
+    #define STORMKIT_ASSERT_BASE(condition, type, message)                                \
+        do {                                                                              \
+            if (!(condition)) [[unlikely]] {                                              \
+                std::cerr << type " `" #condition "` failed in " << STORMKIT_CURRENT_FILE \
+                          << " line " << STORMKIT_CURRENT_LINE << "\n "                   \
+                          << STORMKIT_CURRENT_FUNCTION << ": " << message << std::endl;   \
+                stormkit::core::printStacktrace();                                        \
+                std::quick_exit(EXIT_FAILURE);                                            \
+            }                                                                             \
         } while (false)
 
-    #define STORMKIT_CONSTEXPR_ASSERT_BASE(condition, type, message)                               \
-        do {                                                                                       \
-            if (!(condition)) [[unlikely]]                                                         \
-                assert(!type " `" #condition "` failed in " __FILE__ " line " STORMKIT_ASSERT_LINE \
-                             "\n " STORMKIT_CURRENT_FUNCTION ": " message);                        \
-            else                                                                                   \
-                void(0);                                                                           \
+    #define STORMKIT_CONSTEXPR_ASSERT_BASE(condition, type, message) \
+        do {                                                         \
+            if (!(condition)) [[unlikely]]                           \
+                assert(!type " `" #condition "` failed");            \
+            else                                                     \
+                void(0);                                             \
         } while (false)
 
 /// \brief `STORMKIT_ASSERT` define an assertion, a confition that should be satisfied where it

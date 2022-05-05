@@ -7,6 +7,7 @@ import stormkit.entities.system;
 import stormkit.entities.entitymanager;
 import stormkit.entities.component;
 #else
+    #include <stormkit/core/Memory.mpp>
     #include <stormkit/core/Types.mpp>
 
     #include <stormkit/log/LogHandler.mpp>
@@ -21,6 +22,8 @@ import stormkit.entities.component;
 auto main() -> int {
     using namespace stormkit;
     using log::operator""_module;
+
+    core::setupSignalHandler();
 
     log::LogHandler::setupDefaultLogger();
 

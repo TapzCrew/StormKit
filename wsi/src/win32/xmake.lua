@@ -15,7 +15,7 @@ target("stormkit-wsi-win32")
     add_includedirs("../../include/")
     add_deps("stormkit-core", "stormkit-log", { public = true })
     add_defines("NOMINMAX", "WIN32_LEAN_AND_MEAN", { public = true })
-    add_syslinks("user32", { public = true })
+    add_syslinks("user32", "shcore")
 
     add_options("enable_cxx20_modules")
     set_group("private-libraries")

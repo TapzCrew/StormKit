@@ -36,7 +36,7 @@ export {
             static constexpr auto EnableBitmaskOperatorsEnable = EnableBitmaskOperators<T>::enable;
 
             template<EnumerationType T>
-            constexpr auto toUnderlying(T value);
+            constexpr auto toUnderlying(T value) -> std::underlying_type_t<T>;
         } // namespace details
 
         template<class T>
@@ -45,7 +45,7 @@ export {
         /// \brief Check if a flag bit is enabled
         /// \requires `Enum` to be an enumeration promoted as a flag with `FLAG_ENUM` macro
         /// \returns true if the flag big is set and false if not
-        template<EnumerationType T>
+        template<FlagsType T>
         constexpr auto checkFlag(T value, T flag) noexcept -> bool;
 
         /// \exclude

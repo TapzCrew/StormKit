@@ -24,6 +24,8 @@ export {
     #include <iostream>
     #include <memory>
     #include <utility>
+
+    #include <stormkit/core/Memory.mpp>
 #endif
 
     namespace stormkit::core {

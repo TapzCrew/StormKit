@@ -31,6 +31,19 @@ export {
     /////////// - STL - ///////////
     #include <algorithm>
     #include <array>
+
+    #ifdef module
+        #undef module
+        #define module_back
+    #endif
+
+    #include <backward/backward.hpp>
+
+    #ifdef module_back
+        #undef module_back
+        #define module
+    #endif
+
     #include <memory>
     #include <optional>
     #include <ranges>
@@ -251,6 +264,12 @@ export {
             return
                 [t = std::forward<T>(t)](const auto &elem) -> decltype(t(elem)) { return t(elem); };
         }
+
+        auto printStacktrace() noexcept -> void;
+
+        auto setupSignalHandler() noexcept -> void;
+
+        constexpr auto hton(auto value) noexcept -> decltype(auto);
     } // namespace stormkit::core
 
 #if defined(STORMKIT_CXX20_MODULES)

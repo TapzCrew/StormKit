@@ -2,6 +2,8 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
+#include "System.mpp"
+
 namespace stormkit::entities {
     inline auto System::priority() const noexcept -> core::UInt32 { return m_priority; }
     inline auto System::componentsUsed() const noexcept -> const ComponentTypes & {

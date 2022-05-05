@@ -1,4 +1,4 @@
-// Copyright (C) 2021 Arthur LAURENT <arthur.laurent4@gmail.com>
+// Copyright (C) 2022 Arthur LAURENT <arthur.laurent4@gmail.com>
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
@@ -37,7 +37,7 @@ export {
     #include <stormkit/wsi/Fwd.hpp>
     #include <stormkit/wsi/Key.mpp>
     #include <stormkit/wsi/MouseButton.mpp>
-    #include <stormkit/wsi/VideoSettings.mpp>
+    #include <stormkit/wsi/Monitor.mpp>
 #endif
 
     namespace stormkit::wsi::details {
@@ -69,7 +69,7 @@ export {
           protected:
             auto pushEvent(const Event &event) noexcept -> void;
 
-            VideoSettings m_video_settings;
+            Monitor m_video_settings;
 
             std::queue<Event> m_events;
         };
