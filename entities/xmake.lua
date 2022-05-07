@@ -2,6 +2,10 @@ target("stormkit-entities")
     set_kind("$(kind)")
     set_languages("cxxlatest", "clatest")
 
+    if is_mode("debug") then
+        set_suffixname("-d")
+    end
+
     add_headerfiles("include/**.hpp")
     add_headerfiles("include/**.inl")
     add_files("src/**.cpp")

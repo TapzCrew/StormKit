@@ -2,6 +2,10 @@ target("stormkit-main")
     set_kind("static")
     set_languages("cxxlatest", "clatest")
 
+    if is_mode("debug") then
+        set_suffixname("-d")
+    end
+
     add_headerfiles("include/**.hpp")
 
     add_deps("stormkit-core", { public = true })
