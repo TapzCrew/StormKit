@@ -1,86 +1,88 @@
-#include <storm/core/Platform.hpp>
-#include <storm/core/Strings.hpp>
+// Copyright (C) 2022 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
 
-#include <storm/log/ConsoleLogger.hpp>
-#include <storm/log/LogColorizer.hpp>
+#if defined(STORMKIT_CXX20_MODULES)
+module stormkit.log.consolelogger;
 
-/////////// - StormKit::core - ///////////
-#include <storm/core/Format.hpp>
-
-#include <iostream>
-
+// clang-format off
+/////////// - STL - ///////////
 #include <climits>
 #include <clocale>
+import <iostream>;
+import <string_view>;
+
+/////////// - StormKit::core - ///////////
+import stormkit.core.format
+import stormkit.core.strings
+
+/////////// - StormKit::log - ///////////
+import stormkit.log.details.logcolorizer;
+// clang-format on
+#else
+/////////// - STL - ///////////
+    #include <climits>
+    #include <clocale>
+    #include <iostream>
+    #include <string_view>
+
+    //////////// - StormKit::core - ///////////
+    #include <stormkit/core/Format.mpp>
+    #include <stormkit/core/Strings.mpp>
+
+/////////// - StormKit::log - ///////////
+    #include "LogColorizer.mpp"
+    #include <stormkit/log/ConsoleLogger.mpp>
+#endif
 
 using namespace std::literals;
 
-using namespace storm;
-using namespace storm::log;
+namespace stormkit::log {
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    ConsoleLogger::ConsoleLogger(LogClock::time_point start) noexcept
+        : Logger { std::move(start) } {}
 
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    ConsoleLogger::ConsoleLogger(LogClock::time_point start, Severity log_level) noexcept
+        : Logger { std::move(start), log_level } {}
 
-////////////////////////////////////////
-////////////////////////////////////////
-ConsoleLogger::ConsoleLogger(LogClock::time_point start, Severity log_level)
-    : Logger { std::move(start), log_level } {
-}
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    auto ConsoleLogger::write(Severity severity, Module m, const char *string) -> void {
+        const auto now  = LogClock::now();
+        const auto time = std::chrono::duration_cast<core::Secondf>(now - m_start_time);
 
-////////////////////////////////////////
-////////////////////////////////////////
-ConsoleLogger::~ConsoleLogger() = default;
+        static constexpr auto LOG_LINE        = "[{0}, {1}s]"sv;
+        static constexpr auto LOG_LINE_MODULE = "[{0}, {1}s, {2}]"sv;
 
-////////////////////////////////////////
-////////////////////////////////////////
-ConsoleLogger::ConsoleLogger(ConsoleLogger &&) = default;
+        const auto str = [&severity, &time, &m]() {
+            if (std::size(*m) == 0) return core::format(LOG_LINE, severity, time);
+            else
+                return core::format(LOG_LINE_MODULE, severity, time, *m);
+        }();
 
-////////////////////////////////////////
-////////////////////////////////////////
-ConsoleLogger &ConsoleLogger::operator=(ConsoleLogger &&) = default;
+        const auto to_stderr = severity == Severity::Error || severity == Severity::Fatal;
+        auto &output         = (to_stderr) ? std::cerr : std::cout;
 
-////////////////////////////////////////
-////////////////////////////////////////
-ConsoleLogger::ConsoleLogger(const ConsoleLogger &) = default;
+        // not yet
+        /*
+        auto state          = std::mbstate_t {};
+        std::string out_str = std::string { MB_LEN_MAX };
+        for (const auto &c : str) std::c8rtomb(std::data(out_str), c, &state);
 
-////////////////////////////////////////
-////////////////////////////////////////
-ConsoleLogger &ConsoleLogger::operator=(const ConsoleLogger &) = default;
+        state                  = std::mbstate_t {};
+        std::string out_string = std::string { MB_LEN_MAX };
+        for (const auto &c : string) { std::c8rtomb(std::data(out_string), c, &state); }*/
 
-////////////////////////////////////////
-////////////////////////////////////////
-void ConsoleLogger::flush() {
-    std::cout.flush();
-}
+        details::colorifyBegin(severity, to_stderr);
+        output << str;
+        details::colorifyEnd(to_stderr);
+        output << " " << string << '\n' << std::flush;
+    }
 
-////////////////////////////////////////
-////////////////////////////////////////
-void ConsoleLogger::write(Severity severity, Module module, const char *string) {
-    const auto now  = LogClock::now();
-    const auto time = std::chrono::duration_cast<core::Secondf>(now - m_start_time);
-
-    static constexpr auto LOG_LINE        = "[{0}, {1}s]"sv;
-    static constexpr auto LOG_LINE_MODULE = "[{0}, {1}s, {2}]"sv;
-
-    auto str = std::string {};
-
-    if (std::char_traits<char>::length(module.get()) == 0)
-        str = core::format(LOG_LINE, severity, time);
-    else
-        str = core::format(LOG_LINE_MODULE, severity, time, module.get());
-
-    const auto to_stderr = severity == Severity::Error || severity == Severity::Fatal;
-    auto &output         = (to_stderr) ? std::cerr : std::cout;
-
-    // not yet
-    /*
-    auto state          = std::mbstate_t {};
-    std::string out_str = std::string { MB_LEN_MAX };
-    for (const auto &c : str) std::c8rtomb(std::data(out_str), c, &state);
-
-    state                  = std::mbstate_t {};
-    std::string out_string = std::string { MB_LEN_MAX };
-    for (const auto &c : string) { std::c8rtomb(std::data(out_string), c, &state); }*/
-
-    colorifyBegin(severity, to_stderr);
-    output << str;
-    colorifyEnd(to_stderr);
-    output << " " << string << '\n' << std::flush;
-}
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    auto ConsoleLogger::flush() noexcept -> void { std::cout.flush(); }
+} // namespace stormkit::log

@@ -1,0 +1,97 @@
+// Copyright (C) 2022 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+module;
+
+#pragma once
+
+#include <stormkit/core/PlatformMacro.hpp>
+
+#if defined(STORMKIT_CXX20_MODULES)
+// clang-format off
+export module stormkit.log.loghandler;
+
+/////////// - STL - ///////////
+import <queue>;
+import <string>;
+import <string_view>;
+
+/////////// - StormKit::core - ///////////
+import stormkit.core.format;
+import stormkit.core.strings;
+
+/////////// - StormKit::log - ///////////
+import stormkit.log.logger;
+import stormkit.log.module;
+import stormkit.log.severity;
+
+// clang-format on
+export {
+#else
+    /////////// - StormKit::core - ///////////
+    #include <stormkit/core/Format.mpp>
+    #include <stormkit/core/Strings.mpp>
+
+    /////////// - StormKit::log - ///////////
+    #include <stormkit/log/Logger.mpp>
+    #include <stormkit/log/Module.mpp>
+    #include <stormkit/log/Severity.mpp>
+#endif
+
+    namespace stormkit::log {
+        class STORMKIT_PUBLIC LogHandler {
+          public:
+            LogHandler()  = delete;
+            ~LogHandler() = delete;
+
+            auto operator=(const LogHandler &&) = delete;
+            LogHandler(const LogHandler &&)     = delete;
+
+            auto operator=(const LogHandler &) = delete;
+            LogHandler(const LogHandler &)     = delete;
+
+            template<class T, typename... Args>
+            static auto setupLogger(Args &&...param_args) -> void;
+
+            static auto setupDefaultLogger() -> void;
+
+            template<typename... Args>
+            static auto log(Severity severity,
+                            Module module,
+                            std::string_view format_string,
+                            Args &&...param_args) -> void;
+
+            template<typename... Args>
+            static auto log(Severity severity, std::string_view format_string, Args &&...param_args)
+                -> void;
+
+            template<typename... Args>
+            static auto dlog(Args &&...param_args) -> void;
+
+            template<typename... Args>
+            static auto ilog(Args &&...param_args) -> void;
+
+            template<typename... Args>
+            static auto wlog(Args &&...param_args) -> void;
+
+            template<typename... Args>
+            static auto elog(Args &&...param_args) -> void;
+
+            template<typename... Args>
+            static auto flog(Args &&...param_args) -> void;
+
+            static auto logger() -> Logger &;
+
+          private:
+            static auto setupLogger(LoggerOwnedPtr &&ptr) -> void;
+
+            static inline LoggerOwnedPtr m_logger = nullptr;
+        };
+    } // namespace stormkit::log
+
+#if defined(STORMKIT_CXX20_MODULES)
+}
+#endif
+
+#include "LogHandler.inl"

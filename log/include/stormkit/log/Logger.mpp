@@ -1,0 +1,73 @@
+// Copyright (C) 2022 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+module;
+
+#pragma once
+
+/////////// - StormKit::core - ///////////
+#include <stormkit/core/MemoryMacro.hpp>
+#include <stormkit/core/PlatformMacro.hpp>
+
+#if defined(STORMKIT_CXX20_MODULES)
+// clang-format off
+export module stormkit.log.logger;
+
+/////////// - STL - ///////////
+import <array>;
+import <memory>;
+import <optional>;
+import <span>;
+import <vector>;
+
+/////////// - StormKit::log - ///////////
+import stormkit.log.module;
+import stormkit.log.severity;
+
+// clang-format on
+export {
+#else
+    /////////// - STL - ///////////
+    #include <array>
+    #include <memory>
+    #include <optional>
+    #include <span>
+    #include <vector>
+
+    #include <stormkit/core/Memory.mpp>
+
+    /////////// - StormKit::log - ///////////
+    #include <stormkit/log/Module.mpp>
+    #include <stormkit/log/Severity.mpp>
+#endif
+
+    namespace stormkit::log {
+        class STORMKIT_PUBLIC Logger {
+          public:
+            using LogClock = std::chrono::high_resolution_clock;
+            explicit Logger(LogClock::time_point start) noexcept;
+            Logger(LogClock::time_point start, Severity log_level) noexcept;
+
+            virtual auto write(Severity severity, Module module, const char *string) -> void = 0;
+            virtual auto flush() -> void                                                     = 0;
+
+            auto setLogLevel(Severity log_level) noexcept -> void;
+
+            [[nodiscard]] auto startTime() const noexcept -> const LogClock::time_point &;
+            [[nodiscard]] auto logLevel() const noexcept -> const Severity &;
+
+          protected:
+            LogClock::time_point m_start_time;
+            Severity m_log_level;
+
+            friend class LogHandler;
+        };
+        DECLARE_PTR_AND_REF(Logger)
+    } // namespace stormkit::log
+
+#if defined(STORMKIT_CXX20_MODULES)
+}
+#endif
+
+#include "Logger.inl"

@@ -1,2 +1,4 @@
+#include <string>
+
 void dummy() {
 }

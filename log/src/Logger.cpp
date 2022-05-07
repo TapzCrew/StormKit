@@ -1,29 +1,32 @@
-#include <storm/log/Logger.hpp>
+// Copyright (C) 2022 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
 
-using namespace storm::log;
+#if defined(STORMKIT_CXX20_MODULES)
+module stormkit.log.logger;
 
-/////////////////////////////////////
-/////////////////////////////////////
-Logger::Logger(LogClock::time_point start_time, Severity log_level)
-    : m_start_time { std::move(start_time) }, m_log_level { log_level } {
-}
+// clang-format off
+// clang-format on
+#else
+    /////////// - StormKit::log - ///////////
+    #include <stormkit/log/Logger.mpp>
+#endif
 
-/////////////////////////////////////
-/////////////////////////////////////
-Logger::~Logger() = default;
+namespace stormkit::log {
+#ifdef STORMKIT_BUILD_DEBUG
+    constexpr auto DEFAULT_SEVERITY =
+        Severity::Info | Severity::Debug | Severity::Error | Severity::Fatal | Severity::Warning;
+#else
+    constexpr auto DEFAULT_SEVERITY = Severity::Info | Severity::Error | Severity::Fatal;
+#endif
 
-////////////////////////////////////////
-////////////////////////////////////////
-Logger::Logger(Logger &&) = default;
+    /////////////////////////////////////
+    /////////////////////////////////////
+    Logger::Logger(LogClock::time_point start_time) noexcept
+        : Logger { std::move(start_time), DEFAULT_SEVERITY } {}
 
-////////////////////////////////////////
-////////////////////////////////////////
-Logger &Logger::operator=(Logger &&) = default;
-
-////////////////////////////////////////
-////////////////////////////////////////
-Logger::Logger(const Logger &) = default;
-
-////////////////////////////////////////
-////////////////////////////////////////
-Logger &Logger::operator=(const Logger &) = default;
+    /////////////////////////////////////
+    /////////////////////////////////////
+    Logger::Logger(LogClock::time_point start_time, Severity log_level) noexcept
+        : m_start_time { std::move(start_time) }, m_log_level { log_level } {}
+} // namespace stormkit::log

@@ -1,42 +1,43 @@
-// Copyright (C) 2021 Arthur LAURENT <arthur.laurent4@gmail.com>
+// Copyright (C) 2022 Arthur LAURENT <arthur.laurent4@gmail.com>
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#include <storm/entities/MessageBus.hpp>
+#if defined(STORMKIT_CXX20_MODULES)
+module stormkit.log.logger;
 
-using namespace storm::entities;
+// clang-format off
+// clang-format on
+#else
+    /////////// - StormKit::log - ///////////
+    #include <stormkit/entities/MessageBus.mpp>
+#endif
 
-/////////////////////////////////////
-/////////////////////////////////////
-MessageBus::MessageBus() {
-}
+namespace stormkit::entities {
+    /////////////////////////////////////
+    /////////////////////////////////////
+    MessageBus::MessageBus() = default;
 
-/////////////////////////////////////
-/////////////////////////////////////
-MessageBus::~MessageBus() = default;
+    /////////////////////////////////////
+    /////////////////////////////////////
+    MessageBus::~MessageBus() = default;
 
-/////////////////////////////////////
-/////////////////////////////////////
-MessageBus::MessageBus(MessageBus &&) = default;
+    /////////////////////////////////////
+    /////////////////////////////////////
+    MessageBus::MessageBus(MessageBus &&) = default;
 
-/////////////////////////////////////
-/////////////////////////////////////
-MessageBus &MessageBus::operator=(MessageBus &&) = default;
+    /////////////////////////////////////
+    /////////////////////////////////////
+    MessageBus &MessageBus::operator=(MessageBus &&) = default;
 
-/////////////////////////////////////
-/////////////////////////////////////
-void MessageBus::push(Message &&message) {
-    m_messages.emplace(std::move(message));
-}
+    /////////////////////////////////////
+    /////////////////////////////////////
+    auto MessageBus::push(Message &&message) -> void { m_messages.emplace(std::move(message)); }
 
-/////////////////////////////////////
-/////////////////////////////////////
-const Message &MessageBus::top() const {
-    return m_messages.front();
-}
+    /////////////////////////////////////
+    /////////////////////////////////////
+    auto MessageBus::top() const -> const Message & { return m_messages.front(); }
 
-/////////////////////////////////////
-/////////////////////////////////////
-void MessageBus::pop() {
-    m_messages.pop();
-}
+    /////////////////////////////////////
+    /////////////////////////////////////
+    auto MessageBus::pop() -> void { m_messages.pop(); }
+} // namespace stormkit::entities

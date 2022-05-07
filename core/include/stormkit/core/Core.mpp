@@ -1,0 +1,59 @@
+// Copryright (C) 2022 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+module;
+
+#pragma once
+
+#if defined(STORMKIT_CXX20_MODULES)
+export module stormkit.core;
+
+// clang-format off
+import stormkit.core.app;
+import stormkit.core.crtp;
+import stormkit.core.color;
+import stormkit.core.constexprmap;
+import stormkit.core.flags;
+import stormkit.core.format;
+import stormkit.core.hash;
+import stormkit.core.hashmap;
+import stormkit.core.math;
+import stormkit.core.memory;
+import stormkit.core.namedtype;
+import stormkit.core.numerics;
+import stormkit.core.pimpl;
+import stormkit.core.ringbuffer;
+import stormkit.core.singleton;
+import stormkit.core.state;
+import stormkit.core.statemanager;
+import stormkit.core.strings;
+import stormkit.core.tree;
+import stormkit.core.treenode;
+import stormkit.core.types;
+// clang-format on
+
+#else
+    #include <stormkit/core/App.mpp>
+    #include <stormkit/core/CRTP.mpp>
+    #include <stormkit/core/Color.mpp>
+    #include <stormkit/core/Concepts.mpp>
+    #include <stormkit/core/ConstexprMap.mpp>
+    #include <stormkit/core/Flags.mpp>
+    #include <stormkit/core/Format.mpp>
+    #include <stormkit/core/Hash.mpp>
+    #include <stormkit/core/HashMap.mpp>
+    #include <stormkit/core/Math.mpp>
+    #include <stormkit/core/Memory.mpp>
+    #include <stormkit/core/NamedType.mpp>
+    #include <stormkit/core/Numerics.mpp>
+    #include <stormkit/core/Pimpl.mpp>
+    #include <stormkit/core/RingBuffer.mpp>
+    #include <stormkit/core/Singleton.mpp>
+    #include <stormkit/core/State.mpp>
+    #include <stormkit/core/StateManager.mpp>
+    #include <stormkit/core/Strings.mpp>
+    #include <stormkit/core/Tree.mpp>
+    #include <stormkit/core/TreeNode.mpp>
+    #include <stormkit/core/Types.mpp>
+#endif

@@ -1,55 +1,63 @@
-#include <storm/entities/EntityManager.hpp>
-#include <storm/entities/System.hpp>
+// Copyright (C) 2022 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
 
-using namespace storm;
-using namespace storm::entities;
+#if defined(STORMKIT_CXX20_MODULES)
+module stormkit.entities.system;
 
-/////////////////////////////////////
-/////////////////////////////////////
-System::System(EntityManager &manager, core::UInt32 priority, ComponentTypes &&types)
-    : m_manager { &manager }, m_priority { priority }, m_types { std::move(types) } {
-}
+// clang-format off
+import stormkit.entities.entitymanager;
+// clang-format on
+#else
+    /////////// - StormKit::log - ///////////
+    #include <stormkit/entities/EntityManager.mpp>
+    #include <stormkit/entities/System.mpp>
+#endif
 
-/////////////////////////////////////
-/////////////////////////////////////
-System::System(EntityManager &manager, core::UInt32 priority, const ComponentTypes &types)
-    : m_manager { &manager }, m_priority { priority }, m_types { types } {
-}
+namespace stormkit::entities {
+    /////////////////////////////////////
+    /////////////////////////////////////
+    System::System(EntityManager &manager, core::UInt32 priority, ComponentTypes &&types)
+        : m_manager { &manager }, m_priority { priority }, m_types { std::move(types) } {}
 
-/////////////////////////////////////
-/////////////////////////////////////
-System::System(System &&) = default;
+    /////////////////////////////////////
+    /////////////////////////////////////
+    System::System(EntityManager &manager, core::UInt32 priority, const ComponentTypes &types)
+        : m_manager { &manager }, m_priority { priority }, m_types { types } {}
 
-/////////////////////////////////////
-/////////////////////////////////////
-System &System::operator=(System &&) = default;
+    /////////////////////////////////////
+    /////////////////////////////////////
+    System::System(System &&) = default;
 
-/////////////////////////////////////
-/////////////////////////////////////
-System::~System() = default;
+    /////////////////////////////////////
+    /////////////////////////////////////
+    auto System::operator=(System &&) -> System & = default;
 
-/////////////////////////////////////
-/////////////////////////////////////
-void System::preUpdate() {
-}
+    /////////////////////////////////////
+    /////////////////////////////////////
+    System::~System() = default;
 
-/////////////////////////////////////
-/////////////////////////////////////
-void System::postUpdate() {
-}
+    /////////////////////////////////////
+    /////////////////////////////////////
+    auto System::preUpdate() -> void {}
 
-/////////////////////////////////////
-/////////////////////////////////////
-void System::addEntity(Entity e) {
-    STORMKIT_EXPECTS(e != INVALID_ENTITY);
+    /////////////////////////////////////
+    /////////////////////////////////////
+    auto System::postUpdate() -> void {}
 
-    m_entities.insert(e);
-}
+    /////////////////////////////////////
+    /////////////////////////////////////
+    auto System::addEntity(Entity e) -> void {
+        STORMKIT_EXPECTS(e != INVALID_ENTITY);
 
-/////////////////////////////////////
-/////////////////////////////////////
-void System::removeEntity(Entity e) {
-    STORMKIT_EXPECTS(e != INVALID_ENTITY);
+        m_entities.insert(e);
+    }
 
-    m_entities.erase(e);
-}
+    /////////////////////////////////////
+    /////////////////////////////////////
+    auto System::removeEntity(Entity e) -> void {
+        STORMKIT_EXPECTS(e != INVALID_ENTITY);
+
+        m_entities.erase(e);
+    }
+} // namespace stormkit::entities

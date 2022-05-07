@@ -10,7 +10,7 @@ A C++20 complient compiler is needed to build StormKit
 - [LibPNG >= 1.6](http://www.libpng.org/pub/png/libpng.html)
 - [LibJPEG-turbo](https://www.libjpeg-turbo.org)
 
-### StormKit-render module
+### stormkit-gpu module
 - [Vulkan](https://vulkan.lunarg.com)
 
 ### StormKit-engine module
