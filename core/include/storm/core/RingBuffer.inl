@@ -1,0 +1,4 @@
+#ifndef RINGBUFFER_INL
+#define RINGBUFFER_INL
+
+#endif // RINGBUFFER_INL

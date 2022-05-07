@@ -1,0 +1,23 @@
+option('enable_doc', type: 'boolean', value: false, description: 'Generate documentation')
+option('enable_examples', type: 'boolean', value: false, description: 'Build examples')
+option('examples_data_dir', type: 'string', value: './', description: 'Examples data dir')
+
+option('enable_log', type: 'boolean', value: true, description: 'Build StormKit log library')
+option('enable_entities', type: 'boolean', value: true, description: 'Build StormKit entities library')
+option('enable_module', type: 'boolean', value: true, description: 'Build StormKit module library')
+option('enable_window', type: 'boolean', value: true, description: 'Build StormKit window library')
+option('enable_image', type: 'boolean', value: true, description: 'Build StormKit image library')
+option('enable_render', type: 'boolean', value: true, description: 'Build StormKit render library')
+option('enable_engine', type: 'boolean', value: true, description: 'Build StormKit engine library')
+
+option('enable_window_xcb', type: 'boolean', value: true, description: 'Build StormKit xcb window backend (only for linux)')
+option('enable_window_wayland', type: 'boolean', value: true, description: 'Build StormKit wayland window backend (only for linux)')
+option('enable_render_introspect_spirv', type: 'boolean', value: true, description: 'Build Stormkit render with spirv introspection support')
+
+option('copy_to_bindir', type: 'boolean', value: false, description: 'Copy build output to bindir')
+
+option('image_enable_log', type: 'boolean', value: true, description: 'Enable image module logging')
+
+option('library_type', type: 'combo', choices: ['shared', 'static'], value: 'shared', description: 'Library type (default is shared)')
+
+option('gli_include_dir', type: 'string', value: '', description: 'Overwrite GLI include directory')
