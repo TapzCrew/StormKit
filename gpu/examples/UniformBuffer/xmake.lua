@@ -5,6 +5,10 @@ target("uniform-buffer")
     set_languages("cxxlatest", "clatest")
     add_rules("utils.glsl2spv", {bin2c = true})
 
+    if is_mode("debug") then
+        set_suffixname("-d")
+    end
+
     add_files("src/*.cpp")
     add_headerfiles("src/*.mpp")
     add_files("shaders/*.vert")

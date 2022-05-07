@@ -19,6 +19,10 @@
 #include <stormkit/gpu/core/Queue.mpp>
 #include <stormkit/gpu/core/WindowSurface.mpp>
 
+static constexpr auto TEXTURE_DATA = std::array {
+#include <texture.png.hpp>
+};
+
 using namespace stormkit;
 
 App::App() {
@@ -162,8 +166,8 @@ auto App::doInitMeshRenderObjects() -> void {
     m_render_pass = m_device->allocateRenderPass(description);
     ilog("Renderpass successfully created");
 
-    // We create a pipeline, the pipeline describe all the fixed function parameters and the shaders
-    // wich will be bound
+    // We create a pipeline, the pipeline describe all the fixed function parameters and the
+    // shaders wich will be bound
     m_pipeline       = m_device->allocateGraphicsPipeline();
     const auto state = gpu::GraphicsPipelineState {
         .input_assembly_state = { .topology = gpu::PrimitiveTopology::Triangle_Strip },
@@ -219,10 +223,7 @@ auto App::doInitMeshRenderObjects() -> void {
 
     fence.wait();
 
-    // static constexpr auto texture_path = "textures/test.qoi";
-    static constexpr auto texture_path = "textures/texture.png";
-
-    auto image = image::Image { EXAMPLES_DATA_DIR texture_path };
+    auto image = image::Image { TEXTURE_DATA, image::Image::Codec::PNG };
     image      = image.toFormat(image::Image::Format::RGBA8_UNorm);
 
     m_texture = m_device->allocateImage({ .extent = image.extent() });
@@ -243,8 +244,8 @@ auto App::doInitMeshRenderObjects() -> void {
                                .sampler    = core::makeConstObserver(m_sampler) } });
     m_descriptor_set->update(descriptors);
 
-    // Finally we create per frame data, we need a commandbuffer and a framebuffer by frame to avoid
-    // waiting the GPU
+    // Finally we create per frame data, we need a commandbuffer and a framebuffer by frame to
+    // avoid waiting the GPU
     doInitPerFrameObjects();
 }
 

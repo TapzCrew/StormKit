@@ -174,6 +174,8 @@ package("StormKit")
 
     add_vectorexts("mms", "neon", "avx", "avx2", "sse", "sse2", "sse3", "sse4")
 
+    includes("xmake/**.lua")
+
     includes("core/xmake.lua")
     includes("log/xmake.lua")
     includes("main/xmake.lua")
