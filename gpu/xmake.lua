@@ -1,5 +1,5 @@
 target("stormkit-gpu")
-    set_kind("$(library_type)")
+    set_kind("$(kind)")
     set_languages("cxxlatest", "clatest")
 
     add_headerfiles("include/**.hpp")
