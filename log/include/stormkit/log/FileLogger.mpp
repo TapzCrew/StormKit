@@ -1,0 +1,75 @@
+// Copyright (C) 2022 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+module;
+
+#pragma once
+
+#include <stormkit/core/MemoryMacro.hpp>
+#include <stormkit/core/PlatformMacro.hpp>
+
+#if defined(STORMKIT_CXX20_MODULES)
+// clang-format off
+export module stormkit.log.filelogger;
+
+/////////// - STL - ///////////
+import <filesystem>;
+import <fstream>;
+import <array>;
+import <memory>;
+import <optional>;
+import <span>;
+import <vector>;
+
+/////////// - StormKit::core - ///////////
+import stormkit.core.hashmap;
+
+/////////// - StormKit::log - ///////////
+import stormkit.log.logger;
+
+// clang-format on
+export {
+#else
+    /////////// - STL - ///////////
+    #include <array>
+    #include <filesystem>
+    #include <fstream>
+    #include <memory>
+    #include <optional>
+    #include <span>
+    #include <vector>
+
+    /////////// - StormKit::core - ///////////
+    #include <stormkit/core/HashMap.mpp>
+
+    /////////// - StormKit::log - ///////////
+    #include <stormkit/log/Logger.mpp>
+#endif
+
+    namespace stormkit::log {
+        class STORMKIT_PUBLIC FileLogger final: public Logger {
+          public:
+            FileLogger(LogClock::time_point start, std::filesystem::path path);
+            FileLogger(LogClock::time_point start, std::filesystem::path path, Severity log_level);
+            ~FileLogger();
+
+            FileLogger(const FileLogger &) = delete;
+            auto operator=(const FileLogger &) -> FileLogger & = delete;
+
+            FileLogger(FileLogger &&);
+            auto operator=(FileLogger &&) -> FileLogger &;
+
+            auto write(Severity severity, Module module, const char *string) -> void override;
+            auto flush() -> void override;
+
+          private:
+            core::HashMap<std::string, std::ofstream> m_streams;
+
+            std::filesystem::path m_base_path;
+        };
+    } // namespace stormkit::log
+
+#if defined(STORMKIT_CXX20_MODULES)
+}
+#endif

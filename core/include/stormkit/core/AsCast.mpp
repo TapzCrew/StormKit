@@ -1,0 +1,120 @@
+// Copryright (C) 2022 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+module;
+
+#pragma once
+
+/////////// - StormKit::core - ///////////
+#include <stormkit/core/AssertMacro.hpp>
+
+#if defined(STORMKIT_CXX20_MODULES)
+// clang-format off
+export module stormkit.core.ascast;
+
+    /////////// - STL - ///////////
+import <limits>;
+import <variant>;
+import <type_traits>;
+import <concepts>;
+import <iostream>;
+
+/////////// - StormKit::core - ///////////
+import stormkit.core.concepts;
+
+// clang-format on
+export {
+#else
+    /////////// - STL - ///////////
+    #include <concepts>
+    #include <iostream>
+    #include <limits>
+    #include <type_traits>
+    #include <variant>
+
+    /////////// - StormKit::core - ///////////
+    #include <stormkit/core/Concepts.mpp>
+#endif
+
+    namespace stormkit::core {
+        template<typename To, typename... Args>
+        [[nodiscard]] constexpr auto is(const std::variant<Args...> &variant) noexcept -> bool;
+
+        template<typename To, typename... Args>
+        [[nodiscard]] constexpr auto as(std::variant<Args...> &variant) noexcept -> To &;
+
+        template<typename To, typename... Args>
+        [[nodiscard]] constexpr auto as(std::variant<Args...> &&variant) noexcept -> To &&;
+
+        template<typename To, typename... Args>
+        [[nodiscard]] constexpr auto as(const std::variant<Args...> &variant) noexcept
+            -> const To &;
+
+        template<typename To, typename... Args>
+        [[nodiscard]] constexpr auto as(const std::variant<Args...> &&variant) noexcept
+            -> const To &&;
+
+        template<std::signed_integral To, std::signed_integral From>
+        [[nodiscard]] constexpr auto as(From value) noexcept -> To;
+
+        template<std::unsigned_integral To, std::unsigned_integral From>
+        [[nodiscard]] constexpr auto as(From value) noexcept -> To;
+
+        template<std::signed_integral To, std::unsigned_integral From>
+        [[nodiscard]] constexpr auto as(From value) noexcept -> To;
+
+        template<std::unsigned_integral To, std::signed_integral From>
+        [[nodiscard]] constexpr auto as(From value) noexcept -> To;
+
+        template<std::floating_point To, std::floating_point From>
+        [[nodiscard]] constexpr auto as(From value) noexcept -> To;
+
+        template<std::floating_point To, std::signed_integral From>
+        [[nodiscard]] constexpr auto as(From value) noexcept -> To;
+
+        template<std::signed_integral To, std::floating_point From>
+        [[nodiscard]] constexpr auto as(From value) noexcept -> To;
+
+        template<std::floating_point To, std::unsigned_integral From>
+        [[nodiscard]] constexpr auto as(From value) noexcept -> To;
+
+        template<std::unsigned_integral To, std::floating_point From>
+        [[nodiscard]] constexpr auto as(From value) noexcept -> To;
+
+        template<std::integral To, EnumerationType From>
+        requires(!ByteType<To>) [[nodiscard]] constexpr auto as(From value) noexcept -> To;
+
+        template<EnumerationType To, std::integral From>
+        requires(!ByteType<From>) [[nodiscard]] constexpr auto as(From value) noexcept -> To;
+
+        template<EnumerationType To, EnumerationType From>
+        [[nodiscard]] constexpr auto as(From value) noexcept -> To;
+
+        template<std::integral To, ByteType From>
+        [[nodiscard]] constexpr auto as(From value) noexcept -> To;
+
+        template<ByteType To, std::integral From>
+        [[nodiscard]] constexpr auto as(From value) noexcept -> To;
+
+        template<typename To, std::convertible_to<To> From>
+        requires(!ArithmeticType<To> && !ArithmeticType<From>)
+            [[nodiscard]] constexpr auto as(From &value) noexcept -> To;
+
+        template<RawPointerType To, RawPointerType From>
+        requires(ByteType<std::remove_cvref_t<std::remove_pointer_t<To>>>)
+            [[nodiscard]] constexpr auto as(From value) noexcept -> To;
+
+        template<typename... Ts>
+        struct Overload: Ts... {
+            using Ts::operator()...;
+        };
+        template<class... Ts>
+        Overload(Ts...) -> Overload<Ts...>;
+    } // namespace stormkit::core
+
+#if defined(STORMKIT_CXX20_MODULES)
+}
+#endif
+
+#include "AsCast.inl"

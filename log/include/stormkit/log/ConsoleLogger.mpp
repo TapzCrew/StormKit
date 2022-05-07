@@ -1,0 +1,55 @@
+// Copyright (C) 2022 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+module;
+
+#pragma once
+
+/////////// - StormKit::core - ///////////
+#include <stormkit/core/MemoryMacro.hpp>
+#include <stormkit/core/PlatformMacro.hpp>
+
+#if defined(STORMKIT_CXX20_MODULES)
+// clang-format off
+export module stormkit.log.consolelogger;
+
+/////////// - StormKit::log - ///////////
+import stormkit.log.logger;
+
+/////////// - STL - ///////////
+import <array>;
+import <memory>;
+import <optional>;
+import <span>;
+import <vector>;
+
+// clang-format on
+export {
+#else
+    /////////// - STL - ///////////
+    #include <array>
+    #include <memory>
+    #include <optional>
+    #include <span>
+    #include <vector>
+
+    /////////// - StormKit::log - ///////////
+    #include <stormkit/log/Logger.mpp>
+#endif
+
+    namespace stormkit::log {
+        class STORMKIT_PUBLIC ConsoleLogger final: public Logger {
+          public:
+            explicit ConsoleLogger(LogClock::time_point start) noexcept;
+            ConsoleLogger(LogClock::time_point start, Severity log_level) noexcept;
+
+            auto write(Severity severity, Module module, const char *string) -> void override;
+            auto flush() noexcept -> void override;
+        };
+        DECLARE_PTR_AND_REF(ConsoleLogger)
+    } // namespace stormkit::log
+
+#if defined(STORMKIT_CXX20_MODULES)
+}
+#endif

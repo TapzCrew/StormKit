@@ -1,0 +1,66 @@
+// Copryright (C) 2022 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+module;
+
+#pragma once
+
+/////////// - StormKit::core - ///////////
+#include <stormkit/core/FormatMacro.hpp>
+
+#if defined(STORMKIT_CXX20_MODULES)
+// clang-format off
+export module stormkit.core.numerics;
+
+import <limits>;
+import <random>;
+
+import stormkit.core.types;
+import stormkit.core.concepts;
+import stormkit.core.format;
+
+// clang-format on
+export {
+#else
+    /////////// - STL - ///////////
+    #include <limits>
+    #include <random>
+
+    /////////// - StormKit::core - ///////////
+    #include <stormkit/core/Concepts.mpp>
+    #include <stormkit/core/Format.mpp>
+    #include <stormkit/core/Types.mpp>
+#endif
+
+    namespace stormkit::core {
+        void seed(UInt32 seed) noexcept;
+
+        template<std::floating_point T>
+        [[nodiscard]] auto rand(T min, T max) noexcept -> T;
+
+        template<std::integral T>
+        [[nodiscard]] auto rand(T min, T max) noexcept -> T;
+
+        template<std::floating_point T>
+        [[nodiscard]] constexpr auto isEqual(T a, T b) noexcept -> bool;
+
+        template<std::floating_point T, std::floating_point V>
+        [[nodiscard]] constexpr auto isEqual(T a, V b) noexcept -> bool;
+
+        template<std::integral T>
+        [[nodiscard]] constexpr auto isEqual(T a, T b) noexcept -> bool;
+
+        template<std::integral T, std::integral V>
+        [[nodiscard]] constexpr auto isEqual(T a, V b) noexcept -> bool;
+
+        template<ArithmeticType T, ArithmeticType V>
+        [[nodiscard]] constexpr auto map(V x, V in_min, V in_max, T out_min, T out_max) noexcept;
+
+    } // namespace stormkit::core
+
+#if defined(STORMKIT_CXX20_MODULES)
+}
+#endif
+
+#include "Numerics.inl"
