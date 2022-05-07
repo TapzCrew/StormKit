@@ -212,6 +212,12 @@ namespace stormkit::image {
 
     /////////////////////////////////////
     /////////////////////////////////////
+    Image::Image(const core::ExtentU &extent, Format format) noexcept : Image {} {
+        create(extent, format);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
     Image::Image(const std::filesystem::path &filepath, Image::Codec codec) noexcept : Image {} {
         loadFromFile(filepath, codec);
     }

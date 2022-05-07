@@ -61,11 +61,11 @@ export {
             System(EntityManager &manager, core::UInt32 priority, ComponentTypes &&types);
             System(EntityManager &manager, core::UInt32 priority, const ComponentTypes &types);
 
-            System(const System &);
-            auto operator=(const System &) -> System &;
+            System(const System &) = delete;
+            auto operator=(const System &) -> System & = delete;
 
-            System(System &&);
-            auto operator=(System &&) -> System &;
+            System(System &&) noexcept;
+            auto operator=(System &&) noexcept -> System &;
 
             virtual ~System();
 

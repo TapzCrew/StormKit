@@ -70,6 +70,7 @@ export {
 
             auto makeEntity() -> Entity;
             auto destroyEntity(Entity entity) -> void;
+            auto destroyAllEntities() -> void;
             auto hasEntity(Entity entity) const -> bool;
             auto hasComponent(Entity entity) const -> bool;
 
@@ -99,16 +100,16 @@ export {
             template<typename T>
             auto componentsOfType() -> std::vector<std::reference_wrapper<T>>;
 
-            template<typename T, typename... Args>
+            template<std::derived_from<System> T, typename... Args>
             auto addSystem(Args &&...args) -> T &;
 
-            template<typename T>
+            template<std::derived_from<System> T>
             auto hasSystem() const noexcept -> bool;
 
-            template<typename T>
+            template<std::derived_from<System> T>
             auto getSystem() -> T &;
 
-            template<typename T>
+            template<std::derived_from<System> T>
             auto getSystem() const -> const T &;
 
             auto step(core::Secondf delta) -> void;

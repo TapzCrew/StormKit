@@ -139,23 +139,21 @@ namespace stormkit::entities {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    template<typename T, typename... Args>
+    template<std::derived_from<System> T, typename... Args>
     auto EntityManager::addSystem(Args &&...args) -> T & {
-        auto system = std::make_unique<T>(std::forward<Args &&>(args)..., *this);
-        auto &ref   = static_cast<T &>(*system);
+        m_systems.emplace(std::make_unique<T>(std::forward<Args>(args)..., *this));
 
-        getNeededEntities(ref);
-        m_systems.emplace(std::move(system));
+        auto &system = getSystem<T>();
 
-        return ref;
+        getNeededEntities(system);
+
+        return system;
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    template<typename T>
+    template<std::derived_from<System> T>
     auto EntityManager::hasSystem() const noexcept -> bool {
-        static_assert(std::is_base_of<System, T>::value, "T must be a System");
-
         for (auto &system : m_systems) {
             if (auto system_ptr = dynamic_cast<const T *>(system.get()); system_ptr != nullptr)
                 return true;
@@ -166,7 +164,7 @@ namespace stormkit::entities {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    template<typename T>
+    template<std::derived_from<System> T>
     auto EntityManager::getSystem() -> T & {
         using TPtr = T *;
 
@@ -185,7 +183,7 @@ namespace stormkit::entities {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    template<typename T>
+    template<std::derived_from<System> T>
     auto EntityManager::getSystem() const -> const T & {
         using TConstPtr = const T *;
 

@@ -1,35 +1,18 @@
-#ifdef STORMKIT_CXX20_MODULES
-import stormkit.core.types;
+#include <stormkit/core/Memory.mpp>
 
-import stormkit.log.loghandler;
+#include <stormkit/log/LogHandler.mpp>
 
-import stormkit.entities.system;
-import stormkit.entities.entitymanager;
-import stormkit.entities.component;
-#else
-    #include <stormkit/core/Memory.mpp>
-    #include <stormkit/core/Types.mpp>
+#include <stormkit/main/MainMacro.hpp>
 
-    #include <stormkit/log/LogHandler.mpp>
+#include "App.mpp"
 
-    #include <stormkit/entities/Component.mpp>
-    #include <stormkit/entities/EntityManager.mpp>
-    #include <stormkit/entities/System.mpp>
-#endif
-
-#include <cstdlib>
-
-auto main() -> int {
+auto main(const int argc, const char **argv) -> int {
     using namespace stormkit;
-    using log::operator""_module;
 
     core::setupSignalHandler();
 
     log::LogHandler::setupDefaultLogger();
 
-    auto manager = stormkit::entities::EntityManager {};
-
-    log::LogHandler::ilog("Foo"_module, "you can specify a module");
-
-    return EXIT_SUCCESS;
+    auto app = App {};
+    return app.run(argc, argv);
 }

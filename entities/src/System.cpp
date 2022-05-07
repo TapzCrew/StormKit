@@ -27,11 +27,11 @@ namespace stormkit::entities {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    System::System(System &&) = default;
+    System::System(System &&) noexcept = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto System::operator=(System &&) -> System & = default;
+    auto System::operator=(System &&) noexcept -> System & = default;
 
     /////////////////////////////////////
     /////////////////////////////////////

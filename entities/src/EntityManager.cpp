@@ -55,8 +55,17 @@ namespace stormkit::entities {
 
     /////////////////////////////////////
     /////////////////////////////////////
+    auto EntityManager::destroyAllEntities() -> void {
+        for (const auto e : m_entities) {
+            m_removed_entities.emplace(e);
+            m_message_bus->push(Message { REMOVED_ENTITY_MESSAGE_ID, { e } });
+        }
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
     auto EntityManager::hasEntity(Entity entity) const -> bool {
-        STORMKIT_EXPECTS(entity != INVALID_ENTITY);
+        if (entity == INVALID_ENTITY) return false;
 
         auto it  = m_entities.find(entity);
         auto it2 = m_added_entities.find(entity);

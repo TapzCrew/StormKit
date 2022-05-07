@@ -150,7 +150,7 @@ export {
 
             Image() noexcept;
             explicit Image(ImageData &&data) noexcept;
-            Image(core::ExtentU extent, Format format) noexcept;
+            Image(const core::ExtentU &extent, Format format) noexcept;
             Image(const std::filesystem::path &filepath, Codec codec = Codec::Autodetect) noexcept;
             Image(core::ByteConstSpan data, Codec codec = Codec::Autodetect) noexcept;
             ~Image() noexcept;
