@@ -15,6 +15,7 @@ export module stormkit.core.numerics;
 
 import <limits>;
 import <random>;
+import <numeric>;
 
 import stormkit.core.types;
 import stormkit.core.concepts;
@@ -25,16 +26,18 @@ export {
 #else
     /////////// - STL - ///////////
     #include <limits>
+    #include <numeric>
     #include <random>
 
     /////////// - StormKit::core - ///////////
     #include <stormkit/core/Concepts.mpp>
+    #include <stormkit/core/Coroutines.mpp>
     #include <stormkit/core/Format.mpp>
     #include <stormkit/core/Types.mpp>
 #endif
 
     namespace stormkit::core {
-        void seed(UInt32 seed) noexcept;
+        auto seed(UInt32 seed) noexcept -> void;
 
         template<std::floating_point T>
         [[nodiscard]] auto rand(T min, T max) noexcept -> T;
@@ -57,6 +60,15 @@ export {
         template<ArithmeticType T, ArithmeticType V>
         [[nodiscard]] constexpr auto map(V x, V in_min, V in_max, T out_min, T out_max) noexcept;
 
+        template<std::integral auto start, std::integral auto stop>
+        [[nodiscard]] constexpr auto range() noexcept
+            -> std::array<decltype(stop - start), stop - start>;
+
+        template<std::integral T>
+        [[nodiscard]] auto count(T stop) noexcept -> Generator<T>;
+
+        template<std::integral T>
+        [[nodiscard]] auto range(T start, T stop) noexcept -> Generator<T>;
     } // namespace stormkit::core
 
 #if defined(STORMKIT_CXX20_MODULES)
