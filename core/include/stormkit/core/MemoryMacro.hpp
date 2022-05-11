@@ -21,19 +21,19 @@
 
 /// \exclude
 #define DECLARE_PTR_AND_REF_TEMPLATE_(x, y)                \
-    template<y>                                            \
+    template<typename y>                                   \
     using x##OwnedPtr = std::unique_ptr<x<y>>;             \
-    template<y>                                            \
+    template<typename y>                                   \
     using x##SharedPtr = std::shared_ptr<x<y>>;            \
-    template<y>                                            \
+    template<typename y>                                   \
     using x##ConstSharedPtr = std::shared_ptr<const x<y>>; \
-    template<y>                                            \
+    template<typename y>                                   \
     using x##WeakPtr = std::weak_ptr<x<y>>;                \
-    template<y>                                            \
+    template<typename y>                                   \
     using x##ConstWeakPtr = std::weak_ptr<const x<y>>;     \
-    template<y>                                            \
+    template<typename y>                                   \
     using x##Ref = std::reference_wrapper<x<y>>;           \
-    template<y>                                            \
+    template<typename y>                                   \
     using x##ConstRef = std::reference_wrapper<const x<y>>;
 
 /// \exclude
