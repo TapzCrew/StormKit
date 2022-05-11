@@ -23,7 +23,7 @@ namespace stormkit::core::details {
             if (!(condition)) [[unlikely]] {                                              \
                 std::cerr << type " `" #condition "` failed in " << STORMKIT_CURRENT_FILE \
                           << " line " << STORMKIT_CURRENT_LINE << "\n "                   \
-                          << STORMKIT_CURRENT_FUNCTION << ": " << message << std::endl;   \
+                          << STORMKIT_CURRENT_FUNCTION << "\n\t" << message << std::endl; \
                 stormkit::core::printStacktrace();                                        \
                 std::quick_exit(EXIT_FAILURE);                                            \
             }                                                                             \

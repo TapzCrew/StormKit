@@ -64,4 +64,27 @@ namespace stormkit::core {
     constexpr auto map(V x, V in_min, V in_max, T out_min, T out_max) noexcept {
         return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
     }
+
+    template<std::integral auto start, std::integral auto stop>
+    constexpr auto range() noexcept -> std::array<decltype(stop - start), stop - start> {
+        auto output = std::array<decltype(stop - start), stop - start> {};
+
+        std::iota(std::begin(output), std::end(output), start);
+
+        return output;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<std::integral T>
+    inline auto count(T stop) noexcept -> Generator<T> {
+        return range(T { 0 }, stop);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<std::integral T>
+    inline auto range(T start, T stop) noexcept -> Generator<T> {
+        for (; start < stop; ++start) co_yield start;
+    }
 } // namespace stormkit::core
