@@ -56,17 +56,9 @@ export {
                 operator=(NamedType &&) noexcept(std::is_nothrow_move_assignable_v<UnderlyingType>)
                     -> NamedType &;
 
-            template<IsNot<T> First>
-            requires IsNot<First, NamedType<T, Tag, Skills...>>
-            constexpr NamedType(First &&first) noexcept(
-                std::is_nothrow_constructible_v<UnderlyingType, First>);
-
-            template<class First, class Second, class... Args>
-            constexpr NamedType(First &&first, Second &&second, Args &&...args) noexcept(
-                std::is_nothrow_constructible_v<UnderlyingType, First, Second, Args...>);
-
-            constexpr explicit NamedType(UnderlyingType &&type) noexcept(
-                std::is_nothrow_move_constructible_v<UnderlyingType>);
+            template<IsNot<NamedType<T, Tag, Skills...>>... Args>
+            constexpr explicit(sizeof...(Args) == 1) NamedType(Args &&...args) noexcept(
+                std::is_nothrow_constructible_v<UnderlyingType, Args...>);
 
             constexpr auto get() noexcept -> std::remove_reference_t<UnderlyingType> &;
 
@@ -236,22 +228,22 @@ export {
         struct Callable: FunctionCallable<NamedType_>, MethodCallable<NamedType_> {};
 
         template<class T>
-        struct Arithmetic: PreIncrementable<T>,
-                           PostIncrementable<T>,
-                           PreDecrementable<T>,
-                           PostDecrementable<T>,
-                           Addable<T>,
-                           Subtractable<T>,
-                           Multiplicable<T>,
-                           Divisible<T>,
-                           Modulable<T>,
-                           BitWiseInvertable<T>,
-                           BitWiseAndable<T>,
-                           BitWiseOrable<T>,
-                           BitWiseXorable<T>,
-                           BitWiseLeftShiftable<T>,
-                           BitWiseRightShiftable<T>,
-                           Comparable<T> {};
+        struct ArithmeticLike: PreIncrementable<T>,
+                               PostIncrementable<T>,
+                               PreDecrementable<T>,
+                               PostDecrementable<T>,
+                               Addable<T>,
+                               Subtractable<T>,
+                               Multiplicable<T>,
+                               Divisible<T>,
+                               Modulable<T>,
+                               BitWiseInvertable<T>,
+                               BitWiseAndable<T>,
+                               BitWiseOrable<T>,
+                               BitWiseXorable<T>,
+                               BitWiseLeftShiftable<T>,
+                               BitWiseRightShiftable<T>,
+                               Comparable<T> {};
     } // namespace stormkit::core
 
     template<stormkit::core::NamedTypeType T>

@@ -107,15 +107,6 @@ export {
                            MethodCallable<T>,
                            Dereferencable<T> {};
 
-        template<class T>
-        struct ArithmeticLike: Addable<T>,
-                               Subtractable<T>,
-                               Multiplicable<T>,
-                               Divisible<T>,
-                               Modulable<T>,
-                               Comparable<T>,
-                               Dereferencable<T> {};
-
         /// \group vector-types Math vector types.
         ///
         /// Aliases to `glm::vec*` types.
