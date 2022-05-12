@@ -10,16 +10,13 @@ module;
 // clang-format off
 export module stormkit.core.coroutines;
 
-/////////// - StormKit::core - ///////////
-import stormkit.core.concepts;
-
 // clang-format on
 export {
 #else
     /////////// - STL - ///////////
+    #include <array>
     #include <coroutine>
     #include <exception>
-    #include <iterator>
     #include <utility>
 
     #if __has_include(<generator>)
@@ -30,98 +27,30 @@ export {
         #include <iterator>
     #endif
 
+    #include <stormkit/core/AsCast.mpp>
+    #include <stormkit/core/Concepts.mpp>
 #endif
 
-#if __has_include(<generator>)
     namespace stormkit::core {
+#if __has_include(<generator>)
         template<typename T>
         using Generator = std::generator<T>;
-    }
 #elif __has_include(<experimental/generator>) && !defined(__clang__)
-namespace stormkit::core {
     template<typename T>
     using Generator = std::experimental::generator<T>;
-}
 #else
 
-namespace stormkit::core {
     template<typename T>
     class Generator;
 
     namespace details {
         template<typename T>
-        class GeneratorPromise {
-          public:
-            using value_type     = std::remove_reference_t<T>;
-            using reference_type = std::conditional_t<std::is_reference_v<T>, T, T &>;
-            using pointer_type   = std::conditional_t<std::is_pointer_v<T>, T, T *>;
-
-            auto get_return_object() noexcept -> Generator<T>;
-
-            constexpr auto initial_suspend() const noexcept -> std::suspend_always;
-            constexpr auto final_suspend() const noexcept -> std::suspend_always;
-
-            template<typename U = T, std::enable_if_t<!std::is_rvalue_reference_v<U>, int> = 0>
-            auto yield_value(std::remove_reference_t<T> &value) noexcept -> std::suspend_always;
-
-            auto yield_value(std::remove_reference_t<T> &&value) noexcept -> std::suspend_always;
-
-            auto unhandled_exception() noexcept -> void;
-
-            auto return_void() const noexcept -> void;
-            auto value() const noexcept -> reference_type;
-
-            template<typename U>
-            std::suspend_never await_transform(U &&value) = delete;
-
-            auto rethrow_if_exception() -> void;
-
-          private:
-            pointer_type m_value;
-            std::exception_ptr m_exception;
-        };
-
-        struct GeneratorSentinel {};
+        class GeneratorPromise;
 
         template<typename T>
-        class GeneratorIterator {
-          public:
-            using iterator_category = std::input_iterator_tag;
+        class GeneratorIterator;
 
-            using difference_type = std::ptrdiff_t;
-            using value_type      = typename GeneratorPromise<T>::value_type;
-            using reference       = typename GeneratorPromise<T>::reference_type;
-            using pointer         = typename GeneratorPromise<T>::pointer_type;
-
-            using CoroutineHandle = std::coroutine_handle<GeneratorPromise<T>>;
-
-            GeneratorIterator() noexcept;
-            explicit GeneratorIterator(CoroutineHandle coroutine) noexcept;
-            ~GeneratorIterator() noexcept;
-
-            GeneratorIterator(const GeneratorIterator &) noexcept;
-            auto operator=(const GeneratorIterator &) noexcept -> GeneratorIterator &;
-
-            GeneratorIterator(GeneratorIterator &&) noexcept;
-            auto operator=(GeneratorIterator &&) noexcept -> GeneratorIterator &;
-
-            friend auto operator==(const GeneratorIterator &, GeneratorSentinel) noexcept -> bool;
-            friend auto operator!=(const GeneratorIterator &, GeneratorSentinel) noexcept -> bool;
-            friend auto operator==(GeneratorSentinel, const GeneratorIterator &) noexcept -> bool;
-            friend auto operator!=(GeneratorSentinel, const GeneratorIterator &) noexcept -> bool;
-
-            auto operator++() -> GeneratorIterator &;
-
-            auto operator++(int) -> void;
-
-            auto next() -> void;
-
-            auto operator*() const noexcept -> reference;
-            auto operator->() const noexcept -> pointer;
-
-          private:
-            CoroutineHandle m_coroutine = nullptr;
-        };
+        struct GeneratorSentinel;
     } // namespace details
 
     template<typename T>
@@ -151,16 +80,22 @@ namespace stormkit::core {
         CoroutineHandle m_coroutine;
     };
 
-    template<typename Func, typename T>
-    auto fmap(Func &&func, Generator<T> source) noexcept(noexcept(func()))
-        -> Generator<std::invoke_result_t<Func &, typename Generator<T>::iterator::reference>>;
-} // namespace stormkit::core
 #endif
+
+        template<typename Func, typename T>
+        auto fmap(Func &&func, Generator<T> source) noexcept(noexcept(func()))
+            -> Generator<std::invoke_result_t<Func &, typename Generator<T>::iterator::reference>>;
+
+        template<std::convertible_to<std::size_t>... Args>
+        auto generateIndices(Args... args) -> Generator<std::array<std::size_t, sizeof...(Args)>>;
+
+        template<std::ranges::range... Args>
+        auto generateIndices(const Args &...args)
+            -> Generator<std::array<std::size_t, sizeof...(Args)>>;
+    } // namespace stormkit::core
 
 #if defined(STORMKIT_CXX20_MODULES)
 }
 #endif
 
-#if !__has_include(<generator>) && !(__has_include(<experimental/generator>) && !defined(__clang__))
-    #include "Coroutines.inl"
-#endif
+#include "Coroutines.inl"
