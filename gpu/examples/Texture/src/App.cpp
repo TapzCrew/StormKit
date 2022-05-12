@@ -86,7 +86,7 @@ auto App::run([[maybe_unused]] const int argc, [[maybe_unused]] const char **arg
     return EXIT_SUCCESS;
 }
 
-void App::doInitWindow() {
+auto App::doInitWindow() -> void {
     // First we create the wsi
     const auto window_style = wsi::WindowStyle::All;
 
@@ -280,7 +280,7 @@ auto App::doInitPerFrameObjects() -> void {
     auto vertex_buffers = core::makeConstObserverStaticArray(m_vertex_buffer);
     auto vertex_offsets = std::array { core::UInt64 { 0 } };
 
-    for (auto i = 0u; i < buffering_count; ++i) {
+    for (auto i : core::range(buffering_count)) {
         const auto &image_view = m_surface_views[i];
         auto attachments       = core::makeConstRefArray(image_view);
 

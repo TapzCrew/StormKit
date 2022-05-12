@@ -200,7 +200,7 @@ auto Renderer::doInitMeshRenderObjects() -> void {
     m_board.pipeline->setRenderPass(*m_render_pass);
     m_board.pipeline->bake();
 
-    for (auto i = 0; i < BOARD_BUFFERING_COUNT; ++i) {
+    for (auto i : core::range(BOARD_BUFFERING_COUNT)) {
         auto &img = m_board.images.emplace_back(*m_device,
                                                 gpu::Image::CreateInfo {
                                                     .extent = { BOARD_SIZE, BOARD_SIZE } });
@@ -231,7 +231,7 @@ auto Renderer::doInitPerFrameObjects() -> void {
     m_framebuffers.clear();
     m_framebuffers.reserve(buffering_count);
 
-    for (auto i = 0u; i < buffering_count; ++i) {
+    for (auto i : core::range(buffering_count)) {
         const auto &image_view = m_surface_views[i];
         auto attachments       = core::makeConstRefArray(image_view);
 

@@ -54,7 +54,7 @@ auto App::run([[maybe_unused]] const int argc, [[maybe_unused]] const char **arg
 
     m_update_system = &m_entities.addSystem<UpdateBoardSystem>(m_board, *m_renderer);
 
-    for (auto i = 0; i < m_board.extent().width * m_board.extent().height; ++i) {
+    for (auto i : core::range(m_board.extent().width * m_board.extent().height)) {
         auto pixel = m_board.pixel(i);
         pixel[0]   = 0_b;
         pixel[1]   = 0_b;
@@ -108,7 +108,7 @@ auto App::handleKeyboard(const stormkit::wsi::KeyReleasedEventData &event) -> vo
         }
         break;
         case wsi::Key::R:
-            for (auto i = 0; i < m_board.extent().width * m_board.extent().height; ++i) {
+            for (auto i : core::range(m_board.extent().width * m_board.extent().height)) {
                 auto pixel = m_board.pixel(i);
                 pixel[0]   = 0_b;
                 pixel[1]   = 0_b;
