@@ -172,7 +172,7 @@ namespace stormkit::gpu {
             case Buffering::Swapchain: m_buffering_count = m_image_count; break;
         }
 
-        for (auto i = 0u; i < m_buffering_count; ++i) {
+        for (auto i : core::range(m_buffering_count)) {
             m_image_availables.emplace_back(device.createSemaphore());
             m_render_finisheds.emplace_back(device.createSemaphore());
             m_in_flight_fences.emplace_back(device.createFence(true));

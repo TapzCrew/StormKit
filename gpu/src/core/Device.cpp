@@ -614,7 +614,7 @@ namespace stormkit::gpu {
 
         auto buffers = std::vector<Buffer> {};
         buffers.reserve(count);
-        for (auto i = 0u; i < count; ++i) buffers.emplace_back(createBuffer(info));
+        for (auto i : core::range(count)) buffers.emplace_back(createBuffer(info));
 
         return buffers;
     }
@@ -628,7 +628,7 @@ namespace stormkit::gpu {
         auto buffers = std::vector<BufferOwnedPtr> {};
         buffers.reserve(count);
 
-        for (auto i = 0u; i < count; ++i) buffers.emplace_back(allocateBuffer(info));
+        for (auto i : core::range(count)) buffers.emplace_back(allocateBuffer(info));
 
         return buffers;
     }
@@ -642,7 +642,7 @@ namespace stormkit::gpu {
         auto buffers = std::vector<BufferSharedPtr> {};
         buffers.reserve(count);
 
-        for (auto i = 0u; i < count; ++i) buffers.emplace_back(allocateRefCountedBuffer(info));
+        for (auto i : core::range(count)) buffers.emplace_back(allocateRefCountedBuffer(info));
 
         return buffers;
     }

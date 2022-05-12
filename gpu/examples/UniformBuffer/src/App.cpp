@@ -95,7 +95,7 @@ auto App::run([[maybe_unused]] const int argc, [[maybe_unused]] const char **arg
     return EXIT_SUCCESS;
 }
 
-void App::doInitWindow() {
+auto App::doInitWindow() -> void {
     // First we create the wsi
     const auto window_style = wsi::WindowStyle::All;
 
@@ -254,7 +254,7 @@ auto App::doInitMeshRenderObjects() -> void {
     cmb.copyBuffer(staging_buffer, *m_camera_buffer, CAMERA_BUFFER_SIZE, MESH_VERTEX_BUFFER_SIZE);
 
     m_model_staging_buffer = m_device->allocateStagingBuffer(MODEL_BUFFER_SIZE * buffering_count);
-    for (auto i = 0; i < buffering_count; ++i)
+    for (auto i : core::range(buffering_count))
         m_model_staging_buffer->upload<Transform>({ &m_model, 1 }, i * MODEL_BUFFER_SIZE);
     m_model_staging_buffer->flush(0, MODEL_BUFFER_SIZE * buffering_count);
 
@@ -328,7 +328,7 @@ auto App::doInitPerFrameObjects() -> void {
     const auto clear_values = core::makeStaticArray(gpu::ClearValue { gpu::ClearColor {} },
                                                     gpu::ClearValue { gpu::ClearDepthStencil {} });
 
-    for (auto i = 0u; i < buffering_count; ++i) {
+    for (auto i : core::range(buffering_count)) {
         const auto &image_view = m_surface_views[i];
 
         const auto &depth =
