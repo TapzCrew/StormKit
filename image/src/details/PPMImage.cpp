@@ -13,6 +13,8 @@ import <ranges>;
     /////////// - STL - ///////////
     #include <ranges>
 
+    #include <stormkit/core/Coroutines.mpp>
+
     /////////// - StormKit::log - ///////////
     #include "PPMImage.mpp"
 #endif
@@ -68,14 +70,13 @@ namespace stormkit::image::details {
             auto result =
                 core::format("P3\n{}\n{}\n255\n"sv, data.extent.width, data.extent.height);
 
-            for (auto i = 0u; i < output_image.extent().height; ++i) {
-                for (auto j = 0u; j < output_image.extent().width; ++j) {
-                    auto pixel = output_image.pixel(i * output_image.extent().width + j);
+            const auto &extent = output_image.extent();
+            for (auto [i, j] : core::generateIndices(extent.height, extent.width)) {
+                auto pixel = output_image.pixel(i * output_image.extent().width + j);
 
-                    result += core::format("{} {} {}\n"sv, pixel[0], pixel[1], pixel[2]);
-                }
+                result += core::format("{} {} {}\n"sv, pixel[0], pixel[1], pixel[2]);
 
-                result += '\n';
+                if (j == extent.width) result += '\n';
             }
 
             output.reserve(std::size(result));

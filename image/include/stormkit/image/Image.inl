@@ -135,7 +135,7 @@ namespace stormkit::image {
     /////////////////////////////////////
     inline auto Image::size(core::UInt32 layer, core::UInt32 face) const noexcept -> core::USize {
         auto _size = core::USize { 0u };
-        for (auto i = 0u; i < m_data.mip_levels; ++i) _size += size(layer, face, i);
+        for (auto i : core::range(m_data.mip_levels)) _size += size(layer, face, i);
 
         return _size;
     }
@@ -144,7 +144,7 @@ namespace stormkit::image {
     /////////////////////////////////////
     inline auto Image::size(core::UInt32 layer) const noexcept -> core::USize {
         auto _size = core::USize { 0u };
-        for (auto i = 0u; i < m_data.faces; ++i) _size += size(layer, i);
+        for (auto i : core::range(m_data.faces)) _size += size(layer, i);
 
         return _size;
     }
@@ -161,11 +161,11 @@ namespace stormkit::image {
 
         auto offset = 0u;
 
-        for (auto i = 0u; i < layer; ++i) offset += size(i);
+        for (auto i : core::range(layer)) offset += size(i);
 
-        for (auto j = 0u; j < face; ++j) offset += size(layer, j);
+        for (auto j : core::range(face)) offset += size(layer, j);
 
-        for (auto k = 0u; k < level; ++k) offset += size(layer, face, k);
+        for (auto k : core::range(level)) offset += size(layer, face, k);
 
         return { std::data(m_data.data) + offset, mip_size };
     }
@@ -183,11 +183,11 @@ namespace stormkit::image {
 
         auto offset = 0u;
 
-        for (auto i = 0u; i < layer; ++i) offset += size(i);
+        for (auto i : core::range(layer)) offset += size(i);
 
-        for (auto j = 0u; j < face; ++j) offset += size(layer, j);
+        for (auto j : core::range(face)) offset += size(layer, j);
 
-        for (auto k = 0u; k < level; ++k) offset += size(layer, face, k);
+        for (auto k : core::range(level)) offset += size(layer, face, k);
 
         return { std::data(m_data.data) + offset, mip_size };
     }

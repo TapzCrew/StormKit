@@ -29,6 +29,7 @@ import stormkit.image.details.tgaimage;
     #include <string>
 
     /////////// - StormKit::core - ///////////
+    #include <stormkit/core/Coroutines.mpp>
     #include <stormkit/core/Format.mpp>
     #include <stormkit/core/Numerics.mpp>
     #include <stormkit/core/Strings.mpp>
@@ -139,7 +140,7 @@ namespace stormkit::image {
                 const auto input_it = reinterpret_cast<const core::UInt8 *>(std::data(data));
                 auto output_it      = reinterpret_cast<core::UInt16 *>(std::data(data));
 
-                for (auto i = 0u; i < std::size(bytes); ++i)
+                for (auto i : core::range(std::size(bytes)))
                     output_it[i] = core::map<core::UInt16>(input_it[i],
                                                            BYTE_1_MIN,
                                                            BYTE_1_MAX,
@@ -149,7 +150,7 @@ namespace stormkit::image {
                 const auto input_it = reinterpret_cast<const core::UInt8 *>(std::data(data));
                 auto output_it      = reinterpret_cast<core::UInt32 *>(std::data(data));
 
-                for (auto i = 0u; i < std::size(bytes); ++i)
+                for (auto i : core::range(std::size(bytes)))
                     output_it[i] = core::map<core::UInt32>(input_it[i],
                                                            BYTE_1_MIN,
                                                            BYTE_1_MAX,
@@ -159,7 +160,7 @@ namespace stormkit::image {
                 const auto input_it = reinterpret_cast<const core::UInt16 *>(std::data(data));
                 auto output_it      = reinterpret_cast<core::UInt8 *>(std::data(data));
 
-                for (auto i = 0u; i < std::size(bytes); ++i)
+                for (auto i : core::range(std::size(bytes)))
                     output_it[i] = core::map<core::UInt8>(input_it[i],
                                                           BYTE_2_MIN,
                                                           BYTE_2_MAX,
@@ -169,7 +170,7 @@ namespace stormkit::image {
                 const auto input_it = reinterpret_cast<const core::UInt16 *>(std::data(data));
                 auto output_it      = reinterpret_cast<core::UInt32 *>(std::data(data));
 
-                for (auto i = 0u; i < std::size(bytes); ++i)
+                for (auto i : core::range(std::size(bytes)))
                     output_it[i] = core::map<core::UInt32>(input_it[i],
                                                            BYTE_2_MIN,
                                                            BYTE_2_MAX,
@@ -179,7 +180,7 @@ namespace stormkit::image {
                 const auto input_it = reinterpret_cast<const core::UInt32 *>(std::data(data));
                 auto output_it      = reinterpret_cast<core::UInt8 *>(std::data(data));
 
-                for (auto i = 0u; i < std::size(bytes); ++i)
+                for (auto i : core::range(std::size(bytes)))
                     output_it[i] = core::map<core::UInt8>(input_it[i],
                                                           BYTE_4_MIN,
                                                           BYTE_4_MAX,
@@ -189,7 +190,7 @@ namespace stormkit::image {
                 const auto input_it = reinterpret_cast<const core::UInt32 *>(std::data(data));
                 auto output_it      = reinterpret_cast<core::UInt16 *>(std::data(data));
 
-                for (auto i = 0u; i < std::size(bytes); ++i)
+                for (auto i : core::range(std::size(bytes)))
                     output_it[i] = core::map<core::UInt16>(input_it[i],
                                                            BYTE_4_MIN,
                                                            BYTE_4_MAX,
@@ -219,13 +220,13 @@ namespace stormkit::image {
     /////////////////////////////////////
     /////////////////////////////////////
     Image::Image(const std::filesystem::path &filepath, Image::Codec codec) noexcept : Image {} {
-        loadFromFile(filepath, codec);
+        [[maybe_unused]] const auto _ = loadFromFile(filepath, codec);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     Image::Image(core::ByteConstSpan data, Image::Codec codec) noexcept : Image {} {
-        loadFromMemory(data, codec);
+        [[maybe_unused]] const auto _ = loadFromMemory(data, codec);
     }
 
     ////////////////////////////////////////
@@ -739,21 +740,16 @@ namespace stormkit::image {
 
         auto image = Image { std::move(image_data) };
 
-        for (auto layer = 0u; layer < image.layers(); ++layer) {
-            for (auto face = 0u; face < image.faces(); ++face) {
-                for (auto level = 0u; level < image.layers(); ++level) {
-                    for (auto i = 0u; i < pixel_count; ++i) {
-                        const auto from_image = details::map(pixel(i, layer, face, level),
-                                                             m_data.bytes_per_channel,
-                                                             image.bytesPerChannel());
-                        auto to_image         = image.pixel(i, layer, face, level);
+        for (auto [layer, face, level, i] :
+             core::generateIndices(image.layers(), image.faces(), image.layers(), pixel_count)) {
+            const auto from_image = details::map(pixel(i, layer, face, level),
+                                                 m_data.bytes_per_channel,
+                                                 image.bytesPerChannel());
+            auto to_image         = image.pixel(i, layer, face, level);
 
-                        std::ranges::copy_n(std::ranges::begin(from_image),
-                                            std::min(m_data.channel_count, image.channelCount()),
-                                            std::ranges::begin(to_image));
-                    }
-                }
-            }
+            std::ranges::copy_n(std::ranges::begin(from_image),
+                                std::min(m_data.channel_count, image.channelCount()),
+                                std::ranges::begin(to_image));
         }
 
         return image;
@@ -780,23 +776,18 @@ namespace stormkit::image {
 
         auto image = Image { std::move(image_data) };
 
-        for (auto layer = 0u; layer < m_data.layers; ++layer)
-            for (auto face = 0u; face < m_data.faces; ++face)
-                for (auto mip = 0u; mip < m_data.mip_levels; ++mip)
-                    for (auto x = 0u; x < m_data.extent.width; ++x) {
-                        const auto inv_x = m_data.extent.width - x - 1u;
-                        for (auto y = 0u; y < m_data.extent.height; ++y)
-                            for (auto z = 0u; z < m_data.extent.depth; ++z) {
-                                auto output =
-                                    image.pixel(core::Position3u { inv_x, y, z }, layer, face, mip);
+        for (auto [layer, face, mip, x, y, z] : core::generateIndices(m_data.layers,
+                                                                      m_data.faces,
+                                                                      m_data.mip_levels,
+                                                                      m_data.extent.width,
+                                                                      m_data.extent.height,
+                                                                      m_data.extent.depth)) {
+            const auto inv_x = m_data.extent.width - x - 1u;
+            auto output      = image.pixel({ inv_x, y, z }, layer, face, mip);
+            const auto data  = pixel({ x, y, z }, layer, face, mip);
 
-                                std::ranges::copy(pixel(core::Position3u { x, y, z },
-                                                        layer,
-                                                        face,
-                                                        mip),
-                                                  std::ranges::begin(output));
-                            }
-                    }
+            std::ranges::copy(pixel({ x, y, z }, layer, face, mip), std::ranges::begin(output));
+        }
 
         return image;
     }
@@ -816,21 +807,17 @@ namespace stormkit::image {
 
         auto image = Image { std::move(image_data) };
 
-        for (auto layer = 0u; layer < m_data.layers; ++layer)
-            for (auto face = 0u; face < m_data.faces; ++face)
-                for (auto mip = 0u; mip < m_data.mip_levels; ++mip)
-                    for (auto x = 0u; x < m_data.extent.width; ++x)
-                        for (auto y = 0u; y < m_data.extent.height; ++y) {
-                            const auto inv_y = m_data.extent.height - 1u - y;
-                            for (auto z = 0u; z < m_data.extent.depth; ++z) {
-                                auto output =
-                                    image.pixel(core::Position3u { x, inv_y, z }, layer, face, mip);
-                                const auto data =
-                                    pixel(core::Position3u { x, y, z }, layer, face, mip);
+        for (auto [layer, face, mip, x, y, z] : core::generateIndices(m_data.layers,
+                                                                      m_data.faces,
+                                                                      m_data.mip_levels,
+                                                                      m_data.extent.width,
+                                                                      m_data.extent.height,
+                                                                      m_data.extent.depth)) {
+            const auto inv_y = m_data.extent.height - 1u - y;
+            auto output      = image.pixel({ x, inv_y, z }, layer, face, mip);
 
-                                std::ranges::copy(data, std::ranges::begin(output));
-                            }
-                        }
+            std::ranges::copy(pixel({ x, y, z }, layer, face, mip), std::ranges::begin(output));
+        }
 
         return image;
     }
@@ -849,23 +836,17 @@ namespace stormkit::image {
 
         auto image = Image { std::move(image_data) };
 
-        for (auto layer = 0u; layer < m_data.layers; ++layer)
-            for (auto face = 0u; face < m_data.faces; ++face)
-                for (auto mip = 0u; mip < m_data.mip_levels; ++mip)
-                    for (auto x = 0u; x < m_data.extent.width; ++x)
-                        for (auto y = 0u; y < m_data.extent.height; ++y)
-                            for (auto z = 0u; z < m_data.extent.depth; ++z) {
-                                const auto inv_z = m_data.extent.depth - 1u - z;
+        for (auto [layer, face, mip, x, y, z] : core::generateIndices(m_data.layers,
+                                                                      m_data.faces,
+                                                                      m_data.mip_levels,
+                                                                      m_data.extent.width,
+                                                                      m_data.extent.height,
+                                                                      m_data.extent.depth)) {
+            const auto inv_z = m_data.extent.depth - 1u - z;
+            auto output      = image.pixel({ x, z, inv_z }, layer, face, mip);
 
-                                auto output =
-                                    image.pixel(core::Position3u { x, z, inv_z }, layer, face, mip);
-
-                                std::ranges::copy(pixel(core::Position3u { x, y, z },
-                                                        layer,
-                                                        face,
-                                                        mip),
-                                                  std::ranges::begin(output));
-                            }
+            std::ranges::copy(pixel({ x, y, z }, layer, face, mip), std::ranges::begin(output));
+        }
 
         return image;
     }
