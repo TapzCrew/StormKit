@@ -201,7 +201,7 @@ auto macOSWindow::getDesktopModes() -> std::vector<VideoSettings> {
 
         video_settings.reserve(mode_count);
 
-        for (auto i = CFIndex { 0 }; i < mode_count; ++i) {
+        for (auto i : core::range<CFIndex>(mode_count)) {
             auto mode = (CGDisplayModeRef)[modes objectAtIndex:i];
 
             const auto video_setting = storm::window::VideoSettings {
