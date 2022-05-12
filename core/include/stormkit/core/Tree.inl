@@ -9,7 +9,7 @@ namespace stormkit::core {
     Tree<TreeNodeClass>::Tree() {
         m_tree.resize(DEFAULT_PREALLOCATED_TREE_SIZE);
 
-        for (auto i = TreeNodeIndexType { 0u }; i < (std::size(m_tree) - 1u); ++i)
+        for (auto i : range<TreeNodeIndexType>(std::size(m_tree) - 1u))
             m_tree[i].setNextSibling(i + 1u);
     }
 
@@ -52,7 +52,7 @@ namespace stormkit::core {
             // generate a new chain of free objects, with the last one pointing to
             // ~0
             m_tree[m_first_free_index].setNextSibling(first_new);
-            for (auto i = first_new; i < (new_size - 1u); ++i) m_tree[i].setNextSibling(i + 1u);
+            for (auto i : range(first_new, new_size - 1u)) m_tree[i].setNextSibling(i + 1u);
         }
 
         auto index         = m_first_free_index;
@@ -259,7 +259,7 @@ namespace stormkit::core {
                << "    bgcolor = black\n\n"
                << "    node [shape=box, fontname=\"helvetica\", fontsize=12];\n\n";
 
-        for (auto i = 0u; i < m_first_free_index; ++i) {
+        for (auto i : range(m_first_free_index)) {
             const auto name  = operator[](i).name();
             const auto dirty = bool(operator[](i).dirtyBits());
 
@@ -268,7 +268,7 @@ namespace stormkit::core {
                    << colorize_node(name) << "\"];\n";
         }
 
-        for (auto i = 0u; i < m_first_free_index; ++i) {
+        for (auto i : range(m_first_free_index)) {
             if (operator[](i).firstChild() == TreeNodeClass::INVALID_INDEX) continue;
 
             for (auto current = operator[](i).firstChild(); current != TreeNodeClass::INVALID_INDEX;
@@ -297,7 +297,7 @@ namespace stormkit::core {
                << "    bgcolor = black\n\n"
                << "    node [shape=box, fontname=\"helvetica\", fontsize=12];\n\n";
 
-        for (auto i = 0u; i < m_first_free_index; ++i) {
+        for (auto i : range(m_first_free_index)) {
             const auto name  = operator[](i).name();
             const auto dirty = bool(operator[](i).dirtyBits());
             if (i != highlight)
@@ -311,7 +311,7 @@ namespace stormkit::core {
                        << "\", style=filled,color=\"" << colorize_node(name) << "\"];\n";
         }
 
-        for (auto i = 0u; i < m_first_free_index; ++i) {
+        for (auto i : range(m_first_free_index)) {
             if (operator[](i).firstChild() == TreeNodeClass::INVALID_INDEX) continue;
 
             for (auto current = operator[](i).firstChild(); current != TreeNodeClass::INVALID_INDEX;
