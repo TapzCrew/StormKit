@@ -187,3 +187,4 @@ package("StormKit")
     end
 
     includes("gpu/xmake.lua")
+    includes("engine/xmake.lua")
