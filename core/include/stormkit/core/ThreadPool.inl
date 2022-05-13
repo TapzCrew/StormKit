@@ -9,7 +9,7 @@
 namespace stormkit::core {
     ////////////////////////////////////////
     ////////////////////////////////////////
-    auto ThreadPool::workerCount() const noexcept -> core::USize { return m_worker_count; }
+    inline auto ThreadPool::workerCount() const noexcept -> core::USize { return m_worker_count; }
 
     ////////////////////////////////////////
     ////////////////////////////////////////
