@@ -13,7 +13,7 @@ target("stormkit-core")
     add_files("src/*.cpp")
 
     if is_plat("linux") then       add_files("src/posix/*.cpp")
-    elseif is_plat("windows") then add_files("src/win32/DynamicLoader.cpp") end
+    elseif is_plat("windows") then add_files("src/win32/*.cpp") end
 
     if has_config("enable_cxx20_modules") then
         add_files("include/**.mpp")
