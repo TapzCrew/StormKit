@@ -31,8 +31,6 @@ export {
 
     /////////// - StormKit::core - ///////////
     #include <stormkit/core/Concepts.mpp>
-    #include <stormkit/core/Coroutines.mpp>
-    #include <stormkit/core/Format.mpp>
     #include <stormkit/core/Types.mpp>
 #endif
 
@@ -64,11 +62,12 @@ export {
         [[nodiscard]] constexpr auto range() noexcept
             -> std::array<decltype(stop - start), stop - start>;
 
-        template<std::integral T>
-        [[nodiscard]] auto count(T stop) noexcept -> Generator<T>;
+        template<std::integral T, std::convertible_to<T> U = T>
+        [[nodiscard]] constexpr auto range(T stop, U increment = 1) noexcept -> std::vector<T>;
 
-        template<std::integral T>
-        [[nodiscard]] auto range(T start, T stop) noexcept -> Generator<T>;
+        template<std::integral T, std::convertible_to<T> U = T>
+        [[nodiscard]] constexpr auto range(T start, T stop, U increment = 1) noexcept
+            -> std::vector<T>;
     } // namespace stormkit::core
 
 #if defined(STORMKIT_CXX20_MODULES)

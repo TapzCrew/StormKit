@@ -114,7 +114,7 @@ export {
 
             auto step(core::Secondf delta) -> void;
 
-            auto numberOfEntities() const noexcept -> core::USize;
+            auto entityCount() const noexcept -> core::USize;
 
             // void commit(Entity e);
 

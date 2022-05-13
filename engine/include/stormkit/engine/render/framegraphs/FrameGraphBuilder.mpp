@@ -1,0 +1,79 @@
+// Copyright (C) 2022 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+module;
+
+#pragma once
+
+#include <stormkit/core/AssertMacro.hpp>
+#include <stormkit/core/MemoryMacro.hpp>
+#include <stormkit/core/PlatformMacro.hpp>
+
+#if defined(STORMKIT_CXX20_MODULES)
+// clang-format off
+export module stormkit.engine.render.renderer;
+
+/////////// - STL - ///////////
+import <vector>;
+
+/////////// - StormKit::render - ///////////
+import stormkit.gpu.core.vulkan;
+// clang-format on
+export {
+#else
+    /////////// - StormKit::core - ///////////
+    #include <stormkit/core/Format.mpp>
+    #include <stormkit/core/Memory.mpp>
+    #include <stormkit/core/Types.mpp>
+
+    #include <stormkit/engine/render/framegraphs/Fwd.hpp>
+    #include <stormkit/engine/render/framegraphs/GraphTask.mpp>
+#endif
+
+    namespace stormkit::engine {
+        class STORMKIT_PUBLIC FrameGraphBuilder {
+          public:
+            explicit FrameGraphBuilder();
+            ~FrameGraphBuilder();
+
+            FrameGraphBuilder(const FrameGraphBuilder &) = delete;
+            auto operator=(const FrameGraphBuilder &) -> FrameGraphBuilder & = delete;
+
+            FrameGraphBuilder(FrameGraphBuilder &&) noexcept;
+            auto operator=(FrameGraphBuilder &&) noexcept -> FrameGraphBuilder &;
+
+            template<typename TaskData, typename... Args>
+            auto addTask(std::string name, Args &&...args) -> GraphTask<TaskData> &;
+
+            auto bake() -> BakedFrameGraphOwnedPtr;
+
+            auto hasTask(GraphID id) const noexcept -> bool;
+            auto hasTask(std::string_view name) const noexcept -> bool;
+
+            template<typename TaskData>
+            auto getTask(std::string_view name) noexcept -> GraphTask<TaskData> &;
+            template<typename TaskData>
+            auto getTask(std::string_view name) const noexcept -> const GraphTask<TaskData> &;
+
+            template<typename TaskData>
+            auto getTask(GraphID id) noexcept -> GraphTask<TaskData> &;
+            template<typename TaskData>
+            auto getTask(GraphID id) const noexcept -> const GraphTask<TaskData> &;
+
+            auto getTask(std::string_view name) noexcept -> GraphTaskBase &;
+            auto getTask(std::string_view name) const noexcept -> const GraphTaskBase &;
+            auto getTask(GraphID id) noexcept -> GraphTaskBase &;
+            auto getTask(GraphID id) const noexcept -> const GraphTaskBase &;
+
+          private:
+            auto prepareTask(GraphTaskBase &task) noexcept -> void;
+
+            std::vector<std::unique_ptr<GraphTaskBase>> m_tasks;
+            std::vector<std::unique_ptr<GraphResourceBase>> m_resources;
+
+            friend class GraphTaskBuilder;
+        };
+    } // namespace stormkit::engine
+
+#include "FrameGraphBuilder.inl"

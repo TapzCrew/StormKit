@@ -47,10 +47,9 @@ auto UpdateBoardSystem::update(stormkit::core::Secondf delta) -> void {
 
     constexpr auto CELL_COUNT = BOARD_SIZE * BOARD_SIZE;
 
-    auto cell_status = std::vector<Cell> {};
-    cell_status.reserve(CELL_COUNT);
-    for (auto i = 0u; i < CELL_COUNT; ++i)
-        cell_status.emplace_back(Cell { i % BOARD_SIZE, i / BOARD_SIZE });
+    auto cell_status = core::transform(core::range(CELL_COUNT), [](const auto i) {
+        return Cell { i % BOARD_SIZE, i / BOARD_SIZE };
+    });
 
     for (const auto e : m_entities) {
         const auto &position = m_manager->getComponent<PositionComponent>(e);
@@ -146,7 +145,7 @@ auto UpdateBoardSystem::postUpdate() -> void {
         auto &board        = *m_board;
         const auto &extent = board.extent();
 
-        for (auto i = 0; i < extent.width * extent.height; ++i) {
+        for (auto i : core::range(extent.width * extent.height)) {
             auto pixel = board.pixel(i);
             pixel[0]   = 0_b;
             pixel[1]   = 0_b;

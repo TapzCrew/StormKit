@@ -549,7 +549,7 @@ namespace stormkit::wsi::details::x11 {
             auto randr_output = xcb_randr_get_screen_resources_current_outputs(reply.get());
 
             video_settings.reserve(len);
-            for (auto i = 0; i < len; ++i) {
+            for (auto i : core::range(len)) {
                 auto output = OutputScoped { xcb_randr_get_output_info_reply(
                     display,
                     xcb_randr_get_output_info(display, randr_output[i], timestamp),

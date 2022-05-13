@@ -3,18 +3,20 @@
 #include "Numerics.mpp"
 
 namespace stormkit::core {
-    static std::default_random_engine generator {};
+    namespace details {
+        static std::default_random_engine generator {};
+    } // namespace details
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto seed(UInt32 seed) noexcept -> void { generator.seed(seed); }
+    inline auto seed(UInt32 seed) noexcept -> void { details::generator.seed(seed); }
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<std::floating_point T>
     auto rand(T min, T max) noexcept -> T {
         std::uniform_real_distribution<T> dis(min, max);
-        return dis(generator);
+        return dis(details::generator);
     }
 
     /////////////////////////////////////
@@ -22,7 +24,7 @@ namespace stormkit::core {
     template<std::integral T>
     auto rand(T min, T max) noexcept -> T {
         std::uniform_int_distribution<T> dis(min, max);
-        return dis(generator);
+        return dis(details::generator);
     }
 
     /////////////////////////////////////
@@ -65,6 +67,8 @@ namespace stormkit::core {
         return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
     }
 
+    /////////////////////////////////////
+    /////////////////////////////////////
     template<std::integral auto start, std::integral auto stop>
     constexpr auto range() noexcept -> std::array<decltype(stop - start), stop - start> {
         auto output = std::array<decltype(stop - start), stop - start> {};
@@ -76,15 +80,24 @@ namespace stormkit::core {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    template<std::integral T>
-    inline auto count(T stop) noexcept -> Generator<T> {
-        return range(T { 0 }, stop);
+    template<std::integral T, std::convertible_to<T> U>
+    constexpr auto range(T stop, U increment) noexcept -> std::vector<T> {
+        return range(T { 0 }, stop, increment);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    template<std::integral T>
-    inline auto range(T start, T stop) noexcept -> Generator<T> {
-        for (; start < stop; ++start) co_yield start;
+    template<std::integral T, std::convertible_to<T> U>
+    constexpr auto range(T start, T stop, U increment) noexcept -> std::vector<T> {
+        auto output = std::vector<T> {};
+        output.resize(stop - start);
+
+        auto i = 0;
+        for (auto &v : output) {
+            v = i * core::as<T>(increment);
+            ++i;
+        }
+
+        return output;
     }
 } // namespace stormkit::core

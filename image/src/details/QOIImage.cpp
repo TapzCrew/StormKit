@@ -100,7 +100,7 @@ namespace stormkit::image::details {
         auto it         = std::ranges::begin(chunks);
 
         const auto chunks_size = output_size - std::size(END_OF_FILE);
-        for (auto i = 0; i < output_size; i += channels) {
+        for (auto i : core::range(output_size, channels)) {
             const auto tag = *it;
 
             const auto position = std::distance(std::ranges::begin(chunks), it);
@@ -126,7 +126,6 @@ namespace stormkit::image::details {
                     it += 4;
                 } else {
 #define CHECK(op) (tag & 0b11000000) == static_cast<core::UInt8>(op)
-
                     if (CHECK(QOI_OPERATION::INDEX)) {
                         const auto index = tag;
 

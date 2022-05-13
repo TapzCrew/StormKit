@@ -148,7 +148,7 @@ namespace stormkit::gpu {
                                 const VkPhysicalDeviceMemoryProperties &mem_properties,
                                 [[maybe_unused]] const VkMemoryRequirements &mem_requirements)
         -> core::UInt32 {
-        for (auto i = 0u; i < mem_properties.memoryTypeCount; ++i) {
+        for (auto i : core::range(mem_properties.memoryTypeCount)) {
             if ((type_filter & (1 << i)) &&
                 (mem_properties.memoryTypes[i].propertyFlags & properties) == properties)
                 return i;

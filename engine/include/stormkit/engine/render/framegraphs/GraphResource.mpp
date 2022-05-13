@@ -1,0 +1,84 @@
+// Copyright (C) 2022 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+module;
+
+#pragma once
+
+#if defined(STORMKIT_CXX20_MODULES)
+// clang-format off
+export module stormkit.engine.render.renderer;
+
+/////////// - STL - ///////////
+import <vector>;
+
+/////////// - StormKit::render - ///////////
+import stormkit.gpu.core.vulkan;
+// clang-format on
+export {
+#else
+    /////////// - StormKit::core - ///////////
+    #include <stormkit/core/Types.mpp>
+
+    #include <stormkit/engine/render/framegraphs/Fwd.hpp>
+#endif
+
+    namespace stormkit::engine {
+        struct BufferDescription {};
+        struct ImageDescription {};
+
+        class STORMKIT_PUBLIC GraphResourceBase {
+          public:
+            GraphResourceBase(std::string name, GraphID creator);
+            ~GraphResourceBase();
+
+            GraphResourceBase(const GraphResourceBase &) = delete;
+            auto operator=(const GraphResourceBase &) -> GraphResourceBase & = delete;
+
+            GraphResourceBase(GraphResourceBase &&) noexcept;
+            auto operator=(GraphResourceBase &&) noexcept -> GraphResourceBase &;
+
+            auto id() const noexcept -> GraphID;
+            auto name() const noexcept -> std::string_view;
+            auto creator() const noexcept -> GraphID;
+            auto writers() const noexcept -> std::span<const GraphID>;
+            auto readers() const noexcept -> std::span<const GraphID>;
+            auto refCount() const noexcept -> core::USize;
+
+          private:
+            GraphID m_id;
+            std::string m_name;
+
+            GraphID m_creator;
+
+            std::vector<GraphID> m_writers;
+            std::vector<GraphID> m_readers;
+
+            core::USize m_ref_count;
+
+            friend class GraphTaskBuilder;
+        };
+
+        template<typename D>
+        class STORMKIT_PUBLIC GraphResource: public GraphResourceBase {
+          public:
+            using Description = D;
+
+            GraphResource(std::string name, GraphID id, Description &&description);
+            ~GraphResource();
+
+            GraphResource(const GraphResource &) = delete;
+            auto operator=(const GraphResource &) -> GraphResource & = delete;
+
+            GraphResource(GraphResource &&) noexcept;
+            auto operator=(GraphResource &&) noexcept -> GraphResource &;
+
+            auto description() const noexcept -> const Description &;
+
+          private:
+            Description m_description;
+        };
+    } // namespace stormkit::engine
+
+#include "GraphResource.inl"

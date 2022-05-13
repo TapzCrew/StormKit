@@ -60,7 +60,7 @@ namespace stormkit::gpu {
         auto fence          = m_device->createFence();
 
         command_buffer.begin(true);
-        for (auto i = 0u; i < m_buffering_count; ++i) {
+        for (auto i : core::range(m_buffering_count)) {
             auto &image = m_images.emplace_back(device.createImage(
                 { m_extent,
                   m_pixel_format,

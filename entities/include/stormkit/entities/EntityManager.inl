@@ -202,7 +202,7 @@ namespace stormkit::entities {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto EntityManager::numberOfEntities() const noexcept -> core::USize {
+    inline auto EntityManager::entityCount() const noexcept -> core::USize {
         return std::size(m_entities);
     }
 } // namespace stormkit::entities

@@ -179,7 +179,7 @@ namespace stormkit::image::details {
 
         auto buff_pos = std::data(image_memory);
 
-        for (auto i = 0u; i < extent.height; ++i) row_pointers[i] = &buff_pos[row_bytes * i];
+        for (auto i : core::range(extent.height)) row_pointers[i] = &buff_pos[row_bytes * i];
 
         png_read_image(png_ptr, reinterpret_cast<png_bytepp>(std::data(row_pointers)));
         png_read_end(png_ptr, info_ptr);
@@ -259,7 +259,7 @@ namespace stormkit::image::details {
         png_write_info(png_ptr, info_ptr);
 
         auto rows = std::vector<core::Byte *> { data.extent.height, nullptr };
-        for (auto i = 0u; i < data.extent.height; ++i)
+        for (auto i : core::range(data.extent.height))
             rows[i] =
                 const_cast<core::Byte *>(&data.data[i * data.extent.width * data.channel_count *
                                                     data.bytes_per_channel]); // TODO Fix this shit

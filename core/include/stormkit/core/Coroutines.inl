@@ -7,7 +7,82 @@
 /////////////////////////////////////
 /////////////////////////////////////
 namespace stormkit::core {
+#if !__has_include(<generator>) && !(__has_include(<experimental/generator>) && !defined(__clang__))
     namespace details {
+        template<typename T>
+        class GeneratorPromise {
+          public:
+            using value_type     = std::remove_reference_t<T>;
+            using reference_type = std::conditional_t<std::is_reference_v<T>, T, T &>;
+            using pointer_type   = std::conditional_t<std::is_pointer_v<T>, T, T *>;
+
+            auto get_return_object() noexcept -> Generator<T>;
+
+            constexpr auto initial_suspend() const noexcept -> std::suspend_always;
+            constexpr auto final_suspend() const noexcept -> std::suspend_always;
+
+            template<typename U = T, std::enable_if_t<!std::is_rvalue_reference_v<U>, int> = 0>
+            auto yield_value(std::remove_reference_t<T> &value) noexcept -> std::suspend_always;
+
+            auto yield_value(std::remove_reference_t<T> &&value) noexcept -> std::suspend_always;
+
+            auto unhandled_exception() noexcept -> void;
+
+            auto return_void() const noexcept -> void;
+            auto value() const noexcept -> reference_type;
+
+            template<typename U>
+            std::suspend_never await_transform(U &&value) = delete;
+
+            auto rethrow_if_exception() -> void;
+
+          private:
+            pointer_type m_value;
+            std::exception_ptr m_exception;
+        };
+
+        struct GeneratorSentinel {};
+
+        template<typename T>
+        class GeneratorIterator {
+          public:
+            using iterator_category = std::input_iterator_tag;
+
+            using difference_type = std::ptrdiff_t;
+            using value_type      = typename GeneratorPromise<T>::value_type;
+            using reference       = typename GeneratorPromise<T>::reference_type;
+            using pointer         = typename GeneratorPromise<T>::pointer_type;
+
+            using CoroutineHandle = std::coroutine_handle<GeneratorPromise<T>>;
+
+            GeneratorIterator() noexcept;
+            explicit GeneratorIterator(CoroutineHandle coroutine) noexcept;
+            ~GeneratorIterator() noexcept;
+
+            GeneratorIterator(const GeneratorIterator &) noexcept;
+            auto operator=(const GeneratorIterator &) noexcept -> GeneratorIterator &;
+
+            GeneratorIterator(GeneratorIterator &&) noexcept;
+            auto operator=(GeneratorIterator &&) noexcept -> GeneratorIterator &;
+
+            friend auto operator==(const GeneratorIterator &, GeneratorSentinel) noexcept -> bool;
+            friend auto operator!=(const GeneratorIterator &, GeneratorSentinel) noexcept -> bool;
+            friend auto operator==(GeneratorSentinel, const GeneratorIterator &) noexcept -> bool;
+            friend auto operator!=(GeneratorSentinel, const GeneratorIterator &) noexcept -> bool;
+
+            auto operator++() -> GeneratorIterator &;
+
+            auto operator++(int) -> void;
+
+            auto next() -> void;
+
+            auto operator*() const noexcept -> reference;
+            auto operator->() const noexcept -> pointer;
+
+          private:
+            CoroutineHandle m_coroutine = nullptr;
+        };
+
         template<typename T>
         auto GeneratorPromise<T>::get_return_object() noexcept -> Generator<T> {
             using CoroutineHandle = std::coroutine_handle<GeneratorPromise<T>>;
@@ -179,6 +254,7 @@ namespace stormkit::core {
         auto GeneratorIterator<T>::operator->() const noexcept -> pointer {
             return std::addressof(operator*());
         }
+
     } // namespace details
 
     /////////////////////////////////////
@@ -232,13 +308,114 @@ namespace stormkit::core {
     auto Generator<T>::end() const noexcept -> details::GeneratorSentinel {
         return {};
     }
+#endif
+
+    namespace details {
+#define FOR(a, b) for (auto a = std::size_t { 0 }; a < b; ++a)
+        /////////////////////////////////////
+        /////////////////////////////////////
+        inline auto generateIndices(std::size_t a) -> Generator<std::array<std::size_t, 1>> {
+            FOR(i, a)
+            co_yield std::array { i };
+        }
+
+        /////////////////////////////////////
+        /////////////////////////////////////
+        inline auto generateIndices(std::size_t a, std::size_t b)
+            -> Generator<std::array<std::size_t, 2>> {
+            FOR(i, a)
+            FOR(j, b)
+            co_yield std::array { i, j };
+        }
+
+        /////////////////////////////////////
+        /////////////////////////////////////
+        inline auto generateIndices(std::size_t a, std::size_t b, std::size_t c)
+            -> Generator<std::array<std::size_t, 3>> {
+            FOR(i, a)
+            FOR(j, b)
+            FOR(k, c)
+            co_yield std::array { i, j, k };
+        }
+
+        /////////////////////////////////////
+        /////////////////////////////////////
+        inline auto generateIndices(std::size_t a, std::size_t b, std::size_t c, std::size_t d)
+            -> Generator<std::array<std::size_t, 4>> {
+            FOR(i, a)
+            FOR(j, b)
+            FOR(k, c)
+            FOR(l, d)
+            co_yield std::array { i, j, k, l };
+        }
+
+        /////////////////////////////////////
+        /////////////////////////////////////
+        inline auto generateIndices(std::size_t a,
+                                    std::size_t b,
+                                    std::size_t c,
+                                    std::size_t d,
+                                    std::size_t e) -> Generator<std::array<std::size_t, 5>> {
+            FOR(i, a)
+            FOR(j, b)
+            FOR(k, c)
+            FOR(l, d)
+            FOR(m, e)
+            co_yield std::array { i, j, k, l, m };
+        }
+
+        /////////////////////////////////////
+        /////////////////////////////////////
+        inline auto generateIndices(std::size_t a,
+                                    std::size_t b,
+                                    std::size_t c,
+                                    std::size_t d,
+                                    std::size_t e,
+                                    std::size_t f) -> Generator<std::array<std::size_t, 6>> {
+            FOR(i, a)
+            FOR(j, b)
+            FOR(k, c)
+            FOR(l, d)
+            FOR(m, e)
+            FOR(n, f)
+            co_yield std::array { i, j, k, l, m, n };
+        }
+
+        /////////////////////////////////////
+        /////////////////////////////////////
+        inline auto generateIndices(std::size_t a,
+                                    std::size_t b,
+                                    std::size_t c,
+                                    std::size_t d,
+                                    std::size_t e,
+                                    std::size_t f,
+                                    std::size_t g) -> Generator<std::array<std::size_t, 7>> {
+            FOR(i, a)
+            FOR(j, b)
+            FOR(k, c)
+            FOR(l, d)
+            FOR(m, e)
+            FOR(n, f)
+            FOR(o, g)
+            co_yield std::array { i, j, k, l, m, n, o };
+        }
+
+#undef FOR
+
+    } // namespace details
 
     /////////////////////////////////////
     /////////////////////////////////////
-    template<typename Func, typename T>
-    auto fmap(Func &&func, Generator<T> source) noexcept(noexcept(func()))
-        -> Generator<std::invoke_result_t<Func &, typename Generator<T>::iterator::reference>> {
-        for (auto &&value : source)
-            co_yield std::invoke(std::forward<Func>(func), std::forward<decltype(value)>(value));
+    template<std::convertible_to<std::size_t>... Args>
+    auto generateIndices(Args... args) -> Generator<std::array<std::size_t, sizeof...(Args)>> {
+        return details::generateIndices(core::as<std::size_t>(args)...);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<std::ranges::range... Args>
+    auto generateIndices(const Args &...args)
+        -> Generator<std::array<std::size_t, sizeof...(Args)>> {
+        return details::generateIndices(std::size(args)...);
     }
 } // namespace stormkit::core

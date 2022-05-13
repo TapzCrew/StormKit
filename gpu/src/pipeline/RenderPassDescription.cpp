@@ -9,7 +9,7 @@ namespace stormkit::gpu {
         RenderPassDescription::isCompatible(const RenderPassDescription &description) const noexcept
         -> bool {
         if (std::size(description.subpasses) != std::size(subpasses)) return false;
-        for (auto i = 0u; i < std::size(subpasses); ++i) {
+        for (auto i : core::range(std::size(subpasses))) {
             const auto &subpass_1 = subpasses[i];
             const auto &subpass_2 = description.subpasses[i];
 
@@ -74,8 +74,8 @@ namespace std {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto hash<gpu::Subpass::Ref>::operator()(
-        const gpu::Subpass::Ref &description) const noexcept -> core::Hash64 {
+    auto hash<gpu::Subpass::Ref>::operator()(const gpu::Subpass::Ref &description) const noexcept
+        -> core::Hash64 {
         auto hash = core::Hash64 { 0 };
 
         core::hashCombine(hash, description.attachment_id);

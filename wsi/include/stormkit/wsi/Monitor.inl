@@ -11,7 +11,7 @@ namespace stormkit::wsi {
         if (auto ret = name <=> other.name; ret != 0) return ret;
         if (auto ret = std::size(sizes) <=> std::size(other.sizes); ret != 0) return ret;
 
-        for (auto i = 0; i < std::size(sizes); ++i) {
+        for (auto i : core::range(std::size(sizes))) {
             if (auto ret = sizes[i].width <=> other.sizes[i].width; ret != 0) return ret;
             if (auto ret = sizes[i].height <=> other.sizes[i].height; ret != 0) return ret;
         }

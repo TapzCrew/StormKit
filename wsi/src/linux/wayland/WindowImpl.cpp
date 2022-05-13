@@ -486,7 +486,7 @@ namespace stormkit::wsi::details::wayland {
         m_visible = width > 0 && height > 0;
 
         auto data = static_cast<xdg_toplevel_state *>(state->data);
-        for (auto i = 0u; i < state->size; ++i) {
+        for (auto i : core::range(state->size)) {
             const auto state = data[i];
 
             switch (state) {
@@ -648,7 +648,7 @@ namespace stormkit::wsi::details::wayland {
         WindowImplBase::gainedFocusEvent();
 
         auto data = static_cast<std::uint32_t *>(keys->data);
-        for (auto i = 0u; i < keys->size; ++i) {
+        for (auto i : core::range(keys->size)) {
             const auto keycode = data[i] + 8;
 
             auto character = char {};

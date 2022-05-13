@@ -2,6 +2,8 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
+#include <stormkit/core/Coroutines.mpp>
+
 /////////// - StormKit::render - ///////////
 #include <stormkit/gpu/core/CommandBuffer.mpp>
 #include <stormkit/gpu/core/Device.mpp>
@@ -300,31 +302,28 @@ namespace stormkit::gpu {
         const auto byte_count_by_channel = getArraySizeByChannelFor(m_format);
 
         auto _offset = 0u;
-        for (auto layer = 0u; layer < layers; ++layer) {
-            for (auto face = 0u; face < faces; ++face) {
-                for (auto mip_level = 0u; mip_level < mip_levels; ++mip_level) {
-                    const auto extent = core::ExtentU { std::max(1u, m_extent.width >> mip_level),
-                                                        std::max(1u, m_extent.height >> mip_level),
-                                                        std::max(1u, m_extent.depth >> mip_level) };
+        for (auto [layer, face, mip_level] : core::generateIndices(layers, faces, mip_levels)) {
+            const auto extent = core::ExtentU { std::max(1u, m_extent.width >> mip_level),
+                                                std::max(1u, m_extent.height >> mip_level),
+                                                std::max(1u, m_extent.depth >> mip_level) };
 
-                    const auto size = extent.width * extent.height * extent.depth * channel_count *
-                                      byte_count_by_channel;
+            const auto size =
+                extent.width * extent.height * extent.depth * channel_count * byte_count_by_channel;
 
-                    auto copy_regions = std::vector<BufferImageCopy> {};
-                    copy_regions.reserve(m_layers);
+            auto copy_regions = std::vector<BufferImageCopy> {};
+            copy_regions.reserve(m_layers);
 
-                    copy_regions.emplace_back(BufferImageCopy {
-                        .buffer_offset      = offset + _offset,
-                        .subresource_layers = { .mip_level        = mip_level,
-                                                .base_array_layer = layer + (face * m_layers) },
-                        .extent             = extent,
-                    });
+            copy_regions.emplace_back(BufferImageCopy {
+                .buffer_offset      = offset + _offset,
+                .subresource_layers = { .mip_level = core::as<core::UInt32>(mip_level),
+                                        .base_array_layer =
+                                            core::as<core::UInt32>(layer + (face * m_layers)) },
+                .extent             = extent,
+            });
 
-                    command_buffer.copyBufferToImage(buffer, *this, std::move(copy_regions));
+            command_buffer.copyBufferToImage(buffer, *this, std::move(copy_regions));
 
-                    _offset += size;
-                }
-            }
+            _offset += size;
         }
 
         auto layout = ImageLayout::Transfer_Dst_Optimal;
@@ -373,7 +372,7 @@ namespace stormkit::gpu {
                                              ImageLayout::Transfer_Src_Optimal,
                                              { .layer_count = m_layers * m_faces });
 
-        for (auto i = 1u; i < mip_levels; ++i) {
+        for (auto i : core::range(1u, mip_levels)) {
             auto region =
                 BlitRegion { .source = ImageSubresourceLayers { .mip_level   = i - 1u,
                                                                 .layer_count = m_layers * m_faces },

@@ -111,7 +111,7 @@ auto macOSKeyboard::initializeKeyboard() -> void {
 
     CFSetGetValues(keyboards, std::data(devices_array));
 
-    for (auto i = CFIndex { 0 }; i < keyboardCount; ++i) {
+    for (auto i : core::range<CFIndex>(keyboardCount)) {
         IOHIDDeviceRef keyboard =
             reinterpret_cast<IOHIDDeviceRef>(const_cast<void *>(devices_array[i]));
         loadKeyboard(keyboard);
@@ -125,7 +125,7 @@ auto macOSKeyboard::loadKeyboard(IOHIDDeviceRef keyboard) -> void {
 
     auto keys_count = CFArrayGetCount(keys);
 
-    for (auto i = CFIndex { 0 }; i < keys_count; ++i) {
+    for (auto i : core::range<CFIndex>(keys_count)) {
         IOHIDElementRef key =
             reinterpret_cast<IOHIDElementRef>(const_cast<void *>(CFArrayGetValueAtIndex(keys, i)));
 

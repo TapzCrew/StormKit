@@ -47,30 +47,11 @@ namespace stormkit::core {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    template<class T, class Tag, template<class> class... Skills>
-    template<IsNot<T> First>
-    requires IsNot<First, NamedType<T, Tag, Skills...>>
-    constexpr NamedType<T, Tag, Skills...>::NamedType(First &&first) noexcept(
-        std::is_nothrow_constructible_v<UnderlyingType, First>)
-        : m_value { std::forward<First>(first) } {}
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    template<class T, class Tag, template<class> class... Skills>
-    template<class First, class Second, class... Args>
-    constexpr NamedType<T, Tag, Skills...>::
-        NamedType(First &&first, Second &&second, Args &&...args) noexcept(
-            std::is_nothrow_constructible_v<UnderlyingType, First, Second, Args...>)
-        : m_value { std::forward<First>(first),
-                    std::forward<Second>(second),
-                    std::forward<Args>(args)... } {}
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    template<class T, class Tag, template<class> class... Skills>
-    constexpr NamedType<T, Tag, Skills...>::NamedType(UnderlyingType &&value) noexcept(
-        std::is_nothrow_move_constructible_v<UnderlyingType>)
-        : m_value { std::forward<UnderlyingType>(value) } {}
+    /*template<class T, class Tag, template<class> class... Skills>
+    template<IsNot<NamedType<T, Tag, Skills...>>... Args>
+    constexpr NamedType<T, Tag, Skills...>::NamedType(Args &&...args) noexcept(
+        std::is_nothrow_constructible_v<UnderlyingType, Args...>)
+        : m_value { std::forward<Args>(args)... } {} */
 
     /////////////////////////////////////
     /////////////////////////////////////

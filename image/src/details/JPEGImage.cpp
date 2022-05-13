@@ -142,7 +142,7 @@ namespace stormkit::image::details {
         info.client_data     = &error_data;
         error_mgr.error_exit = jpg::error_callback;
 
-        for (auto i = 0u; i < image_rgb.mipLevels(); ++i) {
+        for (auto i : core::range(image_rgb.mipLevels())) {
             if (i >= 1u) _filename += core::format("_mip{}", i);
 
             auto file = std::fopen(_filename.string().c_str(), "wb");
