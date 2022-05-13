@@ -47,11 +47,11 @@ namespace stormkit::core {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    template<class T, class Tag, template<class> class... Skills>
+    /*template<class T, class Tag, template<class> class... Skills>
     template<IsNot<NamedType<T, Tag, Skills...>>... Args>
     constexpr NamedType<T, Tag, Skills...>::NamedType(Args &&...args) noexcept(
         std::is_nothrow_constructible_v<UnderlyingType, Args...>)
-        : m_value { std::forward<Args>(args)... } {}
+        : m_value { std::forward<Args>(args)... } {} */
 
     /////////////////////////////////////
     /////////////////////////////////////

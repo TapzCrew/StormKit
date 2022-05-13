@@ -58,7 +58,8 @@ export {
 
             template<IsNot<NamedType<T, Tag, Skills...>>... Args>
             constexpr explicit(sizeof...(Args) == 1) NamedType(Args &&...args) noexcept(
-                std::is_nothrow_constructible_v<UnderlyingType, Args...>);
+                std::is_nothrow_constructible_v<UnderlyingType, Args...>)
+                : m_value { std::forward<Args>(args)... } {}
 
             constexpr auto get() noexcept -> std::remove_reference_t<UnderlyingType> &;
 
