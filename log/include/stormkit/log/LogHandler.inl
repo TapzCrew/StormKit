@@ -33,9 +33,9 @@ namespace stormkit::log {
         if (!m_logger) setupDefaultLogger();
 
         auto memory_buffer = std::string {};
-        core::format_to(std::back_inserter(memory_buffer),
-                        core::runtime(format_string),
-                        std::forward<Args>(param_args)...);
+        core::vformat_to(std::back_inserter(memory_buffer),
+                         core::runtime(format_string),
+                         core::make_format_args(std::forward<Args>(param_args)...));
 
         logger().write(severity, m, std::data(memory_buffer));
     }
