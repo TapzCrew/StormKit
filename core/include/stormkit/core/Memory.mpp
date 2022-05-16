@@ -276,10 +276,10 @@ export {
                  std::output_iterator<std::invoke_result_t<
                      Lambda,
                      const typename std::remove_cvref_t<Range>::value_type &>> Iterator>
-        [[nodiscard]] constexpr auto transformIf(Range &&input,
-                                                 Iterator &&it,
-                                                 Predicate &&predicate,
-                                                 Lambda &&lambda) noexcept -> void;
+        constexpr auto transformIf(Range &&input,
+                                   Iterator &&it,
+                                   Predicate &&predicate,
+                                   Lambda &&lambda) noexcept -> void;
 
         template<typename T>
         [[nodiscard]] constexpr auto toLambda(T &&t) {
