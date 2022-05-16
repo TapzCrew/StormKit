@@ -22,6 +22,7 @@ export {
     #include <thread>
     #include <vector>
 
+    #include <stormkit/core/Memory.mpp>
     #include <stormkit/core/Types.mpp>
 #endif
 
@@ -79,6 +80,20 @@ export {
             std::condition_variable m_work_signal;
             std::queue<Task> m_tasks;
         };
+
+        template<std::ranges::range Range, std::invocable<typename Range::element_type &> F>
+        auto parallelFor(ThreadPool &pool, Range &&range, F &&f)
+            -> std::future<std::invoke_result_t<F, typename Range::element_type &>>;
+
+        template<std::ranges::range Range, std::invocable<typename Range::element_type &> F>
+        auto parallelTransform(ThreadPool &pool, Range &&range, F &&f)
+            -> std::future<std::invoke_result_t<F, typename Range::element_type &>>;
+
+        template<std::ranges::range Range,
+                 std::predicate<typename Range::element_type &> Predicate,
+                 std::invocable<typename Range::element_type &> F>
+        auto parallelTransformIf(ThreadPool &pool, Range &&range, Predicate &&predicate, F &&f)
+            -> std::future<std::invoke_result_t<F, typename Range::element_type &>>;
     } // namespace stormkit::core
 
 #if defined(STORMKIT_CXX20_MODULES)

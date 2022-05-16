@@ -56,4 +56,100 @@ namespace stormkit::core {
 
         m_work_signal.notify_one();
     }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    template<std::ranges::range Range, std::invocable<typename Range::element_type &> F>
+    auto parallelFor(ThreadPool &pool, Range &&range, F &&f) -> std::future<void> {
+        using Element = typename Range::element_type;
+
+        if constexpr (std::is_rvalue_reference_v<Range>)
+            return postTask<void>([range = std::move(range), f = std::forward<F>(f)]() {
+                auto futures = core::transform(range, [](auto &elem) { return f(elem); });
+
+                for (auto &future : futures) future.wait();
+            });
+        else
+            return postTask<void>([&range, f = std::forward<F>(f)]() {
+                auto futures = core::transform(range, [](auto &elem) { return f(elem); });
+
+                for (auto &future : futures) future.wait();
+            });
+    }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    template<std::ranges::range Range, std::invocable<typename Range::element_type &> F>
+    auto parallelTransform(ThreadPool &pool, Range &&range, F &&f)
+        -> std::future<std::invoke_result_t<F, typename Range::element_type &>> {
+        using Element      = typename Range::element_type;
+        using OutputType   = std::invoke_result_t<F, Element &>;
+        using OutputVector = std::vector<OutputType>;
+
+        if constexpr (std::is_rvalue_reference_v<Range>)
+            return pool.postTask<std::vector<typename Range::element_type &>>(
+                [range = std::move(range), f = std::forward<F>(f), &pool]() {
+                    auto tasks = core::transform(range, [](auto &elem) { return f(elem); });
+
+                    auto futures = core::transform(tasks, [&pool](auto &l) {
+                        return pool.postTask<OutputType>(std::move(l));
+                    });
+
+                    return core::transform(futures, [](auto &future) { return future.get(); });
+                });
+        else
+            return pool.postTask<std::vector<typename Range::element_type &>>(
+                [&range, f = std::forward<F>(f), &pool]() {
+                    auto tasks = core::transform(range, [](auto &elem) { return f(elem); });
+
+                    auto futures = core::transform(tasks, [&pool](auto &l) {
+                        return pool.postTask<OutputType>(std::move(l));
+                    });
+
+                    return core::transform(futures, [](auto &future) { return future.get(); });
+                });
+    }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    template<std::ranges::range Range,
+             std::predicate<typename Range::element_type &> Predicate,
+             std::invocable<typename Range::element_type &> F>
+    auto parallelTransformIf(ThreadPool &pool, Range &&range, Predicate &&predicate, F &&f)
+        -> std::future<std::invoke_result_t<F, typename Range::element_type &>> {
+        using Element      = typename Range::element_type;
+        using OutputType   = std::invoke_result_t<F, Element &>;
+        using OutputVector = std::vector<OutputType>;
+
+        if constexpr (std::is_rvalue_reference_v<Range>)
+            return pool.postTask<std::vector<typename Range::element_type &>>(
+                [range     = std::move(range),
+                 f         = std::forward<F>(f),
+                 predicate = std::forward<Predicate>(predicate),
+                 &pool]() {
+                    auto tasks =
+                        core::transformIf(range, predicate, [](auto &elem) { return f(elem); });
+
+                    auto futures = core::transform(tasks, [&pool](auto &l) {
+                        return pool.postTask<OutputType>(std::move(l));
+                    });
+
+                    return core::transform(futures, [](auto &future) { return future.get(); });
+                });
+        else
+            return pool.postTask<std::vector<typename Range::element_type &>>(
+                [&range,
+                 f         = std::forward<F>(f),
+                 predicate = std::forward<Predicate>(predicate),
+                 &pool]() {
+                    auto tasks =
+                        core::transformIf(range, predicate, [](auto &elem) { return f(elem); });
+
+                    auto futures = core::transform(tasks, [&pool](auto &l) {
+                        return pool.postTask<OutputType>(std::move(l));
+                    });
+
+                    return core::transform(futures, [](auto &future) { return future.get(); });
+                });
+    }
 } // namespace stormkit::core
