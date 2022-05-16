@@ -39,13 +39,13 @@ export {
             struct CreateInfo {
                 core::ExtentU extent;
                 gpu::PixelFormat format = gpu::PixelFormat::RGBA8_UNorm;
-                core::UInt32 layers        = 1u;
-                core::UInt32 mip_levels    = 1u;
-                ImageType type             = ImageType::T2D;
-                ImageCreateFlag flags      = ImageCreateFlag::None;
-                SampleCountFlag samples    = SampleCountFlag::C1;
-                ImageUsageFlag usage = ImageUsageFlag::Sampled | ImageUsageFlag::Transfert_Dst |
-                                       ImageUsageFlag::Transfert_Src;
+                core::UInt32 layers     = 1u;
+                core::UInt32 mip_levels = 1u;
+                ImageType type          = ImageType::T2D;
+                ImageCreateFlag flags   = ImageCreateFlag::None;
+                SampleCountFlag samples = SampleCountFlag::C1;
+                ImageUsageFlag usages   = ImageUsageFlag::Sampled | ImageUsageFlag::Transfert_Dst |
+                                        ImageUsageFlag::Transfert_Src;
                 ImageTiling tiling          = ImageTiling::Optimal;
                 MemoryPropertyFlag property = MemoryPropertyFlag::Device_Local;
             };
@@ -107,11 +107,10 @@ export {
             [[nodiscard]] auto layers() const noexcept -> core::UInt32;
             [[nodiscard]] auto faces() const noexcept -> core::UInt32;
             [[nodiscard]] auto mipLevels() const noexcept -> core::UInt32;
-            [[nodiscard]] auto usage() const noexcept -> ImageUsageFlag;
+            [[nodiscard]] auto usages() const noexcept -> ImageUsageFlag;
 
             [[nodiscard]] operator VkImage() const noexcept;
             [[nodiscard]] auto vkHandle() const noexcept -> VkImage;
-
 
             DEVICE_CONST_GETTER
           private:
@@ -130,7 +129,7 @@ export {
             ImageType m_type          = {};
             ImageCreateFlag m_flags   = {};
             SampleCountFlag m_samples = {};
-            ImageUsageFlag m_usage    = {};
+            ImageUsageFlag m_usages    = {};
 
             VkImage m_image              = VK_NULL_HANDLE;
             VmaAllocation m_image_memory = VK_NULL_HANDLE;

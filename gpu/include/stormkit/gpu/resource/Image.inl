@@ -65,10 +65,10 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto Image::usage() const noexcept -> ImageUsageFlag {
+    inline auto Image::usages() const noexcept -> ImageUsageFlag {
         STORMKIT_EXPECTS(m_image);
 
-        return m_usage;
+        return m_usages;
     }
 
     /////////////////////////////////////

@@ -9,11 +9,11 @@
 namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto Buffer::usage() const noexcept -> BufferUsageFlag {
+    inline auto Buffer::usages() const noexcept -> BufferUsageFlag {
         STORMKIT_EXPECTS(m_buffer);
         STORMKIT_EXPECTS(m_buffer_memory);
 
-        return m_usage;
+        return m_usages;
     }
 
     /////////////////////////////////////

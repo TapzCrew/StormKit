@@ -96,7 +96,7 @@ namespace stormkit::gpu {
     Image::Image(const Device &device, const CreateInfo &info, Tag)
         : m_device { &device }, m_extent { info.extent }, m_format { info.format },
           m_layers { info.layers }, m_mip_levels { info.mip_levels }, m_type { info.type },
-          m_flags { info.flags }, m_samples { info.samples }, m_usage { info.usage } {
+          m_flags { info.flags }, m_samples { info.samples }, m_usages { info.usages } {
         m_faces = 1;
         if (core::checkFlag(m_flags, gpu::ImageCreateFlag::Cube_Compatible)) m_faces = 6u;
     }
@@ -118,7 +118,7 @@ namespace stormkit::gpu {
             .arrayLayers   = m_layers * m_faces,
             .samples       = core::as<VkSampleCountFlagBits>(m_samples),
             .tiling        = core::as<VkImageTiling>(info.tiling),
-            .usage         = core::as<VkImageUsageFlags>(m_usage),
+            .usage         = core::as<VkImageUsageFlags>(m_usages),
             .sharingMode   = VK_SHARING_MODE_EXCLUSIVE,
             .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
         };
@@ -181,8 +181,8 @@ namespace stormkit::gpu {
                                                                                  0) },
           m_mip_levels { std::exchange(other.m_mip_levels, 0) },
           m_type { std::exchange(other.m_type, {}) }, m_flags { std::exchange(other.m_flags, {}) },
-          m_samples { std::exchange(other.m_samples, {}) }, m_usage { std::exchange(other.m_usage,
-                                                                                    {}) },
+          m_samples { std::exchange(other.m_samples, {}) }, m_usages { std::exchange(other.m_usages,
+                                                                                     {}) },
           m_image_memory { std::exchange(other.m_image_memory, VK_NULL_HANDLE) },
           m_image { std::exchange(other.m_image, VK_NULL_HANDLE) }, m_own_image {
               std::exchange(other.m_own_image, true)
@@ -203,7 +203,7 @@ namespace stormkit::gpu {
         m_type         = std::exchange(other.m_type, {});
         m_flags        = std::exchange(other.m_flags, {});
         m_samples      = std::exchange(other.m_samples, {});
-        m_usage        = std::exchange(other.m_usage, {});
+        m_usages       = std::exchange(other.m_usages, {});
         m_image_memory = std::exchange(other.m_image_memory, VK_NULL_HANDLE);
         m_image        = std::exchange(other.m_image, VK_NULL_HANDLE);
         m_own_image    = std::exchange(other.m_own_image, true);

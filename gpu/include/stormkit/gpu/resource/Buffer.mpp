@@ -32,7 +32,7 @@ export {
         class STORMKIT_PUBLIC Buffer {
           public:
             struct CreateInfo {
-                BufferUsageFlag usage;
+                BufferUsageFlag usages;
                 core::USize size;
                 MemoryPropertyFlag property =
                     MemoryPropertyFlag::Host_Visible | MemoryPropertyFlag::Host_Coherent;
@@ -49,7 +49,7 @@ export {
             Buffer(Buffer &&) noexcept;
             auto operator=(Buffer &&) noexcept -> Buffer &;
 
-            [[nodiscard]] auto usage() const noexcept -> BufferUsageFlag;
+            [[nodiscard]] auto usages() const noexcept -> BufferUsageFlag;
             [[nodiscard]] auto size() const noexcept -> core::USize;
 
             [[nodiscard]] auto map(core::Int64 offset) noexcept -> core::Byte *;
@@ -81,7 +81,6 @@ export {
 
             [[nodiscard]] operator VkBuffer() const noexcept;
             [[nodiscard]] auto vkHandle() const noexcept -> VkBuffer;
-            
 
             DEVICE_CONST_GETTER
           private:
@@ -92,7 +91,7 @@ export {
                 -> core::UInt32;
 
             const Device *m_device  = nullptr;
-            BufferUsageFlag m_usage = {};
+            BufferUsageFlag m_usages = {};
             core::USize m_size      = 0;
 
             bool m_is_persistently_mapped = false;

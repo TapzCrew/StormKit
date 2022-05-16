@@ -12,14 +12,14 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     Buffer::Buffer(const Device &device, const CreateInfo &info, bool persistently_mapped)
-        : m_device { &device }, m_usage { info.usage }, m_size { info.size },
+        : m_device { &device }, m_usages { info.usages }, m_size { info.size },
           m_is_persistently_mapped { persistently_mapped } {
         const auto &vk = m_device->table();
 
         const auto create_info =
             VkBufferCreateInfo { .sType       = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
                                  .size        = m_size,
-                                 .usage       = core::as<VkBufferUsageFlags>(m_usage),
+                                 .usage       = core::as<VkBufferUsageFlags>(m_usages),
                                  .sharingMode = VK_SHARING_MODE_EXCLUSIVE };
 
         CHECK_VK_ERROR(vk.vkCreateBuffer(*m_device, &create_info, nullptr, &m_buffer));
@@ -63,7 +63,7 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     Buffer::Buffer(Buffer &&other) noexcept
         : m_device { std::exchange(other.m_device, nullptr) },
-          m_usage { std::exchange(other.m_usage, {}) }, m_size { std::exchange(other.m_size, 0) },
+          m_usages { std::exchange(other.m_usages, {}) }, m_size { std::exchange(other.m_size, 0) },
           m_is_persistently_mapped { std::exchange(other.m_is_persistently_mapped, false) },
           m_mapped_pointer { std::exchange(other.m_mapped_pointer, nullptr) },
           m_buffer { std::exchange(other.m_buffer, VK_NULL_HANDLE) }, m_buffer_memory {
@@ -77,7 +77,7 @@ namespace stormkit::gpu {
             return *this;
 
         m_device                 = std::exchange(other.m_device, nullptr);
-        m_usage                  = std::exchange(other.m_usage, {});
+        m_usages                 = std::exchange(other.m_usages, {});
         m_size                   = std::exchange(other.m_size, 0);
         m_is_persistently_mapped = std::exchange(other.m_is_persistently_mapped, false);
         m_mapped_pointer         = std::exchange(other.m_mapped_pointer, nullptr);
