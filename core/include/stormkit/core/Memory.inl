@@ -235,6 +235,51 @@ namespace stormkit::core {
 
     /////////////////////////////////////
     /////////////////////////////////////
+    template<std::ranges::input_range Range,
+             std::predicate<const typename std::remove_cvref_t<Range>::value_type &> Predicate>
+    constexpr auto copyIf(Range &&input, Predicate &&predicate) noexcept {
+        auto output = std::vector<typename std::remove_cvref_t<Range>::value_type> {};
+        output.reserve(std::size(input));
+
+        std::ranges::copy_if(input, std::back_inserter(output), std::forward<Predicate>(predicate));
+
+        return output;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<std::ranges::input_range Range,
+             std::predicate<const typename std::remove_cvref_t<Range>::value_type &> Predicate,
+             std::invocable<const typename std::remove_cvref_t<Range>::value_type &> Lambda>
+    constexpr auto transformIf(Range &&input, Predicate &&predicate, Lambda &&lambda) noexcept {
+        auto output = std::vector<
+            std::invoke_result_t<std::remove_cvref_t<Lambda>,
+                                 const typename std::remove_cvref_t<Range>::value_type &>> {};
+        output.reserve(std::size(input));
+
+        std::ranges::for_each(input, [&](auto &elem) {
+            if (predicate(elem)) output.emplace_back(lambda(elem));
+        });
+
+        return output;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<std::ranges::input_range Range,
+             std::ranges::borrowed_iterator_t Iterator,
+             std::predicate<const typename std::remove_cvref_t<Range>::value_type &> Predicate,
+             std::invocable<const typename std::remove_cvref_t<Range>::value_type &> Lambda>
+    constexpr auto
+        transformIf(Range &&input, Iterator &&it, Predicate &&predicate, Lambda &&lambda) noexcept
+        -> void {
+        std::ranges::for_each(input, [&](auto &elem) {
+            if (predicate(elem)) *it++ = lambda(elem);
+        });
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
     inline auto printStacktrace() noexcept -> void {
         using namespace backward;
         auto st = StackTrace {};
