@@ -28,6 +28,20 @@ namespace stormkit::core {
 
     /////////////////////////////////////
     /////////////////////////////////////
+    template<typename To, ReferenceType From>
+    requires std::derived_from<To, std::remove_cvref_t<From>>
+    constexpr auto is(From &&value) noexcept -> bool { return is<To>(&value); }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<typename To, RawPointerType From>
+    requires std::derived_from<To, std::remove_pointer_t<From>>
+    constexpr auto is(From &&value) noexcept -> bool {
+        return dynamic_cast<To *>(value) != nullptr;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
     template<typename To, typename... Args>
     constexpr auto as(std::variant<Args...> &variant) noexcept -> To & {
         STORMKIT_CONSTEXPR_EXPECTS(is<To>(variant));
@@ -199,6 +213,19 @@ namespace stormkit::core {
     constexpr auto as(From value) noexcept -> To {
         return static_cast<To>(value);
     }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<ReferenceType To, ReferenceType From>
+    requires std::derived_from<std::remove_cvref_t<To>, std::remove_cvref_t<From>>
+    constexpr auto as(From &&value) -> To { return static_cast<To>(value); }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<RawPointerType To, RawPointerType From>
+    requires std::derived_from<std::remove_cvref_t<std::remove_pointer_t<To>>,
+                               std::remove_cvref_t<std::remove_pointer_t<From>>>
+    constexpr auto as(From &&value) noexcept -> To { return dynamic_cast<To>(value); }
 
     /////////////////////////////////////
     /////////////////////////////////////

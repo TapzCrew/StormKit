@@ -41,6 +41,14 @@ export {
         template<typename To, typename... Args>
         [[nodiscard]] constexpr auto is(const std::variant<Args...> &variant) noexcept -> bool;
 
+        template<typename To, ReferenceType From>
+        requires std::derived_from<To, std::remove_cvref_t<From>>
+        [[nodiscard]] constexpr auto is(From &&value) noexcept -> bool;
+
+        template<typename To, RawPointerType From>
+        requires std::derived_from<To, std::remove_pointer_t<From>>
+        [[nodiscard]] constexpr auto is(From &&value) noexcept -> bool;
+
         template<typename To, typename... Args>
         [[nodiscard]] constexpr auto as(std::variant<Args...> &variant) noexcept -> To &;
 
@@ -54,7 +62,6 @@ export {
         template<typename To, typename... Args>
         [[nodiscard]] constexpr auto as(const std::variant<Args...> &&variant) noexcept
             -> const To &&;
-
         template<std::signed_integral To, std::signed_integral From>
         [[nodiscard]] constexpr auto as(From value) noexcept -> To;
 
@@ -96,6 +103,15 @@ export {
 
         template<ByteType To, std::integral From>
         [[nodiscard]] constexpr auto as(From value) noexcept -> To;
+
+        template<ReferenceType To, ReferenceType From>
+        requires std::derived_from<std::remove_cvref_t<To>, std::remove_cvref_t<From>>
+        [[nodiscard]] constexpr auto as(From &&value) -> To;
+
+        template<RawPointerType To, RawPointerType From>
+        requires std::derived_from<std::remove_cvref_t<std::remove_pointer_t<To>>,
+                                   std::remove_cvref_t<std::remove_pointer_t<From>>>
+        [[nodiscard]] constexpr auto as(From &&value) noexcept -> To;
 
         template<typename To, std::convertible_to<To> From>
         requires(!ArithmeticType<To> && !ArithmeticType<From>)
