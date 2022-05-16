@@ -221,6 +221,19 @@ namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
     template<std::ranges::input_range Range,
+             UnaryPredicateType<typename std::remove_cvref_t<Range>::value_type> Predicate>
+    constexpr auto copyIf(Range &&input, Predicate &&predicate) noexcept {
+        auto output = std::vector<typename std::remove_cvref_t<Range>::value_type> {};
+        output.reserve(std::size(input));
+
+        std::ranges::copy_if(input, std::back_inserter(output), std::forward<Predicate>(predicate));
+
+        return output;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<std::ranges::input_range Range,
              std::invocable<const typename std::remove_cvref_t<Range>::value_type &> Lambda>
     constexpr auto transform(Range &&input, Lambda &&lambda) noexcept {
         auto output = std::vector<
@@ -236,20 +249,7 @@ namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
     template<std::ranges::input_range Range,
-             std::predicate<const typename std::remove_cvref_t<Range>::value_type &> Predicate>
-    constexpr auto copyIf(Range &&input, Predicate &&predicate) noexcept {
-        auto output = std::vector<typename std::remove_cvref_t<Range>::value_type> {};
-        output.reserve(std::size(input));
-
-        std::ranges::copy_if(input, std::back_inserter(output), std::forward<Predicate>(predicate));
-
-        return output;
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    template<std::ranges::input_range Range,
-             std::predicate<const typename std::remove_cvref_t<Range>::value_type &> Predicate,
+             UnaryPredicateType<typename std::remove_cvref_t<Range>::value_type> Predicate,
              std::invocable<const typename std::remove_cvref_t<Range>::value_type &> Lambda>
     constexpr auto transformIf(Range &&input, Predicate &&predicate, Lambda &&lambda) noexcept {
         auto output = std::vector<
@@ -268,7 +268,7 @@ namespace stormkit::core {
     /////////////////////////////////////
     template<
         std::ranges::input_range Range,
-        std::predicate<const typename std::remove_cvref_t<Range>::value_type &> Predicate,
+        UnaryPredicateType<typename std::remove_cvref_t<Range>::value_type> Predicate,
         std::invocable<const typename std::remove_cvref_t<Range>::value_type &> Lambda,
         std::output_iterator<
             std::invoke_result_t<Lambda, const typename std::remove_cvref_t<Range>::value_type &>>
@@ -279,6 +279,24 @@ namespace stormkit::core {
         std::ranges::for_each(input, [&](auto &elem) {
             if (predicate(elem)) *it++ = lambda(elem);
         });
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<typename T, BinaryPredicateType<std::remove_cvref_t<T>> BinaryPredicate>
+    constexpr auto binaryToUnary(T &&value, BinaryPredicate &&predicate) noexcept {
+        if constexpr (std::is_rvalue_reference_v<T>)
+            return [value     = std::forward<T>(value),
+                    predicate = std::forward<BinaryPredicate>(predicate)](
+                       const std::remove_cvref_t<T> &other) { return predicate(value, other); };
+        else
+            return [&value, predicate = std::forward<BinaryPredicate>(predicate)](
+                       const std::remove_cvref_t<T> &other) { return predicate(value, other); };
+    }
+
+    template<typename T>
+    constexpr auto toLambda(T &&t) {
+        return [t = std::forward<T>(t)](const auto &elem) -> decltype(t(elem)) { return t(elem); };
     }
 
     /////////////////////////////////////
