@@ -6,8 +6,9 @@ module;
 
 #pragma once
 
-//#if defined(__cpp_lib_format)
-#if __has_include(<format>)
+#include <version>
+
+#if defined(__cpp_lib_format)
     #define STORMKIT_HAS_STL_FORMAT
 #elif __has_include(<fmt/format.h>)
     #define STORMKIT_HAS_FMT_FORMAT
@@ -48,6 +49,9 @@ export {
 namespace stormkit::core {
     using std::format;
     using std::format_to;
+    using std::vformat;
+    using std::vformat_to;
+    using std::make_format_args;
 
 constexpr auto runtime(std::string_view str) {
     return str;
