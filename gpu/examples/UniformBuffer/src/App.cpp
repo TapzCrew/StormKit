@@ -107,7 +107,7 @@ auto App::doInitBaseRenderObjects() -> void {
     // We create an instance and initialize device on best available GPU
     m_instance = std::make_unique<gpu::Instance>();
     ilog("Render backend successfully initialized");
-    ilog("Using StormKit {}.{}.{} {} {}, built with {}",
+    ilog("Using StormKit {}.{}.{} (branch: {}, commit_hash: {}), built with {}",
          core::STORMKIT_MAJOR_VERSION,
          core::STORMKIT_MINOR_VERSION,
          core::STORMKIT_PATCH_VERSION,

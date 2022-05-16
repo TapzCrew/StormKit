@@ -1,4 +1,22 @@
 target("stormkit-core")
+    on_load(function(target)
+        local output, errors = os.iorunv("git",
+                                         { "rev-parse", "--abbrev-ref", "HEAD" })
+
+        if not errors == "" then
+            print("Failed to get git hash and branch, reason: ", errors, output)
+            target:set("configvar", "STORMKIT_GIT_BRANCH", " ")
+            target:set("configvar", "STORMKIT_GIT_COMMIT_HASH", " ")
+            return
+        end
+
+        target:set("configvar", "STORMKIT_GIT_BRANCH", output:trim())
+        output, errors = os.iorunv("git",
+                                   { "rev-parse", "--verify", "HEAD" })
+
+        target:set("configvar", "STORMKIT_GIT_COMMIT_HASH", output:trim())
+    end)
+
     set_kind("$(kind)")
     set_languages("cxxlatest", "clatest")
 
@@ -34,8 +52,6 @@ target("stormkit-core")
     add_includedirs("$(buildir)/include", { public = true })
 
     set_configdir("$(buildir)/include/stormkit/core/")
-    set_configvar("STORMKIT_GIT_COMMIT_HASH", " ")
-    set_configvar("STORMKIT_GIT_BRANCH", " ")
     add_configfiles("include/stormkit/core/*.mpp.in")
 
     add_options("enable_cxx20_modules")
