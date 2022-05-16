@@ -88,6 +88,16 @@ export {
         concept BooleanTestableType = details::BooleanTestableType<T> && requires(T &&t) {
             { !std::forward<T>(t) } -> details::BooleanTestableType;
         };
+
+        template<class T, class... Args>
+        concept PredicateType = std::predicate<T, Args...>;
+
+        template<class T, class... Args>
+        concept UnaryPredicateType = sizeof...(Args) == 1 && PredicateType<T, Args...>;
+
+        template<class T, class U, class... Args>
+        concept BinaryPredicateType = sizeof...(Args) == 1 &&
+                                      (Is<U, Args>, ...) && PredicateType<T, U, Args...>;
     } // namespace stormkit::core
 
 #if defined(STORMKIT_CXX20_MODULES)
