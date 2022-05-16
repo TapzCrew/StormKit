@@ -27,6 +27,10 @@ export {
 #endif
 
     namespace stormkit::core {
+        namespace details {
+            template<class T>
+            concept BooleanTestableType = std::convertible_to<T, bool>;
+        }
         template<class T>
         concept ColorComponentType = std::same_as<T, float> || std::same_as<T, std::uint8_t>;
 
@@ -79,6 +83,11 @@ export {
 
         template<class T>
         concept ReferenceType = std::is_lvalue_reference_v<T>;
+
+        template<class T>
+        concept BooleanTestableType = details::BooleanTestableType<T> && requires(T &&t) {
+            { !std::forward<T>(t) } -> details::BooleanTestableType;
+        };
     } // namespace stormkit::core
 
 #if defined(STORMKIT_CXX20_MODULES)
