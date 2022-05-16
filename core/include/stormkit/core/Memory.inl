@@ -266,10 +266,13 @@ namespace stormkit::core {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    template<std::ranges::input_range Range,
-             std::ranges::borrowed_iterator_t Iterator,
-             std::predicate<const typename std::remove_cvref_t<Range>::value_type &> Predicate,
-             std::invocable<const typename std::remove_cvref_t<Range>::value_type &> Lambda>
+    template<
+        std::ranges::input_range Range,
+        std::predicate<const typename std::remove_cvref_t<Range>::value_type &> Predicate,
+        std::invocable<const typename std::remove_cvref_t<Range>::value_type &> Lambda,
+        std::output_iterator<
+            std::invoke_result_t<Lambda, const typename std::remove_cvref_t<Range>::value_type &>>
+            Iterator>
     constexpr auto
         transformIf(Range &&input, Iterator &&it, Predicate &&predicate, Lambda &&lambda) noexcept
         -> void {
