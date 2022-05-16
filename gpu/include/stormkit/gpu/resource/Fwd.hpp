@@ -12,6 +12,7 @@
 #include <vector>
 
 /////////// - StormKit::core - ///////////
+#include <stormkit/core/Concepts.mpp>
 #include <stormkit/core/MemoryMacro.hpp>
 
 namespace stormkit::gpu {
@@ -33,4 +34,7 @@ namespace stormkit::gpu {
     struct ImageSubresource;
     struct ImageSubresourceLayers;
     struct ImageSubresourceRange;
+
+    template<typename T>
+    concept ResourceType = core::Is<T, Image> || core::Is<T, Buffer>;
 } // namespace stormkit::gpu
