@@ -78,20 +78,15 @@ namespace stormkit::entities {
 
         auto entities = std::vector<Entity> {};
 
-        std::for_each(std::cbegin(m_components),
-                      std::cend(m_components),
-                      [&entities](const auto &pair) {
-                          const auto &map = pair.second;
-                          auto it         = std::find_if(std::cbegin(map),
-                                                 std::cend(map),
-                                                 [](const auto &component) {
-                                                     if (component.first == T::TYPE) return true;
+        for (const auto &[entity, map] : m_components) {
+            auto it = std::find_if(std::cbegin(map), std::cend(map), [](const auto &component) {
+                if (component.first == T::TYPE) return true;
 
-                                                     return false;
-                                                 });
+                return false;
+            });
 
-                          if (it != std::cend(map)) entities.emplace_back(pair.first);
-                      });
+            if (it != std::cend(map)) entities.emplace_back(entity);
+        }
 
         return entities;
     }
