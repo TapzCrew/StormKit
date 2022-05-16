@@ -84,23 +84,11 @@ namespace stormkit::gpu {
                        Fence *fence) const noexcept -> void {
         const auto &vk = device().table();
 
-        auto vk_command_buffers = std::vector<VkCommandBuffer> {};
-        vk_command_buffers.reserve(std::size(command_buffers));
-        std::ranges::transform(command_buffers,
-                               std::back_inserter(vk_command_buffers),
-                               [](const auto &elem) { return elem->vkHandle(); });
+        const auto toVkHandle = [](const auto &elem) noexcept { return elem->vkHandle(); };
 
-        auto vk_wait_semaphores = std::vector<VkSemaphore> {};
-        vk_wait_semaphores.reserve(std::size(wait_semaphores));
-        std::ranges::transform(wait_semaphores,
-                               std::back_inserter(vk_wait_semaphores),
-                               [](const auto &elem) { return elem->vkHandle(); });
-
-        auto vk_signal_semaphores = std::vector<VkSemaphore> {};
-        vk_signal_semaphores.reserve(std::size(signal_semaphores));
-        std::ranges::transform(signal_semaphores,
-                               std::back_inserter(vk_signal_semaphores),
-                               [](const auto &elem) { return elem->vkHandle(); });
+        const auto vk_command_buffers   = core::transform(command_buffers, toVkHandle);
+        const auto vk_wait_semaphores   = core::transform(wait_semaphores, toVkHandle);
+        const auto vk_signal_semaphores = core::transform(signal_semaphores, toVkHandle);
 
         auto wait_stages = std::vector<VkPipelineStageFlags> {};
         wait_stages.resize(core::as<core::USize>(std::size(wait_semaphores)),
@@ -158,22 +146,13 @@ namespace stormkit::gpu {
         -> std::vector<gpu::CommandBuffer> {
         auto vk_command_buffers = createVkCommandBuffers(count, level);
 
-        auto command_buffers = std::vector<CommandBuffer> {};
-        command_buffers.reserve(std::size(vk_command_buffers));
-
-        std::ranges::transform(vk_command_buffers,
-                               std::back_inserter(command_buffers),
-                               [level, this](const auto &elem) {
-                                   return CommandBuffer { *this,
-                                                          level,
-                                                          elem,
-                                                          [this](auto cmb) {
-                                                              deleteCommandBuffer(cmb);
-                                                          },
-                                                          CommandBuffer::Tag {} };
-                               });
-
-        return command_buffers;
+        return core::transform(vk_command_buffers, [level, this](const auto &elem) {
+            return CommandBuffer { *this,
+                                   level,
+                                   elem,
+                                   [this](auto cmb) { deleteCommandBuffer(cmb); },
+                                   CommandBuffer::Tag {} };
+        });
     }
 
     /////////////////////////////////////
@@ -182,21 +161,14 @@ namespace stormkit::gpu {
         -> std::vector<gpu::CommandBufferOwnedPtr> {
         auto vk_command_buffers = createVkCommandBuffers(count, level);
 
-        auto command_buffers = std::vector<CommandBufferOwnedPtr> {};
-        command_buffers.reserve(std::size(vk_command_buffers));
-
-        std::ranges::transform(vk_command_buffers,
-                               std::back_inserter(command_buffers),
-                               [level, this](const auto &elem) {
-                                   return std::make_unique<CommandBuffer>(
-                                       *this,
-                                       level,
-                                       elem,
-                                       [this](auto cmb) { deleteCommandBuffer(cmb); },
-                                       CommandBuffer::Tag {});
-                               });
-
-        return command_buffers;
+        return core::transform(vk_command_buffers, [level, this](const auto &elem) {
+            return std::make_unique<CommandBuffer>(
+                *this,
+                level,
+                elem,
+                [this](auto cmb) { deleteCommandBuffer(cmb); },
+                CommandBuffer::Tag {});
+        });
     }
 
     /////////////////////////////////////
@@ -206,21 +178,14 @@ namespace stormkit::gpu {
         -> std::vector<gpu::CommandBufferSharedPtr> {
         auto vk_command_buffers = createVkCommandBuffers(count, level);
 
-        auto command_buffers = std::vector<CommandBufferSharedPtr> {};
-        command_buffers.reserve(std::size(vk_command_buffers));
-
-        std::ranges::transform(vk_command_buffers,
-                               std::back_inserter(command_buffers),
-                               [level, this](const auto &elem) {
-                                   return std::make_shared<CommandBuffer>(
-                                       *this,
-                                       level,
-                                       elem,
-                                       [this](auto cmb) { deleteCommandBuffer(cmb); },
-                                       CommandBuffer::Tag {});
-                               });
-
-        return command_buffers;
+        return core::transform(vk_command_buffers, [level, this](const auto &elem) {
+            return std::make_shared<CommandBuffer>(
+                *this,
+                level,
+                elem,
+                [this](auto cmb) { deleteCommandBuffer(cmb); },
+                CommandBuffer::Tag {});
+        });
     }
 
     /////////////////////////////////////
