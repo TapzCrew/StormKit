@@ -92,12 +92,11 @@ export {
         template<class T, class... Args>
         concept PredicateType = std::predicate<T, Args...>;
 
-        template<class T, class... Args>
-        concept UnaryPredicateType = sizeof...(Args) == 1 && PredicateType<T, Args...>;
+        template<class T, class U>
+        concept UnaryPredicateType = PredicateType<T, const U &>;
 
-        template<class T, class U, class... Args>
-        concept BinaryPredicateType = sizeof...(Args) == 1 &&
-                                      (Is<U, Args>, ...) && PredicateType<T, U, Args...>;
+        template<class T, class U>
+        concept BinaryPredicateType = PredicateType<T, const U &, const U &>;
     } // namespace stormkit::core
 
 #if defined(STORMKIT_CXX20_MODULES)
