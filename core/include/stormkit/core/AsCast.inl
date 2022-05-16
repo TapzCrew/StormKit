@@ -37,7 +37,7 @@ namespace stormkit::core {
     template<typename To, RawPointerType From>
     requires std::derived_from<To, std::remove_pointer_t<From>>
     constexpr auto is(From &&value) noexcept -> bool {
-        return dynamic_cast<To *>(value) != nullptr;
+        return dynamic_cast<const To *>(value) != nullptr;
     }
 
     /////////////////////////////////////
