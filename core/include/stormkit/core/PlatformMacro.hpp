@@ -12,7 +12,32 @@
     #pragma warning(disable : 4251)
     #define STORMKIT_COMPILER_MSVC "MSVC " + std::to_string(_MSC_VER)
     #define STORMKIT_COMPILER STORMKIT_COMPILER_MSVC
-#elif defined(__clang__)
+    #define STORMKIT_EXPORT [[msvc::dllexport]]
+    #define STORMKIT_IMPORT [[msvc::dllimport]]
+    #define STORMKIT_PRIVATE
+#elif defined(__MINGW32__)
+    #define STORMKIT_EXPORT __declspec(dllexport)
+    #define STORMKIT_IMPORT __declspec(dllimport)
+    #define STORMKIT_PRIVATE
+#else
+    #define STORMKIT_IMPORT [[gnu::visibility("default")]]
+    #define STORMKIT_EXPORT [[gnu::visibility("default")]]
+    #define STORMKIT_PRIVATE [[gnu::visibility("hidden")]]
+#endif
+
+#if defined(__MINGW32__)
+    #define STORMKIT_COMPILER STORMKIT_COMPILER_MINGW
+    #if defined(__clang__)
+        #define STORMKIT_COMPILER_CLANG "MinGW Clang " + __clang_version__
+        #define STORMKIT_COMPILER STORMKIT_COMPILER_CLANG
+    #elif defined(__GNUC__) || defined(__GNUG__)
+        #define STORMKIT_COMPILER_GCC                                                              \
+            "MinGW GCC " + std::to_string(__GNUC__) + "." + std::to_string(__GNUC_MINOR__) + "." + \
+                "." + std::to_string(__GNUC_PATCHLEVEL__)
+        #define STORMKIT_COMPILER_MINGW STORMKIT_COMPILER_GCC
+    #endif
+    #define STORMKIT_COMPILER_MINGW STORMKIT_COMPILER
+#elif defined(__clang__) && !defined(_MSC_VER)
     #define STORMKIT_COMPILER_CLANG "Clang " + __clang_version__
     #define STORMKIT_COMPILER STORMKIT_COMPILER_CLANG
 #elif defined(__GNUC__) || defined(__GNUG__)
@@ -24,18 +49,12 @@
 
 #if defined(__SWITCH__)
     #define STORMKIT_OS_NX "Nintendo Switch"
-    #define STORMKIT_BITS 64
-    #define STORMKIT_IMPORT [[gnu::visibility("default")]]
-    #define STORMKIT_EXPORT [[gnu::visibility("default")]]
-    #define STORMKIT_PRIVATE [[gnu::visibility("hidden")]]
+    #define STORMKIT_BITS_64
     #define STORMKIT_OS STORMKIT_OS_NX
 #elif defined(_WIN64)
     #define STORMKIT_OS_WIN64 "Windows 64 bits" A
     #define STORMKIT_OS_WINDOWS STORMKIT_OS_WIN64
     #define STORMKIT_BITS_64
-    #define STORMKIT_EXPORT __declspec(dllexport)
-    #define STORMKIT_IMPORT __declspec(dllimport)
-    #define STORMKIT_PRIVATE
     #define STORMKIT_OS STORMKIT_OS_WIN64
 #elif defined(_WIN32)
 extern "C" {
@@ -44,16 +63,11 @@ extern "C" {
     #define STORMKIT_OS_WIN32 "Windows 32 bits"
     #define STORMKIT_OS_WINDOWS STORMKIT_OS_WIN32
     #define STORMKIT_BITS_32
-    #define STORMKIT_EXPORT [[msvc::dllexport]]
-    #define STORMKIT_IMPORT [[msvc::dllimport]]
     #define STORMKIT_PRIVATE
     #define STORMKIT_OS STORMKIT_OS_WIN32
 #elif defined(__ANDROID__)
     #define STORMKIT_OS_ANDROID "Android"
     #define STORMKIT_OS STORMKIT_OS_ANDROID
-    #define STORMKIT_EXPORT [[gnu::visibility("default")]]
-    #define STORMKIT_IMPORT [[gnu::visibility("default")]]
-    #define STORMKIT_PRIVATE [[gnu::visibility("hidden")]]
 #elif defined(__linux__)
     #if defined(__x86_64__)
         #define STORMKIT_OS_LINUX64 "Linux 64 bits"
@@ -66,9 +80,6 @@ extern "C" {
     #endif
 
     #define STORMKIT_OS STORMKIT_OS_LINUX
-    #define STORMKIT_EXPORT [[gnu::visibility("default")]]
-    #define STORMKIT_IMPORT [[gnu::visibility("default")]]
-    #define STORMKIT_PRIVATE [[gnu::visibility("hidden")]]
 #elif defined(__MACH__)
 extern "C" {
     #include <TargetConditionals.h>
@@ -85,9 +96,6 @@ extern "C" {
         #define STORMKIT_OS_APPLE STORMKIT_OS_MACOS
     #endif
     #define STORMKIT_OS STORMKIT_OS_APPLE
-    #define STORMKIT_EXPORT [[gnu::visibility("default")]]
-    #define STORMKIT_IMPORT [[gnu::visibility("default")]]
-    #define STORMKIT_PRIVATE [[gnu::visibility("hidden")]]
 #else
     #error "Targeted platform not supported !"
 #endif
