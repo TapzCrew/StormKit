@@ -302,12 +302,18 @@ namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
     inline auto printStacktrace() noexcept -> void {
+#ifndef STORMKIT_HAS_STD_STACKTRACE
         using namespace backward;
         auto st = StackTrace {};
         st.load_here(32);
 
         auto p = Printer {};
         p.print(st);
+#else
+        auto st = std::basic_stacktrace::current();
+
+        std::cerr << st << std::endl;
+#endif
     }
 
     /////////////////////////////////////

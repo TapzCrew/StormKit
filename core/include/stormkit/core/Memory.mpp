@@ -32,16 +32,22 @@ export {
     #include <algorithm>
     #include <array>
 
-    #ifdef module
-        #undef module
-        #define module_back
-    #endif
+    #if defined(__cpp_lib_stacktrace) || __has_include(<stacktrace>)
+        #define STORMKIT_HAS_STD_STACKTRACE
+        #include <iostream>
+        #include <stacktrace>
+    #else
+        #ifdef module
+            #undef module
+            #define module_back
+        #endif
 
-    #include <backward/backward.hpp>
+        #include <backward/backward.hpp>
 
-    #ifdef module_back
-        #undef module_back
-        #define module
+        #ifdef module_back
+            #undef module_back
+            #define module
+        #endif
     #endif
 
     #include <iterator>
