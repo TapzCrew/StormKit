@@ -36,6 +36,11 @@ jobs:
         - name: Install xmake
           uses: xmake-io/github-action-setup-xmake@v1
 
+        - name: Checkout
+          uses: actions/checkout@v2
+          with:
+            fetch-depth: 0
+            
         - name: Configure & Build
           id: confandbuild
           run: |
