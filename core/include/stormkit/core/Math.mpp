@@ -98,14 +98,12 @@ export {
         } // namespace details
 
         template<class T>
-        struct VectorLike: Addable<T>,
-                           Subtractable<T>,
-                           Multiplicable<T>,
-                           Divisible<T>,
-                           Modulable<T>,
-                           Comparable<T>,
-                           MethodCallable<T>,
-                           Dereferencable<T> {};
+        struct STORMKIT_PUBLIC VectorLike: Addable<T>,
+                                           Subtractable<T>,
+                                           Multiplicable<T>,
+                                           Divisible<T>,
+                                           MethodCallable<T>,
+                                           Dereferencable<T> {};
 
         /// \group vector-types Math vector types.
         ///
@@ -342,7 +340,7 @@ export {
             /// \brief Default construct an extent.
             ///
             /// `width` `height` and `depth` are default constructed to 1.
-            constexpr Extent() noexcept = default;
+            constexpr Extent() noexcept;
 
             /// \brief Construct an extent from width, height and optionnaly depth
             /// \param red The amound of width.

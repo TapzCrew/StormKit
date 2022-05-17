@@ -12,8 +12,8 @@
     #pragma warning(disable : 4251)
     #define STORMKIT_COMPILER_MSVC "MSVC " + std::to_string(_MSC_VER)
     #define STORMKIT_COMPILER STORMKIT_COMPILER_MSVC
-    #define STORMKIT_EXPORT [[msvc::dllexport]]
-    #define STORMKIT_IMPORT [[msvc::dllimport]]
+    #define STORMKIT_EXPORT __declspec(dllexport)
+    #define STORMKIT_IMPORT __declspec(dllimport)
     #define STORMKIT_PRIVATE
 #elif defined(__MINGW32__)
     #define STORMKIT_EXPORT __declspec(dllexport)

@@ -10,6 +10,11 @@ namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
     template<ArithmeticType T>
+    constexpr Extent<T>::Extent() noexcept : Extent { 0, 0 } {}
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<ArithmeticType T>
     constexpr Extent<T>::Extent(UnderlyingType _width,
                                 UnderlyingType _height,
                                 UnderlyingType _depth) noexcept
