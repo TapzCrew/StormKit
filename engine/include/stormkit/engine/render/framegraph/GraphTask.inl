@@ -52,6 +52,22 @@ namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     template<typename TaskData>
+    GraphTask<TaskData>::GraphTask(std::string name,
+                                   SetupCallback &&setup,
+                                   ExecuteCallback &&execute,
+                                   Type type,
+                                   bool cull_imune)
+        : GraphTaskBase { std::move(name), type, cull_imune }, m_setup { std::move(setup) },
+          m_execute { std::move(execute) } {}
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<typename TaskData>
+    GraphTask<TaskData>::~GraphTask() = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<typename TaskData>
     auto GraphTask<TaskData>::data() const noexcept -> const TaskData & {
         return m_data;
     }

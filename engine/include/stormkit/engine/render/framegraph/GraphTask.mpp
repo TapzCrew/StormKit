@@ -23,8 +23,8 @@ export {
 
     #include <stormkit/gpu/Fwd.hpp>
 
-    #include <stormkit/engine/render/framegraphs/Fwd.hpp>
-    #include <stormkit/engine/render/framegraphs/GraphResource.mpp>
+    #include <stormkit/engine/render/framegraph/Fwd.hpp>
+    #include <stormkit/engine/render/framegraph/GraphResource.mpp>
 #endif
 
     namespace stormkit::engine {
@@ -54,8 +54,8 @@ export {
             auto setCullImune(bool imune) noexcept -> void;
 
           protected:
-            virtual auto setup(GraphTaskBuilder &builder) -> void;
-            virtual auto execute(gpu::CommandBuffer &cmb) -> void;
+            virtual auto setup(GraphTaskBuilder &builder) -> void = 0;
+            virtual auto execute(gpu::CommandBuffer &cmb) -> void = 0;
 
             friend class FrameGraphBuilder; // TODO rework this
 
@@ -70,11 +70,12 @@ export {
             std::vector<GraphID> m_writes;
             std::vector<GraphID> m_reads;
 
-            friend class GraphTaskBuilder; // TODO rework this
+            friend class GraphTaskBuilder;  // TODO rework this
+            friend class FrameGraphBuilder; // TODO rework this
         };
 
         template<typename T>
-        class GraphTask: public GraphTaskBase {
+        class STORMKIT_PUBLIC GraphTask: public GraphTaskBase {
           public:
             using TaskData        = T;
             using SetupCallback   = std::function<void(T &, GraphTaskBuilder &)>;

@@ -34,7 +34,7 @@ export {
     #include <stormkit/engine/render/core/VertexArray.mpp>
 #endif
 
-    static constexpr auto WINDOW_TITLE = "StormKit Triangle Example";
+    static constexpr auto WINDOW_TITLE = "StormKit Model Loading Example";
 
     static constexpr auto VERTICES = std::array {
         stormkit::engine::Vertex { .position = { 1.f, 1.f, 1.f }, .color = { 1.f, 0.f, 0.f } },

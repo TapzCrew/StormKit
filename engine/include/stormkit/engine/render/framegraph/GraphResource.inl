@@ -17,6 +17,12 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
+    inline auto GraphResourceBase::transient() const noexcept -> bool {
+        return m_creator != INVALID_ID;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
     inline auto GraphResourceBase::creator() const noexcept -> GraphID { return m_creator; }
 
     /////////////////////////////////////
@@ -37,29 +43,29 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    template<typename D>
-    GraphResource<D>::GraphResource(std::string name, GraphID id, Description &&description)
-        : GraphResourceBase { std::move(name), id }, m_description { std::forward<Description>(
-                                                         description) } {}
+    template<ResourceDescriptionType D>
+    GraphResource<D>::GraphResource(std::string name, GraphID creator, Description &&description)
+        : GraphResourceBase { std::move(name), creator }, m_description { std::forward<Description>(
+                                                              description) } {}
 
     /////////////////////////////////////
     /////////////////////////////////////
-    template<typename D>
+    template<ResourceDescriptionType D>
     GraphResource<D>::~GraphResource() = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
-    template<typename D>
+    template<ResourceDescriptionType D>
     GraphResource<D>::GraphResource(GraphResource &&other) noexcept = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
-    template<typename D>
+    template<ResourceDescriptionType D>
     auto GraphResource<D>::operator=(GraphResource &&other) noexcept -> GraphResource & = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
-    template<typename D>
+    template<ResourceDescriptionType D>
     inline auto GraphResource<D>::description() const noexcept -> const Description & {
         return m_description;
     }

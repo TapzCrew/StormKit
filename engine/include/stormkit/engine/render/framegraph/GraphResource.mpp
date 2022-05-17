@@ -19,19 +19,33 @@ import stormkit.gpu.core.vulkan;
 export {
 #else
     /////////// - StormKit::core - ///////////
+    #include <stormkit/core/Concepts.mpp>
     #include <stormkit/core/Types.mpp>
 
-    #include <stormkit/engine/render/framegraphs/Fwd.hpp>
+    #include <stormkit/gpu/core/Types.mpp>
+
+    #include <stormkit/engine/render/framegraph/Fwd.hpp>
 #endif
 
     namespace stormkit::engine {
-        struct BufferDescription {};
-        struct ImageDescription {};
+        struct BufferDescription {
+            core::USize size;
+        };
+
+        struct ImageDescription {
+            core::ExtentU extent;
+            gpu::ImageType type;
+            gpu::PixelFormat format;
+
+            core::UInt32 layers = 1u;
+
+            std::optional<gpu::ClearValue> clear_value;
+        };
 
         class STORMKIT_PUBLIC GraphResourceBase {
           public:
             GraphResourceBase(std::string name, GraphID creator);
-            ~GraphResourceBase();
+            virtual ~GraphResourceBase() = 0;
 
             GraphResourceBase(const GraphResourceBase &) = delete;
             auto operator=(const GraphResourceBase &) -> GraphResourceBase & = delete;
@@ -41,6 +55,7 @@ export {
 
             auto id() const noexcept -> GraphID;
             auto name() const noexcept -> std::string_view;
+            auto transient() const noexcept -> bool;
             auto creator() const noexcept -> GraphID;
             auto writers() const noexcept -> std::span<const GraphID>;
             auto readers() const noexcept -> std::span<const GraphID>;
@@ -57,16 +72,17 @@ export {
 
             core::USize m_ref_count;
 
-            friend class GraphTaskBuilder;
+            friend class GraphTaskBuilder;  // TODO rework this
+            friend class FrameGraphBuilder; // TODO rework this
         };
 
-        template<typename D>
+        template<ResourceDescriptionType D>
         class STORMKIT_PUBLIC GraphResource: public GraphResourceBase {
           public:
             using Description = D;
 
-            GraphResource(std::string name, GraphID id, Description &&description);
-            ~GraphResource();
+            GraphResource(std::string name, GraphID creator, Description &&description);
+            ~GraphResource() override;
 
             GraphResource(const GraphResource &) = delete;
             auto operator=(const GraphResource &) -> GraphResource & = delete;
@@ -79,6 +95,9 @@ export {
           private:
             Description m_description;
         };
+
+        using GraphBuffer = GraphResource<BufferDescription>;
+        using GraphImage  = GraphResource<ImageDescription>;
     } // namespace stormkit::engine
 
 #include "GraphResource.inl"

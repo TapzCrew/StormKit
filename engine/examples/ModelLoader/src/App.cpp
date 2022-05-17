@@ -9,6 +9,10 @@
 
 #include <stormkit/engine/Engine.mpp>
 #include <stormkit/engine/render/MeshComponent.mpp>
+#include <stormkit/engine/render/Renderer.mpp>
+#include <stormkit/engine/render/framegraph/FrameGraphBuilder.mpp>
+#include <stormkit/engine/render/framegraph/GraphResource.mpp>
+#include <stormkit/engine/render/framegraph/GraphTaskBuilder.mpp>
 
 using namespace stormkit;
 
@@ -29,7 +33,30 @@ auto App::doInitEngine() -> void {
     m_window =
         std::make_unique<wsi::Window>(WINDOW_TITLE, core::ExtentU { 800u, 600u }, window_style);
 
-    m_engine = std::make_unique<engine::Engine>(*m_window);
+    m_engine       = std::make_unique<engine::Engine>(*m_window);
+    auto &renderer = m_engine->renderer();
+
+    renderer.setBuildFrameGraphCallback([&](auto &builder) -> void {
+        const auto &size = m_window->size();
+        struct SimplePass {
+            engine::GraphImage *output;
+        };
+
+        const auto &task = builder.addTask<SimplePass>(
+            "SimplePass",
+            [&](auto &data, auto &builder) {
+                data.output = &builder.create("Backbuffer",
+                                              engine::ImageDescription {
+                                                  .extent = { size.width, size.height },
+                                                  .type   = gpu::ImageType::T2D,
+                                                  .format = gpu::PixelFormat::RGBA8_UNorm });
+            },
+            [=](const auto &data, auto &cmb) {},
+            engine::GraphTaskBase::Type::Graphics,
+            true);
+
+        builder.setFinalResource(task.data().output->id());
+    });
 }
 
 auto App::doInitMesh() -> void {

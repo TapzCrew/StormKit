@@ -7,9 +7,9 @@
 #include "GraphTaskBuilder.mpp"
 
 namespace stormkit::engine {
-    template<typename Description>
+    template<ResourceDescriptionType Description>
     auto GraphTaskBuilder::create(std::string name, Description &&description)
-        -> const GraphResource<Description> & {
+        -> GraphResource<Description> & {
         const auto &resource = m_framegraph->m_resources.emplace_back(
             std::make_unique<GraphResource<Description>>(std::move(name),
                                                          m_task->id(),
@@ -17,10 +17,10 @@ namespace stormkit::engine {
 
         m_task->m_creates.emplace_back(resource->id());
 
-        return static_cast<GraphResource<Description &>>(*resource);
+        return static_cast<GraphResource<Description> &>(*resource);
     }
 
-    template<typename Description>
+    template<ResourceDescriptionType Description>
     auto GraphTaskBuilder::read(GraphResource<Description> &resource)
         -> GraphResource<Description> & {
         resource.m_readers.emplace_back(m_task->id());
@@ -29,11 +29,20 @@ namespace stormkit::engine {
         return resource;
     }
 
-    template<typename Description>
+    template<ResourceDescriptionType Description>
     auto GraphTaskBuilder::write(GraphResource<Description> &resource)
         -> GraphResource<Description> & {
         resource.m_writers.emplace_back(m_task->id());
         m_task->m_writes.emplace_back(resource.id());
+
+        return resource;
+    }
+
+    template<ResourceDescriptionType Description>
+    auto GraphTaskBuilder::readwrite(GraphResource<Description> &resource)
+        -> GraphResource<Description> & {
+        [[maybe_unused]] const auto _1 = read(resource);
+        [[maybe_unused]] const auto _2 = write(resource);
 
         return resource;
     }

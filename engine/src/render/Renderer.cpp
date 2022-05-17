@@ -13,8 +13,8 @@
 #include <stormkit/engine/Engine.mpp>
 #include <stormkit/engine/render/Renderer.mpp>
 #include <stormkit/engine/render/core/RenderQueue.mpp>
-#include <stormkit/engine/render/framegraphs/BakedFrameGraph.mpp>
-#include <stormkit/engine/render/framegraphs/FrameGraphBuilder.mpp>
+#include <stormkit/engine/render/framegraph/BakedFrameGraph.mpp>
+#include <stormkit/engine/render/framegraph/FrameGraphBuilder.mpp>
 
 #include <stormkit/gpu/core/Device.mpp>
 #include <stormkit/gpu/core/Instance.mpp>
@@ -50,7 +50,7 @@ namespace stormkit::engine {
     Renderer::Renderer(Engine &engine) : m_engine { &engine } {
         m_instance = std::make_unique<gpu::Instance>();
         ilog("Render backend successfully initialized");
-        ilog("Using StormKit {}.{}.{} {} {}, built with {}",
+        ilog("Using StormKit {}.{}.{} (branch: {}, commit_hash: {}), built with {}",
              core::STORMKIT_MAJOR_VERSION,
              core::STORMKIT_MINOR_VERSION,
              core::STORMKIT_PATCH_VERSION,
@@ -80,13 +80,14 @@ namespace stormkit::engine {
 
         m_render_queue = std::make_unique<RenderQueue>();
 
-        reallocateViewDependentResources();
-
-        m_builder = std::make_unique<FrameGraphBuilder>();
+        m_builder = std::make_unique<FrameGraphBuilder>(*m_engine);
 
         auto &world = m_engine->world();
 
         world.addSystem<RendererSyncSystem>(*m_render_queue);
+
+        m_framegraphs.resize(m_surface->bufferingCount());
+        m_framegraph_states.resize(m_surface->bufferingCount());
 
         m_render_thread = std::thread { [this] { threadLoop(); } };
         core::setThreadName(m_render_thread, "Render Thread");
@@ -105,11 +106,20 @@ namespace stormkit::engine {
         other.m_stop_thread = true;
         if (other.m_render_thread.joinable()) other.m_render_thread.join();
 
+        m_engine           = std::exchange(other.m_engine, nullptr);
+        m_build_framegraph = std::exchange(other.m_build_framegraph, {});
+
         m_instance      = std::move(other.m_instance);
         m_device        = std::move(other.m_device);
         m_surface       = std::move(other.m_surface);
-        m_surface_views = std::move(other.m_surface_views);
         m_render_thread = std::thread { [this] { threadLoop(); } };
+
+        m_updated.store(other.m_updated.load());
+        other.m_updated     = false;
+        m_render_queue      = std::move(other.m_render_queue);
+        m_builder           = std::move(other.m_builder);
+        m_framegraphs       = std::move(other.m_framegraphs);
+        m_framegraph_states = std::move(other.m_framegraph_states);
     }
 
     /////////////////////////////////////
@@ -121,11 +131,20 @@ namespace stormkit::engine {
         other.m_stop_thread = true;
         if (other.m_render_thread.joinable()) other.m_render_thread.join();
 
+        m_engine           = std::exchange(other.m_engine, nullptr);
+        m_build_framegraph = std::exchange(other.m_build_framegraph, {});
+
         m_instance      = std::move(other.m_instance);
         m_device        = std::move(other.m_device);
         m_surface       = std::move(other.m_surface);
-        m_surface_views = std::move(other.m_surface_views);
         m_render_thread = std::thread { [this] { threadLoop(); } };
+
+        m_updated.store(other.m_updated.load());
+        other.m_updated     = false;
+        m_render_queue      = std::move(other.m_render_queue);
+        m_builder           = std::move(other.m_builder);
+        m_framegraphs       = std::move(other.m_framegraphs);
+        m_framegraph_states = std::move(other.m_framegraph_states);
 
         return *this;
     }
@@ -134,19 +153,33 @@ namespace stormkit::engine {
     /////////////////////////////////////
     auto Renderer::threadLoop() -> void {
         while (!m_stop_thread) {
-            if (m_surface->needRecreate()) {
+            if (m_surface->needRecreate()) [[unlikely]] {
                 m_surface->recreate();
-                reallocateViewDependentResources();
+
+                m_updated = true;
             }
 
             if (m_updated) {
                 m_updated = false;
 
+                rebuildFrameGraph();
+
+                std::ranges::fill(m_framegraph_states, FrameGraphState::Old);
                 m_render_queue->update();
-                m_framegraph = m_builder->bake();
             }
 
             auto frame = std::move(m_surface->acquireNextFrame().value());
+
+            auto &framegraph = m_framegraphs[frame.image_index];
+            if (m_framegraph_states[frame.image_index] == FrameGraphState::Old) {
+                framegraph = m_builder->allocateFrameGraph(framegraph.get());
+                framegraph->setBackbuffer(m_surface->images()[frame.image_index]);
+
+                m_framegraph_states[frame.image_index] = FrameGraphState::Updated;
+            }
+
+            framegraph->execute(frame);
+
             m_surface->present(frame);
         }
 
@@ -155,15 +188,11 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto Renderer::reallocateViewDependentResources() -> void {
-        const auto &images = m_surface->images();
+    auto Renderer::rebuildFrameGraph() -> void {
+        m_builder->reset();
 
-        m_surface_views.clear();
-        m_surface_views.reserve(std::size(images));
-        for (const auto &image : images) m_surface_views.emplace_back(image.createView());
+        m_build_framegraph(*m_builder);
+
+        m_builder->bake();
     }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto Renderer::rebuildFrameGraph() -> void {}
 } // namespace stormkit::engine

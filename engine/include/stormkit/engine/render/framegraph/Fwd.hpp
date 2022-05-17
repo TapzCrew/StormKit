@@ -25,7 +25,14 @@ namespace stormkit::engine {
     class GraphResourceBase;
     DECLARE_PTR_AND_REF(GraphResourceBase);
 
-    template<typename Description>
+    struct BufferDescription;
+    struct ImageDescription;
+
+    template<typename T>
+    concept ResourceDescriptionType =
+        core::Is<T, BufferDescription> || core::Is<T, ImageDescription>;
+
+    template<ResourceDescriptionType Description>
     class GraphResource;
     DECLARE_PTR_AND_REF_TEMPLATE(GraphResource, Description);
 
@@ -39,5 +46,6 @@ namespace stormkit::engine {
     class GraphTaskBuilder;
     DECLARE_PTR_AND_REF(GraphTaskBuilder);
 
-    using GraphID = core::UInt64;
+    using GraphID                    = core::UInt64;
+    static constexpr auto INVALID_ID = std::numeric_limits<GraphID>::max();
 } // namespace stormkit::engine

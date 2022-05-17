@@ -1,31 +1,24 @@
-
 // Copyright (C) 2022 Arthur LAURENT <arthur.laurent4@gmail.com>
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#include <stormkit/engine/render/framegraph/GraphResource.mpp>
+#pragma once
+
+#include "Renderer.mpp"
 
 namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
-    GraphResourceBase::GraphResourceBase(std::string name, GraphID creator)
-        : m_creator { creator }, m_name { std::move(name) } {
-        static GraphID s_next_id = 0;
-
-        m_id = s_next_id++;
+    inline auto Renderer::setBuildFrameGraphCallback(BuildFrameGraphCallback callback) -> void {
+        m_build_framegraph = std::move(callback);
     }
-
     /////////////////////////////////////
     /////////////////////////////////////
-    GraphResourceBase::~GraphResourceBase() = default;
-
+    inline auto Renderer::instance() const noexcept -> const gpu::Instance & { return *m_instance; }
     /////////////////////////////////////
     /////////////////////////////////////
-    GraphResourceBase::GraphResourceBase(GraphResourceBase &&other) noexcept = default;
-
+    inline auto Renderer::device() const noexcept -> const gpu::Device & { return *m_device; }
     /////////////////////////////////////
     /////////////////////////////////////
-    auto GraphResourceBase::operator=(GraphResourceBase &&other) noexcept
-        -> GraphResourceBase      & = default;
-
+    inline auto Renderer::surface() const noexcept -> const gpu::Surface & { return *m_surface; }
 } // namespace stormkit::engine

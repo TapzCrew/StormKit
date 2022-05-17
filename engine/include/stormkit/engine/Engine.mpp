@@ -53,6 +53,8 @@ export {
             auto threadPool() noexcept -> core::ThreadPool &;
             auto threadPool() const noexcept -> const core::ThreadPool &;
 
+            auto renderer() noexcept -> Renderer &;
+
             auto run(const int argc, const char **argv) -> stormkit::core::Int32;
 
           private:

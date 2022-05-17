@@ -15,7 +15,7 @@
 #include <stormkit/core/MemoryMacro.hpp>
 
 #include <stormkit/engine/render/core/Fwd.hpp>
-#include <stormkit/engine/render/framegraphs/Fwd.hpp>
+#include <stormkit/engine/render/framegraph/Fwd.hpp>
 
 namespace stormkit::engine {
     struct MeshComponent;

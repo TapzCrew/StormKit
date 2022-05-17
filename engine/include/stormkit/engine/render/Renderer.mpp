@@ -35,11 +35,14 @@ export {
 
     /////////// - StormKit::gpu - ///////////
     #include <stormkit/engine/Fwd.hpp>
+    #include <stormkit/engine/render/framegraph/GraphResource.mpp>
 #endif
 
     namespace stormkit::engine {
         class STORMKIT_PUBLIC Renderer {
           public:
+            using BuildFrameGraphCallback = std::function<void(FrameGraphBuilder &graph_builder)>;
+
             explicit Renderer(Engine &engine);
             ~Renderer();
 
@@ -49,19 +52,24 @@ export {
             Renderer(Renderer &&) noexcept;
             auto operator=(Renderer &&) noexcept -> Renderer &;
 
+            auto setBuildFrameGraphCallback(BuildFrameGraphCallback callback) -> void;
+
+            auto instance() const noexcept -> const gpu::Instance &;
+            auto device() const noexcept -> const gpu::Device &;
+            auto surface() const noexcept -> const gpu::Surface &;
+
           private:
+            enum class FrameGraphState { Updated, Old };
+
             auto threadLoop() -> void;
-            auto reallocateViewDependentResources() -> void;
             auto rebuildFrameGraph() -> void;
 
             Engine *m_engine = nullptr;
+            BuildFrameGraphCallback m_build_framegraph;
 
             gpu::InstanceOwnedPtr m_instance;
             gpu::DeviceOwnedPtr m_device;
             gpu::SurfaceOwnedPtr m_surface;
-            std::vector<gpu::ImageView> m_surface_views;
-
-            std::vector<gpu::CommandBuffer> m_main_command_buffers;
 
             std::atomic_bool m_stop_thread = false;
             std::thread m_render_thread;
@@ -70,6 +78,9 @@ export {
             RenderQueueOwnedPtr m_render_queue;
             FrameGraphBuilderOwnedPtr m_builder;
 
-            BakedFrameGraphOwnedPtr m_framegraph;
+            std::vector<BakedFrameGraphOwnedPtr> m_framegraphs;
+            std::vector<FrameGraphState> m_framegraph_states;
         };
     } // namespace stormkit::engine
+
+#include "Renderer.inl"
