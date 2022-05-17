@@ -26,17 +26,20 @@ jobs:
     env:
       VCPKG_FEATURE_FLAGS: "binarycaching"
     steps:
-        - name: Checkout
-          uses: actions/checkout@v2
-          with:
-            lfs: true
-            fetch-depth: 0
-
         - name: Install brew dependencies
           run: |
             brew update
             brew tap apenngrace/homebrew-vulkan
-            brew install vulkan-sdk wget p7zip
+            brew install vulkan-sdk wget p7zip curl
+
+        - name: Install xmake
+          run: |
+            bash <(curl -fsSL https://xmake.io/shget.text)
+
+        - name: Checkout
+          uses: actions/checkout@v2
+          with:
+            fetch-depth: 0
 
         - name: Configure & Build
           id: confandbuild
