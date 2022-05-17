@@ -51,7 +51,7 @@ target("stormkit-core")
     add_includedirs("include", { public = true })
     add_includedirs("$(buildir)/include")
 
-    set_configdir("$(buildir)/include/stormkit/core/")
+    set_configdir("$(buildir)/include/")
     add_configfiles("include/(stormkit/**.mpp.in)")
 
     add_options("enable_cxx20_modules")
