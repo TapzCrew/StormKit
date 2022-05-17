@@ -41,7 +41,9 @@ jobs:
         - name: Configure & Build
           id: confandbuild
           run: |
-            xmake f -v --yes -m ${{ matrix.build_type }} -k ${{ matrix.kind }}
+            xrepo install llvm
+            $LLVM_TOOLCHAIN=xrepo info llvm | grep "installdir:" | grep -o "/"
+            xmake f -v --yes -m ${{ matrix.build_type }} -k ${{ matrix.kind }} --sdk=$LLVM_TOOLCHAIN
             xmake b -v
 
         - name: Install
