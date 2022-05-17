@@ -16,7 +16,7 @@ jobs:
         os:
         - {
            name: "Ubuntu",
-           compiler: "GCC12",
+           compiler: "GCC",
            value: ubuntu-22.04,
            triplet: "x64-linux"
         }
