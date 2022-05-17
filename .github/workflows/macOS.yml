@@ -23,8 +23,6 @@ jobs:
 
         library_type: [static, shared]
         build_type: [release, debug]
-    env:
-      VCPKG_FEATURE_FLAGS: "binarycaching"
     steps:
         - name: Install brew dependencies
           run: |
@@ -36,7 +34,7 @@ jobs:
           uses: actions/checkout@v2
           with:
             fetch-depth: 0
-
+            
         - name: Configure & Build
           id: confandbuild
           run: |
