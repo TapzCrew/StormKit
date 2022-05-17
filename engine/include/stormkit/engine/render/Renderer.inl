@@ -15,10 +15,24 @@ namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     inline auto Renderer::instance() const noexcept -> const gpu::Instance & { return *m_instance; }
+
     /////////////////////////////////////
     /////////////////////////////////////
     inline auto Renderer::device() const noexcept -> const gpu::Device & { return *m_device; }
+
     /////////////////////////////////////
     /////////////////////////////////////
     inline auto Renderer::surface() const noexcept -> const gpu::Surface & { return *m_surface; }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Renderer::pipelineCache() noexcept -> gpu::PipelineCache & {
+        return *m_pipeline_cache;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Renderer::pipelineCache() const noexcept -> const gpu::PipelineCache & {
+        return *m_pipeline_cache;
+    }
 } // namespace stormkit::engine

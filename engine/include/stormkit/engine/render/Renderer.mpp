@@ -60,6 +60,9 @@ export {
 
             auto pipelineCache() noexcept -> gpu::PipelineCache &;
             auto pipelineCache() const noexcept -> const gpu::PipelineCache &;
+
+            static auto forwardRenderer(Engine &engine) noexcept -> BuildFrameGraphCallback;
+
           private:
             enum class FrameGraphState { Updated, Old };
 
@@ -81,6 +84,7 @@ export {
             FrameGraphBuilderOwnedPtr m_builder;
 
             gpu::PipelineCacheOwnedPtr m_pipeline_cache;
+
             std::vector<BakedFrameGraphOwnedPtr> m_framegraphs;
             std::vector<FrameGraphState> m_framegraph_states;
         };

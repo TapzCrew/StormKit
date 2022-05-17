@@ -36,27 +36,7 @@ auto App::doInitEngine() -> void {
     m_engine       = std::make_unique<engine::Engine>(*m_window);
     auto &renderer = m_engine->renderer();
 
-    renderer.setBuildFrameGraphCallback([&](auto &builder) -> void {
-        const auto &size = m_window->size();
-        struct SimplePass {
-            engine::GraphImage *output;
-        };
-
-        const auto &task = builder.addTask<SimplePass>(
-            "SimplePass",
-            [&](auto &data, auto &builder) {
-                data.output = &builder.create("Backbuffer",
-                                              engine::ImageDescription {
-                                                  .extent = { size.width, size.height },
-                                                  .type   = gpu::ImageType::T2D,
-                                                  .format = gpu::PixelFormat::RGBA8_UNorm });
-            },
-            [=](const auto &data, auto &cmb) {},
-            engine::GraphTaskBase::Type::Graphics,
-            true);
-
-        builder.setFinalResource(task.data().output->id());
-    });
+    renderer.setBuildFrameGraphCallback(engine::Renderer::forwardRenderer(*m_engine));
 }
 
 auto App::doInitMesh() -> void {
