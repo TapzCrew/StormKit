@@ -40,7 +40,7 @@ jobs:
           uses: actions/checkout@v2
           with:
             fetch-depth: 0
-            
+
         - name: Configure & Build
           id: confandbuild
           run: |
@@ -50,8 +50,10 @@ jobs:
             }
 
             if("${{ matrix.os.compiler }}" -eq "MinGW") {
-              xrepo install --yes llvm-mingw 
-              xmake f -v --yes -m ${{ matrix.build_type }} -k ${{ matrix.kind }} -p mingw@llvm-mingw
+              xrepo install --yes llvm-mingw
+              $MINGW_INSTALL_DIR = xrepo info llvm-mingw | Out-String
+              $MINGW_INSTALL_DIR -match 'installdir: (C.+)'
+              xmake f -v --yes -m ${{ matrix.build_type }} -k ${{ matrix.kind }} -p mingw --sdk="$Matches[1]"
             } else {
               xmake f -v --yes -m ${{ matrix.build_type }} -k ${{ matrix.kind }} --vs_runtime=$VS_RUNTIME
             }
