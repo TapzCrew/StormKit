@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    name: ${{ matrix.os.name }} ( ${{matrix.os.compiler }} ${{ matrix.library_type }}, ${{ matrix.build_type }} )
+    name: ${{ matrix.os.name }} ( ${{matrix.os.compiler }} ${{ matrix.kind }}, ${{ matrix.build_type }} )
     runs-on: ${{ matrix.os.value }}
     strategy:
       fail-fast: false
@@ -21,14 +21,17 @@ jobs:
            triplet: "x64-macos"
         }
 
-        library_type: [static, shared]
+        kind: [static, shared]
         build_type: [release, debug]
     steps:
         - name: Install brew dependencies
           run: |
             brew update
             brew tap apenngrace/homebrew-vulkan
-            brew install vulkan-sdk wget p7zip curl xmake
+            brew install vulkan-sdk wget p7zip
+
+        - name: Install xmake
+          uses: xmake-io/github-action-setup-xmake@v1
 
         - name: Checkout
           uses: actions/checkout@v2
@@ -38,7 +41,7 @@ jobs:
         - name: Configure & Build
           id: confandbuild
           run: |
-            xmake f -v --yes -m ${{ matrix.build_type }} -k ${{ matrix.library_type }}
+            xmake f -v --yes -m ${{ matrix.build_type }} -k ${{ matrix.kind }}
             xmake b
 
         - name: Install
@@ -50,5 +53,5 @@ jobs:
           id: upload
           uses: actions/upload-artifact@v1
           with:
-            name: ${{ matrix.os.name }}-${{ matrix.os.compiler }}-${{ matrix.library_type }}-${{ matrix.build_type }}
+            name: ${{ matrix.os.name }}-${{ matrix.os.compiler }}-${{ matrix.kind }}-${{ matrix.build_type }}
             path: ${{ runner.workspace }}/StormKit_Output

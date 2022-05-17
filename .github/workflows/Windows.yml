@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    name: ${{ matrix.os.name }} ( ${{matrix.os.compiler }} ${{ matrix.library_type }}, ${{ matrix.build_type }} )
+    name: ${{ matrix.os.name }} ( ${{matrix.os.compiler }} ${{ matrix.kind }}, ${{ matrix.build_type }} )
     runs-on: ${{ matrix.os.value }}
     strategy:
       fail-fast: false
@@ -27,26 +27,28 @@ jobs:
            triplet: "x64-windows"
         }
             
-        library_type: [static, shared]
+        kind: [static, shared]
         build_type: [release, debug]
     steps:
         - name: Install msvc
           uses: ilammy/msvc-dev-cmd@v1
 
         - name: Install xmake
-          run: |
-            Invoke-Expression (Invoke-Webrequest 'https://xmake.io/psget.text' -UseBasicParsing).Content
-            if("${{ matrix.os.compiler }}" -eq "MinGW") {
-              xrepo install llvm-mingw
-            } 
+          uses: xmake-io/github-action-setup-xmake@v1
 
         - name: Configure & Build
           id: confandbuild
           run: |
+            $VS_RUNTIME = "MD"
+            if("${{ matrix.kind }}" -eq "static") {
+                $VS_RUNTIME = "MT"
+            }
+
             if("${{ matrix.os.compiler }}" -eq "MinGW") {
-              xmake f -v --yes -m ${{ matrix.build_type }} -k ${{ matrix.library_type }} -p mingw@llvm-mingw
+              xrepo install llvm-mingw
+              xmake f -v --yes -m ${{ matrix.build_type }} -k ${{ matrix.kind }} -p mingw@llvm-mingw
             else
-              xmake f -v --yes -m ${{ matrix.build_type }} -k ${{ matrix.library_type }}
+              xmake f -v --yes -m ${{ matrix.build_type }} -k ${{ matrix.kind }} --vs_runtime=$VS_RUNTIME
             }
             xmake b
 
@@ -60,6 +62,6 @@ jobs:
           id: upload
           uses: actions/upload-artifact@v1
           with:
-            name: ${{ matrix.os.name }}-${{ matrix.os.compiler }}-${{ matrix.library_type }}-${{ matrix.build_type }}
+            name: ${{ matrix.os.name }}-${{ matrix.os.compiler }}-${{ matrix.kind }}-${{ matrix.build_type }}
             path: ${{ runner.workspace }}/StormKit_Output
  

@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    name: ${{ matrix.os.name }} ( ${{matrix.os.compiler }} ${{ matrix.library_type }}, ${{ matrix.build_type }} )
+    name: ${{ matrix.os.name }} ( ${{matrix.os.compiler }} ${{ matrix.kind }}, ${{ matrix.build_type }} )
     runs-on: ${{ matrix.os.value }}
     strategy:
       fail-fast: false
@@ -21,11 +21,8 @@ jobs:
            triplet: "x64-linux"
         }
             
-        library_type: [static, shared]
+        kind: [static, shared]
         build_type: [release, debug]
-    env:
-      CC: "gcc-12"
-      CXX: "g++-12"
     steps:
         - name: Install apt deps
           id: aptdeps
@@ -36,8 +33,8 @@ jobs:
             sudo add-apt-repository -y ppa:deadsnakes/ppa
             sudo apt -q update
             sudo apt -y install vulkan-sdk \
-              gcc-12 \
-              g++-12 \
+              gcc \
+              g++ \
               libxcb-util0-dev \
               tar \
               curl \
@@ -58,8 +55,7 @@ jobs:
               ninja-build
 
         - name: Install xmake
-          run: |
-            bash <(curl -fsSL https://xmake.io/shget.text)
+          uses: xmake-io/github-action-setup-xmake@v1
 
         - name: Checkout
           uses: actions/checkout@v2
@@ -69,7 +65,7 @@ jobs:
         - name: Configure & Build
           id: confandbuild
           run: |
-            xmake f -v --yes -m ${{ matrix.build_type }} -k ${{ matrix.library_type }}
+            xmake f -v --yes -m ${{ matrix.build_type }} -k ${{ matrix.kind }}
             xmake b
 
         - name: Install
@@ -81,6 +77,6 @@ jobs:
           id: upload
           uses: actions/upload-artifact@v1
           with:
-            name: ${{ matrix.os.name }}-${{ matrix.os.compiler }}-${{ matrix.library_type }}-${{ matrix.build_type }}
+            name: ${{ matrix.os.name }}-${{ matrix.os.compiler }}-${{ matrix.kind }}-${{ matrix.build_type }}
             path: ${{ runner.workspace }}/StormKit_Output
  
