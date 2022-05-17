@@ -471,7 +471,7 @@ namespace stormkit::engine {
                                           gpu::InheritanceInfo { task.renderpass.get(),
                                                                  0,
                                                                  task.framebuffer.get() });
-                graph_task.execute(*task.commandbuffer);
+                graph_task.execute(task.renderpass.get(), *task.commandbuffer);
                 task.commandbuffer->end();
 
                 return task;

@@ -54,8 +54,8 @@ export {
             auto setCullImune(bool imune) noexcept -> void;
 
           protected:
-            virtual auto setup(GraphTaskBuilder &builder) -> void = 0;
-            virtual auto execute(gpu::CommandBuffer &cmb) -> void = 0;
+            virtual auto setup(GraphTaskBuilder &builder) -> void                              = 0;
+            virtual auto execute(gpu::RenderPass *renderpass, gpu::CommandBuffer &cmb) -> void = 0;
 
             friend class FrameGraphBuilder; // TODO rework this
 
@@ -77,9 +77,10 @@ export {
         template<typename T>
         class STORMKIT_PUBLIC GraphTask: public GraphTaskBase {
           public:
-            using TaskData        = T;
-            using SetupCallback   = std::function<void(T &, GraphTaskBuilder &)>;
-            using ExecuteCallback = std::function<void(const T &, gpu::CommandBuffer &)>;
+            using TaskData      = T;
+            using SetupCallback = std::function<void(T &, GraphTaskBuilder &)>;
+            using ExecuteCallback =
+                std::function<void(const T &, gpu::RenderPass *, gpu::CommandBuffer &)>;
 
             GraphTask(std::string name,
                       SetupCallback &&setup,
@@ -98,7 +99,7 @@ export {
 
           protected:
             auto setup(GraphTaskBuilder &builder) -> void override;
-            auto execute(gpu::CommandBuffer &cmb) -> void override;
+            auto execute(gpu::RenderPass *renderpass, gpu::CommandBuffer &cmb) -> void override;
 
           private:
             TaskData m_data;

@@ -82,7 +82,8 @@ namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     template<typename TaskData>
-    auto GraphTask<TaskData>::execute(gpu::CommandBuffer &cmb) -> void {
-        m_execute(m_data, cmb);
+    auto GraphTask<TaskData>::execute(gpu::RenderPass *renderpass, gpu::CommandBuffer &cmb)
+        -> void {
+        m_execute(m_data, renderpass, cmb);
     }
 } // namespace stormkit::engine
