@@ -17,7 +17,7 @@ jobs:
         - {
            name: "Ubuntu",
            compiler: "GCC12",
-           value: ubuntu-latest,
+           value: ubuntu-22.04,
            triplet: "x64-linux"
         }
             
