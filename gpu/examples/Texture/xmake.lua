@@ -14,7 +14,10 @@ target("texture")
     add_headerfiles("src/*.mpp")
     add_files("shaders/*.vert")
     add_files("shaders/*.frag")
-    add_files("win32/*.manifest")
+
+    if is_plat("windows") then
+        add_files("win32/*.manifest")
+    end
 
     add_defines("EXAMPLES_DATA_DIR=")
     add_deps("stormkit-core", "stormkit-main", "stormkit-log", "stormkit-wsi", "stormkit-gpu", "stormkit-image")

@@ -13,7 +13,10 @@ target("model_loader")
     add_headerfiles("src/*.mpp")
     add_files("shaders/*.vert")
     add_files("shaders/*.frag")
-    add_files("win32/*.manifest")
+
+    if is_plat("windows") then
+        add_files("win32/*.manifest")
+    end
 
     add_deps("stormkit-core", "stormkit-main", "stormkit-engine", "stormkit-log")
     add_packages("glslang")

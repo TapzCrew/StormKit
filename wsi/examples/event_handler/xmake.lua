@@ -2,7 +2,10 @@ target("event_handler")
     set_kind("binary")
     set_languages("cxxlatest", "clatest")
     add_files("src/main.cpp")
-    add_files("win32/*.manifest")
+
+    if is_plat("windows") then
+        add_files("win32/*.manifest")
+    end
 
     if is_mode("debug") then
         set_suffixname("-d")
