@@ -47,15 +47,15 @@ jobs:
             if("${{ matrix.os.compiler }}" -eq "MinGW") {
               xrepo install --yes llvm-mingw 
               xmake f -v --yes -m ${{ matrix.build_type }} -k ${{ matrix.kind }} -p mingw@llvm-mingw
-            else
+            else {
               xmake f -v --yes -m ${{ matrix.build_type }} -k ${{ matrix.kind }} --vs_runtime=$VS_RUNTIME
             }
-            xmake b
+            xmake b -v
 
         - name: Install
           id: install
           run: |
-            xmake install --installdir="${{ runner.workspace }}/StormKit_Output"
+            xmake install -v --installdir="${{ runner.workspace }}/StormKit_Output"
 
             
         - name: Upload artifacts
