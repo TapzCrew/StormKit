@@ -58,6 +58,8 @@ export {
             auto device() const noexcept -> const gpu::Device &;
             auto surface() const noexcept -> const gpu::Surface &;
 
+            auto pipelineCache() noexcept -> gpu::PipelineCache &;
+            auto pipelineCache() const noexcept -> const gpu::PipelineCache &;
           private:
             enum class FrameGraphState { Updated, Old };
 
@@ -78,6 +80,7 @@ export {
             RenderQueueOwnedPtr m_render_queue;
             FrameGraphBuilderOwnedPtr m_builder;
 
+            gpu::PipelineCacheOwnedPtr m_pipeline_cache;
             std::vector<BakedFrameGraphOwnedPtr> m_framegraphs;
             std::vector<FrameGraphState> m_framegraph_states;
         };

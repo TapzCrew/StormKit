@@ -22,6 +22,7 @@
 #include <stormkit/gpu/core/PhysicalDeviceInfo.mpp>
 #include <stormkit/gpu/core/Queue.mpp>
 #include <stormkit/gpu/core/WindowSurface.mpp>
+#include <stormkit/gpu/pipeline/PipelineCache.mpp>
 
 namespace stormkit::engine {
     LOGGER("StormKit.Renderer.Renderer");
@@ -77,6 +78,8 @@ namespace stormkit::engine {
 
         m_device = physical_device.allocateLogicalDevice();
         m_surface->initialize(*m_device);
+
+        m_pipeline_cache = m_device->allocatePipelineCache();
 
         m_render_queue = std::make_unique<RenderQueue>();
 
