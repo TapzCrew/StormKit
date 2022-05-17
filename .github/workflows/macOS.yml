@@ -16,7 +16,7 @@ jobs:
         os:
         - {
            name: "macOS 11",
-           compiler: "LLVM 13",
+           compiler: "LLVM",
            value: macos-latest,
            triplet: "x64-macos"
         }
@@ -30,11 +30,7 @@ jobs:
           run: |
             brew update
             brew tap apenngrace/homebrew-vulkan
-            brew install vulkan-sdk wget p7zip curl
-
-        - name: Install xmake
-          run: |
-            bash <(curl -fsSL https://xmake.io/shget.text)
+            brew install vulkan-sdk wget p7zip curl xmake
 
         - name: Checkout
           uses: actions/checkout@v2
