@@ -24,9 +24,9 @@ target("stormkit-core")
         set_suffixname("-d")
     end
 
-    add_headerfiles("include/**.inl")
-    add_headerfiles("include/**.hpp")
-    add_headerfiles("include/**.h")
+    add_headerfiles("include/(stormkit/**.inl)")
+    add_headerfiles("include/(stormkit/**.hpp)")
+    add_headerfiles("include(stormkit/**.h)")
 
     add_files("src/*.cpp")
 
@@ -37,7 +37,7 @@ target("stormkit-core")
         add_files("include/**.mpp")
         add_files("src/**.mpp")
     else
-        add_headerfiles("include/**.mpp")
+        add_headerfiles("include/(stormkit/**.mpp)")
         add_headerfiles("src/**.mpp")
     end
 
@@ -52,7 +52,7 @@ target("stormkit-core")
     add_includedirs("$(buildir)/include", { public = true })
 
     set_configdir("$(buildir)/include/stormkit/core/")
-    add_configfiles("include/stormkit/core/*.mpp.in")
+    add_configfiles("include/stormkit/core/*.mpp.in", { prefixdir = "include/stormkit/core" })
 
     add_options("enable_cxx20_modules")
 

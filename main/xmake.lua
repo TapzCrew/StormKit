@@ -6,7 +6,7 @@ target("stormkit-main")
         set_suffixname("-d")
     end
 
-    add_headerfiles("include/**.hpp")
+    add_headerfiles("include/(stormkit/**.hpp)")
 
     add_deps("stormkit-core", { public = true })
 

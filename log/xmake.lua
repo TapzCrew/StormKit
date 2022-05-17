@@ -6,15 +6,15 @@ target("stormkit-log")
         set_suffixname("-d")
     end
 
-    add_headerfiles("include/**.hpp")
-    add_headerfiles("include/**.inl")
+    add_headerfiles("include/(stormkit/**.hpp)")
+    add_headerfiles("include/(stormkit/**.inl)")
     add_files("src/**.cpp")
 
     if has_config("enable_cxx20_modules") then
         add_files("include/**.mpp")
         add_files("src/**.mpp")
     else
-        add_headerfiles("include/**.mpp")
+        add_headerfiles("include/(stormkit/**.mpp)")
         add_headerfiles("src/**.mpp")
     end
 

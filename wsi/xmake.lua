@@ -6,8 +6,8 @@ target("stormkit-wsi")
         set_suffixname("-d")
     end
 
-    add_headerfiles("include/**.hpp")
-    add_headerfiles("include/**.inl")
+    add_headerfiles("include/(stormkit/**.hpp)")
+    add_headerfiles("include/(stormkit/**.inl)")
     add_headerfiles("src/*.hpp")
     add_headerfiles("src/common/**.hpp")
     add_headerfiles("src/common/**.inl")
@@ -20,7 +20,7 @@ target("stormkit-wsi")
     else
         add_headerfiles("src/common/**.mpp")
         add_headerfiles("src/*.mpp")
-        add_headerfiles("include/**.mpp")
+        add_headerfiles("include/(stormkit/**.mpp)")
     end
 
     if is_plat("windows") then
