@@ -7,25 +7,25 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     template<std::integral T>
-    constexpr auto vkMakeVersion(T major, T minor, T patch) -> core::UInt32 {
+    constexpr auto vkMakeVersion(T major, T minor, T patch) noexcept -> core::UInt32 {
         return vkVersionMajor(major) | vkVersionMinor(minor) | vkVersionPatch(patch);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    constexpr auto vkVersionMajor(std::integral auto version) -> core::UInt32 {
+    constexpr auto vkVersionMajor(std::integral auto version) noexcept -> core::UInt32 {
         return core::as<core::UInt32>(version >> 22u);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    constexpr auto vkVersionMinor(std::integral auto version) -> core::UInt32 {
+    constexpr auto vkVersionMinor(std::integral auto version) noexcept -> core::UInt32 {
         return core::as<core::UInt32>((version >> 12u) & 0x3ffu);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    constexpr auto vkVersionPatch(std::integral auto version) -> core::UInt32 {
+    constexpr auto vkVersionPatch(std::integral auto version) noexcept -> core::UInt32 {
         return core::as<core::UInt32>(version & 0xfffu);
     }
 

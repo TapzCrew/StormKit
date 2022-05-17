@@ -81,13 +81,13 @@ import stormkit.core.types;
 
 namespace stormkit::gpu {
     template<std::integral T>
-    constexpr auto vkMakeVersion(T major, T minor, T patch) -> core::UInt32;
+    constexpr auto vkMakeVersion(T major, T minor, T patch) noexcept -> core::UInt32;
 
-    constexpr auto vkVersionMajor(std::integral auto version) -> core::UInt32;
+    constexpr auto vkVersionMajor(std::integral auto version) noexcept -> core::UInt32;
 
-    constexpr auto vkVersionMinor(std::integral auto version) -> core::UInt32;
+    constexpr auto vkVersionMinor(std::integral auto version) noexcept -> core::UInt32;
 
-    constexpr auto vkVersionPatch(std::integral auto version) -> core::UInt32;
+    constexpr auto vkVersionPatch(std::integral auto version) noexcept -> core::UInt32;
 
     static constexpr auto DEVICE_EXTENSIONS = std::array {
         core::CZString { VK_KHR_MAINTENANCE3_EXTENSION_NAME },
