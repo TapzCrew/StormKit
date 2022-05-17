@@ -36,14 +36,14 @@ jobs:
         - name: Install xmake
           run: |
             Invoke-Expression (Invoke-Webrequest 'https://xmake.io/psget.text' -UseBasicParsing).Content
-            if("${{ matrix.os.compiler }}" == "MinGW") {
+            if("${{ matrix.os.compiler }}" -eq "MinGW") {
               xrepo install llvm-mingw
             } 
 
         - name: Configure & Build
           id: confandbuild
           run: |
-            if("${{ matrix.os.compiler }}" == "MinGW") {
+            if("${{ matrix.os.compiler }}" -eq "MinGW") {
               xmake f -v --yes -m ${{ matrix.build_type }} -k ${{ matrix.library_type }} -p mingw@llvm-mingw
             else
               xmake f -v --yes -m ${{ matrix.build_type }} -k ${{ matrix.library_type }}
