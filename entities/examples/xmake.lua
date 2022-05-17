@@ -19,6 +19,7 @@ target("game_of_life")
     add_deps("stormkit-core", "stormkit-main", "stormkit-log", "stormkit-entities", "stormkit-image", "stormkit-gpu")
     add_packages("glslang")
 
+    add_includedirs("$(buildir)/include")
     add_options("enable_cxx20_modules")
 
     set_group("examples/stormkit-entities")

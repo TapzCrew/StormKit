@@ -17,6 +17,7 @@ target("stormkit-main")
     elseif is_plat("android") then  add_files("src/android/*.cpp") end
 
     add_includedirs("include", { public = true })
+    add_includedirs("$(buildir)/include")
 
     add_options("enable_cxx20_modules")
 

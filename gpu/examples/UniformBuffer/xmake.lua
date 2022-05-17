@@ -21,6 +21,7 @@ target("uniform-buffer")
     add_deps("stormkit-core", "stormkit-main", "stormkit-log", "stormkit-wsi", "stormkit-gpu")
     add_packages("glslang")
 
+    add_includedirs("$(buildir)/include")
     add_options("enable_cxx20_modules")
 
     set_group("examples/stormkit-gpu")

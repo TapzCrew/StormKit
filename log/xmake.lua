@@ -21,7 +21,7 @@ target("stormkit-log")
     add_deps("stormkit-core", { public = true })
 
     add_includedirs("include", { public = true })
-    add_includedirs("$(buildir)/include", { public = true })
+    add_includedirs("$(buildir)/include")
 
     if is_plat("windows") then
         remove_files("src/posix/*")

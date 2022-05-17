@@ -36,6 +36,7 @@ target("stormkit-wsi")
 
     add_deps("stormkit-core", "stormkit-log", { public = true })
     add_includedirs("include", { public = true })
+    add_includedirs("$(buildir)/include")
 
     add_options("enable_cxx20_modules")
     add_options("enable_wsi_x11")

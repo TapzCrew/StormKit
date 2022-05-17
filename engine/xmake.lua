@@ -25,6 +25,7 @@ target("stormkit-engine")
     add_packages("volk", "vulkan-headers", "vulkan-memory-allocator", { public = true })
 
     add_includedirs("include", { public = true })
+    add_includedirs("$(buildir)/include")
 
     add_options("enable_cxx20_modules")
 

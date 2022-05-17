@@ -21,6 +21,7 @@ target("stormkit-image")
     add_packages("gli", "libpng", "libjpeg")
     add_deps("stormkit-core", { public = true })
     add_includedirs("include", { public = true })
+    add_includedirs("$(buildir)/include")
 
     add_options("enable_cxx20_modules")
 

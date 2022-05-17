@@ -9,6 +9,7 @@ target("consolelogger")
 
     add_deps("stormkit-core", "stormkit-main", "stormkit-log")
 
+    add_includedirs("$(buildir)/include")
     add_options("enable_cxx20_modules")
 
     set_group("examples/stormkit-log")

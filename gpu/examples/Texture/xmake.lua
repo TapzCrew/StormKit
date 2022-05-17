@@ -25,6 +25,7 @@ target("texture")
 
     add_files("textures/texture.png", { rule = "embed_resources" })
 
+    add_includedirs("$(buildir)/include")
     add_options("enable_cxx20_modules")
 
     set_group("examples/stormkit-gpu")
