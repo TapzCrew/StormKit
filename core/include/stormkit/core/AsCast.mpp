@@ -35,6 +35,7 @@ export {
 
     /////////// - StormKit::core - ///////////
     #include <stormkit/core/Concepts.mpp>
+    #include <stormkit/core/Memory.mpp>
 #endif
 
     namespace stormkit::core {

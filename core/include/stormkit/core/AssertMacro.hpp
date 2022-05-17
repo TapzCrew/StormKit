@@ -8,12 +8,16 @@
 #include <stormkit/core/PlatformMacro.hpp>
 
 #include <cassert>
+#include <cstdio>
 #include <cstdlib>
 
 #if defined(STORMKIT_BUILD_DEBUG) || defined(STORMKIT_GEN_DOC)
 namespace stormkit::core::details {
     struct AssertFailure {
-        AssertFailure() { std::quick_exit(EXIT_FAILURE); }
+        AssertFailure(const char *type, const char *message) {
+            std::fprintf(stderr, "%s failure: %s", type, message);
+            std::quick_exit(EXIT_FAILURE);
+        }
     };
 } // namespace stormkit::core::details
 
@@ -29,13 +33,12 @@ namespace stormkit::core::details {
             }                                                                             \
         } while (false)
 
-    #define STORMKIT_CONSTEXPR_ASSERT_BASE(condition, type, message) \
-        do {                                                         \
-            if (!(condition)) [[unlikely]]                           \
-                assert(!type " `" #condition "` failed");            \
-            else                                                     \
-                void(0);                                             \
-        } while (false)
+    #define STORMKIT_CONSTEXPR_ASSERT_BASE(condition, type, message)                        \
+        if (std::is_constant_evaluated())                                                   \
+            (!(condition)) ? throw stormkit::core::details::AssertFailure { type, message } \
+                           : void(0);                                                       \
+        else                                                                                \
+            STORMKIT_ASSERT_BASE(condition, type, message)
 
 /// \brief `STORMKIT_ASSERT` define an assertion, a confition that should be satisfied where it
 /// appears in a function body.

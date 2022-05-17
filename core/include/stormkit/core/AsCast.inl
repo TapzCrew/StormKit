@@ -12,10 +12,10 @@ namespace stormkit::core {
         /////////////////////////////////////
         template<ArithmeticType T, ArithmeticType V>
         constexpr auto maxIsGreater() noexcept {
-            using LargerType = std::conditional_t<(sizeof(T) > sizeof(V)), T, V>;
+            using Type = decltype(T {} + V {});
 
-            return static_cast<LargerType>(std::numeric_limits<T>::max()) >
-                   static_cast<LargerType>(std::numeric_limits<V>::max());
+            return static_cast<Type>(std::numeric_limits<T>::max()) >
+                   static_cast<Type>(std::numeric_limits<V>::max());
         }
 
         template<ArithmeticType T, ArithmeticType V>
