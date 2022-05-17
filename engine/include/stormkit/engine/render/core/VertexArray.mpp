@@ -104,3 +104,5 @@ export {
             core::USize m_size = 0;
         };
     } // namespace stormkit::engine
+
+#include "VertexArray.inl"
