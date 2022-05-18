@@ -33,7 +33,7 @@ import stormkit.wsi.key;
 
 #include <cstdlib>
 
-LOGGER("StormKit.Examples.Log.EventHandler");
+NAMED_LOGGER(event_handler_logger, "StormKit.Examples.Log.EventHandler");
 
 auto main([[maybe_unused]] const int argc, [[maybe_unused]] const char **argv) -> int {
     using namespace stormkit;
@@ -42,8 +42,8 @@ auto main([[maybe_unused]] const int argc, [[maybe_unused]] const char **argv) -
 
     log::LogHandler::setupDefaultLogger();
 
-    ilog("--- Monitors ---");
-    ilog("{}", wsi::Window::getMonitorSettings());
+    event_handler_logger.ilog("--- Monitors ---");
+    event_handler_logger.ilog("{}", wsi::Window::getMonitorSettings());
 
     auto window = wsi::Window { "Hello world", { 800u, 600u }, wsi::WindowStyle::All };
 
@@ -55,43 +55,51 @@ auto main([[maybe_unused]] const int argc, [[maybe_unused]] const char **argv) -
                               [&](const wsi::Event &event) { window.close(); });
     event_handler.addCallback(wsi::EventType::Resized, [](const wsi::Event &event) {
         const auto &event_data = core::as<wsi::ResizedEventData>(event.data);
-        ilog("Resize event: {}", event_data.extent);
+        event_handler_logger.ilog("Resize event: {}", event_data.extent);
     });
     event_handler.addCallback(wsi::EventType::MouseMoved, [](const wsi::Event &event) {
         const auto &event_data = core::as<wsi::MouseMovedEventData>(event.data);
-        ilog("Mouse move event: {}", event_data.position);
+        event_handler_logger.ilog("Mouse move event: {}", event_data.position);
     });
     event_handler.addCallback(wsi::EventType::MouseButtonPushed, [](const wsi::Event &event) {
         const auto &event_data = core::as<wsi::MouseButtonPushedEventData>(event.data);
-        ilog("Mouse button push event: {} {}", event_data.button, event_data.position);
+        event_handler_logger.ilog("Mouse button push event: {} {}",
+                                  event_data.button,
+                                  event_data.position);
     });
     event_handler.addCallback(wsi::EventType::MouseButtonReleased, [](const wsi::Event &event) {
         const auto &event_data = core::as<wsi::MouseButtonReleasedEventData>(event.data);
-        ilog("Mouse button release event: {} {}", event_data.button, event_data.position);
+        event_handler_logger.ilog("Mouse button release event: {} {}",
+                                  event_data.button,
+                                  event_data.position);
     });
-    event_handler.addCallback(wsi::EventType::MouseEntered,
-                              [](const wsi::Event &event) { ilog("Mouse Entered event"); });
-    event_handler.addCallback(wsi::EventType::MouseExited,
-                              [](const wsi::Event &event) { ilog("Mouse Exited event"); });
-    event_handler.addCallback(wsi::EventType::LostFocus,
-                              [](const wsi::Event &event) { ilog("Lost focus event"); });
-    event_handler.addCallback(wsi::EventType::GainedFocus,
-                              [](const wsi::Event &event) { ilog("Gained focus event"); });
+    event_handler.addCallback(wsi::EventType::MouseEntered, [](const wsi::Event &event) {
+        event_handler_logger.ilog("Mouse Entered event");
+    });
+    event_handler.addCallback(wsi::EventType::MouseExited, [](const wsi::Event &event) {
+        event_handler_logger.ilog("Mouse Exited event");
+    });
+    event_handler.addCallback(wsi::EventType::LostFocus, [](const wsi::Event &event) {
+        event_handler_logger.ilog("Lost focus event");
+    });
+    event_handler.addCallback(wsi::EventType::GainedFocus, [](const wsi::Event &event) {
+        event_handler_logger.ilog("Gained focus event");
+    });
     event_handler.addCallback(wsi::EventType::KeyPressed, [&](const wsi::Event &event) {
         const auto &event_data = core::as<wsi::KeyPressedEventData>(event.data);
 
         if (event_data.key == wsi::Key::Escape) {
             window.close();
-            ilog("Closing window");
+            event_handler_logger.ilog("Closing window");
         } else if (event_data.key == wsi::Key::F11)
             toggle_fullscreen = true;
 
-        ilog("Key pressed: {}", event_data.key);
+        event_handler_logger.ilog("Key pressed: {}", event_data.key);
     });
     event_handler.addCallback(wsi::EventType::KeyReleased, [](const wsi::Event &event) {
         const auto &event_data = core::as<wsi::KeyReleasedEventData>(event.data);
 
-        ilog("Key release: {}", event_data.key);
+        event_handler_logger.ilog("Key release: {}", event_data.key);
     });
 
     while (window.isOpen()) {
@@ -102,7 +110,7 @@ auto main([[maybe_unused]] const int argc, [[maybe_unused]] const char **argv) -
             window.setFullscreenEnabled(fullscreen);
 
             toggle_fullscreen = false;
-            ilog("Toggle fullscreen to: {}", fullscreen);
+            event_handler_logger.ilog("Toggle fullscreen to: {}", fullscreen);
         }
     }
 

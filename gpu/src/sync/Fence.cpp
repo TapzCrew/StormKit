@@ -7,7 +7,6 @@
 #include <stormkit/gpu/sync/Fence.mpp>
 
 namespace stormkit::gpu {
-
     /////////////////////////////////////
     /////////////////////////////////////
     Fence::Fence(const Device &device, bool signaled) : m_device { &device } {

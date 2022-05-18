@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include "GraphResource.mpp"
-
 namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////

@@ -10,13 +10,8 @@ target("stormkit-log")
     add_headerfiles("include/(stormkit/**.inl)")
     add_files("src/**.cpp")
 
-    if has_config("enable_cxx20_modules") then
-        add_files("include/**.mpp")
-        add_files("src/**.mpp")
-    else
-        add_headerfiles("include/(stormkit/**.mpp)")
-        add_headerfiles("src/**.mpp")
-    end
+    add_headerfiles("include/(stormkit/**.mpp)")
+    add_headerfiles("src/**.mpp")
 
     add_deps("stormkit-core", { public = true })
 
@@ -28,8 +23,6 @@ target("stormkit-log")
     else
         remove_files("src/win32/*")
     end
-
-    add_options("enable_cxx20_modules")
 
     set_group("libraries")
 

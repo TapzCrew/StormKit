@@ -2,56 +2,35 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-module;
-
 #pragma once
 
-#if defined(STORMKIT_CXX20_MODULES)
-// clang-format off
-export module stormkit.core.singleton;
+#include <functional>
+#include <memory>
+#include <mutex>
+#include <utility>
 
-/////////// - STL - ///////////
-import <functional>;
-import <memory>;
-import <mutex>;
-import <utility>;
+namespace stormkit::core {
+    template<class T>
+    class Singleton {
+      public:
+        template<class... Args>
+        static auto instance(Args &&...args) -> T &;
 
-// clang-format on
-export {
-#else
-    /////////// - STL - ///////////
-    #include <functional>
-    #include <memory>
-    #include <mutex>
-    #include <utility>
-#endif
+        Singleton(Singleton &&)      = delete;
+        Singleton(const Singleton &) = delete;
 
-    namespace stormkit::core {
-        template<class T>
-        class Singleton {
-          public:
-            template<class... Args>
-            static auto instance(Args &&...args) -> T &;
+        auto operator=(Singleton &&) -> Singleton & = delete;
+        auto operator=(const Singleton &) -> Singleton & = delete;
 
-            Singleton(Singleton &&)      = delete;
-            Singleton(const Singleton &) = delete;
+      protected:
+        Singleton() noexcept  = default;
+        ~Singleton() noexcept = default;
 
-            auto operator=(Singleton &&) -> Singleton & = delete;
-            auto operator=(const Singleton &) -> Singleton & = delete;
+      private:
+        static auto onceFlag() -> std::once_flag &;
 
-          protected:
-            Singleton() noexcept  = default;
-            ~Singleton() noexcept = default;
-
-          private:
-            static auto onceFlag() -> std::once_flag &;
-
-            static inline std::unique_ptr<T> m_instance = nullptr;
-        };
-    } // namespace stormkit::core
-
-#if defined(STORMKIT_CXX20_MODULES)
-}
-#endif
+        static inline std::unique_ptr<T> m_instance = nullptr;
+    };
+} // namespace stormkit::core
 
 #include "Singleton.inl"

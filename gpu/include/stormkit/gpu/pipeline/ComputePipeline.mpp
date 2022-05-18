@@ -2,8 +2,6 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-module;
-
 #pragma once
 
 #include <stormkit/core/PlatformMacro.hpp>
@@ -15,58 +13,45 @@ module;
     }                                          \
     [[nodiscard]] auto NAME() const noexcept->const TYPE & { return m_state.MEMBER; }
 
-#if defined(STORMKIT_CXX20_MODULES)
-// clang-format off
-export module stormkit.gpu.pipeline.computepipeline;
-// clang-format on
-export {
-#else
-    /////////// - StormKit::core - ///////////
-    #include <stormkit/core/Memory.mpp>
-    #include <stormkit/core/Types.mpp>
+#include <stormkit/core/Memory.mpp>
+#include <stormkit/core/Types.mpp>
 
-    /////////// - StormKit::render - ///////////
-    #include <stormkit/gpu/core/Fwd.hpp>
-    #include <stormkit/gpu/core/Types.mpp>
-    #include <stormkit/gpu/core/Vulkan.mpp>
+#include <stormkit/gpu/core/Fwd.hpp>
+#include <stormkit/gpu/core/Types.mpp>
+#include <stormkit/gpu/core/Vulkan.mpp>
 
-    #include <stormkit/gpu/pipeline/AbstractPipeline.mpp>
-    #include <stormkit/gpu/pipeline/ComputePipelineState.mpp>
+#include <stormkit/gpu/pipeline/AbstractPipeline.mpp>
+#include <stormkit/gpu/pipeline/ComputePipelineState.mpp>
 
-    #include <stormkit/gpu/pipeline/Fwd.hpp>
-#endif
+#include <stormkit/gpu/pipeline/Fwd.hpp>
 
-    namespace stormkit::gpu {
-        class STORMKIT_PUBLIC ComputePipeline final: public AbstractPipeline {
-          public:
-            static constexpr auto DEBUG_TYPE = DebugObjectType::Pipeline;
+namespace stormkit::gpu {
+    class STORMKIT_PUBLIC ComputePipeline final: public AbstractPipeline {
+      public:
+        static constexpr auto DEBUG_TYPE = DebugObjectType::Pipeline;
 
-            ComputePipeline(const Device &device, const PipelineCache *cache = nullptr) noexcept;
-            ~ComputePipeline() override;
+        ComputePipeline(const Device &device, const PipelineCache *cache = nullptr) noexcept;
+        ~ComputePipeline() override;
 
-            ComputePipeline(const ComputePipeline &) = delete;
-            auto operator=(const ComputePipeline &) -> ComputePipeline & = delete;
+        ComputePipeline(const ComputePipeline &) = delete;
+        auto operator=(const ComputePipeline &) -> ComputePipeline & = delete;
 
-            ComputePipeline(ComputePipeline &&) noexcept;
-            auto operator=(ComputePipeline &&) noexcept -> ComputePipeline &;
+        ComputePipeline(ComputePipeline &&) noexcept;
+        auto operator=(ComputePipeline &&) noexcept -> ComputePipeline &;
 
-            STATE(ComputePipelineShaderState, shaderState, shader_state)
-            STATE(ComputePipelineLayout, layout, layout)
+        STATE(ComputePipelineShaderState, shaderState, shader_state)
+        STATE(ComputePipelineLayout, layout, layout)
 
-            auto bake() -> void override;
+        auto bake() -> void override;
 
-            auto setState(const ComputePipelineState &state) noexcept -> void;
-            [[nodiscard]] auto state() noexcept -> ComputePipelineState &;
-            [[nodiscard]] auto state() const noexcept -> const ComputePipelineState &;
+        auto setState(const ComputePipelineState &state) noexcept -> void;
+        [[nodiscard]] auto state() noexcept -> ComputePipelineState &;
+        [[nodiscard]] auto state() const noexcept -> const ComputePipelineState &;
 
-          private:
-            ComputePipelineState m_state = {};
-        };
-    } // namespace stormkit::gpu
-
-#if defined(STORMKIT_CXX20_MODULES)
-}
-#endif
+      private:
+        ComputePipelineState m_state = {};
+    };
+} // namespace stormkit::gpu
 
 #undef STATE
 

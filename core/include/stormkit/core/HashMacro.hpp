@@ -4,7 +4,6 @@
 
 #pragma once
 
-/////////// - StormKit::core - ///////////
 #include <stormkit/core/PlatformMacro.hpp>
 
 /// \brief `HASH_FUNC` declare hash func and define an operator== for a given `x` type

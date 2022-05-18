@@ -16,22 +16,11 @@ namespace tl {
 
 #endif
 
-#if defined(STORMKIT_CXX20_MODULES)
-// clang-format off
-export module stormkit.core.expected;
-// clang-format on
-export {
-#endif
+namespace stormkit::core {
+    template<class T, class E>
+    using Expected = tl::expected<T, E>;
 
-    namespace stormkit::core {
-        template<class T, class E>
-        using Expected = tl::expected<T, E>;
+    template<class E>
+    using Unexpected = tl::unexpected<E>;
 
-        template<class E>
-        using Unexpected = tl::unexpected<E>;
-
-    } // namespace stormkit::core
-
-#if defined(STORMKIT_CXX20_MODULES)
-}
-#endif
+} // namespace stormkit::core

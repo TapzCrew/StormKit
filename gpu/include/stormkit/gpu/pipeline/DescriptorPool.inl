@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include "DescriptorPool.mpp"
-
 namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////

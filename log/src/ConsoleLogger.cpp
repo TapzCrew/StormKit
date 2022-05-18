@@ -2,40 +2,19 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#if defined(STORMKIT_CXX20_MODULES)
-module stormkit.log.consolelogger;
-
-// clang-format off
-/////////// - STL - ///////////
 #include <climits>
 #include <clocale>
-import <iostream>;
-import <string_view>;
+#include <iostream>
+#include <string_view>
 
-/////////// - StormKit::core - ///////////
-import stormkit.core.format
-import stormkit.core.strings
+/
+#include <stormkit/core/Format.mpp>
+#include <stormkit/core/Strings.mpp>
 
-/////////// - StormKit::log - ///////////
-import stormkit.log.details.logcolorizer;
-// clang-format on
-#else
-/////////// - STL - ///////////
-    #include <climits>
-    #include <clocale>
-    #include <iostream>
-    #include <string_view>
+#include "LogColorizer.mpp"
+#include <stormkit/log/ConsoleLogger.mpp>
 
-    //////////// - StormKit::core - ///////////
-    #include <stormkit/core/Format.mpp>
-    #include <stormkit/core/Strings.mpp>
-
-/////////// - StormKit::log - ///////////
-    #include "LogColorizer.mpp"
-    #include <stormkit/log/ConsoleLogger.mpp>
-#endif
-
-using namespace std::literals;
+    using namespace std::literals;
 
 namespace stormkit::log {
     ////////////////////////////////////////
@@ -58,9 +37,9 @@ namespace stormkit::log {
         static constexpr auto LOG_LINE_MODULE = "[{0}, {1}s, {2}]"sv;
 
         const auto str = [&severity, &time, &m]() {
-            if (std::size(*m) == 0) return core::format(LOG_LINE, severity, time);
+            if (std::empty(m.name)) return core::format(LOG_LINE, severity, time);
             else
-                return core::format(LOG_LINE_MODULE, severity, time, *m);
+                return core::format(LOG_LINE_MODULE, severity, time, m.name);
         }();
 
         const auto to_stderr = severity == Severity::Error || severity == Severity::Fatal;

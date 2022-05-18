@@ -25,7 +25,7 @@
 #include <stormkit/gpu/pipeline/PipelineCache.mpp>
 
 namespace stormkit::engine {
-    LOGGER("StormKit.Renderer.Renderer");
+    NAMED_LOGGER(renderer_logger, "StormKit.Renderer.Renderer");
 
     class RendererSyncSystem: public entities::System {
       public:
@@ -50,8 +50,8 @@ namespace stormkit::engine {
     /////////////////////////////////////
     Renderer::Renderer(Engine &engine) : m_engine { &engine } {
         m_instance = std::make_unique<gpu::Instance>();
-        ilog("Render backend successfully initialized");
-        ilog("Using StormKit {}.{}.{} (branch: {}, commit_hash: {}), built with {}",
+        renderer_logger.ilog("Render backend successfully initialized");
+        renderer_logger.ilog("Using StormKit {}.{}.{} (branch: {}, commit_hash: {}), built with {}",
              core::STORMKIT_MAJOR_VERSION,
              core::STORMKIT_MINOR_VERSION,
              core::STORMKIT_PATCH_VERSION,
@@ -59,8 +59,8 @@ namespace stormkit::engine {
              core::STORMKIT_GIT_COMMIT_HASH,
              STORMKIT_COMPILER);
 
-        ilog("--------- Physical Devices ----------");
-        for (const auto &device : m_instance->physicalDevices()) ilog("{}", device.info());
+        renderer_logger.ilog("--------- Physical Devices ----------");
+        for (const auto &device : m_instance->physicalDevices()) renderer_logger.ilog("{}", device.info());
 
         auto &window = m_engine->window();
 
@@ -72,7 +72,7 @@ namespace stormkit::engine {
 
         const auto &physical_device_info = physical_device.info();
 
-        ilog("Using physical device {} ({:#06x})",
+        renderer_logger.ilog("Using physical device {} ({:#06x})",
              physical_device_info.device_name,
              physical_device_info.device_id);
 

@@ -2,25 +2,12 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#if defined(STORMKIT_CXX20_MODULES)
-module stormkit.image.details.jpgimage;
+#include <ranges>
 
-// clang-format off
-/////////// - STL - ///////////
-import <ranges>;
-// clang-format on
-#else
-    /////////// - STL - ///////////
-    #include <ranges>
+#include "JPEGImage.mpp"
 
-    /////////// - StormKit::image - ///////////
-    #include "JPEGImage.mpp"
-#endif
-
-/////////// - STL - ///////////
 #include <csetjmp>
 
-/////////// - libJPEG - ///////////
 #include <jerror.h>
 #include <jpeglib.h>
 

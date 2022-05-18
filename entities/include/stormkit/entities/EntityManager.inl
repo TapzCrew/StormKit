@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include "EntityManager.mpp"
-
 namespace stormkit::entities {
     /////////////////////////////////////
     /////////////////////////////////////

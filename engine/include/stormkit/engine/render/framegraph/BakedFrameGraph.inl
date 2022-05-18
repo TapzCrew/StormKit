@@ -4,7 +4,5 @@
 
 #pragma once
 
-#include "BakedFrameGraph.mpp"
-
 namespace stormkit::engine {
 } // namespace stormkit::engine

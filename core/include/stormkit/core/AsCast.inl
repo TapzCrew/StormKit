@@ -4,8 +4,6 @@
 // found in the top-level of this distribution
 #pragma once
 
-#include "AsCast.mpp"
-
 namespace stormkit::core {
     namespace details {
         /////////////////////////////////////

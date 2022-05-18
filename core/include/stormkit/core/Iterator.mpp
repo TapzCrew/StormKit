@@ -2,48 +2,32 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-module;
-
 #pragma once
 
-#if defined(STORMKIT_CXX20_MODULES)
-// clang-format off
-export module stormkit.core.iterator;
+#include <iterator>
 
-// clang-format on
-export {
-#else
-    /////////// - STL - ///////////
-    #include <iterator>
+namespace stormkit::core {
+    template<std::ranges::range auto... Ranges>
+    class MultidimentionalIterator {
+        using tuple_type = std::tuple<typename decltype(Ranges)::value_type &...>;
 
-#endif
+      public:
+        using iterator_category = std::input_iterator_tag;
 
-    namespace stormkit::core {
-        template<std::ranges::range auto... Ranges>
-        class MultidimentionalIterator {
-            using tuple_type = std::tuple<typename decltype(Ranges)::value_type &...>;
+        using difference_type = std::ptrdiff_t;
+        using value_type      = tuple_type;
+        using reference       = tuple_type &;
+        using pointer         = tuple_type *;
 
-          public:
-            using iterator_category = std::input_iterator_tag;
+        auto operator++() -> MultidimentionalIterator &;
 
-            using difference_type = std::ptrdiff_t;
-            using value_type      = tuple_type;
-            using reference       = tuple_type &;
-            using pointer         = tuple_type *;
+        auto operator++(int) -> void;
 
-            auto operator++() -> MultidimentionalIterator &;
+        auto operator*() const noexcept -> reference;
+        auto operator->() const noexcept -> pointer;
 
-            auto operator++(int) -> void;
-
-            auto operator*() const noexcept -> reference;
-            auto operator->() const noexcept -> pointer;
-
-          private:
-        };
-    } // namespace stormkit::core
-
-#if defined(STORMKIT_CXX20_MODULES)
-}
-#endif
+      private:
+    };
+} // namespace stormkit::core
 
 #include "Iterator.inl"

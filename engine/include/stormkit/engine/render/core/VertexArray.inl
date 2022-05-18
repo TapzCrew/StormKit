@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include "VertexArray.mpp"
-
 namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////

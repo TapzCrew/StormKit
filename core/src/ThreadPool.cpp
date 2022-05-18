@@ -1,11 +1,7 @@
-#if defined(STORMKIT_CXX20_MODULES)
-module stormkit.core.threadpool;
-#else
-    /////////// - StormKit::core - ///////////
-    #include <stormkit/core/Numerics.mpp>
-    #include <stormkit/core/ThreadPool.mpp>
-    #include <stormkit/core/ThreadUtils.mpp>
-#endif
+
+#include <stormkit/core/Numerics.mpp>
+#include <stormkit/core/ThreadPool.mpp>
+#include <stormkit/core/ThreadUtils.mpp>
 
 namespace stormkit::core {
     ////////////////////////////////////////

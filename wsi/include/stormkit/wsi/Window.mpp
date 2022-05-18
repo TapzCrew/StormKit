@@ -2,129 +2,93 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-module;
-
 #pragma once
 
 #include <stormkit/core/FlagsMacro.hpp>
 #include <stormkit/core/PlatformMacro.hpp>
 
-#if defined(STORMKIT_CXX20_MODULES)
-// clang-format off
-export module stormkit.wsi.window;
+#include <array>
+#include <memory>
+#include <optional>
+#include <span>
+#include <string>
+#include <string_view>
+#include <vector>
 
-/////////// - STL - ///////////
-import <string>;
-import <string_view>;
-import <vector>;
-import <memory>;
-import <optional>;
-import <span>;
-import <array>;
+#include <stormkit/core/Flags.mpp>
+#include <stormkit/core/Math.mpp>
+#include <stormkit/core/Pimpl.mpp>
+#include <stormkit/core/Types.mpp>
 
-/////////// - StormKit::core - ///////////
-import stormkit.core.math;
-import stormkit.core.types;
-import stormkit.core.flags;
-import stormkit.core.pimpl;
+#include <stormkit/wsi/Event.mpp>
+#include <stormkit/wsi/Monitor.mpp>
+#include <stormkit/wsi/WindowStyle.mpp>
 
-/////////// - StormKit::wsi - ///////////
-import stormkit.wsi.event;
-import stormkit.wsi.videosettings;
-import stormkit.wsi.windowstyle;
-// clang-format on
-export {
-#else
-    /////////// - STL - ///////////
-    #include <array>
-    #include <memory>
-    #include <optional>
-    #include <span>
-    #include <string>
-    #include <string_view>
-    #include <vector>
+namespace stormkit::wsi {
+    namespace details {
+        class WindowImpl;
+        using WindowImplPimpl = core::Pimpl<WindowImpl>;
+    } // namespace details
 
-    /////////// - StormKit::core - ///////////
-    #include <stormkit/core/Flags.mpp>
-    #include <stormkit/core/Math.mpp>
-    #include <stormkit/core/Pimpl.mpp>
-    #include <stormkit/core/Types.mpp>
+    class STORMKIT_PUBLIC Window {
+      public:
+        using NativeHandle = void *;
 
-    /////////// - StormKit::wsi - ///////////
-    #include <stormkit/wsi/Event.mpp>
-    #include <stormkit/wsi/Monitor.mpp>
-    #include <stormkit/wsi/WindowStyle.mpp>
-#endif
+        enum class WM { Win32, X11, Wayland, macOS, iOS, Android, Switch };
 
-    namespace stormkit::wsi {
-        namespace details {
-            class WindowImpl;
-            using WindowImplPimpl = core::Pimpl<WindowImpl>;
-        } // namespace details
+        Window() noexcept;
+        Window(std::string title, const core::ExtentU &size, WindowStyle style) noexcept;
+        ~Window();
 
-        class STORMKIT_PUBLIC Window {
-          public:
-            using NativeHandle = void *;
+        Window(Window &&);
+        auto operator=(Window &&) -> Window &;
 
-            enum class WM { Win32, X11, Wayland, macOS, iOS, Android, Switch };
+        auto create(std::string title, const core::ExtentU &size, WindowStyle style) noexcept
+            -> void;
+        auto close() noexcept -> void;
 
-            Window() noexcept;
-            Window(std::string title, const core::ExtentU &size, WindowStyle style) noexcept;
-            ~Window();
+        [[nodiscard]] auto pollEvent(Event &event) noexcept -> bool;
+        [[nodiscard]] auto waitEvent(Event &event) noexcept -> bool;
 
-            Window(Window &&);
-            auto operator=(Window &&) -> Window &;
+        auto setTitle(std::string title) noexcept -> void;
 
-            auto create(std::string title, const core::ExtentU &size, WindowStyle style) noexcept
-                -> void;
-            auto close() noexcept -> void;
+        auto setFullscreenEnabled(bool fullscreen) noexcept -> void;
 
-            [[nodiscard]] auto pollEvent(Event &event) noexcept -> bool;
-            [[nodiscard]] auto waitEvent(Event &event) noexcept -> bool;
+        auto setSize(const core::ExtentU &size) noexcept -> void;
 
-            auto setTitle(std::string title) noexcept -> void;
+        auto lockMouse() noexcept -> void;
+        auto unlockMouse() noexcept -> void;
+        auto hideMouse() noexcept -> void;
 
-            auto setFullscreenEnabled(bool fullscreen) noexcept -> void;
+        [[nodiscard]] auto size() const noexcept -> const core::ExtentU &;
+        [[nodiscard]] auto title() const noexcept -> std::string_view;
+        [[nodiscard]] auto videoSettings() const noexcept -> const Monitor &;
 
-            auto setSize(const core::ExtentU &size) noexcept -> void;
+        [[nodiscard]] auto isOpen() const noexcept -> bool;
+        [[nodiscard]] auto visible() const noexcept -> bool;
 
-            auto lockMouse() noexcept -> void;
-            auto unlockMouse() noexcept -> void;
-            auto hideMouse() noexcept -> void;
+        [[nodiscard]] auto nativeHandle() const noexcept -> NativeHandle;
 
-            [[nodiscard]] auto size() const noexcept -> const core::ExtentU &;
-            [[nodiscard]] auto title() const noexcept -> std::string_view;
-            [[nodiscard]] auto videoSettings() const noexcept -> const Monitor &;
+        [[nodiscard]] auto mouseLocked() const noexcept -> bool;
+        [[nodiscard]] auto fullscreen() const noexcept -> bool;
 
-            [[nodiscard]] auto isOpen() const noexcept -> bool;
-            [[nodiscard]] auto visible() const noexcept -> bool;
+        auto setKeyRepeatEnabled(bool enabled) noexcept -> void;
+        [[nodiscard]] auto keyRepeatEnabled() const noexcept -> bool;
 
-            [[nodiscard]] auto nativeHandle() const noexcept -> NativeHandle;
+        auto setVirtualKeyboardVisible(bool visible) noexcept -> void;
 
-            [[nodiscard]] auto mouseLocked() const noexcept -> bool;
-            [[nodiscard]] auto fullscreen() const noexcept -> bool;
+        auto setMousePosition(core::Position2i position) noexcept -> void;
+        static auto setMousePositionOnDesktop(core::Position2u position) noexcept -> void;
 
-            auto setKeyRepeatEnabled(bool enabled) noexcept -> void;
-            [[nodiscard]] auto keyRepeatEnabled() const noexcept -> bool;
+        [[nodiscard]] static auto getMonitorSettings() -> std::vector<Monitor>;
+        [[nodiscard]] static auto getPrimaryMonitorSettings() -> Monitor;
 
-            auto setVirtualKeyboardVisible(bool visible) noexcept -> void;
+        [[nodiscard]] static auto wm() noexcept -> WM;
 
-            auto setMousePosition(core::Position2i position) noexcept -> void;
-            static auto setMousePositionOnDesktop(core::Position2u position) noexcept -> void;
-
-            [[nodiscard]] static auto getMonitorSettings() -> std::vector<Monitor>;
-            [[nodiscard]] static auto getPrimaryMonitorSettings() -> Monitor;
-
-            [[nodiscard]] static auto wm() noexcept -> WM;
-
-          private:
-            details::WindowImplPimpl m_impl;
-        };
-        DECLARE_PTR_AND_REF(Window)
-    } // namespace stormkit::wsi
-
-#if defined(STORMKIT_CXX20_MODULES)
-}
-#endif
+      private:
+        details::WindowImplPimpl m_impl;
+    };
+    DECLARE_PTR_AND_REF(Window)
+} // namespace stormkit::wsi
 
 #include "Window.inl"

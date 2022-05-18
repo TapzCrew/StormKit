@@ -1,9 +1,5 @@
-#if defined(STORMKIT_CXX20_MODULES)
-module stormkit.core.threadutils;
-#else
-    /////////// - StormKit::core - ///////////
-    #include <stormkit/core/ThreadUtils.mpp>
-#endif
+
+#include <stormkit/core/ThreadUtils.mpp>
 
 #include <windows.h>
 

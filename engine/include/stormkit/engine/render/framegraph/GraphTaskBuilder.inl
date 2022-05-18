@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include "GraphTaskBuilder.mpp"
-
 namespace stormkit::engine {
     template<ResourceDescriptionType Description>
     auto GraphTaskBuilder::create(std::string name, Description &&description)

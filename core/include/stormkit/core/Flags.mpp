@@ -2,81 +2,61 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-module;
-
 #pragma once
 
-#if defined(STORMKIT_CXX20_MODULES)
-// clang-format off
-export module stormkit.core.flags;
+#include <stormkit/core/AsCast.mpp>
+#include <stormkit/core/Concepts.mpp>
+#include <stormkit/core/Types.mpp>
 
-/////////// - StormKit::core - ///////////
-import stormkit.core.concepts;
-import stormkit.core.types;
-import stormkit.core.ascast;
+namespace stormkit::core {
+    namespace details {
+        template<stormkit::core::EnumerationType T>
+        struct EnableBitmaskOperators {
+            constexpr EnableBitmaskOperators() = default;
+            static constexpr auto enable       = false;
+        };
 
-export {
-// clang-format on
-#else
-    /////////// - StormKit::core - ///////////
-    #include <stormkit/core/AsCast.mpp>
-    #include <stormkit/core/Concepts.mpp>
-    #include <stormkit/core/Types.mpp>
-#endif
+        template<stormkit::core::EnumerationType T>
+        static constexpr auto EnableBitmaskOperatorsEnable = EnableBitmaskOperators<T>::enable;
 
-    namespace stormkit::core {
-        namespace details {
-            template<stormkit::core::EnumerationType T>
-            struct EnableBitmaskOperators {
-                constexpr EnableBitmaskOperators() = default;
-                static constexpr auto enable       = false;
-            };
+        template<EnumerationType T>
+        constexpr auto toUnderlying(T value) -> std::underlying_type_t<T>;
+    } // namespace details
 
-            template<stormkit::core::EnumerationType T>
-            static constexpr auto EnableBitmaskOperatorsEnable = EnableBitmaskOperators<T>::enable;
+    template<class T>
+    concept FlagsType = EnumerationType<T> && details::EnableBitmaskOperatorsEnable<T>;
 
-            template<EnumerationType T>
-            constexpr auto toUnderlying(T value) -> std::underlying_type_t<T>;
-        } // namespace details
+    /// \brief Check if a flag bit is enabled
+    /// \requires `Enum` to be an enumeration promoted as a flag with `FLAG_ENUM` macro
+    /// \returns true if the flag big is set and false if not
+    template<FlagsType T>
+    constexpr auto checkFlag(T value, T flag) noexcept -> bool;
 
-        template<class T>
-        concept FlagsType = EnumerationType<T> && details::EnableBitmaskOperatorsEnable<T>;
+    /// \exclude
+    template<FlagsType T>
+    constexpr auto nextValue(T value) noexcept -> T;
 
-        /// \brief Check if a flag bit is enabled
-        /// \requires `Enum` to be an enumeration promoted as a flag with `FLAG_ENUM` macro
-        /// \returns true if the flag big is set and false if not
-        template<FlagsType T>
-        constexpr auto checkFlag(T value, T flag) noexcept -> bool;
+} // namespace stormkit::core
 
-        /// \exclude
-        template<FlagsType T>
-        constexpr auto nextValue(T value) noexcept -> T;
+template<stormkit::core::FlagsType T>
+constexpr auto operator|(T lhs, T rhs) noexcept -> T;
 
-    } // namespace stormkit::core
+template<stormkit::core::FlagsType T>
+constexpr auto operator&(T lhs, T rhs) noexcept -> T;
 
-    template<stormkit::core::FlagsType T>
-    constexpr auto operator|(T lhs, T rhs) noexcept->T;
+template<stormkit::core::FlagsType T>
+constexpr auto operator^(T lhs, T rhs) noexcept -> T;
 
-    template<stormkit::core::FlagsType T>
-    constexpr auto operator&(T lhs, T rhs) noexcept->T;
+template<stormkit::core::FlagsType T>
+constexpr auto operator~(T lhs) noexcept -> T;
 
-    template<stormkit::core::FlagsType T>
-    constexpr auto operator^(T lhs, T rhs) noexcept->T;
+template<stormkit::core::FlagsType T>
+constexpr auto operator|=(T &lhs, T rhs) noexcept -> T;
 
-    template<stormkit::core::FlagsType T>
-    constexpr auto operator~(T lhs) noexcept->T;
+template<stormkit::core::FlagsType T>
+constexpr auto operator&=(T &lhs, T rhs) noexcept -> T;
 
-    template<stormkit::core::FlagsType T>
-    constexpr auto operator|=(T &lhs, T rhs) noexcept->T;
-
-    template<stormkit::core::FlagsType T>
-    constexpr auto operator&=(T &lhs, T rhs) noexcept->T;
-
-    template<stormkit::core::FlagsType T>
-    constexpr auto operator^=(T &lhs, T rhs) noexcept->T;
-
-#if defined(STORMKIT_CXX20_MODULES)
-}
-#endif
+template<stormkit::core::FlagsType T>
+constexpr auto operator^=(T &lhs, T rhs) noexcept -> T;
 
 #include "Flags.inl"

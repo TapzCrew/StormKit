@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include "MessageBus.mpp"
-
 namespace stormkit::entities {
     /////////////////////////////////////
     /////////////////////////////////////

@@ -11,13 +11,8 @@ target("stormkit-gpu")
     add_headerfiles("src/**.hpp")
     add_files("src/**.cpp")
 
-    if has_config("enable_cxx20_modules") then
-        add_files("include/**.mpp")
-        add_files("src/**.mpp")
-    else
-        add_headerfiles("include/(stormkit/**.mpp)")
-        add_headerfiles("src/**.mpp")
-    end
+    add_headerfiles("include/(stormkit/**.mpp)")
+    add_headerfiles("src/**.mpp")
 
     add_deps("stormkit-core", "stormkit-image", { public = true })
     add_deps("stormkit-log")

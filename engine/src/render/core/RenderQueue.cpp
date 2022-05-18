@@ -7,7 +7,7 @@
 #include <stormkit/log/LogMacro.hpp>
 
 namespace stormkit::engine {
-    LOGGER("StormKit.Renderer.RenderQueue");
+    NAMED_LOGGER(renderqueue_logger, "StormKit.Renderer.RenderQueue");
 
     /////////////////////////////////////
     /////////////////////////////////////
@@ -64,7 +64,7 @@ namespace stormkit::engine {
             std::ranges::any_of(m_entries, [&](const auto &entry) { return entry.id == id; });
 
         if (!it) {
-            elog("Trying to remove unknown mesh (ID: {})", id);
+            renderqueue_logger.elog("Trying to remove unknown mesh (ID: {})", id);
 
             return;
         }

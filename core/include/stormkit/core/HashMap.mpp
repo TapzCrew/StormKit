@@ -2,49 +2,25 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-module;
-
 #pragma once
 
 #include <robin_hood.h>
 
-#if defined(STORMKIT_CXX20_MODULES)
-// clang-format off
-export module stormkit.core.hashmap;
+#include <functional>
 
-/////////// - STL - ///////////
-import <functional>;
+#include <stormkit/core/Concepts.mpp>
 
-/////////// - StormKit::core - ///////////
-import stormkit.core.concepts;
+namespace stormkit::core {
+    /// Alias to `robin_hood::unordered_map`
+    template<HashableType Key,
+             typename T,
+             typename Hash     = robin_hood::hash<Key>,
+             typename KeyEqual = std::equal_to<Key>>
+    using HashMap = robin_hood::unordered_map<Key, T, Hash, KeyEqual>;
 
-import <stormkit/core/details/robin_hood.h>;
-
-// clang-format on
-export {
-#else
-    /////////// - STL - ///////////
-    #include <functional>
-
-    /////////// - StormKit::core - ///////////
-    #include <stormkit/core/Concepts.mpp>
-#endif
-
-    namespace stormkit::core {
-        /// Alias to `robin_hood::unordered_map`
-        template<HashableType Key,
-                 typename T,
-                 typename Hash     = robin_hood::hash<Key>,
-                 typename KeyEqual = std::equal_to<Key>>
-        using HashMap = robin_hood::unordered_map<Key, T, Hash, KeyEqual>;
-
-        /// Alias to `robin_hood::unordered_set`
-        template<HashableType Key,
-                 typename Hash     = robin_hood::hash<Key>,
-                 typename KeyEqual = std::equal_to<Key>>
-        using HashSet = robin_hood::unordered_set<Key, Hash, KeyEqual>;
-    } // namespace stormkit::core
-
-#if defined(STORMKIT_CXX20_MODULES)
-}
-#endif
+    /// Alias to `robin_hood::unordered_set`
+    template<HashableType Key,
+             typename Hash     = robin_hood::hash<Key>,
+             typename KeyEqual = std::equal_to<Key>>
+    using HashSet = robin_hood::unordered_set<Key, Hash, KeyEqual>;
+} // namespace stormkit::core

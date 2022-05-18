@@ -2,15 +2,7 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#if defined(STORMKIT_CXX20_MODULES)
-module stormkit.image.details.hdrimage;
-
-// clang-format off
-// clang-format on
-#else
-    /////////// - StormKit::log - ///////////
-    #include "HDRImage.mpp"
-#endif
+#include "HDRImage.mpp"
 
 namespace stormkit::image::details {
     template<class E>

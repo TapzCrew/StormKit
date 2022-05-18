@@ -2,33 +2,18 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-module;
-
 #pragma once
 
-#if defined(STORMKIT_CXX20_MODULES)
-// clang-format off
-export module stormkit.gpu.core.queuefamily;
-// clang-format on
-export {
-#else
-    /////////// - StormKit::core - ///////////
-    #include <stormkit/core/Types.mpp>
+#include <stormkit/core/Types.mpp>
 
-    /////////// - StormKit::render - ///////////
-    #include <stormkit/gpu/core/Enums.mpp>
-    #include <stormkit/gpu/core/Fwd.hpp>
-#endif
+#include <stormkit/gpu/core/Enums.mpp>
+#include <stormkit/gpu/core/Fwd.hpp>
 
-    namespace stormkit::gpu {
-        struct QueueFamily {
-            QueueFlag flags;
-            core::UInt32 count;
+namespace stormkit::gpu {
+    struct QueueFamily {
+        QueueFlag flags;
+        core::UInt32 count;
 
-            bool has_present_support = false;
-        };
-    } // namespace stormkit::gpu
-
-#if defined(STORMKIT_CXX20_MODULES)
-}
-#endif
+        bool has_present_support = false;
+    };
+} // namespace stormkit::gpu

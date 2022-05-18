@@ -8,9 +8,6 @@
 
 #include <stormkit/gpu/pipeline/ComputePipeline.mpp>
 
-#undef module
-#define module module
-
 namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////

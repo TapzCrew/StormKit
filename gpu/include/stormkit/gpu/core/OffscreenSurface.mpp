@@ -2,55 +2,42 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-module;
-
 #pragma once
 
 #include <stormkit/core/PlatformMacro.hpp>
 
-#if defined(STORMKIT_CXX20_MODULES)
-// clang-format off
-export module stormkit.gpu.core.offscreensurface;
-// clang-format on
-export {
-#else
-    #include <stormkit/core/Math.mpp>
-    #include <stormkit/core/Types.mpp>
+#include <stormkit/core/Math.mpp>
+#include <stormkit/core/Types.mpp>
 
-    /////////// - StormKit::render - ///////////
-    #include <stormkit/gpu/core/Enums.mpp>
-    #include <stormkit/gpu/core/Fwd.hpp>
-    #include <stormkit/gpu/core/Surface.mpp>
-#endif
 
-    namespace stormkit::gpu {
-        class STORMKIT_PUBLIC OffscreenSurface final: public Surface {
-          public:
-            OffscreenSurface(const core::ExtentU &extent,
-                             const Instance &instance,
-                             Buffering buffering = Buffering::Triple);
-            ~OffscreenSurface() override;
+#include <stormkit/gpu/core/Enums.mpp>
+#include <stormkit/gpu/core/Fwd.hpp>
+#include <stormkit/gpu/core/Surface.mpp>
 
-            OffscreenSurface(const OffscreenSurface &) = delete;
-            auto operator=(const OffscreenSurface &) -> OffscreenSurface & = delete;
+namespace stormkit::gpu {
+    class STORMKIT_PUBLIC OffscreenSurface final: public Surface {
+      public:
+        OffscreenSurface(const core::ExtentU &extent,
+                         const Instance &instance,
+                         Buffering buffering = Buffering::Triple);
+        ~OffscreenSurface() override;
 
-            OffscreenSurface(OffscreenSurface &&) noexcept;
-            auto operator=(OffscreenSurface &&) noexcept -> OffscreenSurface &;
+        OffscreenSurface(const OffscreenSurface &) = delete;
+        auto operator=(const OffscreenSurface &) -> OffscreenSurface & = delete;
 
-            auto initialize(const Device &device) -> void override;
-            auto recreate() -> void override;
-            auto destroy() -> void override;
+        OffscreenSurface(OffscreenSurface &&) noexcept;
+        auto operator=(OffscreenSurface &&) noexcept -> OffscreenSurface &;
 
-            auto acquireNextFrame() -> Expected<Frame> override;
-            auto present(const Frame &frame) -> void override;
+        auto initialize(const Device &device) -> void override;
+        auto recreate() -> void override;
+        auto destroy() -> void override;
 
-          private:
-            OffscreenSurface() = delete;
-        };
-    } // namespace stormkit::gpu
+        auto acquireNextFrame() -> Expected<Frame> override;
+        auto present(const Frame &frame) -> void override;
 
-#if defined(STORMKIT_CXX20_MODULES)
-}
-#endif
+      private:
+        OffscreenSurface() = delete;
+    };
+} // namespace stormkit::gpu
 
 //#include "OffscreenSurface.inl"

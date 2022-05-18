@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include "GraphicsPipeline.mpp"
-
 namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////

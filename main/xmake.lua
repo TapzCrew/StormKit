@@ -19,8 +19,6 @@ target("stormkit-main")
     add_includedirs("include", { public = true })
     add_includedirs("$(buildir)/include")
 
-    add_options("enable_cxx20_modules")
-
     set_group("libraries")
 
     before_install(function(target)

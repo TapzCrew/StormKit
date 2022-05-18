@@ -4,7 +4,6 @@
 
 #pragma once
 
-/////////// - StormKit::core - ///////////
 #include <stormkit/core/PlatformMacro.hpp>
 
 #include <cassert>

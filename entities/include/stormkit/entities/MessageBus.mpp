@@ -2,81 +2,52 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-module;
-
 #pragma once
 
 #include <stormkit/core/PlatformMacro.hpp>
 
-#if defined(STORMKIT_CXX20_MODULES)
-// clang-format off
-export module stormkit.entities.messagebus;
 
-/////////// - STL - ///////////
-import <memory>;
-import <optional>;
-import <queue>;
-import <span>;
-import <string>;
-import <string_view>;
-import <vector>;
+#include <memory>
+#include <optional>
+#include <queue>
+#include <span>
+#include <string>
+#include <string_view>
+#include <vector>
 
-/////////// - StormKit::core - ///////////
-import stormkit.core.types;
 
-/////////// - StormKit::entity - ///////////
-import stormkit.core.entity;
+#include <stormkit/core/Types.mpp>
 
-// clang-format on
-export {
-#else
-/////////// - STL - ///////////
-    #include <memory>
-    #include <optional>
-    #include <queue>
-    #include <span>
-    #include <string>
-    #include <string_view>
-    #include <vector>
 
-    /////////// - StormKit::core - ///////////
-    #include <stormkit/core/Types.mpp>
+#include <stormkit/entities/Entity.mpp>
 
-    /////////// - StormKit::entities - ///////////
-    #include <stormkit/entities/Entity.mpp>
-#endif
+namespace stormkit::entities {
+    struct Message {
+        core::UInt32 id;
+        std::vector<Entity> entities;
+    };
 
-    namespace stormkit::entities {
-        struct Message {
-            core::UInt32 id;
-            std::vector<Entity> entities;
-        };
+    class STORMKIT_PUBLIC MessageBus {
+      public:
+        MessageBus();
+        ~MessageBus();
 
-        class STORMKIT_PUBLIC MessageBus {
-          public:
-            MessageBus();
-            ~MessageBus();
+        MessageBus(const MessageBus &) = delete;
+        auto operator=(const MessageBus &) -> MessageBus & = delete;
 
-            MessageBus(const MessageBus &) = delete;
-            auto operator=(const MessageBus &) -> MessageBus & = delete;
+        MessageBus(MessageBus &&);
+        auto operator=(MessageBus &&) -> MessageBus &;
 
-            MessageBus(MessageBus &&);
-            auto operator=(MessageBus &&) -> MessageBus &;
+        auto push(Message &&message) -> void;
+        [[nodiscard]] auto top() const -> const Message &;
+        auto pop() -> void;
 
-            auto push(Message &&message) -> void;
-            [[nodiscard]] auto top() const -> const Message &;
-            auto pop() -> void;
+        [[nodiscard]] auto empty() const noexcept -> bool;
 
-            [[nodiscard]] auto empty() const noexcept -> bool;
-
-          private:
-            std::queue<Message> m_messages;
-        };
-        DECLARE_PTR_AND_REF(MessageBus)
-    } // namespace stormkit::entities
-
-#if defined(STORMKIT_CXX20_MODULES)
-}
-#endif
+      private:
+        std::queue<Message> m_messages;
+    };
+    DECLARE_PTR_AND_REF(MessageBus)
+} // namespace stormkit::entities
 
 #include "MessageBus.inl"

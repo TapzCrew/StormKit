@@ -4,14 +4,14 @@
 
 #pragma once
 
-/////////// - STL - ///////////
+
 #include <array>
 #include <memory>
 #include <optional>
 #include <span>
 #include <vector>
 
-/////////// - StormKit::core - ///////////
+
 #include <stormkit/core/Concepts.mpp>
 #include <stormkit/core/MemoryMacro.hpp>
 

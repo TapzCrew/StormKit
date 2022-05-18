@@ -2,28 +2,14 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-module;
-
 #pragma once
 
-#if defined(STORMKIT_CXX20_MODULES)
-// clang-format off
-export module stormkit.core.crtp;
-
-// clang-format on
-export {
-#endif
-
-    namespace stormkit::core {
-        template<class T, template<class> class CRTP_TYPE>
-        struct CRTP {
-            constexpr auto underlying() noexcept -> T &;
-            constexpr auto underlying() const noexcept -> const T &;
-        };
-    } // namespace stormkit::core
+namespace stormkit::core {
+    template<class T, template<class> class CRTP_TYPE>
+    struct CRTP {
+        constexpr auto underlying() noexcept -> T &;
+        constexpr auto underlying() const noexcept -> const T &;
+    };
+} // namespace stormkit::core
 
 #include "CRTP.inl"
-
-#if defined(STORMKIT_CXX20_MODULES)
-}
-#endif

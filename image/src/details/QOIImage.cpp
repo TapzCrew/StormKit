@@ -2,18 +2,10 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#if defined(STORMKIT_CXX20_MODULES)
-module stormkit.image.details.hdrimage;
+#include <stormkit/core/Color.mpp>
+#include <stormkit/core/ConstexprMap.mpp>
 
-// clang-format off
-// clang-format on
-#else
-    #include <stormkit/core/Color.mpp>
-    #include <stormkit/core/ConstexprMap.mpp>
-
-    /////////// - StormKit::log - ///////////
-    #include "QOIImage.mpp"
-#endif
+#include "QOIImage.mpp"
 
 namespace stormkit::image::details {
     template<class E>

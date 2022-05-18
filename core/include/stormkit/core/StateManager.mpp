@@ -2,109 +2,79 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-module;
-
 #pragma once
 
 #include <stormkit/core/AssertMacro.hpp>
 #include <stormkit/core/MemoryMacro.hpp>
 #include <stormkit/core/PlatformMacro.hpp>
 
-#if defined(STORMKIT_CXX20_MODULES)
-// clang-format off
-export module stormkit.core.statemanager;
+#include <functional>
+#include <memory>
+#include <optional>
+#include <queue>
+#include <span>
+#include <stack>
+#include <vector>
 
-    /////////// - STL - ///////////
-import <mutex>;
-import <utility>;
-import <functional>;
-import <memory>;
-import <optional>;
-import <span>;
-import <vector>;
+#include <stormkit/core/Concepts.mpp>
+#include <stormkit/core/Fwd.hpp>
+#include <stormkit/core/Memory.mpp>
+#include <stormkit/core/State.mpp>
+#include <stormkit/core/Types.mpp>
 
-/////////// - StormKit::core - ///////////
-import stormkit.core.concepts;
-import stormkit.core.types;
-import stormkit.core.state;
+namespace stormkit::core {
+    class STORMKIT_PUBLIC StateManager {
+      public:
+        StateManager() noexcept;
 
-// clang-format on
-export {
-#else
-    /////////// - STL - ///////////
-    #include <functional>
-    #include <memory>
-    #include <optional>
-    #include <queue>
-    #include <span>
-    #include <stack>
-    #include <vector>
+        StateManager(const StateManager &manager) noexcept = delete;
+        auto operator=(const StateManager &manager) noexcept -> StateManager & = delete;
 
-    /////////// - StormKit::core - ///////////
-    #include <stormkit/core/Concepts.mpp>
-    #include <stormkit/core/Fwd.hpp>
-    #include <stormkit/core/Memory.mpp>
-    #include <stormkit/core/State.mpp>
-    #include <stormkit/core/Types.mpp>
-#endif
+        StateManager(StateManager &&manager) noexcept;
+        auto operator=(StateManager &&manager) noexcept -> StateManager &;
 
-    namespace stormkit::core {
-        class STORMKIT_PUBLIC StateManager {
-          public:
-            StateManager() noexcept;
+        ~StateManager();
 
-            StateManager(const StateManager &manager) noexcept = delete;
-            auto operator=(const StateManager &manager) noexcept -> StateManager & = delete;
+        template<ChildOfStateType T, typename... Args>
+        auto requestPush(Args &&...args) -> void;
 
-            StateManager(StateManager &&manager) noexcept;
-            auto operator=(StateManager &&manager) noexcept -> StateManager &;
+        auto requestPush(StateOwnedPtr &&state) -> void;
 
-            ~StateManager();
+        template<ChildOfStateType T, typename... Args>
+        auto requestSet(Args &&...args) -> void;
 
-            template<ChildOfStateType T, typename... Args>
-            auto requestPush(Args &&...args) -> void;
+        auto requestSet(StateOwnedPtr &&state) -> void;
 
-            auto requestPush(StateOwnedPtr &&state) -> void;
+        auto requestPop() -> void;
 
-            template<ChildOfStateType T, typename... Args>
-            auto requestSet(Args &&...args) -> void;
+        [[nodiscard]] auto hasPendingRequests() const noexcept -> bool;
 
-            auto requestSet(StateOwnedPtr &&state) -> void;
+        auto executeRequests() -> void;
 
-            auto requestPop() -> void;
+        auto update(Secondf delta) -> void;
 
-            [[nodiscard]] auto hasPendingRequests() const noexcept -> bool;
+        auto requestClear() -> void;
 
-            auto executeRequests() -> void;
+        [[nodiscard]] auto top() noexcept -> State &;
+        [[nodiscard]] auto top() const noexcept -> const State &;
 
-            auto update(Secondf delta) -> void;
+        template<ChildOfStateType T>
+        [[nodiscard]] auto top() -> T &;
 
-            auto requestClear() -> void;
+        template<ChildOfStateType T>
+        [[nodiscard]] auto top() const -> const T &;
 
-            [[nodiscard]] auto top() noexcept -> State &;
-            [[nodiscard]] auto top() const noexcept -> const State &;
+        auto size() const noexcept -> USize;
 
-            template<ChildOfStateType T>
-            [[nodiscard]] auto top() -> T &;
-
-            template<ChildOfStateType T>
-            [[nodiscard]] auto top() const -> const T &;
-
-            auto size() const noexcept -> USize;
-
-          private:
-            struct StateManagerAction {
-                enum class Type { push, pop, set, clear } type;
-                StateOwnedPtr state; // Null when pop
-            };
-
-            std::queue<StateManagerAction> m_action_queue;
-            std::stack<StateOwnedPtr> m_stack;
+      private:
+        struct StateManagerAction {
+            enum class Type { push, pop, set, clear } type;
+            StateOwnedPtr state; // Null when pop
         };
-    } // namespace stormkit::core
 
-#if defined(STORMKIT_CXX20_MODULES)
-}
-#endif
+        std::queue<StateManagerAction> m_action_queue;
+        std::stack<StateOwnedPtr> m_stack;
+    };
+} // namespace stormkit::core
 
 #include "StateManager.inl"

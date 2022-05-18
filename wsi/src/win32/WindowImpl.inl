@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include "WindowImpl.mpp"
-
 namespace stormkit::wsi::details::win32 {
     inline auto WindowImpl::close() noexcept -> void {
         m_is_open    = false;

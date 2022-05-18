@@ -2,12 +2,7 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#if defined(STORMKIT_CXX20_MODULES)
-module stormkit.gpu.core.dynamicloader;
-#else
-    /////////// - StormKit::render - ///////////
-    #include <stormkit/gpu/core/DynamicLoader.mpp>
-#endif
+#include <stormkit/gpu/core/DynamicLoader.mpp>
 
 namespace stormkit::gpu {
     /////////////////////////////////////

@@ -1,51 +1,24 @@
-
 // Copyright (C) 2022 Arthur LAURENT <arthur.laurent4@gmail.com>
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#if defined(STORMKIT_CXX20_MODULES)
-module stormkit.image.details.hdrimage;
+#include <string>
 
-// clang-format off
-/////////// - STL - ///////////
-import <string>;
+#include <stormkit/core/Coroutines.mpp>
+#include <stormkit/core/Format.mpp>
+#include <stormkit/core/Numerics.mpp>
+#include <stormkit/core/Strings.mpp>
+#include <stormkit/core/Types.mpp>
 
-/////////// - StormKit::core - ///////////
-import stormkit.core.format;
-import stormkit.core.types;
-import stormkit.core.numerics;
-import stormkit.core.strings;
+#include <stormkit/image/Image.mpp>
 
-/////////// - StormKit::image - ///////////
-import stormkit.image.details.hdrimage;
-import stormkit.image.details.jpgimage;
-import stormkit.image.details.ktximage;
-import stormkit.image.details.pngimage;
-import stormkit.image.details.ppmimage;
-import stormkit.image.details.tgaimage;
-// clang-format on
-#else
-    /////////// - STL - ///////////
-    #include <string>
-
-    /////////// - StormKit::core - ///////////
-    #include <stormkit/core/Coroutines.mpp>
-    #include <stormkit/core/Format.mpp>
-    #include <stormkit/core/Numerics.mpp>
-    #include <stormkit/core/Strings.mpp>
-    #include <stormkit/core/Types.mpp>
-
-    /////////// - StormKit::image - ///////////
-    #include <stormkit/image/Image.mpp>
-
-    #include "details/HDRImage.mpp"
-    #include "details/JPEGImage.mpp"
-    #include "details/KTXImage.mpp"
-    #include "details/PNGImage.mpp"
-    #include "details/PPMImage.mpp"
-    #include "details/QOIImage.mpp"
-    #include "details/TARGAImage.mpp"
-#endif
+#include "details/HDRImage.mpp"
+#include "details/JPEGImage.mpp"
+#include "details/KTXImage.mpp"
+#include "details/PNGImage.mpp"
+#include "details/PPMImage.mpp"
+#include "details/QOIImage.mpp"
+#include "details/TARGAImage.mpp"
 
 namespace stormkit::image {
     namespace details {

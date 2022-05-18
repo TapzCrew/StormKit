@@ -2,37 +2,23 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#if defined(STORMKIT_CXX20_MODULES)
-module stormkit.gpu.core.instance;
+#include <map>
+#include <unordered_set>
 
-/////////// - STL - ///////////
-import<map>;
-import<unordered_set>;
+#include <stormkit/core/Math.mpp>
 
-#else
-    /////////// - STL - ///////////
-    #include <map>
-    #include <unordered_set>
+#include <stormkit/log/LogHandler.mpp>
 
-    /////////// - StormKit::core - ///////////
-    #include <stormkit/core/Math.mpp>
+#include <stormkit/gpu/core/Instance.mpp>
+#include <stormkit/gpu/core/OffscreenSurface.mpp>
+#include <stormkit/gpu/core/PhysicalDevice.mpp>
+#include <stormkit/gpu/core/PhysicalDeviceInfo.mpp>
+#include <stormkit/gpu/core/WindowSurface.mpp>
 
-    /////////// - StormKit::log - ///////////
-    #include <stormkit/log/LogHandler.mpp>
-
-    /////////// - StormKit::render - ///////////
-    #include <stormkit/gpu/core/Instance.mpp>
-    #include <stormkit/gpu/core/OffscreenSurface.mpp>
-    #include <stormkit/gpu/core/PhysicalDevice.mpp>
-    #include <stormkit/gpu/core/PhysicalDeviceInfo.mpp>
-    #include <stormkit/gpu/core/WindowSurface.mpp>
-#endif
-
-/////////// - StormKit::log - ///////////
 #include <stormkit/log/LogMacro.hpp>
 
 namespace stormkit::gpu {
-    LOGGER("StormKit.GPU.core.Instance")
+    NAMED_LOGGER(instance_logger, "StormKit.GPU.core.Instance")
 
     auto scorePhysicalDevice(const PhysicalDevice &physical_device) -> core::UInt64 {
         if (!physical_device.checkExtensionSupport(DEVICE_EXTENSIONS)) return 0u;
@@ -79,13 +65,13 @@ namespace stormkit::gpu {
 
         switch (message_severity) {
             case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
-                dlog(format_string, callback_data->pMessage);
+                instance_logger.dlog(format_string, callback_data->pMessage);
                 break;
             case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
-                elog(format_string, callback_data->pMessage);
+                instance_logger.elog(format_string, callback_data->pMessage);
                 break;
             case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
-                wlog(format_string, callback_data->pMessage);
+                instance_logger.wlog(format_string, callback_data->pMessage);
                 break;
             default: break;
         }
@@ -97,12 +83,12 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     Instance::Instance(std::string app_name) : m_app_name { std::move(app_name) } {
         if (s_has_instance) {
-            flog("Trying to create a second Instance, aborting...");
+            instance_logger.flog("Trying to create a second Instance, aborting...");
             std::exit(EXIT_FAILURE);
         }
 
         if (!m_loader.success()) {
-            flog("Failed to initialize vulkan");
+            instance_logger.flog("Failed to initialize vulkan");
             std::exit(EXIT_FAILURE);
         }
 
@@ -198,16 +184,16 @@ namespace stormkit::gpu {
         for (auto ext : INSTANCE_EXTENSIONS)
             if (checkExtensionSupport(ext)) instance_extensions.emplace_back(std::data(ext));
 
-        dlog("Instance extensions -----------");
-        for (const auto &str : m_extensions) dlog("	{}", str);
-        dlog("-------------------------------");
+        instance_logger.dlog("Instance extensions -----------");
+        for (const auto &str : m_extensions) instance_logger.dlog("	{}", str);
+        instance_logger.dlog("-------------------------------");
 
         const auto enable_validation = checkValidationLayerSupport(ENABLE_VALIDATION);
         if (enable_validation) {
-            dlog("Validation layers enabled");
-            dlog("enabling layers: -----------");
-            for (const auto &str : VALIDATION_LAYERS) dlog("	{}", str);
-            dlog("-------------------------------");
+            instance_logger.dlog("Validation layers enabled");
+            instance_logger.dlog("enabling layers: -----------");
+            for (const auto &str : VALIDATION_LAYERS) instance_logger.dlog("	{}", str);
+            instance_logger.dlog("-------------------------------");
 
             create_info.enabledLayerCount   = std::size(VALIDATION_LAYERS);
             create_info.ppEnabledLayerNames = std::data(VALIDATION_LAYERS);
@@ -382,7 +368,7 @@ namespace stormkit::gpu {
             }
 
             if (!layer_found) {
-                dlog("Failed to find validation layers, disabling...");
+                instance_logger.dlog("Failed to find validation layers, disabling...");
                 return false;
             }
         }

@@ -2,22 +2,11 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#if defined(STORMKIT_CXX20_MODULES)
-module stormkit.image.details.ppmimage;
+#include <ranges>
 
-// clang-format off
-/////////// - STL - ///////////
-import <ranges>;
-// clang-format on
-#else
-    /////////// - STL - ///////////
-    #include <ranges>
+#include <stormkit/core/Coroutines.mpp>
 
-    #include <stormkit/core/Coroutines.mpp>
-
-    /////////// - StormKit::log - ///////////
-    #include "PPMImage.mpp"
-#endif
+#include "PPMImage.mpp"
 
 using namespace std::literals;
 

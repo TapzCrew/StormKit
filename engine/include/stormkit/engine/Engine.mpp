@@ -2,74 +2,59 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-module;
-
 #pragma once
 
-#if defined(STORMKIT_CXX20_MODULES)
-// clang-format off
-export module stormkit.engine.engine;
 
-/////////// - STL - ///////////
-import <vector>;
+#include <stormkit/core/ThreadPool.mpp>
+#include <stormkit/core/Types.mpp>
 
-/////////// - StormKit::render - ///////////
-import stormkit.gpu.core.vulkan;
-// clang-format on
-export {
-#else
-    /////////// - StormKit::core - ///////////
-    #include <stormkit/core/ThreadPool.mpp>
-    #include <stormkit/core/Types.mpp>
 
-    /////////// - StormKit::wsi - ///////////
-    #include <stormkit/wsi/EventHandler.mpp>
-    #include <stormkit/wsi/Fwd.hpp>
+#include <stormkit/wsi/EventHandler.mpp>
+#include <stormkit/wsi/Fwd.hpp>
 
-    /////////// - StormKit::entities - ///////////
-    #include <stormkit/entities/EntityManager.mpp>
 
-    /////////// - StormKit::engine - ///////////
-    #include <stormkit/engine/Fwd.hpp>
-#endif
+#include <stormkit/entities/EntityManager.mpp>
 
-    namespace stormkit::engine {
-        class STORMKIT_PUBLIC Engine {
-          public:
-            explicit Engine(wsi::Window &window);
-            ~Engine();
 
-            Engine(const Engine &) = delete;
-            auto operator=(const Engine &) -> Engine & = delete;
+#include <stormkit/engine/Fwd.hpp>
 
-            Engine(Engine &&) noexcept;
-            auto operator=(Engine &&) noexcept -> Engine &;
+namespace stormkit::engine {
+    class STORMKIT_PUBLIC Engine {
+      public:
+        explicit Engine(wsi::Window &window);
+        ~Engine();
 
-            auto world() noexcept -> entities::EntityManager &;
-            auto world() const noexcept -> const entities::EntityManager &;
+        Engine(const Engine &) = delete;
+        auto operator=(const Engine &) -> Engine & = delete;
 
-            auto window() const noexcept -> wsi::Window &;
+        Engine(Engine &&) noexcept;
+        auto operator=(Engine &&) noexcept -> Engine &;
 
-            auto threadPool() noexcept -> core::ThreadPool &;
-            auto threadPool() const noexcept -> const core::ThreadPool &;
+        auto world() noexcept -> entities::EntityManager &;
+        auto world() const noexcept -> const entities::EntityManager &;
 
-            auto renderer() noexcept -> Renderer &;
+        auto window() const noexcept -> wsi::Window &;
 
-            auto run(const int argc, const char **argv) -> stormkit::core::Int32;
+        auto threadPool() noexcept -> core::ThreadPool &;
+        auto threadPool() const noexcept -> const core::ThreadPool &;
 
-          private:
-            wsi::Window *m_window = nullptr;
-            wsi::EventHandler m_event_handler;
+        auto renderer() noexcept -> Renderer &;
 
-            core::ThreadPool m_thread_pool;
+        auto run(const int argc, const char **argv) -> stormkit::core::Int32;
 
-            RendererOwnedPtr m_renderer;
+      private:
+        wsi::Window *m_window = nullptr;
+        wsi::EventHandler m_event_handler;
 
-            entities::EntityManager m_world;
+        core::ThreadPool m_thread_pool;
 
-            bool m_fullscreen_enabled = false;
-        };
+        RendererOwnedPtr m_renderer;
 
-    } // namespace stormkit::engine
+        entities::EntityManager m_world;
+
+        bool m_fullscreen_enabled = false;
+    };
+
+} // namespace stormkit::engine
 
 #include "Engine.inl"

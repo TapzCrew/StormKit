@@ -4,25 +4,27 @@
 
 #pragma once
 
-#define LOGGER(module)                                                                  \
-    static const inline auto LOG_MODULE = stormkit::log::makeModule(module);            \
-    template<typename... Args>                                                          \
-    inline auto dlog(Args &&...param_args)->void {                                      \
-        stormkit::log::LogHandler::dlog(LOG_MODULE, std::forward<Args>(param_args)...); \
-    }                                                                                   \
-    template<typename... Args>                                                          \
-    inline auto ilog(Args &&...param_args)->void {                                      \
-        stormkit::log::LogHandler::ilog(LOG_MODULE, std::forward<Args>(param_args)...); \
-    }                                                                                   \
-    template<typename... Args>                                                          \
-    inline auto wlog(Args &&...param_args)->void {                                      \
-        stormkit::log::LogHandler::wlog(LOG_MODULE, std::forward<Args>(param_args)...); \
-    }                                                                                   \
-    template<typename... Args>                                                          \
-    inline auto elog(Args &&...param_args)->void {                                      \
-        stormkit::log::LogHandler::elog(LOG_MODULE, std::forward<Args>(param_args)...); \
-    }                                                                                   \
-    template<typename... Args>                                                          \
-    inline auto flog(Args &&...param_args)->void {                                      \
-        stormkit::log::LogHandler::flog(LOG_MODULE, std::forward<Args>(param_args)...); \
+#define NAMED_LOGGER(NAME, module) static const inline auto NAME = stormkit::log::Module { module };
+
+#define LOGGER(module)                                \
+    NAMED_LOGGER(LOG_MODULE, module)                  \
+    template<typename... Args>                        \
+    auto dlog(Args &&...args)->void {                 \
+        LOG_MODULE.dlog(std::forward<Args>(args)...); \
+    }                                                 \
+    template<typename... Args>                        \
+    auto ilog(Args &&...args)->void {                 \
+        LOG_MODULE.ilog(std::forward<Args>(args)...); \
+    }                                                 \
+    template<typename... Args>                        \
+    auto wlog(Args &&...args)->void {                 \
+        LOG_MODULE.wlog(std::forward<Args>(args)...); \
+    }                                                 \
+    template<typename... Args>                        \
+    auto elog(Args &&...args)->void {                 \
+        LOG_MODULE.elog(std::forward<Args>(args)...); \
+    }                                                 \
+    template<typename... Args>                        \
+    auto flog(Args &&...args)->void {                 \
+        LOG_MODULE.flog(std::forward<Args>(args)...); \
     }

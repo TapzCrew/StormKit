@@ -2,39 +2,29 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-module;
-
 #pragma once
 
-#if defined(STORMKIT_CXX20_MODULES)
-// clang-format off
-export module stormkit.core.coroutines;
 
-// clang-format on
-export {
+#include <array>
+#include <coroutine>
+#include <exception>
+#include <utility>
+
+#if __has_include(<generator>)
+    #include <generator>
+#elif __has_include(<experimental/generator>) && !defined(__clang__)
+    #include <experimental/generator>
 #else
-    /////////// - STL - ///////////
-    #include <array>
-    #include <coroutine>
-    #include <exception>
-    #include <utility>
-
-    #if __has_include(<generator>)
-        #include <generator>
-    #elif __has_include(<experimental/generator>) && !defined(__clang__)
-        #include <experimental/generator>
-    #else
-        #include <iterator>
-    #endif
-
-    #include <stormkit/core/AsCast.mpp>
-    #include <stormkit/core/Concepts.mpp>
+    #include <iterator>
 #endif
 
-    namespace stormkit::core {
+#include <stormkit/core/AsCast.mpp>
+#include <stormkit/core/Concepts.mpp>
+
+namespace stormkit::core {
 #if __has_include(<generator>)
-        template<typename T>
-        using Generator = std::generator<T>;
+    template<typename T>
+    using Generator = std::generator<T>;
 #elif __has_include(<experimental/generator>) && !defined(__clang__)
     template<typename T>
     using Generator = std::experimental::generator<T>;
@@ -82,20 +72,16 @@ export {
 
 #endif
 
-        template<typename Func, typename T>
-        auto fmap(Func &&func, Generator<T> source) noexcept(noexcept(func()))
-            -> Generator<std::invoke_result_t<Func &, typename Generator<T>::iterator::reference>>;
+    template<typename Func, typename T>
+    auto fmap(Func &&func, Generator<T> source) noexcept(noexcept(func()))
+        -> Generator<std::invoke_result_t<Func &, typename Generator<T>::iterator::reference>>;
 
-        template<std::convertible_to<std::size_t>... Args>
-        auto generateIndices(Args... args) -> Generator<std::array<std::size_t, sizeof...(Args)>>;
+    template<std::convertible_to<std::size_t>... Args>
+    auto generateIndices(Args... args) -> Generator<std::array<std::size_t, sizeof...(Args)>>;
 
-        template<std::ranges::range... Args>
-        auto generateIndices(const Args &...args)
-            -> Generator<std::array<std::size_t, sizeof...(Args)>>;
-    } // namespace stormkit::core
-
-#if defined(STORMKIT_CXX20_MODULES)
-}
-#endif
+    template<std::ranges::range... Args>
+    auto generateIndices(const Args &...args)
+        -> Generator<std::array<std::size_t, sizeof...(Args)>>;
+} // namespace stormkit::core
 
 #include "Coroutines.inl"

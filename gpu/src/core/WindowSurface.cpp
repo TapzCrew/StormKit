@@ -8,7 +8,7 @@
     #include <stormkit/wsi/Window.mpp>
 #endif
 
-/////////// - StormKit::core - ///////////
+
 #include <stormkit/core/Format.mpp>
 
 #include <stormkit/gpu/core/CommandBuffer.mpp>

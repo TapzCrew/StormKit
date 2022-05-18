@@ -6,50 +6,36 @@
 
 #include <stormkit/core/PlatformMacro.hpp>
 
-#if defined(STORMKIT_CXX20_MODULES)
-// clang-format off
-export module stormkit.gpu.sync.semaphore;
-// clang-format on
-export {
-#else
-    /////////// - StormKit::core - ///////////
-    #include <stormkit/core/Memory.mpp>
-    #include <stormkit/core/Types.mpp>
+#include <stormkit/core/Memory.mpp>
+#include <stormkit/core/Types.mpp>
 
-    /////////// - StormKit::render - ///////////
-    #include <stormkit/gpu/core/Enums.mpp>
-    #include <stormkit/gpu/core/Fwd.hpp>
-    #include <stormkit/gpu/core/Vulkan.mpp>
-#endif
+#include <stormkit/gpu/core/Enums.mpp>
+#include <stormkit/gpu/core/Fwd.hpp>
+#include <stormkit/gpu/core/Vulkan.mpp>
 
-    namespace stormkit::gpu {
-        class STORMKIT_PUBLIC Semaphore {
-          public:
-            static constexpr auto DEBUG_TYPE = DebugObjectType::Semaphore;
+namespace stormkit::gpu {
+    class STORMKIT_PUBLIC Semaphore {
+      public:
+        static constexpr auto DEBUG_TYPE = DebugObjectType::Semaphore;
 
-            explicit Semaphore(const Device &device);
-            ~Semaphore();
+        explicit Semaphore(const Device &device);
+        ~Semaphore();
 
-            Semaphore(const Semaphore &) = delete;
-            auto operator=(const Semaphore &) -> Semaphore & = delete;
+        Semaphore(const Semaphore &) = delete;
+        auto operator=(const Semaphore &) -> Semaphore & = delete;
 
-            Semaphore(Semaphore &&) noexcept;
-            auto operator=(Semaphore &&) noexcept -> Semaphore &;
+        Semaphore(Semaphore &&) noexcept;
+        auto operator=(Semaphore &&) noexcept -> Semaphore &;
 
-            [[nodiscard]] operator VkSemaphore() const noexcept;
-            [[nodiscard]] auto vkHandle() const noexcept -> VkSemaphore;
+        [[nodiscard]] operator VkSemaphore() const noexcept;
+        [[nodiscard]] auto vkHandle() const noexcept -> VkSemaphore;
 
+        DEVICE_CONST_GETTER
+      private:
+        const Device *m_device = nullptr;
 
-            DEVICE_CONST_GETTER
-          private:
-            const Device *m_device = nullptr;
-
-            VkSemaphore m_semaphore = VK_NULL_HANDLE;
-        };
-    } // namespace stormkit::gpu
-
-#if defined(STORMKIT_CXX20_MODULES)
-}
-#endif
+        VkSemaphore m_semaphore = VK_NULL_HANDLE;
+    };
+} // namespace stormkit::gpu
 
 #include "Semaphore.inl"

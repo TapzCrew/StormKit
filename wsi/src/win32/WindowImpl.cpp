@@ -2,23 +2,12 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#if defined(STORMKIT_CXX20_MODULES)
-module stormkit.wsi.details.win32.windowimpl;
+#include <locale>
 
-/////////// - STL - ///////////
-import<locale>;
+#include "Log.mpp"
+#include "Utils.mpp"
+#include "WindowImpl.mpp"
 
-#else
-/////////// - STL - ///////////
-    #include <locale>
-
-    /////////// - StormKit::wsi - ///////////
-    #include "Log.mpp"
-    #include "Utils.mpp"
-    #include "WindowImpl.mpp"
-#endif
-
-/////////// - Win32API - ///////////
 #include <shellscalingapi.h>
 #include <winuser.h>
 

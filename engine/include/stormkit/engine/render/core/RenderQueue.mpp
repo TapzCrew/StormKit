@@ -2,73 +2,58 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-module;
-
 #pragma once
 
-#if defined(STORMKIT_CXX20_MODULES)
-// clang-format off
-export module stormkit.engine.render.renderer;
 
-/////////// - STL - ///////////
-import <vector>;
+#include <stormkit/core/Types.mpp>
 
-/////////// - StormKit::render - ///////////
-import stormkit.gpu.core.vulkan;
-// clang-format on
-export {
-#else
-    /////////// - StormKit::core - ///////////
-    #include <stormkit/core/Types.mpp>
 
-    /////////// - StormKit::wsi - ///////////
-    #include <stormkit/wsi/Fwd.hpp>
+#include <stormkit/wsi/Fwd.hpp>
 
-    /////////// - StormKit::gpu - ///////////
-    #include <stormkit/gpu/Fwd.hpp>
 
-    #include <stormkit/gpu/resource/ImageView.mpp>
+#include <stormkit/gpu/Fwd.hpp>
 
-    /////////// - StormKit::engine - ///////////
-    #include <stormkit/engine/Fwd.hpp>
-#endif
+#include <stormkit/gpu/resource/ImageView.mpp>
 
-    namespace stormkit::engine {
-        class STORMKIT_PUBLIC RenderQueue {
-          public:
-            using ID                         = core::UInt64;
-            static constexpr auto INVALID_ID = std::numeric_limits<ID>::max();
 
-            RenderQueue();
-            ~RenderQueue();
+#include <stormkit/engine/Fwd.hpp>
 
-            RenderQueue(const RenderQueue &) = delete;
-            auto operator=(const RenderQueue &) -> RenderQueue & = delete;
+namespace stormkit::engine {
+    class STORMKIT_PUBLIC RenderQueue {
+      public:
+        using ID                         = core::UInt64;
+        static constexpr auto INVALID_ID = std::numeric_limits<ID>::max();
 
-            RenderQueue(RenderQueue &&) noexcept;
-            auto operator=(RenderQueue &&) noexcept -> RenderQueue &;
+        RenderQueue();
+        ~RenderQueue();
 
-            auto addMesh(const MeshComponent &mesh) -> ID;
-            auto removeMesh(ID id) -> void;
+        RenderQueue(const RenderQueue &) = delete;
+        auto operator=(const RenderQueue &) -> RenderQueue & = delete;
 
-            auto update() -> void;
+        RenderQueue(RenderQueue &&) noexcept;
+        auto operator=(RenderQueue &&) noexcept -> RenderQueue &;
 
-          private:
-            struct RenderEntry {
-                RenderEntry(ID _id, const MeshComponent &_mesh) noexcept
-                    : id { _id }, mesh { &_mesh } {};
+        auto addMesh(const MeshComponent &mesh) -> ID;
+        auto removeMesh(ID id) -> void;
 
-                ID id;
+        auto update() -> void;
 
-                const MeshComponent *mesh;
-            };
+      private:
+        struct RenderEntry {
+            RenderEntry(ID _id, const MeshComponent &_mesh) noexcept
+                : id { _id }, mesh { &_mesh } {};
 
-            std::mutex m_mutex;
+            ID id;
 
-            ID m_next_id = 0;
-            std::vector<RenderEntry> m_entries;
-
-            std::vector<RenderEntry> m_to_be_added;
-            std::vector<ID> m_to_be_removed;
+            const MeshComponent *mesh;
         };
-    } // namespace stormkit::engine
+
+        std::mutex m_mutex;
+
+        ID m_next_id = 0;
+        std::vector<RenderEntry> m_entries;
+
+        std::vector<RenderEntry> m_to_be_added;
+        std::vector<ID> m_to_be_removed;
+    };
+} // namespace stormkit::engine

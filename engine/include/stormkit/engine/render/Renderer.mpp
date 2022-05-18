@@ -2,88 +2,73 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-module;
-
 #pragma once
 
-#if defined(STORMKIT_CXX20_MODULES)
-// clang-format off
-export module stormkit.engine.render.renderer;
 
-/////////// - STL - ///////////
-import <vector>;
+#include <stormkit/core/Types.mpp>
 
-/////////// - StormKit::render - ///////////
-import stormkit.gpu.core.vulkan;
-// clang-format on
-export {
-#else
-    /////////// - StormKit::core - ///////////
-    #include <stormkit/core/Types.mpp>
 
-    /////////// - StormKit::entities - ///////////
-    #include <stormkit/entities/Fwd.hpp>
+#include <stormkit/entities/Fwd.hpp>
 
-    /////////// - StormKit::wsi - ///////////
-    #include <stormkit/wsi/Fwd.hpp>
 
-    /////////// - StormKit::gpu - ///////////
-    #include <stormkit/gpu/Fwd.hpp>
-    #include <stormkit/gpu/core/CommandBuffer.mpp>
+#include <stormkit/wsi/Fwd.hpp>
 
-    #include <stormkit/gpu/resource/ImageView.mpp>
 
-    /////////// - StormKit::gpu - ///////////
-    #include <stormkit/engine/Fwd.hpp>
-    #include <stormkit/engine/render/framegraph/GraphResource.mpp>
-#endif
+#include <stormkit/gpu/Fwd.hpp>
+#include <stormkit/gpu/core/CommandBuffer.mpp>
 
-    namespace stormkit::engine {
-        class STORMKIT_PUBLIC Renderer {
-          public:
-            explicit Renderer(Engine &engine);
-            ~Renderer();
+#include <stormkit/gpu/resource/ImageView.mpp>
 
-            Renderer(const Renderer &) = delete;
-            auto operator=(const Renderer &) -> Renderer & = delete;
 
-            Renderer(Renderer &&) noexcept;
-            auto operator=(Renderer &&) noexcept -> Renderer &;
+#include <stormkit/engine/Fwd.hpp>
+#include <stormkit/engine/render/framegraph/GraphResource.mpp>
 
-            auto setBuildFrameGraphCallback(BuildFrameGraphCallback callback) -> void;
+namespace stormkit::engine {
+    class STORMKIT_PUBLIC Renderer {
+      public:
+        explicit Renderer(Engine &engine);
+        ~Renderer();
 
-            auto instance() const noexcept -> const gpu::Instance &;
-            auto device() const noexcept -> const gpu::Device &;
-            auto surface() const noexcept -> const gpu::Surface &;
+        Renderer(const Renderer &) = delete;
+        auto operator=(const Renderer &) -> Renderer & = delete;
 
-            auto pipelineCache() noexcept -> gpu::PipelineCache &;
-            auto pipelineCache() const noexcept -> const gpu::PipelineCache &;
+        Renderer(Renderer &&) noexcept;
+        auto operator=(Renderer &&) noexcept -> Renderer &;
 
-          private:
-            enum class FrameGraphState { Updated, Old };
+        auto setBuildFrameGraphCallback(BuildFrameGraphCallback callback) -> void;
 
-            auto threadLoop() -> void;
-            auto rebuildFrameGraph() -> void;
+        auto instance() const noexcept -> const gpu::Instance &;
+        auto device() const noexcept -> const gpu::Device &;
+        auto surface() const noexcept -> const gpu::Surface &;
 
-            Engine *m_engine = nullptr;
-            BuildFrameGraphCallback m_build_framegraph;
+        auto pipelineCache() noexcept -> gpu::PipelineCache &;
+        auto pipelineCache() const noexcept -> const gpu::PipelineCache &;
 
-            gpu::InstanceOwnedPtr m_instance;
-            gpu::DeviceOwnedPtr m_device;
-            gpu::SurfaceOwnedPtr m_surface;
+      private:
+        enum class FrameGraphState { Updated, Old };
 
-            std::atomic_bool m_stop_thread = false;
-            std::thread m_render_thread;
+        auto threadLoop() -> void;
+        auto rebuildFrameGraph() -> void;
 
-            std::atomic_bool m_updated = true;
-            RenderQueueOwnedPtr m_render_queue;
-            FrameGraphBuilderOwnedPtr m_builder;
+        Engine *m_engine = nullptr;
+        BuildFrameGraphCallback m_build_framegraph;
 
-            gpu::PipelineCacheOwnedPtr m_pipeline_cache;
+        gpu::InstanceOwnedPtr m_instance;
+        gpu::DeviceOwnedPtr m_device;
+        gpu::SurfaceOwnedPtr m_surface;
 
-            std::vector<BakedFrameGraphOwnedPtr> m_framegraphs;
-            std::vector<FrameGraphState> m_framegraph_states;
-        };
-    } // namespace stormkit::engine
+        std::atomic_bool m_stop_thread = false;
+        std::thread m_render_thread;
+
+        std::atomic_bool m_updated = true;
+        RenderQueueOwnedPtr m_render_queue;
+        FrameGraphBuilderOwnedPtr m_builder;
+
+        gpu::PipelineCacheOwnedPtr m_pipeline_cache;
+
+        std::vector<BakedFrameGraphOwnedPtr> m_framegraphs;
+        std::vector<FrameGraphState> m_framegraph_states;
+    };
+} // namespace stormkit::engine
 
 #include "Renderer.inl"

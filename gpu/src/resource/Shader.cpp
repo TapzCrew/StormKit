@@ -2,7 +2,7 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-/////////// - STL - ///////////
+
 #include <fstream>
 #include <streambuf>
 
@@ -11,7 +11,7 @@
     #include <spirv_glsl.hpp>
 #endif
 
-/////////// - StormKit::render - ///////////
+
 #include <stormkit/gpu/core/Device.mpp>
 #include <stormkit/gpu/core/PhysicalDevice.mpp>
 

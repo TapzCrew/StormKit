@@ -2,17 +2,9 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#if defined(STORMKIT_CXX20_MODULES)
-module stormkit.entities.system;
 
-// clang-format off
-import stormkit.entities.entitymanager;
-// clang-format on
-#else
-    /////////// - StormKit::log - ///////////
-    #include <stormkit/entities/EntityManager.mpp>
-    #include <stormkit/entities/System.mpp>
-#endif
+#include <stormkit/entities/EntityManager.mpp>
+#include <stormkit/entities/System.mpp>
 
 namespace stormkit::entities {
     /////////////////////////////////////

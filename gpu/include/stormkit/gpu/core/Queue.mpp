@@ -2,109 +2,95 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-module;
-
 #pragma once
 
 #include <stormkit/core/PlatformMacro.hpp>
 
-#if defined(STORMKIT_CXX20_MODULES)
-// clang-format off
-export module stormkit.gpu.core.queue;
-// clang-format on
-export {
-#else
-    #include <chrono>
-    #include <optional>
+#include <chrono>
+#include <optional>
 
-    /////////// - StormKit::core - ///////////
-    #include <stormkit/core/Memory.mpp>
-    #include <stormkit/core/Types.mpp>
 
-    /////////// - StormKit::render - ///////////
-    #include <stormkit/gpu/core/Enums.mpp>
-    #include <stormkit/gpu/core/Fwd.hpp>
-    #include <stormkit/gpu/core/Vulkan.mpp>
+#include <stormkit/core/Memory.mpp>
+#include <stormkit/core/Types.mpp>
 
-    #include <stormkit/gpu/sync/Fwd.hpp>
-#endif
 
-    namespace stormkit::gpu {
-        class STORMKIT_PUBLIC Queue {
-          public:
-            static constexpr auto DEBUG_TYPE = DebugObjectType::Queue;
+#include <stormkit/gpu/core/Enums.mpp>
+#include <stormkit/gpu/core/Fwd.hpp>
+#include <stormkit/gpu/core/Vulkan.mpp>
 
-            Queue(const gpu::Device &device,
-                  QueueFlag flags,
-                  core::UInt32 family_index,
-                  VkQueue queue);
-            ~Queue();
+#include <stormkit/gpu/sync/Fwd.hpp>
 
-            Queue(const Queue &) = delete;
-            auto operator=(const Queue &) noexcept = delete;
+namespace stormkit::gpu {
+    class STORMKIT_PUBLIC Queue {
+      public:
+        static constexpr auto DEBUG_TYPE = DebugObjectType::Queue;
 
-            Queue(Queue &&) noexcept;
-            auto operator=(Queue &&) noexcept -> Queue &;
+        Queue(const gpu::Device &device, QueueFlag flags, core::UInt32 family_index, VkQueue queue);
+        ~Queue();
 
-            auto waitIdle() const noexcept -> void;
+        Queue(const Queue &) = delete;
+        auto operator=(const Queue &) noexcept = delete;
 
-            auto submit(std::span<const CommandBuffer *> command_buffers,
-                        std::span<const Semaphore *> wait_semaphores   = {},
-                        std::span<const Semaphore *> signal_semaphores = {},
-                        Fence *fence = nullptr) const noexcept -> void;
+        Queue(Queue &&) noexcept;
+        auto operator=(Queue &&) noexcept -> Queue &;
 
-            [[nodiscard]] auto
-                createCommandBuffer(CommandBufferLevel level = CommandBufferLevel::Primary) const
-                -> CommandBuffer;
-            [[nodiscard]] auto
-                allocateCommandBuffer(CommandBufferLevel level = CommandBufferLevel::Primary) const
-                -> CommandBufferOwnedPtr;
-            [[nodiscard]] auto allocateRefCountedCommandBuffer(
-                CommandBufferLevel level = CommandBufferLevel::Primary) const
-                -> CommandBufferSharedPtr;
+        auto waitIdle() const noexcept -> void;
 
-            [[nodiscard]] auto
-                createCommandBuffers(core::USize count,
-                                     CommandBufferLevel level = CommandBufferLevel::Primary) const
-                -> std::vector<CommandBuffer>;
-            [[nodiscard]] auto
-                allocateCommandBuffers(core::USize count,
-                                       CommandBufferLevel level = CommandBufferLevel::Primary) const
-                -> std::vector<CommandBufferOwnedPtr>;
-            [[nodiscard]] auto allocateRefCountedCommandBuffers(
-                core::USize count,
-                CommandBufferLevel level = CommandBufferLevel::Primary) const
-                -> std::vector<CommandBufferSharedPtr>;
+        auto submit(std::span<const CommandBuffer *> command_buffers,
+                    std::span<const Semaphore *> wait_semaphores   = {},
+                    std::span<const Semaphore *> signal_semaphores = {},
+                    Fence *fence = nullptr) const noexcept -> void;
 
-            [[nodiscard]] auto type() const noexcept -> QueueFlag;
-            [[nodiscard]] auto familyIndex() const noexcept -> core::UInt32;
+        [[nodiscard]] auto
+            createCommandBuffer(CommandBufferLevel level = CommandBufferLevel::Primary) const
+            -> CommandBuffer;
+        [[nodiscard]] auto
+            allocateCommandBuffer(CommandBufferLevel level = CommandBufferLevel::Primary) const
+            -> CommandBufferOwnedPtr;
+        [[nodiscard]] auto allocateRefCountedCommandBuffer(
+            CommandBufferLevel level = CommandBufferLevel::Primary) const -> CommandBufferSharedPtr;
 
-            [[nodiscard]] operator VkQueue() const noexcept;
-            [[nodiscard]] auto vkHandle() const noexcept -> VkQueue;
-            [[nodiscard]] auto vkCommandPool() const noexcept -> VkCommandPool;
+        [[nodiscard]] auto
+            createCommandBuffers(core::USize count,
+                                 CommandBufferLevel level = CommandBufferLevel::Primary) const
+            -> std::vector<CommandBuffer>;
+        [[nodiscard]] auto
+            allocateCommandBuffers(core::USize count,
+                                   CommandBufferLevel level = CommandBufferLevel::Primary) const
+            -> std::vector<CommandBufferOwnedPtr>;
+        [[nodiscard]] auto allocateRefCountedCommandBuffers(
+            core::USize count,
+            CommandBufferLevel level = CommandBufferLevel::Primary) const
+            -> std::vector<CommandBufferSharedPtr>;
 
-            DEVICE_CONST_GETTER
-          private:
-            Queue() = delete;
+        [[nodiscard]] auto type() const noexcept -> QueueFlag;
+        [[nodiscard]] auto familyIndex() const noexcept -> core::UInt32;
 
-            auto deleteCommandBuffer(VkCommandBuffer cmb) const noexcept -> void;
+        [[nodiscard]] operator VkQueue() const noexcept;
+        [[nodiscard]] auto vkHandle() const noexcept -> VkQueue;
+        [[nodiscard]] auto vkCommandPool() const noexcept -> VkCommandPool;
 
-            auto createVkCommandBuffers(core::USize count,
-                                        gpu::CommandBufferLevel level) const noexcept
-                -> std::vector<VkCommandBuffer>;
+        DEVICE_CONST_GETTER
+      private:
+        Queue() = delete;
 
-            const Device *m_device = nullptr;
+        auto deleteCommandBuffer(VkCommandBuffer cmb) const noexcept -> void;
 
-            QueueFlag m_queue_flag = QueueFlag::None;
+        auto createVkCommandBuffers(core::USize count, gpu::CommandBufferLevel level) const noexcept
+            -> std::vector<VkCommandBuffer>;
 
-            core::UInt32 m_family_index = 0;
+        const Device *m_device = nullptr;
 
-            VkQueue m_queue = VK_NULL_HANDLE;
+        QueueFlag m_queue_flag = QueueFlag::None;
 
-            VkCommandPool m_command_pool = VK_NULL_HANDLE;
-        };
+        core::UInt32 m_family_index = 0;
 
-    } // namespace stormkit::gpu
+        VkQueue m_queue = VK_NULL_HANDLE;
+
+        VkCommandPool m_command_pool = VK_NULL_HANDLE;
+    };
+
+} // namespace stormkit::gpu
 
 #if defined(STORMKIT_CXX20_MODULES)
 }

@@ -2,71 +2,51 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-module;
-
 #pragma once
 
 #include <stormkit/core/PlatformMacro.hpp>
 
-#if defined(STORMKIT_CXX20_MODULES)
-// clang-format off
-export module stormkit.gpu.core.dynamicloader;
 
-/////////// - STL - ///////////
-import <filesystem>;
-import <string_view>;
+#include <filesystem>
+#include <string_view>
 
-/////////// - StormKit::render - ///////////
-import stormkit.gpu.core.vulkan;
-export {
-// clang-format on
-#else
-    /////////// - STL - ///////////
-    #include <filesystem>
-    #include <string_view>
 
-    /////////// - StormKit::core - ///////////
-    #include <stormkit/core/DynamicLoader.mpp>
+#include <stormkit/core/DynamicLoader.mpp>
 
-    /////////// - StormKit::render - ///////////
-    #include <stormkit/gpu/core/Vulkan.mpp>
-#endif
 
-    namespace stormkit::gpu {
+#include <stormkit/gpu/core/Vulkan.mpp>
+
+namespace stormkit::gpu {
 #ifdef STORMKIT_OS_LINUX
-        static constexpr auto DEFAULT_VULKAN_LIB = std::string_view { "libvulkan.so" };
+    static constexpr auto DEFAULT_VULKAN_LIB = std::string_view { "libvulkan.so" };
 #elif defined(STORMKIT_OS_WINDOWS)
     static constexpr auto DEFAULT_VULKAN_LIB = std::string_view { "vulkan-1.dll" };
 #elif defined(STORMKIT_OS_APPLE)
     static constexpr auto DEFAULT_VULKAN_LIB = std::string_view { "libvulkan.dylib" };
 #endif
 
-        class STORMKIT_PUBLIC DynamicLoader {
-          public:
-            using GetInstanceProcAddrType = PFN_vkVoidFunction(VkInstance, const char *);
+    class STORMKIT_PUBLIC DynamicLoader {
+      public:
+        using GetInstanceProcAddrType = PFN_vkVoidFunction(VkInstance, const char *);
 
-            explicit DynamicLoader(std::filesystem::path vulkan_lib_path = DEFAULT_VULKAN_LIB);
-            ~DynamicLoader();
+        explicit DynamicLoader(std::filesystem::path vulkan_lib_path = DEFAULT_VULKAN_LIB);
+        ~DynamicLoader();
 
-            DynamicLoader(const DynamicLoader &) = delete;
-            auto operator=(const DynamicLoader &) -> DynamicLoader & = delete;
+        DynamicLoader(const DynamicLoader &) = delete;
+        auto operator=(const DynamicLoader &) -> DynamicLoader & = delete;
 
-            DynamicLoader(DynamicLoader &&) noexcept;
-            auto operator=(DynamicLoader &&) noexcept -> DynamicLoader &;
+        DynamicLoader(DynamicLoader &&) noexcept;
+        auto operator=(DynamicLoader &&) noexcept -> DynamicLoader &;
 
-            auto success() const noexcept -> bool;
+        auto success() const noexcept -> bool;
 
-            template<typename T>
-            auto get(std::string_view name) const noexcept -> T;
+        template<typename T>
+        auto get(std::string_view name) const noexcept -> T;
 
-          private:
-            bool m_success = false;
-            core::DynamicLoader m_loader;
-        };
-    } // namespace stormkit::gpu
-
-#if defined(STORMKIT_CXX20_MODULES)
-}
-#endif
+      private:
+        bool m_success = false;
+        core::DynamicLoader m_loader;
+    };
+} // namespace stormkit::gpu
 
 #include "DynamicLoader.inl"

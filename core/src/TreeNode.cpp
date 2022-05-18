@@ -1,9 +1,5 @@
-#if defined(STORMKIT_CXX20_MODULES)
-module stormkit.core.state;
-#else
-    /////////// - StormKit::core - ///////////
-    #include <stormkit/core/TreeNode.mpp>
-#endif
+
+#include <stormkit/core/TreeNode.mpp>
 
 namespace stormkit::core {
     /////////////////////////////////////

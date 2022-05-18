@@ -16,7 +16,7 @@ export module stormkit.triangle.constants;
 // clang-format on
 export {
 #else
-    /////////// - STL - ///////////
+    
     #include <array>
 
     /////////// - StormKit::Log - ///////////

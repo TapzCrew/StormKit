@@ -2,97 +2,81 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-module;
-
 #pragma once
 
 #include <stormkit/core/PlatformMacro.hpp>
 
-#if defined(STORMKIT_CXX20_MODULES)
-// clang-format off
-export module stormkit.gpu.core.offscreensurface;
-// clang-format on
-export {
-#else
-    #include <stormkit/core/Expected.mpp>
-    #include <stormkit/core/Math.mpp>
-    #include <stormkit/core/Types.mpp>
+#include <stormkit/core/Expected.mpp>
+#include <stormkit/core/Math.mpp>
+#include <stormkit/core/Types.mpp>
 
-    ////////// /- StormKit::window - ///////////
-    #if STORMKIT_WSI_ENABLED
-        #include <stormkit/wsi/Fwd.hpp>
-    #else
+#if STORMKIT_WSI_ENABLED
+    #include <stormkit/wsi/Fwd.hpp>
+#else
 namespace stormkit::wsi {
     class Window;
 
     DECLARE_PTR_AND_REF(Window);
 } // namespace stormkit::wsi
-    #endif
-
-    /////////// - StormKit::render - ///////////
-    #include <stormkit/gpu/core/Enums.mpp>
-    #include <stormkit/gpu/core/Fwd.hpp>
-    #include <stormkit/gpu/core/Surface.mpp>
 #endif
 
-    namespace stormkit::gpu {
-        class STORMKIT_PUBLIC WindowSurface final: public Surface {
-          public:
-            static constexpr auto DEBUG_TYPE = DebugObjectType::Surface;
+#include <stormkit/gpu/core/Enums.mpp>
+#include <stormkit/gpu/core/Fwd.hpp>
+#include <stormkit/gpu/core/Surface.mpp>
 
-            WindowSurface(const wsi::Window &window,
-                          const Instance &instance,
-                          Buffering buffering = Buffering::Swapchain);
-            ~WindowSurface() override;
+namespace stormkit::gpu {
+    class STORMKIT_PUBLIC WindowSurface final: public Surface {
+      public:
+        static constexpr auto DEBUG_TYPE = DebugObjectType::Surface;
 
-            WindowSurface(const WindowSurface &) = delete;
-            auto operator=(const WindowSurface &) -> WindowSurface & = delete;
+        WindowSurface(const wsi::Window &window,
+                      const Instance &instance,
+                      Buffering buffering = Buffering::Swapchain);
+        ~WindowSurface() override;
 
-            WindowSurface(WindowSurface &&) noexcept;
-            auto operator=(WindowSurface &&) noexcept -> WindowSurface &;
+        WindowSurface(const WindowSurface &) = delete;
+        auto operator=(const WindowSurface &) -> WindowSurface & = delete;
 
-            auto initialize(const Device &device) -> void override;
-            auto recreate() -> void override;
-            auto destroy() -> void override;
+        WindowSurface(WindowSurface &&) noexcept;
+        auto operator=(WindowSurface &&) noexcept -> WindowSurface &;
 
-            auto setExclusiveFullscreenEnabled(bool enabled) noexcept -> void;
+        auto initialize(const Device &device) -> void override;
+        auto recreate() -> void override;
+        auto destroy() -> void override;
 
-            [[nodiscard]] auto acquireNextFrame() -> Expected<Frame> override;
-            auto present(const Frame &frame) -> void override;
+        auto setExclusiveFullscreenEnabled(bool enabled) noexcept -> void;
 
-            [[nodiscard]] operator VkSurfaceKHR() const noexcept;
-            [[nodiscard]] auto vkHandle() const noexcept -> VkSurfaceKHR;
+        [[nodiscard]] auto acquireNextFrame() -> Expected<Frame> override;
+        auto present(const Frame &frame) -> void override;
 
-          private:
-            WindowSurface() = delete;
+        [[nodiscard]] operator VkSurfaceKHR() const noexcept;
+        [[nodiscard]] auto vkHandle() const noexcept -> VkSurfaceKHR;
 
-            auto createSwapchain() -> void;
-            auto destroySwapchain() -> void;
+      private:
+        WindowSurface() = delete;
 
-            auto chooseSwapSurfaceFormat(std::span<const VkSurfaceFormatKHR> formats) noexcept
-                -> VkSurfaceFormatKHR;
-            auto chooseSwapPresentMode(std::span<const VkPresentModeKHR> present_modes) noexcept
-                -> VkPresentModeKHR;
-            auto chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities) noexcept
-                -> VkExtent2D;
-            auto chooseImageCount(const VkSurfaceCapabilitiesKHR &capabilities) noexcept
-                -> core::UInt32;
+        auto createSwapchain() -> void;
+        auto destroySwapchain() -> void;
 
-            const wsi::Window *m_window = nullptr;
+        auto chooseSwapSurfaceFormat(std::span<const VkSurfaceFormatKHR> formats) noexcept
+            -> VkSurfaceFormatKHR;
+        auto chooseSwapPresentMode(std::span<const VkPresentModeKHR> present_modes) noexcept
+            -> VkPresentModeKHR;
+        auto chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities) noexcept -> VkExtent2D;
+        auto chooseImageCount(const VkSurfaceCapabilitiesKHR &capabilities) noexcept
+            -> core::UInt32;
 
-            bool m_initialized                  = false;
-            bool m_exclusive_fullscreen_enabled = false;
+        const wsi::Window *m_window = nullptr;
 
-            VkSurfaceKHR m_surface         = VK_NULL_HANDLE;
-            VkSwapchainKHR m_swapchain     = VK_NULL_HANDLE;
-            VkSwapchainKHR m_old_swapchain = VK_NULL_HANDLE;
-        };
+        bool m_initialized                  = false;
+        bool m_exclusive_fullscreen_enabled = false;
 
-        DECLARE_PTR_AND_REF(WindowSurface);
-    } // namespace stormkit::gpu
+        VkSurfaceKHR m_surface         = VK_NULL_HANDLE;
+        VkSwapchainKHR m_swapchain     = VK_NULL_HANDLE;
+        VkSwapchainKHR m_old_swapchain = VK_NULL_HANDLE;
+    };
 
-#if defined(STORMKIT_CXX20_MODULES)
-}
-#endif
+    DECLARE_PTR_AND_REF(WindowSurface);
+} // namespace stormkit::gpu
 
 #include "WindowSurface.inl"

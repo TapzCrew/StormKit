@@ -2,23 +2,14 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#if defined(STORMKIT_CXX20_MODULES)
-module stormkit.wsi.window;
+#include <stormkit/wsi/Window.mpp>
 
-/////////// - StormKit::wsi - ///////////
-import stormkit.wsi.log;
-import stormkit.wsi.details.windowimpl;
-#else
-    /////////// - StormKit::wsi - ///////////
-    #include <stormkit/wsi/Window.mpp>
+#include "Log.mpp"
 
-    #include "Log.mpp"
-
-    #if defined(STORMKIT_OS_WINDOWS)
-        #include "win32/WindowImpl.mpp"
-    #elif defined(STORMKIT_OS_LINUX)
-        #include "linux/WindowImpl.mpp"
-    #endif
+#if defined(STORMKIT_OS_WINDOWS)
+    #include "win32/WindowImpl.mpp"
+#elif defined(STORMKIT_OS_LINUX)
+    #include "linux/WindowImpl.mpp"
 #endif
 
 #include <stormkit/core/AssertMacro.hpp>

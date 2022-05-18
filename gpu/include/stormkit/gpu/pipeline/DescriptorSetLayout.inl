@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include "DescriptorSetLayout.mpp"
-
 namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////

@@ -4,7 +4,7 @@
 
 #include <stormkit/core/Coroutines.mpp>
 
-/////////// - StormKit::render - ///////////
+
 #include <stormkit/gpu/core/CommandBuffer.mpp>
 #include <stormkit/gpu/core/Device.mpp>
 #include <stormkit/gpu/core/PhysicalDevice.mpp>

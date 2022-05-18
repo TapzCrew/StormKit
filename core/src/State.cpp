@@ -1,10 +1,6 @@
-#if defined(STORMKIT_CXX20_MODULES)
-module stormkit.core.state;
-#else
-    /////////// - StormKit::core - ///////////
-    #include <stormkit/core/State.mpp>
-    #include <stormkit/core/StateManager.mpp>
-#endif
+
+#include <stormkit/core/State.mpp>
+#include <stormkit/core/StateManager.mpp>
 
 namespace stormkit::core {
     ////////////////////////////////////////

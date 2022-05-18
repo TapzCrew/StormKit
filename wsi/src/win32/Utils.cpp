@@ -2,13 +2,7 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#if defined(STORMKIT_CXX20_MODULES)
-module stormkit.wsi.details.utils;
-
-#else
-    /////////// - StormKit::wsi - ///////////
-    #include "Utils.mpp"
-#endif
+#include "Utils.mpp"
 
 namespace stormkit::wsi::details::win32 {
     /////////////////////////////////////

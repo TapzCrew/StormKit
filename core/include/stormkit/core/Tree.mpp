@@ -2,114 +2,83 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-module;
-
 #pragma once
 
-#if defined(STORMKIT_CXX20_MODULES)
-// clang-format off
-export module stormkit.core.tree;
+#include <cstdint>
+#include <deque>
+#include <filesystem>
+#include <fstream>
+#include <functional>
+#include <memory>
+#include <optional>
+#include <span>
+#include <string_view>
+#include <vector>
 
-/////////// - STL - ///////////
-import <filesystem>;
-import <string_view>;
-import <deque>;
-import <fstream>;
-import <functional>;
-import <memory>;
-import <optional>;
-import <span>;
-import <vector>;
+#include <stormkit/core/Fwd.hpp>
+#include <stormkit/core/TreeNode.mpp>
+#include <stormkit/core/Types.mpp>
 
-/////////// - StormKit::core - ///////////
-import stormkit.core.treenode;
-import stormkit.core.types;
+namespace stormkit::core {
+    template<typename TreeNodeClass = TreeNode>
+    class Tree {
+      public:
+        constexpr static const USize DEFAULT_PREALLOCATED_TREE_SIZE = 1000;
 
-// clang-format on
-export {
-#else
-    /////////// - STL - ///////////
-    #include <cstdint>
-    #include <deque>
-    #include <filesystem>
-    #include <fstream>
-    #include <functional>
-    #include <memory>
-    #include <optional>
-    #include <span>
-    #include <string_view>
-    #include <vector>
+        using TreeNodeType         = TreeNodeClass;
+        using TreeNodeIndexType    = typename TreeNodeType::IndexType;
+        using TreeNodeDirtyBitType = typename TreeNodeType::DirtyBitType;
 
-    /////////// - StormKit::core - ///////////
-    #include <stormkit/core/Fwd.hpp>
-    #include <stormkit/core/TreeNode.mpp>
-    #include <stormkit/core/Types.mpp>
-#endif
+        Tree();
+        ~Tree();
 
-    namespace stormkit::core {
-        template<typename TreeNodeClass = TreeNode>
-        class Tree {
-          public:
-            constexpr static const USize DEFAULT_PREALLOCATED_TREE_SIZE = 1000;
+        Tree(const Tree &);
+        auto operator=(const Tree &) -> Tree &;
 
-            using TreeNodeType         = TreeNodeClass;
-            using TreeNodeIndexType    = typename TreeNodeType::IndexType;
-            using TreeNodeDirtyBitType = typename TreeNodeType::DirtyBitType;
+        Tree(Tree &&);
+        auto operator=(Tree &&) -> Tree &;
 
-            Tree();
-            ~Tree();
+        auto getFreeNode() -> TreeNodeIndexType;
 
-            Tree(const Tree &);
-            auto operator=(const Tree &) -> Tree &;
+        auto insert(TreeNodeType &&node,
+                    TreeNodeIndexType parent_index,
+                    TreeNodeIndexType previous_sibling) -> TreeNodeIndexType;
+        auto remove(TreeNodeIndexType index) -> void;
 
-            Tree(Tree &&);
-            auto operator=(Tree &&) -> Tree &;
+        auto markDirty(TreeNodeIndexType index, TreeNodeDirtyBitType bits) -> void;
 
-            auto getFreeNode() -> TreeNodeIndexType;
+        auto operator[](TreeNodeIndexType index) noexcept -> TreeNodeType &;
+        auto operator[](TreeNodeIndexType index) const noexcept -> const TreeNodeType &;
 
-            auto insert(TreeNodeType &&node,
-                        TreeNodeIndexType parent_index,
-                        TreeNodeIndexType previous_sibling) -> TreeNodeIndexType;
-            auto remove(TreeNodeIndexType index) -> void;
+        [[nodiscard]] auto size() const noexcept -> USize;
 
-            auto markDirty(TreeNodeIndexType index, TreeNodeDirtyBitType bits) -> void;
+        [[nodiscard]] auto begin() noexcept;
+        [[nodiscard]] auto begin() const noexcept;
+        [[nodiscard]] auto cbegin() const noexcept;
 
-            auto operator[](TreeNodeIndexType index) noexcept -> TreeNodeType &;
-            auto operator[](TreeNodeIndexType index) const noexcept -> const TreeNodeType &;
+        [[nodiscard]] auto end() noexcept;
+        [[nodiscard]] auto end() const noexcept;
+        [[nodiscard]] auto cend() const noexcept;
 
-            [[nodiscard]] auto size() const noexcept -> USize;
+        auto clearDirties() noexcept -> void;
+        [[nodiscard]] auto dirties() const noexcept -> std::span<const TreeNodeIndexType>;
 
-            [[nodiscard]] auto begin() noexcept;
-            [[nodiscard]] auto begin() const noexcept;
-            [[nodiscard]] auto cbegin() const noexcept;
+        auto genDotFile(std::filesystem::path filepath,
+                        std::function<std::string_view(std::string_view)> colorize_node) const
+            -> void;
 
-            [[nodiscard]] auto end() noexcept;
-            [[nodiscard]] auto end() const noexcept;
-            [[nodiscard]] auto cend() const noexcept;
+        auto genDotFile(std::filesystem::path filepath,
+                        core::UInt32 highlight,
+                        std::function<std::string_view(std::string_view)> colorize_node) const
+            -> void;
 
-            auto clearDirties() noexcept -> void;
-            [[nodiscard]] auto dirties() const noexcept -> std::span<const TreeNodeIndexType>;
+      private:
+        TreeNodeIndexType m_first_free_index = 0;
+        std::vector<TreeNodeType> m_tree;
+        std::vector<TreeNodeIndexType> m_dirties;
+    };
 
-            auto genDotFile(std::filesystem::path filepath,
-                            std::function<std::string_view(std::string_view)> colorize_node) const
-                -> void;
-
-            auto genDotFile(std::filesystem::path filepath,
-                            core::UInt32 highlight,
-                            std::function<std::string_view(std::string_view)> colorize_node) const
-                -> void;
-
-          private:
-            TreeNodeIndexType m_first_free_index = 0;
-            std::vector<TreeNodeType> m_tree;
-            std::vector<TreeNodeIndexType> m_dirties;
-        };
-
-        DECLARE_PTR_AND_REF_TEMPLATE((Tree), (class T))
-    } // namespace stormkit::core
-
-#if defined(STORMKIT_CXX20_MODULES)
-}
-#endif
+    DECLARE_PTR_AND_REF_TEMPLATE((Tree), (class T))
+} // namespace stormkit::core
 
 #include "Tree.inl"

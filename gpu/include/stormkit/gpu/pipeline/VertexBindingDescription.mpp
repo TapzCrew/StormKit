@@ -2,36 +2,21 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-module;
-
 #pragma once
 
 #include <stormkit/core/HashMacro.hpp>
 
-#if defined(STORMKIT_CXX20_MODULES)
-// clang-format off
-export module stormkit.gpu.pipeline.vertexbindingdescription;
-// clang-format on
-export {
-#else
-    /////////// - StormKit::core - ///////////
-    #include <stormkit/core/Types.mpp>
+#include <stormkit/core/Types.mpp>
 
-    /////////// - StormKit::render - ///////////
-    #include <stormkit/gpu/core/Fwd.hpp>
-    #include <stormkit/gpu/core/Types.mpp>
-#endif
+#include <stormkit/gpu/core/Fwd.hpp>
+#include <stormkit/gpu/core/Types.mpp>
 
-    namespace stormkit::gpu {
-        struct VertexBindingDescription {
-            core::UInt32 binding;
-            core::UInt32 stride;
-            VertexInputRate input_rate = VertexInputRate::Vertex;
-        };
-    } // namespace stormkit::gpu
+namespace stormkit::gpu {
+    struct VertexBindingDescription {
+        core::UInt32 binding;
+        core::UInt32 stride;
+        VertexInputRate input_rate = VertexInputRate::Vertex;
+    };
+} // namespace stormkit::gpu
 
-    HASH_FUNC(stormkit::gpu::VertexBindingDescription)
-
-#if defined(STORMKIT_CXX20_MODULES)
-}
-#endif
+HASH_FUNC(stormkit::gpu::VertexBindingDescription)

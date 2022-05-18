@@ -2,10 +2,6 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#include "Coroutines.mpp"
-
-/////////////////////////////////////
-/////////////////////////////////////
 namespace stormkit::core {
 #if !__has_include(<generator>) && !(__has_include(<experimental/generator>) && !defined(__clang__))
     namespace details {
@@ -83,6 +79,8 @@ namespace stormkit::core {
             CoroutineHandle m_coroutine = nullptr;
         };
 
+        /////////////////////////////////////
+        /////////////////////////////////////
         template<typename T>
         auto GeneratorPromise<T>::get_return_object() noexcept -> Generator<T> {
             using CoroutineHandle = std::coroutine_handle<GeneratorPromise<T>>;

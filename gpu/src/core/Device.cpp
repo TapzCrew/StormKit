@@ -11,7 +11,7 @@
 #include <stormkit/gpu/core/Queue.mpp>
 #include <stormkit/gpu/core/RenderCapabilities.mpp>
 
-/////////// - StormKit::log - ///////////
+
 #include <stormkit/log/LogMacro.hpp>
 
 #define VMA_STATIC_VULKAN_FUNCTIONS 0
@@ -31,7 +31,7 @@ static constexpr auto RAYTRACING_EXTENSIONS =
                  std::string_view { VK_KHR_SHADER_FLOAT_CONTROLS_EXTENSION_NAME } };
 
 namespace stormkit::gpu {
-    LOGGER("StormKit.GPU.core.Device")
+    NAMED_LOGGER(device_logger, "StormKit.GPU.core.Device")
 
     template<QueueFlag flag, QueueFlag... no_flag>
     constexpr auto findQueue() {
@@ -139,9 +139,9 @@ namespace stormkit::gpu {
             return e;
         }();
 
-        dlog("Device extensions -----------");
-        for (const auto &ext : device_extensions) dlog("{}", ext.extensionName);
-        dlog("-------------------------------");
+        device_logger.dlog("Device extensions -----------");
+        for (const auto &ext : device_extensions) device_logger.dlog("{}", ext.extensionName);
+        device_logger.dlog("-------------------------------");
 
         auto raytracing_available = true;
         for (const auto &ext : RAYTRACING_EXTENSIONS) {
@@ -161,7 +161,7 @@ namespace stormkit::gpu {
                 e.reserve(std::size(RAYTRACING_EXTENSIONS));
                 std::ranges::copy(RAYTRACING_EXTENSIONS, std::back_inserter(e));
 
-                ilog("Raytracing supported !");
+                device_logger.ilog("Raytracing supported !");
             }
 
             return e;

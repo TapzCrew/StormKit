@@ -2,8 +2,6 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-module;
-
 #pragma once
 
 #include <stormkit/core/MemoryMacro.hpp>
@@ -54,30 +52,15 @@ module;
     #define module
 #endif
 
-#if defined(STORMKIT_CXX20_MODULES)
-// clang-format off
-export module stormkit.gpu.vulkan;
+#include <array>
+#include <ranges>
 
-/////////// - STL - ///////////
-import <array>;
+#include <stormkit/core/Concepts.mpp>
+#include <stormkit/core/Configure.mpp>
+#include <stormkit/core/Math.mpp>
+#include <stormkit/core/Types.mpp>
 
-/////////// - StormKit::core - ///////////
-import stormkit.core.configure;
-import stormkit.core.types;
-#else
-    /////////// - STL - ///////////
-    #include <array>
-    #include <ranges>
-
-    /////////// - StormKit::core - ///////////
-    #include <stormkit/core/Configure.mpp>
-    #include <stormkit/core/Concepts.mpp>
-    #include <stormkit/core/Types.mpp>
-    #include <stormkit/core/Math.mpp>
-
-    /////////// - StormKit::log - ///////////
-    #include <stormkit/log/LogHandler.mpp>
-#endif
+#include <stormkit/log/LogHandler.mpp>
 
 namespace stormkit::gpu {
     template<std::integral T>
@@ -92,7 +75,7 @@ namespace stormkit::gpu {
     static constexpr auto DEVICE_EXTENSIONS = std::array {
         core::CZString { VK_KHR_MAINTENANCE3_EXTENSION_NAME },
 #if STORMKIT_WSI_ENABLED
-        VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+            VK_KHR_SWAPCHAIN_EXTENSION_NAME,
 #endif
     };
 
@@ -120,23 +103,22 @@ namespace stormkit::gpu {
             std::string_view { VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME },
     #if defined(STORMKIT_OS_LINUX)
         #if STORMKIT_ENABLE_WAYLAND
-           std::string_view{ VK_KHR_WAYLAND_SURFACE_EXTENSION_NAME },
+            std::string_view { VK_KHR_WAYLAND_SURFACE_EXTENSION_NAME },
         #endif
         #if STORMKIT_ENABLE_XCB
-           std::string_view{ VK_KHR_XCB_SURFACE_EXTENSION_NAME },
+            std::string_view { VK_KHR_XCB_SURFACE_EXTENSION_NAME },
         #endif
     #elif defined(STORMKIT_OS_WINDOWS)
-            std::string_view{ VK_KHR_WIN32_SURFACE_EXTENSION_NAME },
+            std::string_view { VK_KHR_WIN32_SURFACE_EXTENSION_NAME },
     #elif defined(STORMKIT_OS_MACOS)
-           std::string_view{ VK_MVK_MACOS_SURFACE_EXTENSION_NAME },
+            std::string_view { VK_MVK_MACOS_SURFACE_EXTENSION_NAME },
     #elif defined(STORMKIT_OS_IOS)
-           std::string_view{ VK_MVK_IOS_SURFACE_EXTENSION_NAME },
+            std::string_view { VK_MVK_IOS_SURFACE_EXTENSION_NAME },
     #endif
     };
 #else
     static constexpr auto INSTANCE_EXTENSIONS = std::array<std::string_view, 0> {};
 #endif
-
 
 #if defined(STORMKIT_RENDER_SAFE_VULKAN) || defined(STORMKIT_ENABLE_VALIDATION_LAYERS)
     static constexpr auto ENABLE_VALIDATION = true;
@@ -144,32 +126,31 @@ namespace stormkit::gpu {
     static constexpr auto ENABLE_VALIDATION   = false;
 #endif
 
-
     [[noreturn]] auto checkVkError(VkResult result,
-                      std::string file,
-                      std::string function,
-                      core::UInt32 line) noexcept -> void;
+                                   std::string file,
+                                   std::string function,
+                                   core::UInt32 line) noexcept -> void;
 
     constexpr auto vkResultToString(VkResult error) -> std::string_view;
 
     inline auto computeMipLevel(const core::ExtentU &extent) noexcept -> core::UInt32;
 
-     template<typename T>
-     concept VulkanObject = requires(const T &t) {
-          t.vkHandle();
-     };
+    template<typename T>
+    concept VulkanObject = requires(const T &t) {
+        t.vkHandle();
+    };
 
-     template <core::NonPointerType T>
-         requires VulkanObject<T>
-     constexpr auto getHandle(const T &t) noexcept;
+    template<core::NonPointerType T>
+    requires VulkanObject<T>
+    constexpr auto getHandle(const T &t) noexcept;
 
-     template <core::RawPointerType T>
-         requires VulkanObject<std::remove_pointer_t<T>>
-     constexpr auto getHandle(T t) noexcept;
+    template<core::RawPointerType T>
+    requires VulkanObject<std::remove_pointer_t<T>>
+    constexpr auto getHandle(T t) noexcept;
 
-     template <core::SmartPointerType T>
-         requires VulkanObject<typename T::element_type>
-     constexpr auto getHandle(const T &t) noexcept;
+    template<core::SmartPointerType T>
+    requires VulkanObject<typename T::element_type>
+    constexpr auto getHandle(const T &t) noexcept;
 
 } // namespace stormkit::gpu
 

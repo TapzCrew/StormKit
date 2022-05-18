@@ -2,15 +2,8 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#if defined(STORMKIT_CXX20_MODULES)
-module stormkit.log.logger;
 
-// clang-format off
-// clang-format on
-#else
-    /////////// - StormKit::log - ///////////
-    #include <stormkit/entities/MessageBus.mpp>
-#endif
+#include <stormkit/entities/MessageBus.mpp>
 
 namespace stormkit::entities {
     /////////////////////////////////////

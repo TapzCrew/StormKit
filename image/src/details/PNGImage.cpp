@@ -2,25 +2,12 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#if defined(STORMKIT_CXX20_MODULES)
-module stormkit.image.details.pngimage;
+#include <ranges>
 
-// clang-format off
-/////////// - STL - ///////////
-import <ranges>;
-// clang-format on
-#else
-    /////////// - STL - ///////////
-    #include <ranges>
+#include "PNGImage.mpp"
 
-    /////////// - StormKit::image - ///////////
-    #include "PNGImage.mpp"
-#endif
-
-/////////// - STL - ///////////
 #include <csetjmp>
 
-/////////// - libPNG - ///////////
 #include <png.h>
 
 namespace stormkit::image::details {

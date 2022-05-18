@@ -22,7 +22,6 @@ target("triangle")
     add_packages("glslang")
 
     add_includedirs("$(buildir)/include")
-    add_options("enable_cxx20_modules")
 
     set_group("examples/stormkit-gpu")
 

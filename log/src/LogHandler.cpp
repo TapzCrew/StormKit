@@ -2,17 +2,8 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#if defined(STORMKIT_CXX20_MODULES)
-module stormkit.log.loghandler;
-
-// clang-format off
-import stormkit.log.consolelogger;
-// clang-format on
-#else
-    /////////// - StormKit::log - ///////////
-    #include <stormkit/log/ConsoleLogger.mpp>
-    #include <stormkit/log/LogHandler.mpp>
-#endif
+#include <stormkit/log/ConsoleLogger.mpp>
+#include <stormkit/log/LogHandler.mpp>
 
 namespace stormkit::log {
     /////////////////////////////////////

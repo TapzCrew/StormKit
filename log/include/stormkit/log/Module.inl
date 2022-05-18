@@ -4,19 +4,42 @@
 
 #pragma once
 
-#include "Module.mpp"
-
 namespace stormkit::log {
     ////////////////////////////////////////
     ////////////////////////////////////////
-    inline auto makeModule(std::string_view str) -> stormkit::log::Module {
-        return core::makeNamed<Module>(std::string { str });
+    template<typename... Args>
+    auto Module::dlog(Args &&...args) const -> void {
+        dlog(name, std::forward<Args>(args)...);
+    }
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    template<typename... Args>
+    auto Module::ilog(Args &&...args) const -> void {
+        ilog(name, std::forward<Args>(args)...);
+    }
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    template<typename... Args>
+    auto Module::wlog(Args &&...args) const -> void {
+        wlog(name, std::forward<Args>(args)...);
+    }
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    template<typename... Args>
+    auto Module::elog(Args &&...args) const -> void {
+        elog(name, std::forward<Args>(args)...);
+    }
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    template<typename... Args>
+    auto Module::flog(Args &&...args) const -> void {
+        flog(name, std::forward<Args>(args)...);
     }
 
     ////////////////////////////////////////
     ////////////////////////////////////////
     inline auto operator"" _module(const char *str, [[maybe_unused]] core::USize sz)
         -> stormkit::log::Module {
-        return makeModule(std::string { str, sz });
+        return Module { std::string { str, sz } };
     }
 } // namespace stormkit::log

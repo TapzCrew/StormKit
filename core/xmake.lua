@@ -33,13 +33,8 @@ target("stormkit-core")
     if is_plat("linux") then       add_files("src/posix/*.cpp")
     elseif is_plat("windows") then add_files("src/win32/*.cpp") end
 
-    if has_config("enable_cxx20_modules") then
-        add_files("include/**.mpp")
-        add_files("src/**.mpp")
-    else
-        add_headerfiles("include/(stormkit/**.mpp)")
-        add_headerfiles("src/**.mpp")
-    end
+    add_headerfiles("include/(stormkit/**.mpp)")
+    add_headerfiles("src/**.mpp")
 
     add_packages("glm", "robin-hood-hashing", "mapbox_eternal", "backward-cpp", { public = true })
 
@@ -53,8 +48,6 @@ target("stormkit-core")
 
     set_configdir("$(buildir)/include/")
     add_configfiles("include/(stormkit/**.mpp.in)")
-
-    add_options("enable_cxx20_modules")
 
     set_group("libraries")
 

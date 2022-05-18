@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include "PhysicalDevice.mpp"
-
 namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////

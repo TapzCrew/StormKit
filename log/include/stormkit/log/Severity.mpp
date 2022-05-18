@@ -4,48 +4,23 @@
 
 #pragma once
 
-module;
-
-#pragma once
-
 #include <stormkit/core/FlagsMacro.hpp>
 #include <stormkit/core/FormatMacro.hpp>
 
-#if defined(STORMKIT_CXX20_MODULES)
-// clang-format off
-export module stormkit.log.severity;
-/////////// - STL - ///////////
-import <string_view>;
-import <algorithm>;
+#include <algorithm>
+#include <string_view>
 
-/////////// - StormKit::core - ///////////
-import stormkit.core.flags;
-import stormkit.core.format;
+#include <stormkit/core/Flags.mpp>
+#include <stormkit/core/Format.mpp>
 
-// clang-format on
-export {
-#else
-    /////////// - STL - ///////////
-    #include <algorithm>
-    #include <string_view>
+namespace stormkit::log {
+    enum class Severity { Info, Warning, Error, Fatal, Debug };
 
-    /////////// - StormKit::core - ///////////
-    #include <stormkit/core/Flags.mpp>
-    #include <stormkit/core/Format.mpp>
-#endif
+    [[nodiscard]] constexpr auto toString(Severity severity) noexcept -> std::string_view;
+} // namespace stormkit::log
 
-    namespace stormkit::log {
-        enum class Severity { Info, Warning, Error, Fatal, Debug };
+FLAG_ENUM(stormkit::log::Severity)
 
-        [[nodiscard]] constexpr auto toString(Severity severity) noexcept -> std::string_view;
-    } // namespace stormkit::log
-
-    FLAG_ENUM(stormkit::log::Severity)
-
-    CUSTOM_FORMAT_STRING_VIEW(stormkit::log::Severity, stormkit::log::toString(data));
-
-#if defined(STORMKIT_CXX20_MODULES)
-}
-#endif
+CUSTOM_FORMAT_STRING_VIEW(stormkit::log::Severity, stormkit::log::toString(data));
 
 #include "Severity.inl"

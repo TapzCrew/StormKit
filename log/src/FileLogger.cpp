@@ -2,28 +2,10 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#if defined(STORMKIT_CXX20_MODULES)
-module stormkit.log.filelogger;
+#include <stormkit/core/Format.mpp>
+#include <stormkit/core/Strings.mpp>
 
-// clang-format off
-/////////// - STL - ///////////
-import <string_view>;
-
-/////////// - StormKit::core - ///////////
-import stormkit.core.format
-import stormkit.core.strings
-
-/////////// - StormKit::log - ///////////
-import stormkit.log.details.logcolorizer;
-// clang-format on
-#else
-    //////////// - StormKit::core - ///////////
-    #include <stormkit/core/Format.mpp>
-    #include <stormkit/core/Strings.mpp>
-
-/////////// - StormKit::log - ///////////
-    #include <stormkit/log/FileLogger.mpp>
-#endif
+#include <stormkit/log/FileLogger.mpp>
 
 using namespace std::literals;
 
@@ -82,8 +64,8 @@ namespace stormkit::log {
             std::chrono::duration_cast<std::chrono::seconds>(now - m_start_time).count();
 
         auto filepath = m_base_path / "log.txt";
-        if (std::size(*m) == 0) {
-            filepath = m_base_path / (*m + std::string { "-log.txt" });
+        if (std::empty(m.name)) {
+            filepath = m_base_path / (m.name + std::string { "-log.txt" });
 
             if (m_streams.find(filepath.string()) == m_streams.cend())
                 m_streams[filepath.string()] = std::ofstream { filepath.string() };
@@ -93,9 +75,9 @@ namespace stormkit::log {
         static constexpr auto LOG_LINE_MODULE = "[{0}, {1}s, {2}] {3}\n"sv;
 
         auto final_string = std::string {};
-        if (std::size(*m) == 0) final_string = core::format(LOG_LINE, severity, time, string);
+        if (std::empty(m.name)) final_string = core::format(LOG_LINE, severity, time, string);
         else
-            final_string = core::format(LOG_LINE_MODULE, severity, time, *m, string);
+            final_string = core::format(LOG_LINE_MODULE, severity, time, m.name, string);
 
         m_streams[filepath.string()] << final_string << std::flush;
     }

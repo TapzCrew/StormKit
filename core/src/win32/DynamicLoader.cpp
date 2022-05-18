@@ -2,28 +2,13 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#if defined(STORMKIT_CXX20_MODULES)
-module stormkit.core.dynamicloader;
+#include <stdexcept>
 
-// clang-format off
-/////////// - STL - ///////////
-import <stdexcept>
+#include <stormkit/core/DynamicLoader.mpp>
+#include <stormkit/core/Format.mpp>
+#include <stormkit/core/Strings.mpp>
 
-/////////// - StormKit::core - ///////////
-import stormkit.core.format;
-import stormkit.core.strings;
-// clang-format on
-#else
-    /////////// - STL - ///////////
-    #include <stdexcept>
 
-    /////////// - StormKit::core - ///////////
-    #include <stormkit/core/DynamicLoader.mpp>
-    #include <stormkit/core/Format.mpp>
-    #include <stormkit/core/Strings.mpp>
-#endif
-
-/////////// - Win32API - ///////////
 #include <windows.h>
 
 using namespace stormkit;

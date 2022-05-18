@@ -2,107 +2,98 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-module;
-
 #pragma once
 
-#if defined(STORMKIT_CXX20_MODULES)
-// clang-format off
-export module stormkit.engine.render.renderqueue;
-// clang-format on
-export {
-#else
-    /////////// - StormKit::core - ///////////
-    #include <stormkit/core/Types.mpp>
 
-    /////////// - StormKit::wsi - ///////////
-    #include <stormkit/wsi/Fwd.hpp>
+#include <stormkit/core/Types.mpp>
 
-    /////////// - StormKit::gpu - ///////////
-    #include <stormkit/gpu/Fwd.hpp>
-    #include <stormkit/gpu/pipeline/VertexBindingDescription.mpp>
-    #include <stormkit/gpu/pipeline/VertexInputAttributeDescription.mpp>
 
-    #include <stormkit/gpu/resource/ImageView.mpp>
+#include <stormkit/wsi/Fwd.hpp>
 
-    /////////// - StormKit::engine - ///////////
-    #include <stormkit/engine/Fwd.hpp>
-#endif
 
-    namespace stormkit::engine {
-        struct Vertex {
-            core::Vector3f position = { 0.f, 0.f, 0.f };
-            core::Vector3f normal   = { 1.f, 1.f, 1.f };
-            core::Vector3f color    = { 1.f, 1.f, 1.f };
-            core::Vector2f uv       = { 0.f, 0.f };
-        };
+#include <stormkit/gpu/Fwd.hpp>
+#include <stormkit/gpu/pipeline/VertexBindingDescription.mpp>
+#include <stormkit/gpu/pipeline/VertexInputAttributeDescription.mpp>
 
-        struct VertexView {
-            VertexView(core::Vector3f &_position,
-                       core::Vector3f &_normal,
-                       core::Vector3f &_color,
-                       core::Vector2f &_uv)
-                : position { &_position }, normal { &_normal }, color { &_color }, uv { &_uv } {}
+#include <stormkit/gpu/resource/ImageView.mpp>
 
-            core::Vector3f *position;
-            core::Vector3f *normal;
-            core::Vector3f *color;
-            core::Vector2f *uv;
-        };
 
-        class STORMKIT_PUBLIC VertexArray {
-          public:
-            using Iterator      = std::vector<VertexView>::iterator;
-            using ConstIterator = std::vector<VertexView>::const_iterator;
+#include <stormkit/engine/Fwd.hpp>
 
-            VertexArray();
-            VertexArray(std::span<const Vertex> vertices);
-            ~VertexArray();
+namespace stormkit::engine {
+    struct Vertex {
+        core::Vector3f position = { 0.f, 0.f, 0.f };
+        core::Vector3f normal   = { 1.f, 1.f, 1.f };
+        core::Vector3f color    = { 1.f, 1.f, 1.f };
+        core::Vector2f uv       = { 0.f, 0.f };
+    };
 
-            VertexArray(const VertexArray &);
-            auto operator=(const VertexArray &) -> VertexArray &;
+    struct VertexView {
+        VertexView(core::Vector3f &_position,
+                   core::Vector3f &_normal,
+                   core::Vector3f &_color,
+                   core::Vector2f &_uv)
+            : position { &_position }, normal { &_normal }, color { &_color }, uv { &_uv } {}
 
-            VertexArray(VertexArray &&) noexcept;
-            auto operator=(VertexArray &&) noexcept -> VertexArray &;
+        core::Vector3f *position;
+        core::Vector3f *normal;
+        core::Vector3f *color;
+        core::Vector2f *uv;
+    };
 
-            auto resize(core::USize size) -> void;
+    class STORMKIT_PUBLIC VertexArray {
+      public:
+        using Iterator      = std::vector<VertexView>::iterator;
+        using ConstIterator = std::vector<VertexView>::const_iterator;
 
-            auto addVertices(std::span<const Vertex> vertices) -> void;
-            auto addVertex(const Vertex &vertex) -> void;
-            auto removeVertex(core::USize position) -> void;
-            auto removeVertices(core::USize first, core::USize count) -> void;
+        VertexArray();
+        VertexArray(std::span<const Vertex> vertices);
+        ~VertexArray();
 
-            auto data() noexcept -> std::span<VertexView>;
-            auto data() const noexcept -> std::span<const VertexView>;
+        VertexArray(const VertexArray &);
+        auto operator=(const VertexArray &) -> VertexArray &;
 
-            auto begin() noexcept -> Iterator;
-            auto begin() const noexcept -> ConstIterator;
-            auto cbegin() const noexcept -> ConstIterator;
+        VertexArray(VertexArray &&) noexcept;
+        auto operator=(VertexArray &&) noexcept -> VertexArray &;
 
-            auto end() noexcept -> Iterator;
-            auto end() const noexcept -> ConstIterator;
-            auto cend() const noexcept -> ConstIterator;
+        auto resize(core::USize size) -> void;
 
-            auto positions() const noexcept -> std::span<const core::Vector3f>;
-            auto normals() const noexcept -> std::span<const core::Vector3f>;
-            auto colors() const noexcept -> std::span<const core::Vector3f>;
-            auto uvs() const noexcept -> std::span<const core::Vector2f>;
+        auto addVertices(std::span<const Vertex> vertices) -> void;
+        auto addVertex(const Vertex &vertex) -> void;
+        auto removeVertex(core::USize position) -> void;
+        auto removeVertices(core::USize first, core::USize count) -> void;
 
-            static auto bindingDescriptions() noexcept
-                -> std::span<const stormkit::gpu::VertexBindingDescription>;
-            static auto attributesDescriptions() noexcept
-                -> std::span<const stormkit::gpu::VertexInputAttributeDescription>;
+        auto data() noexcept -> std::span<VertexView>;
+        auto data() const noexcept -> std::span<const VertexView>;
 
-          private:
-            std::vector<core::Vector3f> m_positions;
-            std::vector<core::Vector3f> m_normals;
-            std::vector<core::Vector3f> m_colors;
-            std::vector<core::Vector2f> m_uvs;
+        auto begin() noexcept -> Iterator;
+        auto begin() const noexcept -> ConstIterator;
+        auto cbegin() const noexcept -> ConstIterator;
 
-            std::vector<VertexView> m_vertices;
+        auto end() noexcept -> Iterator;
+        auto end() const noexcept -> ConstIterator;
+        auto cend() const noexcept -> ConstIterator;
 
-            core::USize m_size = 0;
-        };
-    } // namespace stormkit::engine
+        auto positions() const noexcept -> std::span<const core::Vector3f>;
+        auto normals() const noexcept -> std::span<const core::Vector3f>;
+        auto colors() const noexcept -> std::span<const core::Vector3f>;
+        auto uvs() const noexcept -> std::span<const core::Vector2f>;
+
+        static auto bindingDescriptions() noexcept
+            -> std::span<const stormkit::gpu::VertexBindingDescription>;
+        static auto attributesDescriptions() noexcept
+            -> std::span<const stormkit::gpu::VertexInputAttributeDescription>;
+
+      private:
+        std::vector<core::Vector3f> m_positions;
+        std::vector<core::Vector3f> m_normals;
+        std::vector<core::Vector3f> m_colors;
+        std::vector<core::Vector2f> m_uvs;
+
+        std::vector<VertexView> m_vertices;
+
+        core::USize m_size = 0;
+    };
+} // namespace stormkit::engine
 
 #include "VertexArray.inl"

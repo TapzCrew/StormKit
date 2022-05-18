@@ -13,8 +13,6 @@ target("event_handler")
 
     add_deps("stormkit-core", "stormkit-main", "stormkit-log", "stormkit-wsi")
 
-    add_options("enable_cxx20_modules")
-
     set_group("examples/stormkit-wsi")
 
 

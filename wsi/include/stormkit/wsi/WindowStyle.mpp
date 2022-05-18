@@ -2,42 +2,23 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-module;
-
 #pragma once
 
 #include <stormkit/core/FlagsMacro.hpp>
 
 #undef DELETE
 
-#if defined(STORMKIT_CXX20_MODULES)
-// clang-format off
-export module stormkit.wsi.videosettings;
+#include <stormkit/core/Flags.mpp>
+#include <stormkit/core/Types.mpp>
 
-/////////// - StormKit::core - ///////////
-import stormkit.core.flags;
-import stormkit.core.types;
-// clang-format on
-export {
-#else
-
-    /////////// - StormKit::core - ///////////
-    #include <stormkit/core/Flags.mpp>
-    #include <stormkit/core/Types.mpp>
-#endif
-
-    namespace stormkit::wsi {
-        enum class WindowStyle : core::UInt8 {
-            TitleBar    = 0b1,
-            Close       = TitleBar | 0b10,
-            Minimizable = TitleBar | 0b100,
-            Resizable   = TitleBar | 0b1000,
-            All         = Resizable | Minimizable | Close
-        };
-    }
-
-    FLAG_ENUM(stormkit::wsi::WindowStyle)
-
-#if defined(STORMKIT_CXX20_MODULES)
+namespace stormkit::wsi {
+    enum class WindowStyle : core::UInt8 {
+        TitleBar    = 0b1,
+        Close       = TitleBar | 0b10,
+        Minimizable = TitleBar | 0b100,
+        Resizable   = TitleBar | 0b1000,
+        All         = Resizable | Minimizable | Close
+    };
 }
-#endif
+
+FLAG_ENUM(stormkit::wsi::WindowStyle)

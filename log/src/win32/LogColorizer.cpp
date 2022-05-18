@@ -2,20 +2,9 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#if defined(STORMKIT_CXX20_MODULES)
-module stormkit.log.details.logcolorizer;
+#include <stormkit/core/Types.mpp>
 
-// clang-format off
-/////////// - StormKit::core - ///////////
-import stormkit.core.types;
-// clang-format on
-#else
-    /////////// - StormKit::core - ///////////
-    #include <stormkit/core/Types.mpp>
-
-    /////////// - StormKit::log - ///////////
-    #include "../LogColorizer.mpp"
-#endif
+#include "../LogColorizer.mpp"
 
 #include <windows.h>
 

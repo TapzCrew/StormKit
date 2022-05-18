@@ -2,81 +2,52 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-module;
-
 #pragma once
 
 #include <stormkit/core/MemoryMacro.hpp>
 #include <stormkit/core/PlatformMacro.hpp>
 
-#if defined(STORMKIT_CXX20_MODULES)
-// clang-format off
-export module stormkit.core.state;
+#include <functional>
+#include <memory>
+#include <optional>
+#include <queue>
+#include <span>
+#include <stack>
+#include <vector>
 
-/////////// - STL - ///////////
-import <stack>;
-import <memory>;
-import <optional>;
-import <set>;
-import <span>;
-import <vector>;
-import <functional>;
+#include <stormkit/core/Fwd.hpp>
+#include <stormkit/core/Types.mpp>
 
-/////////// - StormKit::core - ///////////
-import stormkit.core.statemanager;
-import stormkit.core.types;
+namespace stormkit::core {
+    class STORMKIT_PUBLIC State {
+      public:
+        explicit State(StateManager &owner) noexcept;
+        virtual ~State() noexcept;
 
-// clang-format on
-export {
-#else
-    /////////// - STL - ///////////
-    #include <functional>
-    #include <memory>
-    #include <optional>
-    #include <queue>
-    #include <span>
-    #include <stack>
-    #include <vector>
+        State(const State &state) = delete;
+        auto operator=(const State &state) -> State & = delete;
 
-    /////////// - StormKit::core - ///////////
-    #include <stormkit/core/Fwd.hpp>
-    #include <stormkit/core/Types.mpp>
-#endif
+        State(State &&state) noexcept;
+        auto operator=(State &&state) noexcept -> State &;
 
-    namespace stormkit::core {
-        class STORMKIT_PUBLIC State {
-          public:
-            explicit State(StateManager &owner) noexcept;
-            virtual ~State() noexcept;
+        virtual auto pause() -> void = 0;
 
-            State(const State &state) = delete;
-            auto operator=(const State &state) -> State & = delete;
+        virtual auto resume() -> void = 0;
 
-            State(State &&state) noexcept;
-            auto operator=(State &&state) noexcept -> State &;
+        virtual auto update(core::Secondf delta) -> void = 0;
 
-            virtual auto pause() -> void = 0;
+        auto owner() const noexcept -> const StateManager &;
 
-            virtual auto resume() -> void = 0;
+      protected:
+        auto owner() noexcept -> StateManager &;
 
-            virtual auto update(core::Secondf delta) -> void = 0;
+      private:
+        StateManagerRef m_owner;
+    };
+    DECLARE_PTR_AND_REF(State)
 
-            auto owner() const noexcept -> const StateManager &;
-
-          protected:
-            auto owner() noexcept -> StateManager &;
-
-          private:
-            StateManagerRef m_owner;
-        };
-        DECLARE_PTR_AND_REF(State)
-
-        template<typename T>
-        concept ChildOfStateType = std::derived_from<T, State>;
-    } // namespace stormkit::core
-
-#if defined(STORMKIT_CXX20_MODULES)
-}
-#endif
+    template<typename T>
+    concept ChildOfStateType = std::derived_from<T, State>;
+} // namespace stormkit::core
 
 #include "State.inl"

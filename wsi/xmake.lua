@@ -13,15 +13,9 @@ target("stormkit-wsi")
     add_headerfiles("src/common/**.inl")
     add_files("src/*.cpp")
 
-    if has_config("enable_cxx20_modules") then
-        add_files("include/**.mpp")
-        add_files("src/*.mpp")
-        add_files("src/common/**.mpp")
-    else
-        add_headerfiles("src/common/**.mpp")
-        add_headerfiles("src/*.mpp")
-        add_headerfiles("include/(stormkit/**.mpp)")
-    end
+    add_headerfiles("src/common/**.mpp")
+    add_headerfiles("src/*.mpp")
+    add_headerfiles("include/(stormkit/**.mpp)")
 
     if is_plat("windows") then
         includes("src/win32/xmake.lua")
@@ -38,7 +32,6 @@ target("stormkit-wsi")
     add_includedirs("include", { public = true })
     add_includedirs("$(buildir)/include")
 
-    add_options("enable_cxx20_modules")
     add_options("enable_wsi_x11")
     add_options("enable_wsi_wayland")
 
