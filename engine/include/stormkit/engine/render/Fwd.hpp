@@ -22,4 +22,6 @@ namespace stormkit::engine {
 
     class Renderer;
     DECLARE_PTR_AND_REF(Renderer);
+
+    using BuildFrameGraphCallback = std::function<void(FrameGraphBuilder &graph_builder)>;
 } // namespace stormkit::engine

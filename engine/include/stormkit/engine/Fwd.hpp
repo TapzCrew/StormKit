@@ -14,6 +14,7 @@
 /////////// - StormKit::core - ///////////
 #include <stormkit/core/MemoryMacro.hpp>
 
+#include <stormkit/engine/inputs/Fwd.hpp>
 #include <stormkit/engine/render/Fwd.hpp>
 
 namespace stormkit::engine {

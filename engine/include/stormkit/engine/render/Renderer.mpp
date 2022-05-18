@@ -41,8 +41,6 @@ export {
     namespace stormkit::engine {
         class STORMKIT_PUBLIC Renderer {
           public:
-            using BuildFrameGraphCallback = std::function<void(FrameGraphBuilder &graph_builder)>;
-
             explicit Renderer(Engine &engine);
             ~Renderer();
 
@@ -60,8 +58,6 @@ export {
 
             auto pipelineCache() noexcept -> gpu::PipelineCache &;
             auto pipelineCache() const noexcept -> const gpu::PipelineCache &;
-
-            static auto forwardRenderer(Engine &engine) noexcept -> BuildFrameGraphCallback;
 
           private:
             enum class FrameGraphState { Updated, Old };

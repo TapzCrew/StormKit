@@ -86,7 +86,7 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto VertexArray::attributesDescriptions() noexcept
+    inline auto VertexArray::attributesDescriptions() noexcept
         -> std::span<const stormkit::gpu::VertexInputAttributeDescription> {
         static constexpr auto VERTEX_ATTRIBUTE_DESCRIPTIONS = std::array {
             gpu::VertexInputAttributeDescription { .location = 0,

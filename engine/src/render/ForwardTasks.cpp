@@ -2,15 +2,8 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#include <stormkit/core/ThreadUtils.mpp>
-
-#include <stormkit/log/LogHandler.mpp>
-#include <stormkit/log/LogMacro.hpp>
-
-#include <stormkit/entities/EntityManager.mpp>
-#include <stormkit/entities/System.mpp>
-
 #include <stormkit/engine/Engine.mpp>
+#include <stormkit/engine/render/ForwardTasks.mpp>
 #include <stormkit/engine/render/Renderer.mpp>
 #include <stormkit/engine/render/core/RenderQueue.mpp>
 #include <stormkit/engine/render/core/VertexArray.mpp>
@@ -30,7 +23,7 @@
 namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
-    auto Renderer::forwardRenderer(Engine &engine) noexcept -> BuildFrameGraphCallback {
+    auto forwardRenderer(Engine &engine) noexcept -> BuildFrameGraphCallback {
         return [&](auto &builder) -> void {
             auto &renderer = engine.renderer();
 

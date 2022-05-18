@@ -8,6 +8,7 @@
 #include <stormkit/wsi/Window.mpp>
 
 #include <stormkit/engine/Engine.mpp>
+#include <stormkit/engine/render/ForwardTasks.mpp>
 #include <stormkit/engine/render/MeshComponent.mpp>
 #include <stormkit/engine/render/Renderer.mpp>
 #include <stormkit/engine/render/framegraph/FrameGraphBuilder.mpp>
@@ -36,7 +37,7 @@ auto App::doInitEngine() -> void {
     m_engine       = std::make_unique<engine::Engine>(*m_window);
     auto &renderer = m_engine->renderer();
 
-    renderer.setBuildFrameGraphCallback(engine::Renderer::forwardRenderer(*m_engine));
+    renderer.setBuildFrameGraphCallback(engine::forwardRenderer(*m_engine));
 }
 
 auto App::doInitMesh() -> void {
