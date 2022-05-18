@@ -153,8 +153,8 @@ package("StormKit")
     end
 
     if has_config("unity_build") then
-        add_rules("c.unity_build")
-        add_rules("c++.unity_build")
+        add_rules("c.unity_build", { batchsize = 12 })
+        add_rules("c++.unity_build", { batchsize = 12 })
     end
 
     if is_mode("release") then
