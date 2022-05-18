@@ -4,17 +4,17 @@
 
 #pragma once
 
-
 #include <array>
 #include <memory>
 #include <optional>
 #include <span>
 #include <vector>
 
-
 #include <stormkit/core/MemoryMacro.hpp>
 
 namespace stormkit::log {
+    struct Module;
+
     class Logger;
     DECLARE_PTR_AND_REF(Logger)
 

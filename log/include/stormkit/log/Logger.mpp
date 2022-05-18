@@ -25,7 +25,7 @@ namespace stormkit::log {
         explicit Logger(LogClock::time_point start) noexcept;
         Logger(LogClock::time_point start, Severity log_level) noexcept;
 
-        virtual auto write(Severity severity, Module module, const char *string) -> void = 0;
+        virtual auto write(Severity severity, const Module &module, const char *string) -> void = 0;
         virtual auto flush() -> void                                                     = 0;
 
         auto setLogLevel(Severity log_level) noexcept -> void;

@@ -9,6 +9,8 @@
 #include <stormkit/core/NamedType.mpp>
 #include <stormkit/core/Types.mpp>
 
+#include <stormkit/log/Fwd.hpp>
+
 namespace stormkit::log {
     struct Module {
         template<typename... Args>
@@ -28,5 +30,3 @@ namespace stormkit::log {
     [[nodiscard]] auto operator"" _module(const char *name, core::USize sz)
         -> stormkit::log::Module;
 } // namespace stormkit::log
-
-#include "Module.inl"

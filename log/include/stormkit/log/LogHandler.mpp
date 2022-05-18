@@ -9,6 +9,7 @@
 #include <stormkit/core/Format.mpp>
 #include <stormkit/core/Strings.mpp>
 
+#include <stormkit/log/Fwd.hpp>
 #include <stormkit/log/Logger.mpp>
 #include <stormkit/log/Module.mpp>
 #include <stormkit/log/Severity.mpp>
@@ -32,7 +33,7 @@ namespace stormkit::log {
 
         template<typename... Args>
         static auto log(Severity severity,
-                        Module module,
+                        const Module &module,
                         std::string_view format_string,
                         Args &&...param_args) -> void;
 
@@ -65,3 +66,4 @@ namespace stormkit::log {
 } // namespace stormkit::log
 
 #include "LogHandler.inl"
+#include "Module.inl"

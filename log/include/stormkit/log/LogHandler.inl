@@ -25,7 +25,7 @@ namespace stormkit::log {
     ////////////////////////////////////////
     template<typename... Args>
     auto LogHandler::log(Severity severity,
-                         Module m,
+                         const Module &m,
                          std::string_view format_string,
                          Args &&...param_args) -> void {
         if (!m_logger) setupDefaultLogger();

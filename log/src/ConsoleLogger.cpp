@@ -28,7 +28,7 @@ namespace stormkit::log {
 
     ////////////////////////////////////////
     ////////////////////////////////////////
-    auto ConsoleLogger::write(Severity severity, Module m, const char *string) -> void {
+    auto ConsoleLogger::write(Severity severity, const Module &m, const char *string) -> void {
         const auto now  = LogClock::now();
         const auto time = std::chrono::duration_cast<core::Secondf>(now - m_start_time);
 
