@@ -2,17 +2,13 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-module;
-
 #pragma once
 
 #include <stormkit/core/FlagsMacro.hpp>
 
 #include <string>
 
-
 #include <stormkit/core/Flags.mpp>
-
 
 #include <stormkit/gpu/core/Vulkan.mpp>
 

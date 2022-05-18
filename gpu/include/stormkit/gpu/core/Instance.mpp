@@ -4,32 +4,25 @@
 
 #pragma once
 
-
 #include <stormkit/core/PlatformMacro.hpp>
-
 
 #include <stormkit/gpu/core/VulkanMacro.hpp>
 
-#else
+#include <span>
+#include <string>
+#include <vector>
 
-    #include <span>
-    #include <string>
-    #include <vector>
+#include <stormkit/core/Strings.mpp>
 
+#include <stormkit/gpu/core/DynamicLoader.mpp>
+#include <stormkit/gpu/core/Enums.mpp>
+#include <stormkit/gpu/core/Fwd.hpp>
+#include <stormkit/gpu/core/Surface.mpp>
+#include <stormkit/gpu/core/Vulkan.mpp>
 
-    #include <stormkit/core/Strings.mpp>
-
-    
-    #include <stormkit/gpu/core/DynamicLoader.mpp>
-    #include <stormkit/gpu/core/Enums.mpp>
-    #include <stormkit/gpu/core/Fwd.hpp>
-    #include <stormkit/gpu/core/Surface.mpp>
-    #include <stormkit/gpu/core/Vulkan.mpp>
-
-    
-    #if STORMKIT_WSI_ENABLED
-        #include <stormkit/wsi/Window.mpp>
-    #endif
+#if STORMKIT_WSI_ENABLED
+    #include <stormkit/wsi/Window.mpp>
+#endif
 
 namespace stormkit::gpu {
     class STORMKIT_PUBLIC Instance {
@@ -45,7 +38,7 @@ namespace stormkit::gpu {
         Instance(Instance &&) noexcept;
         auto operator=(Instance &&) noexcept -> Instance &;
 
-    #ifdef STORMKIT_WSI_ENABLED
+#ifdef STORMKIT_WSI_ENABLED
         [[nodiscard]] auto
             createWindowSurface(const wsi::Window &window,
                                 Surface::Buffering buffering = Surface::Buffering::Swapchain) const
@@ -58,7 +51,7 @@ namespace stormkit::gpu {
             const wsi::Window &window,
             Surface::Buffering buffering = Surface::Buffering::Swapchain) const
             -> WindowSurfaceSharedPtr;
-    #endif
+#endif
 
         [[nodiscard]] auto
             createOffscreenSurface(const core::ExtentU &extent,
@@ -109,4 +102,4 @@ namespace stormkit::gpu {
     };
 } // namespace stormkit::gpu
 
-    #include "Instance.inl"
+#include "Instance.inl"

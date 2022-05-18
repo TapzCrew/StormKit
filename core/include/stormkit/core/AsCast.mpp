@@ -2,6 +2,8 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
+#pragma once
+
 #include <stormkit/core/AssertMacro.hpp>
 
 #include <concepts>
@@ -99,6 +101,7 @@ namespace stormkit::core {
     struct Overload: Ts... {
         using Ts::operator()...;
     };
+
     template<class... Ts>
     Overload(Ts...) -> Overload<Ts...>;
 } // namespace stormkit::core

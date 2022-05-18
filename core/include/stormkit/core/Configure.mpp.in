@@ -4,20 +4,7 @@
 
 #pragma once 
 
-// clang-format off
-module;
-
-#if defined(STORMKIT_CXX20_MODULES)
-export module stormkit.core.configure;
-
-/////////// - STL - ///////////
-import <string_view>;
-
-export  {
-#else
-    /////////// - STL - ///////////
     #include <string_view>
-#endif
 
     namespace stormkit::core {
         static constexpr auto STORMKIT_MAJOR_VERSION   = ${VERSION_MAJOR};
@@ -29,8 +16,3 @@ export  {
         static constexpr auto STORMKIT_GIT_COMMIT_HASH = std::string_view { "${STORMKIT_GIT_COMMIT_HASH}" };
         static constexpr auto STORMKIT_GIT_BRANCH      = std::string_view { "${STORMKIT_GIT_BRANCH}" };
     }
-#if defined(STORMKIT_CXX20_MODULES)
-}
-#endif
-
-// clang-format on
