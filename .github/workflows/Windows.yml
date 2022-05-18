@@ -53,9 +53,9 @@ jobs:
               xrepo install --yes llvm-mingw
               $MINGW_INSTALL_DIR = xrepo info llvm-mingw | Out-String
               $MINGW_INSTALL_DIR -match 'installdir: (C.+)'
-              xmake f -v --yes -m ${{ matrix.build_type }} -k ${{ matrix.kind }} -p mingw --sdk="$Matches[1]"
+              xmake f --unity_build=y -v --yes -m ${{ matrix.build_type }} -k ${{ matrix.kind }} -p mingw --sdk="$Matches[1]"
             } else {
-              xmake f -v --yes -m ${{ matrix.build_type }} -k ${{ matrix.kind }} --vs_runtime=$VS_RUNTIME
+              xmake f --unity_build=y -v --yes -m ${{ matrix.build_type }} -k ${{ matrix.kind }} --vs_runtime=$VS_RUNTIME 
             }
             xmake b -v
 

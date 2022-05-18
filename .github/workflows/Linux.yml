@@ -65,7 +65,7 @@ jobs:
         - name: Configure & Build
           id: confandbuild
           run: |
-            xmake f -v --yes -m ${{ matrix.build_type }} -k ${{ matrix.kind }}
+            xmake f --unity_build=y -v --yes -m ${{ matrix.build_type }} -k ${{ matrix.kind }} 
             xmake b -v
 
         - name: Install
