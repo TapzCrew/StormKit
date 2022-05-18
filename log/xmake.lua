@@ -33,4 +33,12 @@ target("stormkit-log")
 
     set_group("libraries")
 
+    before_install(function(target)
+        target:set("headerfiles")
+    end)
+
+    on_install(function(target)
+        os.cp(path.join(target:scriptdir(), "include/*"), path.join(target:installdir(), "include"))
+    end)
+
 includes("examples/**/xmake.lua")

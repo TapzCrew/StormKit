@@ -58,3 +58,12 @@ target("stormkit-core")
 
     set_group("libraries")
 
+    before_install(function(target)
+        target:set("headerfiles")
+    end)
+
+    on_install(function(target)
+        os.cp(path.join(target:scriptdir(), "include"), path.join(target:installdir(), "include"))
+        os.rm(path.join(target:installdir(), "include/stormkit/core/Configure.mpp.in"))
+        os.cp("$(buildir)/include/stormkit/core/Configure.mpp", path.join(target:installdir(), "include/stormkit/core/Configure.mpp"))
+    end)
