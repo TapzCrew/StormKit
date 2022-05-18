@@ -47,6 +47,7 @@ set_allowedarchs("windows|x64", "mingw|x86_64", "linux|x86_64", "macosx|x86_64")
 package("StormKit")
     option("unity_build")
         set_default(false)
+        set_showmenu(true)
     option_end()
 
     option("stl_cache_directory", { showmenu = true })
