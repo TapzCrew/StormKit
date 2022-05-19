@@ -104,40 +104,6 @@ package("StormKit")
         end)
     option_end()
 
-    add_requires("robin-hood-hashing",
-                 "mapbox_eternal",
-                 "glm",
-                 "libjpeg",
-                 "libpng",
-                 "gli",
-                 "vulkan-headers",
-                 "volk",
-                 "vulkan-memory-allocator",
-                 "backward-cpp")
-    add_requires("volk", { configs = { header_only = true }})
-    if not is_plat("windows") then
-        add_requires("fmt")
-
-        if is_plat("linux") then
-            add_requires("libxkbcommon", { configs = { x11 = has_config("enable_wsi_x11"),
-                                                       wayland = has_config("enable_wsi_wayland") } })
-
-            if has_config("enable_wsi_x11") then
-                add_requires("libxcb",
-                             "xcb-util-keysyms",
-                             "xcb-util",
-                             "xcb-util-wm",
-                             "xcb-util-errors")
-            end
-
-            if has_config("enable_wsi_wayland") then
-                add_requires("wayland",
-                             "wayland-protocols")
-            end
-        end
-    end
-
-
     if is_plat("windows") then
         set_runtimes(is_mode("debug") and "MDd" or "MD")
 
@@ -171,6 +137,39 @@ package("StormKit")
     end
 
     add_vectorexts("mms", "neon", "avx", "avx2", "sse", "sse2", "sse3", "sse4")
+
+    add_requires("robin-hood-hashing",
+                 "mapbox_eternal",
+                 "glm",
+                 "libjpeg",
+                 "libpng",
+                 "gli",
+                 "vulkan-headers",
+                 "volk",
+                 "vulkan-memory-allocator",
+                 "backward-cpp")
+    add_requires("volk", { configs = { header_only = true }})
+    if not is_plat("windows") then
+        add_requires("fmt")
+
+        if is_plat("linux") then
+            add_requires("libxkbcommon", { configs = { x11 = has_config("enable_wsi_x11"),
+                                                       wayland = has_config("enable_wsi_wayland") } })
+
+            if has_config("enable_wsi_x11") then
+                add_requires("libxcb",
+                             "xcb-util-keysyms",
+                             "xcb-util",
+                             "xcb-util-wm",
+                             "xcb-util-errors")
+            end
+
+            if has_config("enable_wsi_wayland") then
+                add_requires("wayland",
+                             "wayland-protocols")
+            end
+        end
+    end
 
     includes("xmake/**.lua")
 
