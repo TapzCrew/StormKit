@@ -105,10 +105,10 @@ static constexpr auto CAMERA_BUFFER_SIZE = sizeof(Camera);
 static constexpr auto MODEL_BUFFER_SIZE  = sizeof(Transform);
 
 static constexpr auto VERTEX_SHADER_DATA = stormkit::core::makeStaticByteArray(
-#include "vertex.vert.spv.h"
+#include <vertex.vert.spv.h>
 );
 static constexpr auto FRAGMENT_SHADER_DATA = stormkit::core::makeStaticByteArray(
-#include "fragment.frag.spv.h"
+#include <fragment.frag.spv.h>
 );
 
 LOGGER("StormKit.UniformBuffer");

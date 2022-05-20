@@ -9,13 +9,10 @@
 
 #include <array>
 
-/////////// - StormKit::Log - ///////////
 #include <stormkit/core/Memory.mpp>
 
-/////////// - StormKit::Log - ///////////
 #include <stormkit/log/LogHandler.mpp>
 
-/////////// - StormKit::Render - ///////////
 #include <stormkit/gpu/core/Types.mpp>
 
 #include <stormkit/gpu/pipeline/VertexBindingDescription.mpp>
@@ -32,10 +29,10 @@ static constexpr auto VERTICES = std::array {
 };
 
 static constexpr auto VERTEX_SHADER_DATA = stormkit::core::makeStaticByteArray(
-#include "vertex.vert.spv.h"
+#include <vertex.vert.spv.h>
 );
 static constexpr auto FRAGMENT_SHADER_DATA = stormkit::core::makeStaticByteArray(
-#include "fragment.frag.spv.h"
+#include <fragment.frag.spv.h>
 );
 
 LOGGER("StormKit.Triangle");

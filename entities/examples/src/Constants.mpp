@@ -43,10 +43,10 @@ static constexpr auto BOARD_BUFFERING_COUNT = 3u;
 static constexpr auto REFRESH_BOARD_DELTA   = stormkit::core::Secondf { 1 };
 
 static constexpr auto VERTEX_SHADER_DATA = stormkit::core::makeStaticByteArray(
-#include "vertex.vert.spv.h"
+#include <vertex.vert.spv.h>
 );
 static constexpr auto FRAGMENT_SHADER_DATA = stormkit::core::makeStaticByteArray(
-#include "fragment.frag.spv.h"
+#include <fragment.frag.spv.h>
 );
 
 LOGGER("StormKit.GameOfLife");
