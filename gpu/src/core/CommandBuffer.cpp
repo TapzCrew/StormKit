@@ -18,7 +18,7 @@ namespace stormkit::gpu {
     }
 
     static constexpr auto old_layout_access_map =
-        core::make_map<VkImageLayout, std::pair<VkAccessFlags, VkPipelineStageFlags>>(
+        core::makeConstexprMap<VkImageLayout, std::pair<VkAccessFlags, VkPipelineStageFlags>>(
             { { VK_IMAGE_LAYOUT_UNDEFINED,
                 { VkAccessFlags {}, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT } },
               { VK_IMAGE_LAYOUT_PREINITIALIZED,
@@ -46,7 +46,7 @@ namespace stormkit::gpu {
                 { VK_ACCESS_MEMORY_READ_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT } } });
 
     static constexpr auto new_layout_access_map =
-        core::make_map<VkImageLayout, std::pair<VkAccessFlags, VkPipelineStageFlags>>(
+        core::makeConstexprMap<VkImageLayout, std::pair<VkAccessFlags, VkPipelineStageFlags>>(
             { { VK_IMAGE_LAYOUT_UNDEFINED, { VkAccessFlags {}, {} } },
               { VK_IMAGE_LAYOUT_PREINITIALIZED, { VkAccessFlags {}, {} } },
               { VK_IMAGE_LAYOUT_GENERAL,

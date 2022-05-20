@@ -8,7 +8,7 @@
 
 namespace stormkit::core {
     template<typename Key, typename Value, std::size_t N>
-    constexpr auto make_map(const std::pair<const Key, const Value> (&items)[N]) noexcept {
+    constexpr auto makeConstexprMap(const std::pair<const Key, const Value> (&items)[N]) noexcept {
         return mapbox::eternal::map(items);
     }
 } // namespace stormkit::core
