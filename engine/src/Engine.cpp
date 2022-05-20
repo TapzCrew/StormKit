@@ -18,7 +18,7 @@ namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     Engine::Engine(wsi::Window &window) : m_window { &window }, m_event_handler { *m_window } {
-        core::setCurrentThreadName("Main Thread");
+        core::setCurrentThreadName("StormKit:MainThread");
 
         ilog("Initialization of Renderer");
         m_renderer = std::make_unique<Renderer>(*this);
