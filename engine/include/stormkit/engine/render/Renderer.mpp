@@ -39,6 +39,9 @@ namespace stormkit::engine {
         auto pipelineCache() noexcept -> gpu::PipelineCache &;
         auto pipelineCache() const noexcept -> const gpu::PipelineCache &;
 
+        auto shaderCache() noexcept -> ShaderCache &;
+        auto shaderCache() const noexcept -> const ShaderCache &;
+
       private:
         enum class FrameGraphState { Updated, Old };
 

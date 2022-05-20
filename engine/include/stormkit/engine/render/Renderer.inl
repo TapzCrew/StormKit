@@ -33,4 +33,14 @@ namespace stormkit::engine {
     inline auto Renderer::pipelineCache() const noexcept -> const gpu::PipelineCache & {
         return *m_pipeline_cache;
     }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Renderer::shaderCache() noexcept -> ShaderCache & { return *m_shader_cache; }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Renderer::shaderCache() const noexcept -> const ShaderCache & {
+        return *m_shader_cache;
+    }
 } // namespace stormkit::engine
