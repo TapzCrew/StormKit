@@ -6,6 +6,7 @@
 #include <stormkit/engine/render/ForwardTasks.mpp>
 #include <stormkit/engine/render/Renderer.mpp>
 #include <stormkit/engine/render/core/RenderQueue.mpp>
+#include <stormkit/engine/render/core/ShaderCache.mpp>
 #include <stormkit/engine/render/core/VertexArray.mpp>
 #include <stormkit/engine/render/framegraph/BakedFrameGraph.mpp>
 #include <stormkit/engine/render/framegraph/FrameGraphBuilder.mpp>
@@ -23,11 +24,24 @@
 #include "shaders/ForwardShaders.hpp"
 
 namespace stormkit::engine {
+
     /////////////////////////////////////
     /////////////////////////////////////
     auto forwardRenderer(Engine &engine) noexcept -> BuildFrameGraphCallback {
         return [&](auto &builder) -> void {
             auto &renderer = engine.renderer();
+
+            auto &shader_cache = renderer.shaderCache();
+
+            if (!shader_cache.has(FORWARD_PASS_VERTEX_SHADER)) [[unlikely]]
+                shader_cache.load(FORWARD_PASS_VERTEX_SHADER,
+                                  VERTEX_SHADER_DATA,
+                                  gpu::ShaderStageFlag::Vertex);
+
+            if (!shader_cache.has(FORWARD_PASS_FRAGMENT_SHADER)) [[unlikely]]
+                shader_cache.load(FORWARD_PASS_FRAGMENT_SHADER,
+                                  VERTEX_SHADER_DATA,
+                                  gpu::ShaderStageFlag::Vertex);
 
             const auto &extent = engine.window().size();
             struct ForwardPass {
@@ -37,7 +51,7 @@ namespace stormkit::engine {
             auto *pipeline_cache = &renderer.pipelineCache();
 
             const auto &task = builder.template addTask<ForwardPass>(
-                "ForwardPass",
+                "StormKit:ForwardPass",
                 [&](auto &data, auto &builder) {
                     data.output = &builder.create("Backbuffer",
                                                   engine::ImageDescription {

@@ -5,16 +5,16 @@
 namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
-    auto ShaderCache::has(std::string_view name) const noexcept -> bool {
+    inline auto ShaderCache::has(std::string_view name) const noexcept -> bool {
         return std::ranges::any_of(m_shaders,
                                    [name](const auto &pair) { return pair.first == name; });
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto ShaderCache::get(std::string_view name) const noexcept -> const gpu::Shader & {
+    inline auto ShaderCache::get(std::string_view name) const noexcept -> const gpu::Shader & {
         STORMKIT_EXPECTS(has(name));
 
-        return *m_shaders.find(name);
+        return m_shaders.find(name)->second;
     }
 } // namespace stormkit::engine

@@ -12,6 +12,7 @@
 
 #include <stormkit/core/HashMap.mpp>
 #include <stormkit/core/Memory.mpp>
+#include <stormkit/core/Strings.mpp>
 #include <stormkit/core/Types.mpp>
 
 #include <stormkit/gpu/Fwd.hpp>
@@ -46,7 +47,7 @@ namespace stormkit::engine {
 
         const gpu::Device *m_device = nullptr;
 
-        core::HashMap<std::string, gpu::Shader, core::StringHash> m_shaders;
+        core::StringHashMap<gpu::Shader> m_shaders;
     };
 } // namespace stormkit::engine
 
