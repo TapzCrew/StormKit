@@ -10,7 +10,7 @@ namespace stormkit::core {
         m_workers.reserve(m_worker_count);
         for (auto i : range(m_worker_count)) {
             auto &thread = m_workers.emplace_back([this] { workerMain(); });
-            core::setThreadName(thread, core::format("Worker Thread {}", i));
+            core::setThreadName(thread, core::format("StormKit:WorkerThread:{}", i));
         }
     }
 
@@ -29,7 +29,7 @@ namespace stormkit::core {
         m_workers.reserve(m_worker_count);
         for (auto i : range(m_worker_count)) {
             auto &thread = m_workers.emplace_back([this] { workerMain(); });
-            core::setThreadName(thread, core::format("Worker Thread {}", i));
+            core::setThreadName(thread, core::format("StormKit:WorkerThread:{}", i));
         }
     }
 
@@ -51,7 +51,7 @@ namespace stormkit::core {
         m_workers.reserve(m_worker_count);
         for (auto i : range(m_worker_count)) {
             auto &thread = m_workers.emplace_back([this] { workerMain(); });
-            core::setThreadName(thread, core::format("Worker Thread {}", i));
+            core::setThreadName(thread, core::format("StormKit:WorkerThread:{}", i));
         }
 
         return *this;
