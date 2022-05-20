@@ -1,5 +1,3 @@
-local use_cxx20_modules = false
-
 local allowedmodes = {
     "debug",
     "release",
@@ -13,6 +11,8 @@ local allowedmodes = {
     "check",
     "minsizerel"
 }
+
+add_repositories("tapzcrew-repo https://gitlab.com/tapzcrew/xmake-repo.git main")
 
 if not is_plat("windows") then
     table.insert(allowedmodes, "valgrind")
