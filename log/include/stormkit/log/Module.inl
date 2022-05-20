@@ -9,31 +9,31 @@ namespace stormkit::log {
     ////////////////////////////////////////
     template<typename... Args>
     auto Module::dlog(Args &&...args) const -> void {
-        LogHandler::dlog(name, std::forward<Args>(args)...);
+        LogHandler::dlog(*this, std::forward<Args>(args)...);
     }
     ////////////////////////////////////////
     ////////////////////////////////////////
     template<typename... Args>
     auto Module::ilog(Args &&...args) const -> void {
-        LogHandler::ilog(name, std::forward<Args>(args)...);
+        LogHandler::ilog(*this, std::forward<Args>(args)...);
     }
     ////////////////////////////////////////
     ////////////////////////////////////////
     template<typename... Args>
     auto Module::wlog(Args &&...args) const -> void {
-        LogHandler::wlog(name, std::forward<Args>(args)...);
+        LogHandler::wlog(*this, std::forward<Args>(args)...);
     }
     ////////////////////////////////////////
     ////////////////////////////////////////
     template<typename... Args>
     auto Module::elog(Args &&...args) const -> void {
-        LogHandler::elog(name, std::forward<Args>(args)...);
+        LogHandler::elog(*this, std::forward<Args>(args)...);
     }
     ////////////////////////////////////////
     ////////////////////////////////////////
     template<typename... Args>
     auto Module::flog(Args &&...args) const -> void {
-        LogHandler::flog(name, std::forward<Args>(args)...);
+        LogHandler::flog(*this, std::forward<Args>(args)...);
     }
 
     ////////////////////////////////////////
