@@ -31,17 +31,17 @@ namespace stormkit::engine {
         return [&](auto &builder) -> void {
             auto &renderer = engine.renderer();
 
-            auto &shader_cache = renderer.shaderCache();
+            auto *shader_cache = &renderer.shaderCache();
 
-            if (!shader_cache.has(FORWARD_PASS_VERTEX_SHADER)) [[unlikely]]
-                shader_cache.load(FORWARD_PASS_VERTEX_SHADER,
-                                  VERTEX_SHADER_DATA,
-                                  gpu::ShaderStageFlag::Vertex);
+            if (!shader_cache->has(FORWARD_PASS_VERTEX_SHADER)) [[unlikely]]
+                shader_cache->load(FORWARD_PASS_VERTEX_SHADER,
+                                   VERTEX_SHADER_DATA,
+                                   gpu::ShaderStageFlag::Vertex);
 
-            if (!shader_cache.has(FORWARD_PASS_FRAGMENT_SHADER)) [[unlikely]]
-                shader_cache.load(FORWARD_PASS_FRAGMENT_SHADER,
-                                  VERTEX_SHADER_DATA,
-                                  gpu::ShaderStageFlag::Vertex);
+            if (!shader_cache->has(FORWARD_PASS_FRAGMENT_SHADER)) [[unlikely]]
+                shader_cache->load(FORWARD_PASS_FRAGMENT_SHADER,
+                                   FRAGMENT_SHADER_DATA,
+                                   gpu::ShaderStageFlag::Vertex);
 
             const auto &extent = engine.window().size();
             struct ForwardPass {
@@ -60,6 +60,9 @@ namespace stormkit::engine {
                                                       .format = gpu::PixelFormat::RGBA8_UNorm });
                 },
                 [=](const auto &data, auto *renderpass, auto &cmb) {
+                    const auto &vertex_shader   = shader_cache->get(FORWARD_PASS_VERTEX_SHADER);
+                    const auto &fragment_shader = shader_cache->get(FORWARD_PASS_FRAGMENT_SHADER);
+
                     const auto state = gpu::GraphicsPipelineState {
                         .viewport_state = { .viewports = { gpu::Viewport {
                                                 .position = { 0.f, 0.f },
@@ -68,12 +71,12 @@ namespace stormkit::engine {
                                             .scissors  = { gpu::Scissor { .offset = { 0, 0 },
                                                                           .extent = extent } } },
 
-                        .color_blend_state = { .attachments = { {} } },
-                        .dynamic_state     = { { gpu::DynamicState::Viewport,
+                        .color_blend_state   = { .attachments = { {} } },
+                        .dynamic_state       = { { gpu::DynamicState::Viewport,
                                              gpu::DynamicState::Scissor } },
-                        /*.shader_state        = { .shaders =
-                                              core::makeConstObserverArray(m_vertex_shader,
-                                                                           m_fragment_shader) },*/
+                        .shader_state        = { .shaders =
+                                              core::makeConstObserverArray(vertex_shader,
+                                                                           fragment_shader) },
                         .vertex_input_state  = { .binding_descriptions =
                                                     std::vector<gpu::VertexBindingDescription> {
                                                         std::begin(
