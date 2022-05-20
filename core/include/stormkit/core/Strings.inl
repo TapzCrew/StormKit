@@ -70,28 +70,28 @@ namespace stormkit::core {
     ////////////////////////////////////////
     inline auto StringEqual::operator()(const std::string &a, const std::string &b) const noexcept
         -> bool {
-        return a.compare(b);
+        return a.compare(b) == 0;
     }
 
     ////////////////////////////////////////
     ////////////////////////////////////////
     inline auto StringEqual::operator()(const std::string &a, std::string_view b) const noexcept
         -> bool {
-        return a.compare(b);
+        return a.compare(b) == 0;
     }
 
     ////////////////////////////////////////
     ////////////////////////////////////////
     inline auto StringEqual::operator()(std::string_view a, const std::string &b) const noexcept
         -> bool {
-        return a.compare(b);
+        return a.compare(b) == 0;
     }
 
     ////////////////////////////////////////
     ////////////////////////////////////////
     inline auto StringEqual::operator()(std::string_view a, std::string_view b) const noexcept
         -> bool {
-        return a.compare(b);
+        return a.compare(b) == 0;
     }
 
     ////////////////////////////////////////
