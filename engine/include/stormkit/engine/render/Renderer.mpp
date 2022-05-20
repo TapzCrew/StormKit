@@ -4,21 +4,16 @@
 
 #pragma once
 
-
 #include <stormkit/core/Types.mpp>
-
 
 #include <stormkit/entities/Fwd.hpp>
 
-
 #include <stormkit/wsi/Fwd.hpp>
-
 
 #include <stormkit/gpu/Fwd.hpp>
 #include <stormkit/gpu/core/CommandBuffer.mpp>
 
 #include <stormkit/gpu/resource/ImageView.mpp>
-
 
 #include <stormkit/engine/Fwd.hpp>
 #include <stormkit/engine/render/framegraph/GraphResource.mpp>
@@ -65,6 +60,7 @@ namespace stormkit::engine {
         FrameGraphBuilderOwnedPtr m_builder;
 
         gpu::PipelineCacheOwnedPtr m_pipeline_cache;
+        ShaderCacheOwnedPtr m_shader_cache;
 
         std::vector<BakedFrameGraphOwnedPtr> m_framegraphs;
         std::vector<FrameGraphState> m_framegraph_states;

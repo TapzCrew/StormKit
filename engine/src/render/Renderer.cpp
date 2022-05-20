@@ -13,6 +13,7 @@
 #include <stormkit/engine/Engine.mpp>
 #include <stormkit/engine/render/Renderer.mpp>
 #include <stormkit/engine/render/core/RenderQueue.mpp>
+#include <stormkit/engine/render/core/ShaderCache.mpp>
 #include <stormkit/engine/render/framegraph/BakedFrameGraph.mpp>
 #include <stormkit/engine/render/framegraph/FrameGraphBuilder.mpp>
 
@@ -52,15 +53,16 @@ namespace stormkit::engine {
         m_instance = std::make_unique<gpu::Instance>();
         renderer_logger.ilog("Render backend successfully initialized");
         renderer_logger.ilog("Using StormKit {}.{}.{} (branch: {}, commit_hash: {}), built with {}",
-             core::STORMKIT_MAJOR_VERSION,
-             core::STORMKIT_MINOR_VERSION,
-             core::STORMKIT_PATCH_VERSION,
-             core::STORMKIT_GIT_BRANCH,
-             core::STORMKIT_GIT_COMMIT_HASH,
-             STORMKIT_COMPILER);
+                             core::STORMKIT_MAJOR_VERSION,
+                             core::STORMKIT_MINOR_VERSION,
+                             core::STORMKIT_PATCH_VERSION,
+                             core::STORMKIT_GIT_BRANCH,
+                             core::STORMKIT_GIT_COMMIT_HASH,
+                             STORMKIT_COMPILER);
 
         renderer_logger.ilog("--------- Physical Devices ----------");
-        for (const auto &device : m_instance->physicalDevices()) renderer_logger.ilog("{}", device.info());
+        for (const auto &device : m_instance->physicalDevices())
+            renderer_logger.ilog("{}", device.info());
 
         auto &window = m_engine->window();
 
@@ -73,13 +75,14 @@ namespace stormkit::engine {
         const auto &physical_device_info = physical_device.info();
 
         renderer_logger.ilog("Using physical device {} ({:#06x})",
-             physical_device_info.device_name,
-             physical_device_info.device_id);
+                             physical_device_info.device_name,
+                             physical_device_info.device_id);
 
         m_device = physical_device.allocateLogicalDevice();
         m_surface->initialize(*m_device);
 
         m_pipeline_cache = m_device->allocatePipelineCache();
+        m_shader_cache   = std::make_unique<ShaderCache>(*m_device);
 
         m_render_queue = std::make_unique<RenderQueue>();
 
@@ -93,7 +96,7 @@ namespace stormkit::engine {
         m_framegraph_states.resize(m_surface->bufferingCount());
 
         m_render_thread = std::thread { [this] { threadLoop(); } };
-        core::setThreadName(m_render_thread, "Render Thread");
+        core::setThreadName(m_render_thread, "StormKit:RenderThread");
     }
 
     /////////////////////////////////////

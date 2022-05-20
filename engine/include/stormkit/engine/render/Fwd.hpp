@@ -4,13 +4,11 @@
 
 #pragma once
 
-
 #include <array>
 #include <memory>
 #include <optional>
 #include <span>
 #include <vector>
-
 
 #include <stormkit/core/MemoryMacro.hpp>
 
@@ -22,6 +20,9 @@ namespace stormkit::engine {
 
     class Renderer;
     DECLARE_PTR_AND_REF(Renderer);
+
+    class ShaderCache;
+    DECLARE_PTR_AND_REF(ShaderCache);
 
     using BuildFrameGraphCallback = std::function<void(FrameGraphBuilder &graph_builder)>;
 } // namespace stormkit::engine
