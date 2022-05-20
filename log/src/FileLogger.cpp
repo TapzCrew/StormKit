@@ -64,7 +64,7 @@ namespace stormkit::log {
             std::chrono::duration_cast<std::chrono::seconds>(now - m_start_time).count();
 
         auto filepath = m_base_path / "log.txt";
-        if (std::empty(m.name)) {
+        if (!std::empty(m.name)) {
             filepath = m_base_path / (m.name + std::string { "-log.txt" });
 
             if (m_streams.find(filepath.string()) == m_streams.cend())
@@ -79,6 +79,6 @@ namespace stormkit::log {
         else
             final_string = core::format(LOG_LINE_MODULE, severity, time, m.name, string);
 
-        m_streams[filepath.string()] << final_string << std::flush;
+        m_streams.at(filepath.string()) << final_string << std::flush;
     }
 } // namespace stormkit::log

@@ -15,7 +15,7 @@
 #include <span>
 #include <vector>
 
-#include <stormkit/core/HashMap.mpp>
+#include <stormkit/core/Strings.mpp>
 
 #include <stormkit/log/Logger.mpp>
 
@@ -36,7 +36,7 @@ namespace stormkit::log {
         auto flush() -> void override;
 
       private:
-        core::HashMap<std::string, std::ofstream> m_streams;
+        core::StringHashMap<std::ofstream> m_streams;
 
         std::filesystem::path m_base_path;
     };
