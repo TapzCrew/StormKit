@@ -20,6 +20,8 @@
 #include <stormkit/gpu/pipeline/GraphicsPipeline.mpp>
 #include <stormkit/gpu/pipeline/PipelineCache.mpp>
 
+#include "shaders/ForwardShaders.hpp"
+
 namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////

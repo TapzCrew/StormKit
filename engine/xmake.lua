@@ -1,6 +1,7 @@
 target("stormkit-engine")
     set_kind("$(kind)")
     set_languages("cxxlatest", "clatest")
+    add_rules("utils.glsl2spv", {bin2c = true})
 
     if is_mode("debug") then
         set_suffixname("-d")
@@ -10,6 +11,8 @@ target("stormkit-engine")
     add_headerfiles("include/(stormkit/**.inl)")
     add_headerfiles("src/**.hpp")
     add_files("src/**.cpp")
+    add_files("src/**.vert")
+    add_files("src/**.frag")
 
     add_headerfiles("include/(stormkit/**.mpp)")
     add_headerfiles("src/**.mpp")
