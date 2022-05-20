@@ -4,17 +4,13 @@
 
 #pragma once
 
-
 #include <stormkit/core/ThreadPool.mpp>
 #include <stormkit/core/Types.mpp>
-
 
 #include <stormkit/wsi/EventHandler.mpp>
 #include <stormkit/wsi/Fwd.hpp>
 
-
 #include <stormkit/entities/EntityManager.mpp>
-
 
 #include <stormkit/engine/Fwd.hpp>
 
