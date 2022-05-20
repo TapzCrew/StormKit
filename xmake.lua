@@ -145,7 +145,6 @@ package("StormKit")
                  "libpng",
                  "gli",
                  "vulkan-headers",
-                 "volk",
                  "vulkan-memory-allocator",
                  "backward-cpp")
     add_requires("volk", { configs = { header_only = true }})
