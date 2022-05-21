@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    name: ${{ matrix.os.name }} ( ${{matrix.os.compiler }} ${{ matrix.kind }}, ${{ matrix.build_type }} )
+    name: ${{ matrix.os.name }} ( ${{matrix.os.compiler }} ${{ matrix.kind }}, ${{ matrix.mode }} )
     runs-on: ${{ matrix.os.value }}
     strategy:
       fail-fast: false
@@ -22,7 +22,7 @@ jobs:
         }
 
         kind: [static, shared]
-        build_type: [release, debug]
+        mode: [release, debug, asan]
     steps:
         - name: Install brew dependencies
           run: |
@@ -43,7 +43,7 @@ jobs:
           run: |
             xrepo install -v llvm
             $LLVM_TOOLCHAIN=xrepo info llvm | grep "installdir:" | grep -o "/"
-            xmake f --unity_build=y -v --yes -m ${{ matrix.build_type }} -k ${{ matrix.kind }} --sdk=$LLVM_TOOLCHAIN 
+            xmake f --unity_build=y -v --yes -m ${{ matrix.mode }} -k ${{ matrix.kind }} --sdk=$LLVM_TOOLCHAIN 
             xmake b -v
 
         - name: Install
@@ -55,5 +55,5 @@ jobs:
           id: upload
           uses: actions/upload-artifact@v1
           with:
-            name: ${{ matrix.os.name }}-${{ matrix.os.compiler }}-${{ matrix.kind }}-${{ matrix.build_type }}
+            name: ${{ matrix.os.name }}-${{ matrix.os.compiler }}-${{ matrix.kind }}-${{ matrix.mode }}
             path: ${{ runner.workspace }}/StormKit_Output

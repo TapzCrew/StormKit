@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    name: ${{ matrix.os.name }} ( ${{matrix.os.compiler }} ${{ matrix.kind }}, ${{ matrix.build_type }} )
+    name: ${{ matrix.os.name }} ( ${{matrix.os.compiler }} ${{ matrix.kind }}, ${{ matrix.mode }} )
     runs-on: ${{ matrix.os.value }}
     strategy:
       fail-fast: false
@@ -22,7 +22,7 @@ jobs:
         }
             
         kind: [static, shared]
-        build_type: [release, debug]
+        mode: [release, debug, asan]
     steps:
         - name: Install apt deps
           id: aptdeps
@@ -65,7 +65,7 @@ jobs:
         - name: Configure & Build
           id: confandbuild
           run: |
-            xmake f --unity_build=y -v --yes -m ${{ matrix.build_type }} -k ${{ matrix.kind }} 
+            xmake f --unity_build=y -v --yes -m ${{ matrix.mode }} -k ${{ matrix.kind }} 
             xmake b -v
 
         - name: Install
@@ -77,6 +77,6 @@ jobs:
           id: upload
           uses: actions/upload-artifact@v1
           with:
-            name: ${{ matrix.os.name }}-${{ matrix.os.compiler }}-${{ matrix.kind }}-${{ matrix.build_type }}
+            name: ${{ matrix.os.name }}-${{ matrix.os.compiler }}-${{ matrix.kind }}-${{ matrix.mode }}
             path: ${{ runner.workspace }}/StormKit_Output
  
