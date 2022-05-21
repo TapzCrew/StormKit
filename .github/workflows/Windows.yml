@@ -54,7 +54,11 @@ jobs:
               $MINGW_INSTALL_DIR = xrepo info llvm-mingw | Out-String
               $MINGW_INSTALL_DIR -match 'installdir.+'
               $Matches[0] -match '(C.+)'
-              xmake f --unity_build=y -v --yes -m ${{ matrix.build_type }} -k ${{ matrix.kind }} -p mingw --sdk="$Matches[1]"
+              $MINGW_INSTALL_DIR = $Matches[0]
+              $MINGW_INSTALL_DIR = $MINGW_INSTALL_DIR -replace '\x1b\[[0-9;]*m','' -replace "`n","" -replace "`r",""
+              xmake g --mingw="$MINGW_INSTALL_DIR"
+
+              xmake f --unity_build=y -v --yes -m ${{ matrix.build_type }} -k ${{ matrix.kind }} -p mingw
             } else {
               xmake f --unity_build=y -v --yes -m ${{ matrix.build_type }} -k ${{ matrix.kind }} --vs_runtime=$VS_RUNTIME 
             }
