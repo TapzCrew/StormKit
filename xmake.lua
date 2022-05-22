@@ -13,6 +13,7 @@ local allowedmodes = {
 }
 
 add_repositories("tapzcrew-repo https://gitlab.com/tapzcrew/xmake-repo.git main")
+add_repositories("nazara-engine-repo https://github.com/NazaraEngine/xmake-repo")
 
 if not is_plat("windows") then
     table.insert(allowedmodes, "valgrind")
@@ -146,7 +147,8 @@ package("StormKit")
                  "gli",
                  "vulkan-headers",
                  "vulkan-memory-allocator",
-                 "backward-cpp")
+                 "backward-cpp",
+                 "nzsl")
     add_requires("volk", { configs = { header_only = true }})
     if not is_plat("windows") then
         add_requires("fmt")

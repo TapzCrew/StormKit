@@ -141,9 +141,9 @@ auto Renderer::doInitMeshRenderObjects() -> void {
     const auto surface_extentf = core::ExtentF { surface_extent };
 
     m_board.vertex_shader =
-        m_device->allocateShader(VERTEX_SHADER_DATA, gpu::ShaderStageFlag::Vertex);
+        m_device->allocateShader(SHADER_DATA, gpu::ShaderStageFlag::Vertex);
     m_board.fragment_shader =
-        m_device->allocateShader(FRAGMENT_SHADER_DATA, gpu::ShaderStageFlag::Fragment);
+        m_device->allocateShader(SHADER_DATA, gpu::ShaderStageFlag::Fragment);
 
     const auto description = gpu::RenderPassDescription {
         .attachments = { { .format = m_surface->pixelFormat() } },

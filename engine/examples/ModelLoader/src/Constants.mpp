@@ -28,11 +28,4 @@ static constexpr auto VERTICES = std::array {
     stormkit::engine::Vertex { .position = { 0.f, -1.f, 1.f }, .color = { 0.f, 0.f, 1.f } },
 };
 
-static constexpr auto VERTEX_SHADER_DATA = stormkit::core::makeStaticByteArray(
-#include <vertex.vert.spv.h>
-);
-static constexpr auto FRAGMENT_SHADER_DATA = stormkit::core::makeStaticByteArray(
-#include <fragment.frag.spv.h>
-);
-
 LOGGER("StormKit.Triangle");

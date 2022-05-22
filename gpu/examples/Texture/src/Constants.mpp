@@ -48,11 +48,8 @@ static constexpr auto MESH_VERTEX_ATTRIBUTE_DESCRIPTIONS = std::array {
                                                      .offset   = offsetof(Vertex, uv) }
 };
 
-static constexpr auto VERTEX_SHADER_DATA = stormkit::core::makeStaticByteArray(
-#include <vertex.vert.spv.h>
-);
-static constexpr auto FRAGMENT_SHADER_DATA = stormkit::core::makeStaticByteArray(
-#include <fragment.frag.spv.h>
+static constexpr auto SHADER_DATA = stormkit::core::makeStaticByteArray(
+#include <shader.nzsl.h>
 );
 
 LOGGER("StormKit.Textures");

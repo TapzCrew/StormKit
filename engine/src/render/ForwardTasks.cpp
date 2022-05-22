@@ -35,12 +35,12 @@ namespace stormkit::engine {
 
             if (!shader_cache->has(FORWARD_PASS_VERTEX_SHADER)) [[unlikely]]
                 shader_cache->load(FORWARD_PASS_VERTEX_SHADER,
-                                   VERTEX_SHADER_DATA,
+                                   SHADER_DATA,
                                    gpu::ShaderStageFlag::Vertex);
 
             if (!shader_cache->has(FORWARD_PASS_FRAGMENT_SHADER)) [[unlikely]]
                 shader_cache->load(FORWARD_PASS_FRAGMENT_SHADER,
-                                   FRAGMENT_SHADER_DATA,
+                                   SHADER_DATA,
                                    gpu::ShaderStageFlag::Vertex);
 
             const auto &extent = engine.window().size();

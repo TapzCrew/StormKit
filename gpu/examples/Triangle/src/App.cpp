@@ -132,10 +132,9 @@ auto App::doInitMeshRenderObjects() -> void {
     const auto surface_extentf = core::ExtentF { surface_extent };
 
     // We load our triangle shaders
-    m_vertex_shader = m_device->allocateShader(VERTEX_SHADER_DATA, gpu::ShaderStageFlag::Vertex);
+    m_vertex_shader = m_device->allocateShader(SHADER_DATA, gpu::ShaderStageFlag::Vertex);
     ilog("Vertex shader loaded");
-    m_fragment_shader =
-        m_device->allocateShader(FRAGMENT_SHADER_DATA, gpu::ShaderStageFlag::Fragment);
+    m_fragment_shader = m_device->allocateShader(SHADER_DATA, gpu::ShaderStageFlag::Fragment);
     ilog("Fragment shader loaded");
 
     // We need to create a render pass, the render pass describe how the framebuffer will look

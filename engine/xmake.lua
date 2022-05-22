@@ -1,7 +1,7 @@
 target("stormkit-engine")
     set_kind("$(kind)")
     set_languages("cxxlatest", "clatest")
-    add_rules("utils.glsl2spv", {bin2c = true})
+    add_rules("utils.nzsl2spv")
 
     if is_mode("debug") then
         set_suffixname("-d")
@@ -11,8 +11,7 @@ target("stormkit-engine")
     add_headerfiles("include/(stormkit/**.inl)")
     add_headerfiles("src/**.hpp")
     add_files("src/**.cpp")
-    add_files("src/**.vert")
-    add_files("src/**.frag")
+    add_files("src/**.nzsl")
 
     add_headerfiles("include/(stormkit/**.mpp)")
     add_headerfiles("src/**.mpp")
@@ -21,6 +20,7 @@ target("stormkit-engine")
     add_deps("stormkit-log")
 
     add_packages("volk", "vulkan-headers", "vulkan-memory-allocator", { public = true })
+    add_packages("nzsl")
 
     add_includedirs("include", { public = true })
     add_includedirs("$(buildir)/include")

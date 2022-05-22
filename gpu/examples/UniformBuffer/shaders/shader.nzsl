@@ -1,0 +1,51 @@
+[nzsl_version("1.0")]
+
+module Shader;
+
+struct VertIn {
+    [location(0)] position: vec3[f32],
+    [location(1)] color: vec3[f32]
+}
+
+struct VertOut {
+    [builtin(position)] position: vec4[f32],
+    [location(0)] color: vec3[f32]
+}
+
+struct Camera {
+    projection: mat4[f32],
+    view: mat4[f32]
+}
+
+struct MeshData {
+    model: mat4[f32]
+}
+
+external {
+    [binding(0)] camera: uniform[Camera],
+    [binding(1)] mesh_data: uniform[MeshData]
+}
+
+[entry(vert)]
+fn main(input: VertIn) -> VertOut {
+    let output: VertOut;
+
+    let position = vec4[f32](input.position, 1.);
+
+    output.position = camera.projection * camera.view * mesh_data.model * position;
+    output.color = input.color;
+
+    return output;
+}
+
+struct FragOut {
+    [location(0)] color: vec4[f32]
+}
+
+[entry(frag)]
+fn main(input: VertOut) -> FragOut {
+    let output: FragOut;
+    output.color = vec4[f32](input.color, 1.);
+
+    return output;
+}

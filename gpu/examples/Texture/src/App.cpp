@@ -136,10 +136,10 @@ auto App::doInitMeshRenderObjects() -> void {
     const auto surface_extentf = core::ExtentF { surface_extent };
 
     // We load our shaders
-    m_vertex_shader = m_device->allocateShader(VERTEX_SHADER_DATA, gpu::ShaderStageFlag::Vertex);
+    m_vertex_shader = m_device->allocateShader(SHADER_DATA, gpu::ShaderStageFlag::Vertex);
     ilog("Vertex shader loaded");
     m_fragment_shader =
-        m_device->allocateShader(FRAGMENT_SHADER_DATA, gpu::ShaderStageFlag::Fragment);
+        m_device->allocateShader(SHADER_DATA, gpu::ShaderStageFlag::Fragment);
     ilog("Fragment shader loaded");
 
     // We need to indicate to the pipeline how we pass data to the shader, first we need a

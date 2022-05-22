@@ -7,10 +7,7 @@
 #include <stormkit/core/Memory.mpp>
 
 namespace stormkit::engine {
-    static constexpr auto VERTEX_SHADER_DATA = core::makeStaticByteArray(
-#include <ForwardPass.vert.spv.h>
-    );
-    static constexpr auto FRAGMENT_SHADER_DATA = core::makeStaticByteArray(
-#include <ForwardPass.frag.spv.h>
+    static constexpr auto SHADER_DATA = core::makeStaticByteArray(
+#include <FowardPass.nzsl.h>
     );
 } // namespace stormkit::engine

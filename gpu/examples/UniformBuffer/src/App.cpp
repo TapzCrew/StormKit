@@ -156,10 +156,9 @@ auto App::doInitMeshRenderObjects() -> void {
     m_model.model = core::Matrix { 1.f };
 
     // We load our triangle shaders
-    m_vertex_shader = m_device->allocateShader(VERTEX_SHADER_DATA, gpu::ShaderStageFlag::Vertex);
+    m_vertex_shader = m_device->allocateShader(SHADER_DATA, gpu::ShaderStageFlag::Vertex);
     ilog("Vertex shader loaded");
-    m_fragment_shader =
-        m_device->allocateShader(FRAGMENT_SHADER_DATA, gpu::ShaderStageFlag::Fragment);
+    m_fragment_shader = m_device->allocateShader(SHADER_DATA, gpu::ShaderStageFlag::Fragment);
     ilog("Fragment shader loaded");
 
     // We need to indicate to the pipeline how we pass data to the shader, first we need a
