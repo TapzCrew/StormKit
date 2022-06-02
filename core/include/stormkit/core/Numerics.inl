@@ -3,7 +3,45 @@
 namespace stormkit::core {
     namespace details {
         static std::default_random_engine generator {};
-    } // namespace details
+    }
+
+    namespace literals {
+        /////////////////////////////////////
+        /////////////////////////////////////
+        constexpr auto operator""_kb(core::UInt64 x) noexcept -> core::UInt64 {
+            return 1000ULL * x;
+        }
+
+        /////////////////////////////////////
+        /////////////////////////////////////
+        constexpr auto operator""_mb(core::UInt64 x) noexcept -> core::UInt64 {
+            return 1000ULL * 1000ULL * x;
+        }
+
+        /////////////////////////////////////
+        /////////////////////////////////////
+        constexpr auto operator""_gb(core::UInt64 x) noexcept -> core::UInt64 {
+            return 1000ULL * 1000ULL * 1000ULL * x;
+        }
+
+        /////////////////////////////////////
+        /////////////////////////////////////
+        constexpr auto operator""_kib(core::UInt64 x) noexcept -> core::UInt64 {
+            return 1024ULL * x;
+        }
+
+        /////////////////////////////////////
+        /////////////////////////////////////
+        constexpr auto operator""_mib(core::UInt64 x) noexcept -> core::UInt64 {
+            return 1024ULL * 1024ULL * x;
+        }
+
+        /////////////////////////////////////
+        /////////////////////////////////////
+        constexpr auto operator""_gib(core::UInt64 x) noexcept -> core::UInt64 {
+            return 1024ULL * 1000ULL * 1024ULL * x;
+        }
+    } // namespace literals
 
     /////////////////////////////////////
     /////////////////////////////////////

@@ -4,17 +4,13 @@
 
 #pragma once
 
-
 #include <stormkit/core/Types.mpp>
 
-
 #include <stormkit/wsi/Fwd.hpp>
-
 
 #include <stormkit/gpu/Fwd.hpp>
 
 #include <stormkit/gpu/resource/ImageView.mpp>
-
 
 #include <stormkit/engine/Fwd.hpp>
 
@@ -45,6 +41,9 @@ namespace stormkit::engine {
 
             ID id;
 
+            core::USize vertex_buffer_id;
+            core::USize vertex_buffer_offset;
+
             const MeshComponent *mesh;
         };
 
@@ -55,5 +54,7 @@ namespace stormkit::engine {
 
         std::vector<RenderEntry> m_to_be_added;
         std::vector<ID> m_to_be_removed;
+
+        std::vector<gpu::Buffer> m_vertex_buffers;
     };
 } // namespace stormkit::engine

@@ -46,6 +46,20 @@ namespace stormkit::core {
 
     template<std::integral T, std::convertible_to<T> U = T>
     [[nodiscard]] constexpr auto range(T start, T stop, U increment = 1) noexcept -> std::vector<T>;
+
+    namespace literals {
+        [[nodiscard]] constexpr auto operator""_kb(core::UInt64 x) noexcept -> core::UInt64;
+
+        [[nodiscard]] constexpr auto operator""_mb(core::UInt64 x) noexcept -> core::UInt64;
+
+        [[nodiscard]] constexpr auto operator""_gb(core::UInt64 x) noexcept -> core::UInt64;
+
+        [[nodiscard]] constexpr auto operator""_kib(core::UInt64 x) noexcept -> core::UInt64;
+
+        [[nodiscard]] constexpr auto operator""_mib(core::UInt64 x) noexcept -> core::UInt64;
+
+        [[nodiscard]] constexpr auto operator""_gib(core::UInt64 x) noexcept -> core::UInt64;
+    } // namespace literals
 } // namespace stormkit::core
 
 #include "Numerics.inl"
