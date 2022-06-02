@@ -273,7 +273,7 @@ namespace stormkit::core {
 
     auto setupSignalHandler() noexcept -> void;
 
-    constexpr auto hton(auto value) noexcept -> decltype(auto);
+    [[nodiscard]] constexpr auto hton(auto value) noexcept -> decltype(auto);
 } // namespace stormkit::core
 
 #include "Memory.inl"
