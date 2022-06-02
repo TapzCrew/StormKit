@@ -8,6 +8,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <functional>
+#include <type_traits>
 #include <variant>
 
 namespace stormkit::core {
@@ -81,6 +82,10 @@ namespace stormkit::core {
 
     template<class T, class U>
     concept BinaryPredicateType = PredicateType<T, const U &, const U &>;
+
+    template<class T, class U>
+    concept HashFuncType = std::regular_invocable<T, U> &&
+        std::convertible_to<std::invoke_result_t<T, U>, std::uint64_t>;
 } // namespace stormkit::core
 
 #if defined(STORMKIT_CXX20_MODULES)
