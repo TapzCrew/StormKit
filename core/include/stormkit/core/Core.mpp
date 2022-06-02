@@ -8,7 +8,7 @@
 #include <stormkit/core/CRTP.mpp>
 #include <stormkit/core/Color.mpp>
 #include <stormkit/core/Concepts.mpp>
-#include <stormkit/core/ConstexprMap.mpp>
+#include <stormkit/core/FrozenMap.mpp>
 #include <stormkit/core/Flags.mpp>
 #include <stormkit/core/Format.mpp>
 #include <stormkit/core/Hash.mpp>

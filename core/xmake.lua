@@ -36,7 +36,7 @@ target("stormkit-core")
     add_headerfiles("include/(stormkit/**.mpp)")
     add_headerfiles("src/**.mpp")
 
-    add_packages("glm", "robin-hood-hashing", "mapbox_eternal", "backward-cpp", { public = true })
+    add_packages("glm", "robin-hood-hashing", "frozen", "backward-cpp", { public = true })
 
     if not is_plat("windows") then
         add_packages("fmt", { public = true })

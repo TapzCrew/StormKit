@@ -3,7 +3,7 @@
 // found in the top-level of this distribution
 
 #include <stormkit/core/Color.mpp>
-#include <stormkit/core/ConstexprMap.mpp>
+#include <stormkit/core/FrozenMap.mpp>
 
 #include "QOIImage.mpp"
 
@@ -24,7 +24,7 @@ namespace stormkit::image::details {
     constexpr auto SIZE_OF_HEADER = 14;
 
     static constexpr auto CHANNELS_TO_FORMAT =
-        core::makeConstexprMap<core::Int32, std::array<image::Image::Format, 2>>(
+        core::makeFrozenMap<core::Int32, std::array<image::Image::Format, 2>>(
             { { 3, std::array { image::Image::Format::sRGB8, image::Image::Format::RGB8_UNorm } },
               { 4,
                 std::array { image::Image::Format::sRGBA8, image::Image::Format::RGBA8_UNorm } } });

@@ -140,7 +140,7 @@ package("StormKit")
     add_vectorexts("mms", "neon", "avx", "avx2", "sse", "sse2", "sse3", "sse4")
 
     add_requires("robin-hood-hashing",
-                 "mapbox_eternal",
+                 "frozen",
                  "glm",
                  "libjpeg",
                  "libpng",
