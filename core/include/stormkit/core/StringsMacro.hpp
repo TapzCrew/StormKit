@@ -6,4 +6,9 @@
 
 #define STRINGIFY(x) #x
 #define CASE(x) \
-    case x: return STRINGIFY(x);
+    case x:     \
+        return std::string_view { STRINGIFY(x) };
+#define PAIR(x)                              \
+    {                                        \
+        x, std::string_view { STRINGIFY(x) } \
+    }

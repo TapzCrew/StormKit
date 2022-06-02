@@ -12,6 +12,7 @@
 
 #include <stormkit/core/Flags.mpp>
 #include <stormkit/core/Format.mpp>
+#include <stormkit/core/FrozenMap.mpp>
 
 namespace stormkit::log {
     enum class Severity { Info, Warning, Error, Fatal, Debug };

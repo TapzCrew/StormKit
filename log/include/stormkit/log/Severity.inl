@@ -4,18 +4,29 @@
 
 #pragma once
 
+#include "Severity.mpp"
+
 namespace stormkit::log {
+    namespace details {
+        constexpr static auto SEVERITY_TO_STRING = [] {
+            using namespace std::literals;
+
+            return core::makeFrozenMap<Severity, std::string_view>({
+                { Severity::Info, "Info"sv },
+                { Severity::Warning, "Warning"sv },
+                { Severity::Error, "Error"sv },
+                { Severity::Fatal, "Fatal"sv },
+                { Severity::Debug, "Debug"sv },
+            });
+        }();
+    }
+
     ////////////////////////////////////////
     ////////////////////////////////////////
     constexpr auto toString(Severity severity) noexcept -> std::string_view {
-        switch (severity) {
-            case Severity::Info: return "Information";
-            case Severity::Warning: return "Warning";
-            case Severity::Error: return "Error";
-            case Severity::Fatal: return "Fatal";
-            case Severity::Debug: return "Debug";
-        }
+        const auto it = details::SEVERITY_TO_STRING.find(severity);
+        STORMKIT_CONSTEXPR_EXPECTS(it != std::ranges::cend(details::SEVERITY_TO_STRING));
 
-        return "Unkown severity";
+        return it->second;
     }
 } // namespace stormkit::log

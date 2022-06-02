@@ -8,6 +8,7 @@
 
 #include <string_view>
 
+#include <stormkit/core/FrozenMap.mpp>
 #include <stormkit/core/Format.mpp>
 #include <stormkit/core/Types.mpp>
 
