@@ -11,7 +11,6 @@ target("game_of_life")
     add_headerfiles("src/*.mpp")
     add_files("shaders/*.nzsl")
     
-
     if is_plat("windows") then
         add_files("win32/*.manifest")
     end

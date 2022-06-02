@@ -8,6 +8,6 @@
 
 namespace stormkit::engine {
     static constexpr auto SHADER_DATA = core::makeStaticByteArray(
-#include <FowardPass.nzsl.h>
+#include <FowardPass.spv.h>
     );
 } // namespace stormkit::engine

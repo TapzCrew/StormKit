@@ -4,6 +4,7 @@ module Shader;
 
 struct VertIn
 {
+   [builtin(vertexindex)] vertex_id: i32
 }
 
 struct VertOut
@@ -19,6 +20,17 @@ fn main(input: VertIn) -> VertOut
 
     let position: vec2[f32];
     let color: vec3[f32];
+
+    if(input.vertex_id == 0) {
+        position = vec2[f32](1., 1.);
+        color = vec3[f32](1., 0., 0.);
+    } else if(input.vertex_id == 1) {
+        position = vec2[f32](-1., 1.);
+        color = vec3[f32](0., 1., 0.);
+    } else if(input.vertex_id == 2) {
+        position = vec2[f32](0., -1.);
+        color = vec3[f32](0., 0., 1.);
+    }
 
     output.position = vec4[f32](position, 0., 1.);
     output.color = color;

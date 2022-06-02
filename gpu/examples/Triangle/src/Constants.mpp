@@ -39,7 +39,7 @@ static constexpr auto MESH_VERTEX_ATTRIBUTE_DESCRIPTIONS = std::array {
 };
 
 static constexpr auto SHADER_DATA = stormkit::core::makeStaticByteArray(
-#include <shader.nzsl.h>
+#include <shader.spv.h>
 );
 
 LOGGER("StormKit.Triangle");

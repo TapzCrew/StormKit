@@ -105,7 +105,7 @@ static constexpr auto CAMERA_BUFFER_SIZE = sizeof(Camera);
 static constexpr auto MODEL_BUFFER_SIZE  = sizeof(Transform);
 
 static constexpr auto SHADER_DATA = stormkit::core::makeStaticByteArray(
-#include <shader.nzsl.h>
+#include <shader.spv.h>
 );
 
 LOGGER("StormKit.UniformBuffer");
