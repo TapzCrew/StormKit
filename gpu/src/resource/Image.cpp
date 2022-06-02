@@ -4,7 +4,6 @@
 
 #include <stormkit/core/Coroutines.mpp>
 
-
 #include <stormkit/gpu/core/CommandBuffer.mpp>
 #include <stormkit/gpu/core/Device.mpp>
 #include <stormkit/gpu/core/PhysicalDevice.mpp>
@@ -94,7 +93,7 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     Image::Image(const Device &device, const CreateInfo &info, Tag)
-        : m_device { &device }, m_extent { info.extent }, m_format { info.format },
+        : DeviceObject { device }, m_extent { info.extent }, m_format { info.format },
           m_layers { info.layers }, m_mip_levels { info.mip_levels }, m_type { info.type },
           m_flags { info.flags }, m_samples { info.samples }, m_usages { info.usages } {
         m_faces = 1;
@@ -104,7 +103,7 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     Image::Image(const Device &device, const CreateInfo &info) : Image { device, info, Tag {} } {
-        const auto &vk = m_device->table();
+        const auto &vk = this->device().table();
 
         const auto create_info = VkImageCreateInfo {
             .sType         = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
@@ -123,12 +122,12 @@ namespace stormkit::gpu {
             .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
         };
 
-        CHECK_VK_ERROR(vk.vkCreateImage(*m_device, &create_info, nullptr, &m_image));
+        CHECK_VK_ERROR(vk.vkCreateImage(this->device(), &create_info, nullptr, &m_image));
 
         const auto requirements = [&] {
             auto r = VkMemoryRequirements {};
 
-            vk.vkGetImageMemoryRequirements(*m_device, m_image, &r);
+            vk.vkGetImageMemoryRequirements(this->device(), m_image, &r);
 
             return r;
         }();
@@ -136,13 +135,13 @@ namespace stormkit::gpu {
         const auto allocate_info =
             VmaAllocationCreateInfo { .requiredFlags = core::as<core::UInt32>(info.property) };
 
-        CHECK_VK_ERROR(vmaAllocateMemory(m_device->vmaAllocator(),
+        CHECK_VK_ERROR(vmaAllocateMemory(this->device().vmaAllocator(),
                                          &requirements,
                                          &allocate_info,
                                          &m_image_memory,
                                          nullptr));
 
-        CHECK_VK_ERROR(vmaBindImageMemory(m_device->vmaAllocator(), m_image_memory, m_image));
+        CHECK_VK_ERROR(vmaBindImageMemory(this->device().vmaAllocator(), m_image_memory, m_image));
     }
 
     /////////////////////////////////////
@@ -174,8 +173,8 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     Image::Image(Image &&other) noexcept
-        : m_device { std::exchange(other.m_device, nullptr) },
-          m_extent { std::exchange(other.m_extent, { 0, 0, 0 }) },
+        : DeviceObject { std::move(other) }, m_extent { std::exchange(other.m_extent,
+                                                                      { 0, 0, 0 }) },
           m_format { std::exchange(other.m_format, {}) },
           m_layers { std::exchange(other.m_layers, 0) }, m_faces { std::exchange(other.m_faces,
                                                                                  0) },
@@ -194,19 +193,19 @@ namespace stormkit::gpu {
         if (&other == this) [[unlikely]]
             return *this;
 
-        m_device       = std::exchange(other.m_device, nullptr);
-        m_extent       = std::exchange(other.m_extent, { 0, 0, 0 });
-        m_format       = std::exchange(other.m_format, {});
-        m_layers       = std::exchange(other.m_layers, 0);
-        m_faces        = std::exchange(other.m_faces, 0);
-        m_mip_levels   = std::exchange(other.m_mip_levels, 0);
-        m_type         = std::exchange(other.m_type, {});
-        m_flags        = std::exchange(other.m_flags, {});
-        m_samples      = std::exchange(other.m_samples, {});
-        m_usages       = std::exchange(other.m_usages, {});
-        m_image_memory = std::exchange(other.m_image_memory, VK_NULL_HANDLE);
-        m_image        = std::exchange(other.m_image, VK_NULL_HANDLE);
-        m_own_image    = std::exchange(other.m_own_image, true);
+        DeviceObject::operator=(std::move(other));
+        m_extent              = std::exchange(other.m_extent, { 0, 0, 0 });
+        m_format              = std::exchange(other.m_format, {});
+        m_layers              = std::exchange(other.m_layers, 0);
+        m_faces               = std::exchange(other.m_faces, 0);
+        m_mip_levels          = std::exchange(other.m_mip_levels, 0);
+        m_type                = std::exchange(other.m_type, {});
+        m_flags               = std::exchange(other.m_flags, {});
+        m_samples             = std::exchange(other.m_samples, {});
+        m_usages              = std::exchange(other.m_usages, {});
+        m_image_memory        = std::exchange(other.m_image_memory, VK_NULL_HANDLE);
+        m_image               = std::exchange(other.m_image, VK_NULL_HANDLE);
+        m_own_image           = std::exchange(other.m_own_image, true);
 
         return *this;
     }
@@ -214,11 +213,11 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     auto Image::loadFromImage(const image::Image &image, bool generate_mips) -> void {
-        auto staging_buffer = m_device->createStagingBuffer(image.size());
+        auto staging_buffer = device().createStagingBuffer(image.size());
 
-        auto fence = m_device->createFence();
+        auto fence = device().createFence();
         auto command_buffer =
-            m_device->graphicsQueue().createCommandBuffer(CommandBufferLevel::Primary);
+            device().graphicsQueue().createCommandBuffer(CommandBufferLevel::Primary);
 
         command_buffer.begin(true);
 
@@ -256,11 +255,11 @@ namespace stormkit::gpu {
                                core::UInt32 faces,
                                core::UInt32 mip_levels,
                                bool generate_mips) -> void {
-        auto staging_buffer = m_device->createStagingBuffer(std::size(data));
+        auto staging_buffer = device().createStagingBuffer(std::size(data));
 
-        auto fence = m_device->createFence();
+        auto fence = device().createFence();
         auto command_buffer =
-            m_device->graphicsQueue().createCommandBuffer(CommandBufferLevel::Primary);
+            device().graphicsQueue().createCommandBuffer(CommandBufferLevel::Primary);
 
         command_buffer.begin(true);
 
@@ -345,14 +344,14 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     auto Image::createView(ImageViewType type,
                            ImageSubresourceRange subresource_range) const noexcept -> ImageView {
-        return ImageView { *m_device, *this, type, subresource_range };
+        return ImageView { device(), *this, type, subresource_range };
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     auto Image::allocateView(ImageViewType type, ImageSubresourceRange subresource_range) const
         -> ImageViewOwnedPtr {
-        return std::make_unique<ImageView>(*m_device, *this, type, subresource_range);
+        return std::make_unique<ImageView>(device(), *this, type, subresource_range);
     }
 
     /////////////////////////////////////
@@ -360,7 +359,7 @@ namespace stormkit::gpu {
     auto Image::allocateRefCountedView(ImageViewType type,
                                        ImageSubresourceRange subresource_range) const
         -> ImageViewSharedPtr {
-        return std::make_shared<ImageView>(*m_device, *this, type, subresource_range);
+        return std::make_shared<ImageView>(device(), *this, type, subresource_range);
     }
 
     /////////////////////////////////////

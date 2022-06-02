@@ -15,9 +15,9 @@ namespace stormkit::gpu {
     Framebuffer::Framebuffer(const RenderPass &render_pass,
                              const core::ExtentU &extent,
                              std::vector<ImageViewConstRef> attachments)
-        : m_device { &render_pass.device() }, m_render_pass { &render_pass },
+        : DeviceObject { render_pass.device() }, m_render_pass { &render_pass },
           m_extent { std::move(extent) }, m_attachments { std::move(attachments) } {
-        const auto &vk = m_device->table();
+        const auto &vk = this->device().table();
 
         const auto _attachments = [&] {
             auto v = std::vector<VkImageView> {};
@@ -38,7 +38,8 @@ namespace stormkit::gpu {
                                       .height       = m_extent.height,
                                       .layers       = 1 };
 
-        CHECK_VK_ERROR(vk.vkCreateFramebuffer(device(), &create_info, nullptr, &m_framebuffer));
+        CHECK_VK_ERROR(
+            vk.vkCreateFramebuffer(this->device(), &create_info, nullptr, &m_framebuffer));
     }
 
     /////////////////////////////////////
@@ -54,8 +55,8 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     Framebuffer::Framebuffer(Framebuffer &&other) noexcept
-        : m_device { std::exchange(other.m_device, nullptr) },
-          m_render_pass { std::exchange(other.m_render_pass, nullptr) },
+        : DeviceObject { std::move(other) }, m_render_pass { std::exchange(other.m_render_pass,
+                                                                           nullptr) },
           m_extent { std::exchange(other.m_extent, { 0, 0 }) },
           m_attachments { std::exchange(other.m_attachments, {}) }, m_framebuffer {
               std::exchange(other.m_framebuffer, VK_NULL_HANDLE)
@@ -67,11 +68,11 @@ namespace stormkit::gpu {
         if (&other == this) [[unlikely]]
             return *this;
 
-        m_device      = std::exchange(other.m_device, nullptr);
-        m_render_pass = std::exchange(other.m_render_pass, nullptr);
-        m_extent      = std::exchange(other.m_extent, { 0, 0 });
-        m_attachments = std::exchange(other.m_attachments, {});
-        m_framebuffer = std::exchange(other.m_framebuffer, VK_NULL_HANDLE);
+        DeviceObject::operator=(std::move(other));
+        m_render_pass         = std::exchange(other.m_render_pass, nullptr);
+        m_extent              = std::exchange(other.m_extent, { 0, 0 });
+        m_attachments         = std::exchange(other.m_attachments, {});
+        m_framebuffer         = std::exchange(other.m_framebuffer, VK_NULL_HANDLE);
 
         return *this;
     }

@@ -15,6 +15,7 @@
 
 #include <stormkit/gpu/core/Enums.mpp>
 #include <stormkit/gpu/core/Fwd.hpp>
+#include <stormkit/gpu/core/InstanceObject.mpp>
 #include <stormkit/gpu/core/Queue.mpp>
 #include <stormkit/gpu/core/Vulkan.mpp>
 
@@ -38,7 +39,7 @@
 #include <stormkit/gpu/pipeline/RenderPass.mpp>
 
 namespace stormkit::gpu {
-    class STORMKIT_PUBLIC Device {
+    class STORMKIT_PUBLIC Device: public InstanceObject {
       public:
         static constexpr auto DEBUG_TYPE = DebugObjectType::Device;
 
@@ -308,10 +309,6 @@ namespace stormkit::gpu {
             -> void;
 
       private:
-        Device() = delete;
-
-        const Instance *m_instance = nullptr;
-
         const PhysicalDevice *m_physical_device = nullptr;
 
         VkDevice m_device              = VK_NULL_HANDLE;

@@ -11,7 +11,6 @@
 #include <stormkit/gpu/core/Queue.mpp>
 #include <stormkit/gpu/core/RenderCapabilities.mpp>
 
-
 #include <stormkit/log/LogMacro.hpp>
 
 #define VMA_STATIC_VULKAN_FUNCTIONS 0
@@ -50,7 +49,7 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     Device::Device(const PhysicalDevice &physical_device, const Instance &instance)
-        : m_instance { &instance }, m_physical_device { &physical_device } {
+        : InstanceObject { instance }, m_physical_device { &physical_device } {
         const auto &queue_families = m_physical_device->queueFamilies();
 
         struct Queue_ {
@@ -267,7 +266,7 @@ namespace stormkit::gpu {
             VmaAllocatorCreateInfo { .physicalDevice   = physical_device,
                                      .device           = *this,
                                      .pVulkanFunctions = &m_vma_device_table,
-                                     .instance         = *m_instance };
+                                     .instance         = this->instance() };
 
         CHECK_VK_ERROR(vmaCreateAllocator(&alloc_create_info, &m_vma_allocator));
 
@@ -294,7 +293,7 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     Device::Device(Device &&other) noexcept
-        : m_instance { std::exchange(other.m_instance, nullptr) },
+        : InstanceObject { std::move(other) },
           m_physical_device { std::exchange(other.m_physical_device, nullptr) },
           m_device { std::exchange(other.m_device, VK_NULL_HANDLE) },
           m_device_table { std::exchange(other.m_device_table, {}) },
@@ -310,7 +309,7 @@ namespace stormkit::gpu {
         if (&other == this) [[unlikely]]
             return *this;
 
-        m_instance              = std::exchange(other.m_instance, nullptr);
+        InstanceObject::operator=(std::move(other));
         m_physical_device       = std::exchange(other.m_physical_device, nullptr);
         m_device                = std::exchange(other.m_device, VK_NULL_HANDLE);
         m_device_table          = std::exchange(other.m_device_table, {});

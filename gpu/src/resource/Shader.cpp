@@ -2,7 +2,6 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-
 #include <fstream>
 #include <streambuf>
 
@@ -10,7 +9,6 @@
     /////////// - spirv-cross - ///////////
     #include <spirv_glsl.hpp>
 #endif
-
 
 #include <stormkit/gpu/core/Device.mpp>
 #include <stormkit/gpu/core/PhysicalDevice.mpp>
@@ -21,7 +19,7 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     Shader::Shader(std::filesystem::path filepath, ShaderStageFlag type, const Device &device)
-        : m_device { &device }, m_type { type } /* , m_descriptor_set_layout {
+        : DeviceObject { device }, m_type { type } /* , m_descriptor_set_layout {
                                             m_device->createDescriptorSetLayout()
                                             } */
     {
@@ -39,7 +37,7 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     Shader::Shader(core::ByteConstSpan data, ShaderStageFlag type, const Device &device)
-        : m_device { &device }, m_type {
+        : DeviceObject { device }, m_type {
               type
           } /*, m_descriptor_set_layout {
 m_device->createDescriptorSetLayout()
@@ -72,10 +70,11 @@ m_device->createDescriptorSetLayout()
     /////////////////////////////////////
     /////////////////////////////////////
     Shader::Shader(Shader &&other) noexcept
-        : m_device { std::exchange(other.m_device, nullptr) },
-          m_type { std::exchange(other.m_type, ShaderStageFlag::None) }, m_source { std::move(
-                                                                             other.m_source) },
-          m_shader_module { std::exchange(other.m_shader_module, VK_NULL_HANDLE) } {}
+        : DeviceObject { std::move(other) }, m_type { std::exchange(other.m_type,
+                                                                    ShaderStageFlag::None) },
+          m_source { std::move(other.m_source) }, m_shader_module {
+              std::exchange(other.m_shader_module, VK_NULL_HANDLE)
+          } {}
 
     /////////////////////////////////////
     /////////////////////////////////////
@@ -83,10 +82,10 @@ m_device->createDescriptorSetLayout()
         if (&other == this) [[unlikely]]
             return *this;
 
-        m_device        = std::exchange(other.m_device, nullptr);
-        m_type          = std::exchange(other.m_type, ShaderStageFlag::None);
-        m_source        = std::move(other.m_source);
-        m_shader_module = std::exchange(other.m_shader_module, VK_NULL_HANDLE);
+        DeviceObject::operator=(std::move(other));
+        m_type                = std::exchange(other.m_type, ShaderStageFlag::None);
+        m_source              = std::move(other.m_source);
+        m_shader_module       = std::exchange(other.m_shader_module, VK_NULL_HANDLE);
 
         return *this;
     }
@@ -94,9 +93,7 @@ m_device->createDescriptorSetLayout()
     /////////////////////////////////////
     /////////////////////////////////////
     auto Shader::compile() noexcept -> void {
-        STORMKIT_EXPECTS(m_device);
-
-        const auto &vk = m_device->table();
+        const auto &vk = device().table();
 
         const auto create_info =
             VkShaderModuleCreateInfo { .sType    = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,

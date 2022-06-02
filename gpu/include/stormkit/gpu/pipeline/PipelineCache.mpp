@@ -10,6 +10,7 @@
 
 #include <stormkit/core/HashMap.mpp>
 
+#include <stormkit/gpu/core/DeviceObject.mpp>
 #include <stormkit/gpu/core/Fwd.hpp>
 #include <stormkit/gpu/core/Types.mpp>
 #include <stormkit/gpu/core/Vulkan.mpp>
@@ -20,7 +21,7 @@
 #include <stormkit/gpu/pipeline/RenderPassDescription.mpp>
 
 namespace stormkit::gpu {
-    class STORMKIT_PUBLIC PipelineCache {
+    class STORMKIT_PUBLIC PipelineCache: public DeviceObject {
       public:
         static constexpr auto DEBUG_TYPE = DebugObjectType::Pipeline_Cache;
 
@@ -41,7 +42,6 @@ namespace stormkit::gpu {
         [[nodiscard]] operator VkPipelineCache() const noexcept;
         [[nodiscard]] auto vkHandle() const noexcept -> VkPipelineCache;
 
-        DEVICE_CONST_GETTER
       private:
         auto has(const GraphicsPipelineState &state,
                  const RenderPassDescription &description) const noexcept -> bool;
@@ -70,8 +70,6 @@ namespace stormkit::gpu {
                 std::array<core::UInt8, VK_UUID_SIZE> value;
             } uuid;
         } m_serialized;
-
-        const Device *m_device = nullptr;
 
         std::filesystem::path m_path = {};
 

@@ -11,6 +11,7 @@
 #include <stormkit/core/Memory.mpp>
 #include <stormkit/core/Types.mpp>
 
+#include <stormkit/gpu/core/DeviceObject.mpp>
 #include <stormkit/gpu/core/Enums.mpp>
 #include <stormkit/gpu/core/Fwd.hpp>
 #include <stormkit/gpu/core/Vulkan.mpp>
@@ -18,7 +19,7 @@
 #include <stormkit/gpu/resource/Fwd.hpp>
 
 namespace stormkit::gpu {
-    class STORMKIT_PUBLIC Buffer {
+    class STORMKIT_PUBLIC Buffer: public DeviceObject {
       public:
         struct CreateInfo {
             BufferUsageFlag usages;
@@ -71,14 +72,12 @@ namespace stormkit::gpu {
         [[nodiscard]] operator VkBuffer() const noexcept;
         [[nodiscard]] auto vkHandle() const noexcept -> VkBuffer;
 
-        DEVICE_CONST_GETTER
       private:
         static auto findMemoryType(core::UInt32 type_filter,
                                    VkMemoryPropertyFlags properties,
                                    const VkPhysicalDeviceMemoryProperties &mem_properties,
                                    const VkMemoryRequirements &mem_requirements) -> core::UInt32;
 
-        const Device *m_device   = nullptr;
         BufferUsageFlag m_usages = {};
         core::USize m_size       = 0;
 

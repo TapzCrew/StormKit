@@ -11,6 +11,7 @@
 #include <stormkit/core/Memory.mpp>
 #include <stormkit/core/Types.mpp>
 
+#include <stormkit/gpu/core/DeviceObject.mpp>
 #include <stormkit/gpu/core/Enums.mpp>
 #include <stormkit/gpu/core/Fwd.hpp>
 #include <stormkit/gpu/core/Vulkan.mpp>
@@ -19,7 +20,7 @@
 #include <stormkit/gpu/resource/ImageSubresourceRange.mpp>
 
 namespace stormkit::gpu {
-    class STORMKIT_PUBLIC ImageView {
+    class STORMKIT_PUBLIC ImageView: public DeviceObject {
       public:
         static constexpr auto DEBUG_TYPE = DebugObjectType::Image_View;
 
@@ -42,10 +43,8 @@ namespace stormkit::gpu {
         [[nodiscard]] operator VkImageView() const noexcept;
         [[nodiscard]] auto vkHandle() const noexcept -> VkImageView;
 
-        DEVICE_CONST_GETTER
       private:
-        const Device *m_device = nullptr;
-        const Image *m_image   = nullptr;
+        const Image *m_image = nullptr;
 
         ImageViewType m_type                      = {};
         ImageSubresourceRange m_subresource_range = {};

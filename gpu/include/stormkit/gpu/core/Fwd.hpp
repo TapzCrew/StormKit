@@ -4,13 +4,11 @@
 
 #pragma once
 
-
 #include <array>
 #include <memory>
 #include <optional>
 #include <span>
 #include <vector>
-
 
 #include <stormkit/core/MemoryMacro.hpp>
 
@@ -42,22 +40,3 @@ namespace stormkit::gpu {
     class CommandBuffer;
     DECLARE_PTR_AND_REF(CommandBuffer);
 } // namespace stormkit::gpu
-
-#define INSTANCE_GETTER                                                                  \
-    [[nodiscard]] stormkit::gpu::Instance &instance() noexcept { return *m_instance); \
-    }
-#define INSTANCE_CONST_GETTER                                                   \
-    [[nodiscard]] const stormkit::gpu::Instance &instance() const noexcept { \
-        return *m_instance;                                                     \
-    }
-#define INSTANCE_GETTERS \
-    INSTANCE_GETTER      \
-    INSTANCE_CONST_GETTER
-
-#define DEVICE_GETTER \
-    [[nodiscard]] stormkit::gpu::Device &device() noexcept { return *m_device; }
-#define DEVICE_CONST_GETTER \
-    [[nodiscard]] const stormkit::gpu::Device &device() const noexcept { return *m_device; }
-#define DEVICE_GETTERS \
-    DEVICE_GETTER      \
-    DEVICE_CONST_GETTER

@@ -8,7 +8,6 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     inline auto ImageView::image() const noexcept -> const Image & {
-        STORMKIT_EXPECTS(m_device);
         STORMKIT_EXPECTS(m_image);
 
         return *m_image;
@@ -17,7 +16,6 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     inline auto ImageView::type() const noexcept -> ImageViewType {
-        STORMKIT_EXPECTS(m_device);
         STORMKIT_EXPECTS(m_image);
         STORMKIT_EXPECTS(m_image_view);
 
@@ -27,7 +25,6 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     inline auto ImageView::subresourceRange() const noexcept -> const ImageSubresourceRange & {
-        STORMKIT_EXPECTS(m_device);
         STORMKIT_EXPECTS(m_image);
         STORMKIT_EXPECTS(m_image_view);
 
@@ -41,7 +38,6 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     inline auto ImageView::vkHandle() const noexcept -> VkImageView {
-        STORMKIT_EXPECTS(m_device);
         STORMKIT_EXPECTS(m_image);
         STORMKIT_EXPECTS(m_image_view);
 

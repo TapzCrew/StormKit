@@ -9,12 +9,13 @@
 #include <stormkit/core/Memory.mpp>
 #include <stormkit/core/Types.mpp>
 
+#include <stormkit/gpu/core/DeviceObject.mpp>
 #include <stormkit/gpu/core/Enums.mpp>
 #include <stormkit/gpu/core/Fwd.hpp>
 #include <stormkit/gpu/core/Vulkan.mpp>
 
 namespace stormkit::gpu {
-    class STORMKIT_PUBLIC Semaphore {
+    class STORMKIT_PUBLIC Semaphore: public DeviceObject {
       public:
         static constexpr auto DEBUG_TYPE = DebugObjectType::Semaphore;
 
@@ -30,10 +31,7 @@ namespace stormkit::gpu {
         [[nodiscard]] operator VkSemaphore() const noexcept;
         [[nodiscard]] auto vkHandle() const noexcept -> VkSemaphore;
 
-        DEVICE_CONST_GETTER
       private:
-        const Device *m_device = nullptr;
-
         VkSemaphore m_semaphore = VK_NULL_HANDLE;
     };
 } // namespace stormkit::gpu

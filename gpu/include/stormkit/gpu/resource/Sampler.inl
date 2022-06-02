@@ -8,7 +8,6 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     inline auto Sampler::settings() const noexcept -> const Settings & {
-        STORMKIT_EXPECTS(m_device);
         STORMKIT_EXPECTS(m_sampler);
 
         return m_settings;
@@ -21,7 +20,6 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     inline auto Sampler::vkHandle() const noexcept -> VkSampler {
-        STORMKIT_EXPECTS(m_device);
         STORMKIT_EXPECTS(m_sampler);
 
         return m_sampler;

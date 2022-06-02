@@ -7,6 +7,13 @@
 namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
+    inline auto Surface::device() const noexcept -> const Device & {
+        STORMKIT_EXPECTS(m_device);
+        return *m_device;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
     inline auto Surface::images() noexcept -> std::span<Image> { return m_images; }
 
     /////////////////////////////////////

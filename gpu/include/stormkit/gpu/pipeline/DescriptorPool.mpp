@@ -9,6 +9,7 @@
 #include <stormkit/core/Memory.mpp>
 #include <stormkit/core/Types.mpp>
 
+#include <stormkit/gpu/core/DeviceObject.mpp>
 #include <stormkit/gpu/core/Enums.mpp>
 #include <stormkit/gpu/core/Fwd.hpp>
 #include <stormkit/gpu/core/Vulkan.mpp>
@@ -17,7 +18,7 @@
 #include <stormkit/gpu/pipeline/Fwd.hpp>
 
 namespace stormkit::gpu {
-    class STORMKIT_PUBLIC DescriptorPool {
+    class STORMKIT_PUBLIC DescriptorPool: public DeviceObject {
       public:
         static constexpr auto DEBUG_TYPE = DebugObjectType::Descriptor_Pool;
 
@@ -55,13 +56,10 @@ namespace stormkit::gpu {
         [[nodiscard]] operator VkDescriptorPool() const noexcept;
         [[nodiscard]] auto vkHandle() const noexcept -> VkDescriptorPool;
 
-        DEVICE_CONST_GETTER
       private:
         auto createVkDescriptorSets(core::USize count, const DescriptorSetLayout &layout) const
             -> std::pair<std::vector<VkDescriptorSet>, std::vector<DescriptorType>>;
         auto deleteDescriptorSet(VkDescriptorSet set) const -> void;
-
-        const Device *m_device = nullptr;
 
         VkDescriptorPool m_descriptor_pool = VK_NULL_HANDLE;
     };

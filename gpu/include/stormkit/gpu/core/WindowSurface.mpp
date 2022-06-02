@@ -53,8 +53,6 @@ namespace stormkit::gpu {
         [[nodiscard]] auto vkHandle() const noexcept -> VkSurfaceKHR;
 
       private:
-        WindowSurface() = delete;
-
         auto createSwapchain() -> void;
         auto destroySwapchain() -> void;
 

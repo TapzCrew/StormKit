@@ -9,7 +9,6 @@
 #include <stormkit/core/Math.mpp>
 #include <stormkit/core/Types.mpp>
 
-
 #include <stormkit/gpu/core/Enums.mpp>
 #include <stormkit/gpu/core/Fwd.hpp>
 #include <stormkit/gpu/core/Surface.mpp>
@@ -34,9 +33,6 @@ namespace stormkit::gpu {
 
         auto acquireNextFrame() -> Expected<Frame> override;
         auto present(const Frame &frame) -> void override;
-
-      private:
-        OffscreenSurface() = delete;
     };
 } // namespace stormkit::gpu
 

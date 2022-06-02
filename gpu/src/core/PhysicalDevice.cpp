@@ -27,7 +27,7 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     PhysicalDevice::PhysicalDevice(VkPhysicalDevice vk_physical_device, const Instance &instance)
-        : m_instance { &instance }, m_physical_device { vk_physical_device } {
+        : InstanceObject { instance }, m_physical_device { vk_physical_device } {
         const auto properties = [this] {
             auto p = VkPhysicalDeviceProperties {};
             vkGetPhysicalDeviceProperties(m_physical_device, &p);
@@ -366,7 +366,7 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     PhysicalDevice::PhysicalDevice(PhysicalDevice &&other) noexcept
-        : m_instance { std::exchange(other.m_instance, nullptr) },
+        : InstanceObject { std::move(other) },
           m_physical_device { std::exchange(other.m_physical_device, VK_NULL_HANDLE) },
           m_device_info { std::exchange(other.m_device_info, {}) },
           m_capabilities { std::exchange(other.m_capabilities, {}) },
@@ -382,14 +382,14 @@ namespace stormkit::gpu {
         if (&other == this) [[unlikely]]
             return *this;
 
-        m_instance             = std::exchange(other.m_instance, nullptr);
-        m_physical_device      = std::exchange(other.m_physical_device, VK_NULL_HANDLE);
-        m_device_info          = std::exchange(other.m_device_info, {});
-        m_capabilities         = std::exchange(other.m_capabilities, {});
-        m_memory_properties    = std::move(other.m_memory_properties);
-        m_queue_families       = std::move(other.m_queue_families);
-        m_vk_memory_properties = std::exchange(other.m_vk_memory_properties, {});
-        m_extensions           = std::move(other.m_extensions);
+        InstanceObject::operator=(std::move(other));
+        m_physical_device       = std::exchange(other.m_physical_device, VK_NULL_HANDLE);
+        m_device_info           = std::exchange(other.m_device_info, {});
+        m_capabilities          = std::exchange(other.m_capabilities, {});
+        m_memory_properties     = std::move(other.m_memory_properties);
+        m_queue_families        = std::move(other.m_queue_families);
+        m_vk_memory_properties  = std::exchange(other.m_vk_memory_properties, {});
+        m_extensions            = std::move(other.m_extensions);
 
         return *this;
     }
@@ -456,7 +456,7 @@ namespace stormkit::gpu {
     auto PhysicalDevice::createLogicalDevice() const -> gpu::Device {
         STORMKIT_EXPECTS(m_physical_device != VK_NULL_HANDLE);
 
-        return Device { *this, *m_instance };
+        return Device { *this, instance() };
     }
 
     /////////////////////////////////////
@@ -464,7 +464,7 @@ namespace stormkit::gpu {
     auto PhysicalDevice::allocateLogicalDevice() const -> gpu::DeviceOwnedPtr {
         STORMKIT_EXPECTS(m_physical_device != VK_NULL_HANDLE);
 
-        return std::make_unique<Device>(*this, *m_instance);
+        return std::make_unique<Device>(*this, instance());
     }
 
     /////////////////////////////////////
@@ -472,6 +472,6 @@ namespace stormkit::gpu {
     auto PhysicalDevice::allocateRefCountedLogicalDevice() const -> gpu::DeviceSharedPtr {
         STORMKIT_EXPECTS(m_physical_device != VK_NULL_HANDLE);
 
-        return std::make_shared<Device>(*this, *m_instance);
+        return std::make_shared<Device>(*this, instance());
     }
 } // namespace stormkit::gpu

@@ -4,18 +4,15 @@
 
 #pragma once
 
-
 #include <stormkit/core/PlatformMacro.hpp>
 
-
 #include <span>
-
 
 #include <stormkit/core/Color.mpp>
 #include <stormkit/core/HashMap.mpp>
 #include <stormkit/core/Types.mpp>
 
-
+#include <stormkit/gpu/core/DeviceObject.mpp>
 #include <stormkit/gpu/core/Enums.mpp>
 #include <stormkit/gpu/core/Fwd.hpp>
 #include <stormkit/gpu/core/MemoryBarrier.mpp>
@@ -189,8 +186,6 @@ namespace stormkit::gpu {
         [[nodiscard]] auto vkHandle() const noexcept -> VkCommandBuffer;
 
       private:
-        CommandBuffer() = delete;
-
         State m_state              = State::Initial;
         const Queue *m_queue       = nullptr;
         CommandBufferLevel m_level = CommandBufferLevel::Primary;

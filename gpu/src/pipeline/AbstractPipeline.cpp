@@ -11,7 +11,7 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     AbstractPipeline::AbstractPipeline(const gpu::Device &device,
                                        const PipelineCache *cache) noexcept
-        : m_device { &device }, m_pipeline_cache { cache } {};
+        : DeviceObject { device }, m_pipeline_cache { cache } {};
 
     /////////////////////////////////////
     /////////////////////////////////////
@@ -28,7 +28,7 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     AbstractPipeline::AbstractPipeline(AbstractPipeline &&other) noexcept
-        : m_device { std::exchange(other.m_device, nullptr) },
+        : DeviceObject { std::move(other) },
           m_pipeline_cache { std::exchange(other.m_pipeline_cache, nullptr) },
           m_is_baked { std::exchange(other.m_is_baked, false) },
           m_pipeline { std::exchange(other.m_pipeline, VK_NULL_HANDLE) }, m_pipeline_layout {
@@ -41,11 +41,11 @@ namespace stormkit::gpu {
         if (&other == this) [[unlikely]]
             return *this;
 
-        m_device          = std::exchange(other.m_device, nullptr);
-        m_pipeline_cache  = std::exchange(other.m_pipeline_cache, nullptr);
-        m_is_baked        = std::exchange(other.m_is_baked, false);
-        m_pipeline        = std::exchange(other.m_pipeline, VK_NULL_HANDLE);
-        m_pipeline_layout = std::exchange(other.m_pipeline_layout, VK_NULL_HANDLE);
+        DeviceObject::operator=(std::move(other));
+        m_pipeline_cache      = std::exchange(other.m_pipeline_cache, nullptr);
+        m_is_baked            = std::exchange(other.m_is_baked, false);
+        m_pipeline            = std::exchange(other.m_pipeline, VK_NULL_HANDLE);
+        m_pipeline_layout     = std::exchange(other.m_pipeline_layout, VK_NULL_HANDLE);
 
         return *this;
     }

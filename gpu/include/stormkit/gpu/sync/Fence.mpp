@@ -12,12 +12,13 @@
 #include <stormkit/core/Memory.mpp>
 #include <stormkit/core/Types.mpp>
 
+#include <stormkit/gpu/core/DeviceObject.mpp>
 #include <stormkit/gpu/core/Enums.mpp>
 #include <stormkit/gpu/core/Fwd.hpp>
 #include <stormkit/gpu/core/Vulkan.mpp>
 
 namespace stormkit::gpu {
-    class STORMKIT_PUBLIC Fence {
+    class STORMKIT_PUBLIC Fence: public DeviceObject {
       public:
         static constexpr auto DEBUG_TYPE = DebugObjectType::Fence;
 
@@ -41,10 +42,7 @@ namespace stormkit::gpu {
         [[nodiscard]] operator VkFence() const noexcept;
         [[nodiscard]] auto vkHandle() const noexcept -> VkFence;
 
-        DEVICE_CONST_GETTER
       private:
-        const Device *m_device = nullptr;
-
         VkFence m_fence = VK_NULL_HANDLE;
     };
 } // namespace stormkit::gpu

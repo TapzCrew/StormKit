@@ -2,7 +2,6 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-
 #include <stormkit/gpu/core/Device.mpp>
 
 #include <stormkit/gpu/pipeline/Framebuffer.mpp>
@@ -12,7 +11,7 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     RenderPass::RenderPass(const Device &device, const RenderPassDescription &description)
-        : m_device { &device }, m_description { description } {
+        : DeviceObject { device }, m_description { description } {
         bake();
     }
 
@@ -29,10 +28,9 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     RenderPass::RenderPass(RenderPass &&other) noexcept
-        : m_device { std::exchange(other.m_device, nullptr) },
-          m_description { std::exchange(other.m_description, {}) }, m_render_pass {
-              std::exchange(other.m_render_pass, VK_NULL_HANDLE)
-          } {}
+        : DeviceObject { std::move(other) }, m_description { std::exchange(other.m_description,
+                                                                           {}) },
+          m_render_pass { std::exchange(other.m_render_pass, VK_NULL_HANDLE) } {}
 
     /////////////////////////////////////
     /////////////////////////////////////
@@ -40,9 +38,9 @@ namespace stormkit::gpu {
         if (&other != this) [[unlikely]]
             return *this;
 
-        m_device      = std::exchange(other.m_device, nullptr);
-        m_description = std::exchange(other.m_description, {});
-        m_render_pass = std::exchange(other.m_render_pass, VK_NULL_HANDLE);
+        DeviceObject::operator=(std::move(other));
+        m_description         = std::exchange(other.m_description, {});
+        m_render_pass         = std::exchange(other.m_render_pass, VK_NULL_HANDLE);
 
         return *this;
     }

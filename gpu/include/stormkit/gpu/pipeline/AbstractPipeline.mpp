@@ -9,6 +9,7 @@
 #include <stormkit/core/Memory.mpp>
 #include <stormkit/core/Types.mpp>
 
+#include <stormkit/gpu/core/DeviceObject.mpp>
 #include <stormkit/gpu/core/Enums.mpp>
 #include <stormkit/gpu/core/Fwd.hpp>
 #include <stormkit/gpu/core/Vulkan.mpp>
@@ -16,7 +17,7 @@
 #include <stormkit/gpu/pipeline/Fwd.hpp>
 
 namespace stormkit::gpu {
-    class STORMKIT_PUBLIC AbstractPipeline {
+    class STORMKIT_PUBLIC AbstractPipeline: public DeviceObject {
       public:
         static constexpr auto DEBUG_TYPE = DebugObjectType::Pipeline;
 
@@ -37,9 +38,7 @@ namespace stormkit::gpu {
         [[nodiscard]] VkPipeline vkHandle() const noexcept;
         [[nodiscard]] VkPipelineLayout vkLayout() const noexcept;
 
-        DEVICE_CONST_GETTER
       protected:
-        const Device *m_device                = nullptr;
         const PipelineCache *m_pipeline_cache = nullptr;
 
         bool m_is_baked = false;

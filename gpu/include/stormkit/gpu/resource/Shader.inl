@@ -8,7 +8,6 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     inline auto Shader::type() const noexcept -> ShaderStageFlag {
-        STORMKIT_EXPECTS(m_device);
         STORMKIT_EXPECTS(m_shader_module);
 
         return m_type;
@@ -17,7 +16,6 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     inline auto Shader::source() const noexcept -> core::ByteConstSpan {
-        STORMKIT_EXPECTS(m_device);
         STORMKIT_EXPECTS(m_shader_module);
 
         return m_source;
@@ -36,7 +34,6 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     inline auto Shader::vkHandle() const noexcept -> VkShaderModule {
-        STORMKIT_EXPECTS(m_device);
         STORMKIT_EXPECTS(m_shader_module);
 
         return m_shader_module;

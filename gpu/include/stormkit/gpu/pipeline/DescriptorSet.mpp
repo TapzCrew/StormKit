@@ -10,6 +10,7 @@
 #include <stormkit/core/Memory.mpp>
 #include <stormkit/core/Types.mpp>
 
+#include <stormkit/gpu/core/DeviceObject.mpp>
 #include <stormkit/gpu/core/Fwd.hpp>
 #include <stormkit/gpu/core/Types.mpp>
 #include <stormkit/gpu/core/Vulkan.mpp>
@@ -19,7 +20,7 @@
 #include <stormkit/gpu/pipeline/Fwd.hpp>
 
 namespace stormkit::gpu {
-    class STORMKIT_PUBLIC DescriptorSet {
+    class STORMKIT_PUBLIC DescriptorSet: public DeviceObject {
         struct Tag {};
 
       public:
@@ -47,9 +48,7 @@ namespace stormkit::gpu {
         [[nodiscard]] operator VkDescriptorSet() const noexcept;
         [[nodiscard]] auto vkHandle() const noexcept -> VkDescriptorSet;
 
-        DEVICE_CONST_GETTER
       private:
-        const Device *m_device       = nullptr;
         const DescriptorPool *m_pool = nullptr;
 
         std::vector<DescriptorType> m_types;

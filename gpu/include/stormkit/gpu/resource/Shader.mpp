@@ -11,6 +11,7 @@
 #include <stormkit/core/Memory.mpp>
 #include <stormkit/core/Types.mpp>
 
+#include <stormkit/gpu/core/DeviceObject.mpp>
 #include <stormkit/gpu/core/Enums.mpp>
 #include <stormkit/gpu/core/Fwd.hpp>
 #include <stormkit/gpu/core/Types.mpp>
@@ -19,7 +20,7 @@
 //#include <storm/render/pipeline/DescriptorSetLayout.mpp>
 
 namespace stormkit::gpu {
-    class STORMKIT_PUBLIC Shader {
+    class STORMKIT_PUBLIC Shader: public DeviceObject {
       public:
         static constexpr auto DEBUG_TYPE = DebugObjectType::Shader_Module;
 
@@ -41,14 +42,9 @@ namespace stormkit::gpu {
         [[nodiscard]] operator VkShaderModule() const noexcept;
         [[nodiscard]] auto vkHandle() const noexcept -> VkShaderModule;
 
-        DEVICE_CONST_GETTER
       private:
-        Shader() = delete;
-
         auto compile() noexcept -> void;
         auto reflect() noexcept -> void;
-
-        const Device *m_device = nullptr;
 
         ShaderStageFlag m_type   = ShaderStageFlag::None;
         core::ByteArray m_source = {};

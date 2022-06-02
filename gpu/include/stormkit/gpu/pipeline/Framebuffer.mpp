@@ -6,6 +6,7 @@
 
 #include <stormkit/core/PlatformMacro.hpp>
 
+#include <stormkit/gpu/core/DeviceObject.mpp>
 #include <stormkit/gpu/core/Fwd.hpp>
 #include <stormkit/gpu/core/Types.mpp>
 #include <stormkit/gpu/core/Vulkan.mpp>
@@ -13,7 +14,7 @@
 #include <stormkit/gpu/pipeline/Fwd.hpp>
 
 namespace stormkit::gpu {
-    class STORMKIT_PUBLIC Framebuffer {
+    class STORMKIT_PUBLIC Framebuffer: public DeviceObject {
       public:
         static constexpr auto DEBUG_TYPE = DebugObjectType::Framebuffer;
 
@@ -34,9 +35,7 @@ namespace stormkit::gpu {
         [[nodiscard]] operator VkFramebuffer() const noexcept;
         [[nodiscard]] auto vkHandle() const noexcept -> VkFramebuffer;
 
-        DEVICE_CONST_GETTER
       private:
-        const Device *m_device          = nullptr;
         const RenderPass *m_render_pass = nullptr;
 
         core::ExtentU m_extent = { 0, 0 };

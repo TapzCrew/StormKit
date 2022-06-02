@@ -9,11 +9,13 @@
 
 #include <stormkit/core/Types.mpp>
 
+#include <stormkit/gpu/core/DeviceObject.mpp>
 #include <stormkit/gpu/core/Fwd.hpp>
 #include <stormkit/gpu/core/Types.mpp>
 
 namespace stormkit::gpu {
-    class STORMKIT_PUBLIC AccelerationStructure {
+    struct AccelerationStructureDescription;
+    class STORMKIT_PUBLIC AccelerationStructure: public DeviceObject {
       public:
         static constexpr auto DEBUG_TYPE = DebugObjectType::Render_Pass;
 
@@ -30,10 +32,7 @@ namespace stormkit::gpu {
         [[nodiscard]] operator VkAccelerationStructureKHR() const noexcept;
         [[nodiscard]] auto vkHandle() const noexcept -> VkAccelerationStructure;
 
-        DEVICE_CONST_GETTER
       private:
-        const Device *m_device = nullptr;
-
         VkAccelerationStructureKHR m_render_pass = VK_NULL_HANDLE;
     };
 } // namespace stormkit::gpu

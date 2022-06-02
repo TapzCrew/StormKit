@@ -15,7 +15,7 @@ namespace stormkit::gpu {
                                  VkDescriptorSet set,
                                  Deleter deleter,
                                  Tag)
-        : m_device { &pool.device() }, m_pool { &pool }, m_types { std::move(types) },
+        : DeviceObject { pool.device() }, m_pool { &pool }, m_types { std::move(types) },
           m_descriptor_set { set }, m_deleter { std::move(deleter) } {}
 
     /////////////////////////////////////
@@ -28,8 +28,8 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     DescriptorSet::DescriptorSet(DescriptorSet &&other) noexcept
-        : m_device { std::exchange(other.m_device, nullptr) },
-          m_pool { std::exchange(other.m_pool, nullptr) }, m_types { std::move(other.m_types) },
+        : DeviceObject { std::move(other) }, m_pool { std::exchange(other.m_pool, nullptr) },
+          m_types { std::move(other.m_types) },
           m_descriptor_set { std::exchange(other.m_descriptor_set, VK_NULL_HANDLE) }, m_deleter {
               std::move(other.m_deleter)
           } {}
@@ -40,11 +40,11 @@ namespace stormkit::gpu {
         if (&other == this) [[unlikely]]
             return *this;
 
-        m_device         = std::exchange(other.m_device, nullptr);
-        m_pool           = std::exchange(other.m_pool, nullptr);
-        m_types          = std::move(other.m_types);
-        m_descriptor_set = std::exchange(other.m_descriptor_set, VK_NULL_HANDLE);
-        m_deleter        = std::move(other.m_deleter);
+        DeviceObject::operator=(std::move(other));
+        m_pool                = std::exchange(other.m_pool, nullptr);
+        m_types               = std::move(other.m_types);
+        m_descriptor_set      = std::exchange(other.m_descriptor_set, VK_NULL_HANDLE);
+        m_deleter             = std::move(other.m_deleter);
 
         return *this;
     }

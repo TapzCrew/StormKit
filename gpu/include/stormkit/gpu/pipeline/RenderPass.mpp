@@ -8,6 +8,7 @@
 
 #include <stormkit/core/Types.mpp>
 
+#include <stormkit/gpu/core/DeviceObject.mpp>
 #include <stormkit/gpu/core/Fwd.hpp>
 #include <stormkit/gpu/core/Types.mpp>
 
@@ -15,7 +16,7 @@
 #include <stormkit/gpu/pipeline/RenderPassDescription.mpp>
 
 namespace stormkit::gpu {
-    class STORMKIT_PUBLIC RenderPass {
+    class STORMKIT_PUBLIC RenderPass: public DeviceObject {
       public:
         static constexpr auto DEBUG_TYPE = DebugObjectType::Render_Pass;
 
@@ -47,11 +48,8 @@ namespace stormkit::gpu {
         [[nodiscard]] operator VkRenderPass() const noexcept;
         [[nodiscard]] auto vkHandle() const noexcept -> VkRenderPass;
 
-        DEVICE_CONST_GETTER
       private:
         auto bake() noexcept -> void;
-
-        const Device *m_device = nullptr;
 
         RenderPassDescription m_description = {};
 

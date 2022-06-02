@@ -12,6 +12,7 @@
 #include <stormkit/core/Memory.mpp>
 #include <stormkit/core/Types.mpp>
 
+#include <stormkit/gpu/core/DeviceObject.mpp>
 #include <stormkit/gpu/core/Enums.mpp>
 #include <stormkit/gpu/core/Fwd.hpp>
 #include <stormkit/gpu/core/Vulkan.mpp>
@@ -22,7 +23,7 @@
 #include <stormkit/image/Fwd.hpp>
 
 namespace stormkit::gpu {
-    class STORMKIT_PUBLIC Image {
+    class STORMKIT_PUBLIC Image: public DeviceObject {
       public:
         struct CreateInfo {
             core::ExtentU extent;
@@ -99,14 +100,10 @@ namespace stormkit::gpu {
         [[nodiscard]] operator VkImage() const noexcept;
         [[nodiscard]] auto vkHandle() const noexcept -> VkImage;
 
-        DEVICE_CONST_GETTER
       private:
         struct Tag {};
 
         Image(const Device &device, const CreateInfo &create_info, Tag);
-        Image() = delete;
-
-        const Device *m_device = nullptr;
 
         core::ExtentU m_extent    = { 0, 0, 0 };
         PixelFormat m_format      = {};

@@ -13,6 +13,7 @@
 
 #include <stormkit/gpu/core/Enums.mpp>
 #include <stormkit/gpu/core/Fwd.hpp>
+#include <stormkit/gpu/core/InstanceObject.mpp>
 #include <stormkit/gpu/core/Types.mpp>
 #include <stormkit/gpu/core/Vulkan.mpp>
 
@@ -24,7 +25,7 @@
 #include <stormkit/gpu/resource/Image.mpp>
 
 namespace stormkit::gpu {
-    class STORMKIT_PUBLIC Surface {
+    class STORMKIT_PUBLIC Surface: public InstanceObject {
       public:
         static constexpr auto DEBUG_TYPE = DebugObjectType::Surface;
 
@@ -68,12 +69,9 @@ namespace stormkit::gpu {
 
         std::function<void(const Fence &fence)> onSwapchainFenceSignaled;
 
-        INSTANCE_CONST_GETTER
-        DEVICE_CONST_GETTER
-      protected:
-        Surface() = delete;
+        [[nodiscard]] auto device() const noexcept -> const Device &;
 
-        const Instance *m_instance    = nullptr;
+      protected:
         const Device *m_device        = nullptr;
         const Queue *m_graphics_queue = nullptr;
 

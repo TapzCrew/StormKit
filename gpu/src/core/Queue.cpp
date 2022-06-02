@@ -18,17 +18,17 @@ namespace stormkit::gpu {
                  gpu::QueueFlag flags,
                  core::UInt32 family_index,
                  VkQueue queue)
-        : m_device { &device }, m_queue_flag { flags }, m_family_index { family_index }, m_queue {
-              queue
-          } {
+        : DeviceObject { device }, m_queue_flag { flags },
+          m_family_index { family_index }, m_queue { queue } {
         const auto create_info =
             VkCommandPoolCreateInfo { .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
                                       .flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT |
                                                VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT };
 
-        const auto &vk = m_device->table();
+        const auto &vk = this->device().table();
 
-        CHECK_VK_ERROR(vk.vkCreateCommandPool(*m_device, &create_info, nullptr, &m_command_pool));
+        CHECK_VK_ERROR(
+            vk.vkCreateCommandPool(this->device(), &create_info, nullptr, &m_command_pool));
     }
 
     /////////////////////////////////////
@@ -44,8 +44,8 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     Queue::Queue(Queue &&other) noexcept
-        : m_device { std::exchange(other.m_device, nullptr) },
-          m_queue_flag { std::exchange(other.m_queue_flag, QueueFlag::None) },
+        : DeviceObject { std::move(other) }, m_queue_flag { std::exchange(other.m_queue_flag,
+                                                                          QueueFlag::None) },
           m_family_index { std::exchange(other.m_family_index, 0) },
           m_queue { std::exchange(other.m_queue, VK_NULL_HANDLE) }, m_command_pool {
               std::exchange(other.m_command_pool, VK_NULL_HANDLE)
@@ -57,11 +57,11 @@ namespace stormkit::gpu {
         if (&other == this) [[unlikely]]
             return *this;
 
-        m_device       = std::exchange(other.m_device, nullptr);
-        m_queue_flag   = std::exchange(other.m_queue_flag, QueueFlag::None);
-        m_family_index = std::exchange(other.m_family_index, 0);
-        m_queue        = std::exchange(other.m_queue, VK_NULL_HANDLE);
-        m_command_pool = std::exchange(other.m_command_pool, VK_NULL_HANDLE);
+        DeviceObject::operator=(std::move(other));
+        m_queue_flag          = std::exchange(other.m_queue_flag, QueueFlag::None);
+        m_family_index        = std::exchange(other.m_family_index, 0);
+        m_queue               = std::exchange(other.m_queue, VK_NULL_HANDLE);
+        m_command_pool        = std::exchange(other.m_command_pool, VK_NULL_HANDLE);
 
         return *this;
     }

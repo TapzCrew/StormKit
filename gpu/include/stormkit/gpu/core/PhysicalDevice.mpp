@@ -8,19 +8,18 @@
 #include <string>
 #include <vector>
 
-
 #include <stormkit/core/Types.mpp>
-
 
 #include <stormkit/gpu/core/Enums.mpp>
 #include <stormkit/gpu/core/Fwd.hpp>
+#include <stormkit/gpu/core/InstanceObject.mpp>
 #include <stormkit/gpu/core/PhysicalDeviceInfo.mpp>
 #include <stormkit/gpu/core/QueueFamily.mpp>
 #include <stormkit/gpu/core/RenderCapabilities.mpp>
 #include <stormkit/gpu/core/Vulkan.mpp>
 
 namespace stormkit::gpu {
-    class STORMKIT_PUBLIC PhysicalDevice {
+    class STORMKIT_PUBLIC PhysicalDevice: public InstanceObject {
       public:
         static constexpr auto DEBUG_TYPE = DebugObjectType::Physical_Device;
 
@@ -57,8 +56,6 @@ namespace stormkit::gpu {
 
       private:
         PhysicalDevice(VkPhysicalDevice physical_device, const Instance &instance);
-
-        const Instance *m_instance = nullptr;
 
         VkPhysicalDevice m_physical_device = VK_NULL_HANDLE;
 

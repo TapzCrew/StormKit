@@ -9,12 +9,13 @@
 #include <stormkit/core/Memory.mpp>
 #include <stormkit/core/Types.mpp>
 
+#include <stormkit/gpu/core/DeviceObject.mpp>
 #include <stormkit/gpu/core/Enums.mpp>
 #include <stormkit/gpu/core/Fwd.hpp>
 #include <stormkit/gpu/core/Vulkan.mpp>
 
 namespace stormkit::gpu {
-    class STORMKIT_PUBLIC Sampler {
+    class STORMKIT_PUBLIC Sampler: public DeviceObject {
       public:
         struct Settings {
             Filter mag_filter = Filter::Linear;
@@ -57,12 +58,7 @@ namespace stormkit::gpu {
         [[nodiscard]] operator VkSampler() const noexcept;
         [[nodiscard]] auto vkHandle() const noexcept -> VkSampler;
 
-        DEVICE_CONST_GETTER
       private:
-        Sampler() = delete;
-
-        const Device *m_device = nullptr;
-
         Settings m_settings = {};
 
         VkSampler m_sampler = VK_NULL_HANDLE;

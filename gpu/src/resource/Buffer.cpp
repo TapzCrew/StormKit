@@ -2,7 +2,6 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-
 #include <stormkit/gpu/core/Device.mpp>
 #include <stormkit/gpu/core/Enums.mpp>
 
@@ -12,9 +11,9 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     Buffer::Buffer(const Device &device, const CreateInfo &info, bool persistently_mapped)
-        : m_device { &device }, m_usages { info.usages }, m_size { info.size },
+        : DeviceObject { device }, m_usages { info.usages }, m_size { info.size },
           m_is_persistently_mapped { persistently_mapped } {
-        const auto &vk = m_device->table();
+        const auto &vk = this->device().table();
 
         const auto create_info =
             VkBufferCreateInfo { .sType       = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
@@ -22,12 +21,12 @@ namespace stormkit::gpu {
                                  .usage       = core::as<VkBufferUsageFlags>(m_usages),
                                  .sharingMode = VK_SHARING_MODE_EXCLUSIVE };
 
-        CHECK_VK_ERROR(vk.vkCreateBuffer(*m_device, &create_info, nullptr, &m_buffer));
+        CHECK_VK_ERROR(vk.vkCreateBuffer(this->device(), &create_info, nullptr, &m_buffer));
 
         const auto requirements = [&] {
             auto r = VkMemoryRequirements {};
 
-            vk.vkGetBufferMemoryRequirements(*m_device, m_buffer, &r);
+            vk.vkGetBufferMemoryRequirements(this->device(), m_buffer, &r);
 
             return r;
         }();
@@ -35,13 +34,14 @@ namespace stormkit::gpu {
         const auto allocate_info =
             VmaAllocationCreateInfo { .requiredFlags = core::as<core::UInt32>(info.property) };
 
-        CHECK_VK_ERROR(vmaAllocateMemory(m_device->vmaAllocator(),
+        CHECK_VK_ERROR(vmaAllocateMemory(this->device().vmaAllocator(),
                                          &requirements,
                                          &allocate_info,
                                          &m_buffer_memory,
                                          nullptr));
 
-        CHECK_VK_ERROR(vmaBindBufferMemory(m_device->vmaAllocator(), m_buffer_memory, m_buffer));
+        CHECK_VK_ERROR(
+            vmaBindBufferMemory(this->device().vmaAllocator(), m_buffer_memory, m_buffer));
 
         if (m_is_persistently_mapped) STORMKIT_UNUSED(map(0u));
     }
@@ -62,8 +62,8 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     Buffer::Buffer(Buffer &&other) noexcept
-        : m_device { std::exchange(other.m_device, nullptr) },
-          m_usages { std::exchange(other.m_usages, {}) }, m_size { std::exchange(other.m_size, 0) },
+        : DeviceObject { std::move(other) }, m_usages { std::exchange(other.m_usages, {}) },
+          m_size { std::exchange(other.m_size, 0) },
           m_is_persistently_mapped { std::exchange(other.m_is_persistently_mapped, false) },
           m_mapped_pointer { std::exchange(other.m_mapped_pointer, nullptr) },
           m_buffer { std::exchange(other.m_buffer, VK_NULL_HANDLE) }, m_buffer_memory {
@@ -76,7 +76,7 @@ namespace stormkit::gpu {
         if (&other == this) [[unlikely]]
             return *this;
 
-        m_device                 = std::exchange(other.m_device, nullptr);
+        DeviceObject::operator   =(std::move(other));
         m_usages                 = std::exchange(other.m_usages, {});
         m_size                   = std::exchange(other.m_size, 0);
         m_is_persistently_mapped = std::exchange(other.m_is_persistently_mapped, false);

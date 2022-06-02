@@ -9,7 +9,7 @@
 namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
-    DescriptorSetLayout::DescriptorSetLayout(const Device &device) : m_device { &device } {}
+    DescriptorSetLayout::DescriptorSetLayout(const Device &device) : DeviceObject { device } {}
 
     /////////////////////////////////////
     /////////////////////////////////////
@@ -24,7 +24,7 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     DescriptorSetLayout::DescriptorSetLayout(DescriptorSetLayout &&other) noexcept
-        : m_device { std::exchange(other.m_device, nullptr) },
+        : DeviceObject { std::move(other) },
           m_bindings { std::move(other.m_bindings) }, m_hash { std::exchange(other.m_hash, 0) },
           m_descriptor_set_layout { std::exchange(other.m_descriptor_set_layout, VK_NULL_HANDLE) } {
     }
@@ -36,7 +36,7 @@ namespace stormkit::gpu {
         if (&other == this) [[unlikely]]
             return *this;
 
-        m_device                = std::exchange(other.m_device, nullptr);
+        DeviceObject::operator  =(std::move(other));
         m_bindings              = std::move(other.m_bindings);
         m_hash                  = std::exchange(other.m_hash, 0);
         m_descriptor_set_layout = std::exchange(other.m_descriptor_set_layout, VK_NULL_HANDLE);

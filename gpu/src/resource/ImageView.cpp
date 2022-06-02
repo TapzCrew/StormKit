@@ -2,7 +2,6 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-
 #include <stormkit/gpu/core/Device.mpp>
 
 #include <stormkit/gpu/resource/Image.mpp>
@@ -15,10 +14,10 @@ namespace stormkit::gpu {
                          const Image &image,
                          ImageViewType type,
                          ImageSubresourceRange subresource_range)
-        : m_device { &device }, m_image { &image }, m_type { type }, m_subresource_range {
+        : DeviceObject { device }, m_image { &image }, m_type { type }, m_subresource_range {
               subresource_range
           } {
-        const auto &vk = m_device->table();
+        const auto &vk = this->device().table();
 
         const auto vk_subresource_range = VkImageSubresourceRange {
             .aspectMask     = core::as<VkImageAspectFlags>(m_subresource_range.aspect_mask),
@@ -44,7 +43,7 @@ namespace stormkit::gpu {
             .subresourceRange = vk_subresource_range,
         };
 
-        CHECK_VK_ERROR(vk.vkCreateImageView(*m_device, &create_info, nullptr, &m_image_view));
+        CHECK_VK_ERROR(vk.vkCreateImageView(this->device(), &create_info, nullptr, &m_image_view));
     }
 
     /////////////////////////////////////
@@ -60,9 +59,8 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     ImageView::ImageView(ImageView &&other) noexcept
-        : m_device { std::exchange(other.m_device, nullptr) },
-          m_image { std::exchange(other.m_image, nullptr) }, m_type { std::exchange(other.m_type,
-                                                                                    {}) },
+        : DeviceObject { std::move(other) }, m_image { std::exchange(other.m_image, nullptr) },
+          m_type { std::exchange(other.m_type, {}) },
           m_subresource_range { std::exchange(other.m_subresource_range, {}) }, m_image_view {
               std::exchange(other.m_image_view, VK_NULL_HANDLE)
           } {}
@@ -73,11 +71,11 @@ namespace stormkit::gpu {
         if (&other == this) [[unlikely]]
             return *this;
 
-        m_device            = std::exchange(other.m_device, nullptr);
-        m_image             = std::exchange(other.m_image, nullptr);
-        m_type              = std::exchange(other.m_type, {});
-        m_subresource_range = std::exchange(other.m_subresource_range, {});
-        m_image_view        = std::exchange(other.m_image_view, VK_NULL_HANDLE);
+        DeviceObject::operator=(std::move(other));
+        m_image               = std::exchange(other.m_image, nullptr);
+        m_type                = std::exchange(other.m_type, {});
+        m_subresource_range   = std::exchange(other.m_subresource_range, {});
+        m_image_view          = std::exchange(other.m_image_view, VK_NULL_HANDLE);
 
         return *this;
     }

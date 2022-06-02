@@ -14,8 +14,8 @@ namespace stormkit::gpu {
     DescriptorPool::DescriptorPool(const Device &device,
                                    std::span<const Size> sizes,
                                    core::UInt32 max_sets)
-        : m_device { &device } {
-        const auto &vk = m_device->table();
+        : DeviceObject { device } {
+        const auto &vk = this->device().table();
 
         const auto _sizes = core::transform(sizes, [&](const auto &s) {
             return VkDescriptorPoolSize { .type            = core::as<VkDescriptorType>(s.type),
@@ -31,7 +31,7 @@ namespace stormkit::gpu {
         };
 
         CHECK_VK_ERROR(
-            vk.vkCreateDescriptorPool(*m_device, &create_info, nullptr, &m_descriptor_pool));
+            vk.vkCreateDescriptorPool(this->device(), &create_info, nullptr, &m_descriptor_pool));
     }
 
     /////////////////////////////////////
@@ -47,7 +47,7 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     DescriptorPool::DescriptorPool(DescriptorPool &&other) noexcept
-        : m_device { std::exchange(other.m_device, nullptr) }, m_descriptor_pool {
+        : DeviceObject { std::move(other) }, m_descriptor_pool {
               std::exchange(other.m_descriptor_pool, VK_NULL_HANDLE)
           } {}
 
@@ -57,8 +57,8 @@ namespace stormkit::gpu {
         if (&other == this) [[unlikely]]
             return *this;
 
-        m_device          = std::exchange(other.m_device, nullptr);
-        m_descriptor_pool = std::exchange(other.m_descriptor_pool, VK_NULL_HANDLE);
+        DeviceObject::operator=(std::move(other));
+        m_descriptor_pool     = std::exchange(other.m_descriptor_pool, VK_NULL_HANDLE);
 
         return *this;
     }

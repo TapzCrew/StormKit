@@ -2,7 +2,6 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-
 #include <stormkit/gpu/core/Device.mpp>
 #include <stormkit/gpu/resource/Sampler.mpp>
 
@@ -10,8 +9,8 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     Sampler::Sampler(Settings settings, const Device &device)
-        : m_device { &device }, m_settings { std::move(settings) } {
-        const auto &vk = m_device->table();
+        : DeviceObject { device }, m_settings { std::move(settings) } {
+        const auto &vk = this->device().table();
 
         const auto create_info = VkSamplerCreateInfo {
             .sType                   = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
@@ -32,26 +31,24 @@ namespace stormkit::gpu {
             .unnormalizedCoordinates = m_settings.unnormalized_coordinates,
         };
 
-        CHECK_VK_ERROR(vk.vkCreateSampler(*m_device, &create_info, nullptr, &m_sampler));
+        CHECK_VK_ERROR(vk.vkCreateSampler(this->device(), &create_info, nullptr, &m_sampler));
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     Sampler::~Sampler() {
         if (m_sampler != VK_NULL_HANDLE) [[likely]] {
-            const auto &vk = m_device->table();
+            const auto &vk = device().table();
 
-            vk.vkDestroySampler(*m_device, m_sampler, nullptr);
+            vk.vkDestroySampler(device(), m_sampler, nullptr);
         }
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     Sampler::Sampler(Sampler &&other) noexcept
-        : m_device { std::exchange(other.m_device, nullptr) },
-          m_settings { std::exchange(other.m_settings, {}) }, m_sampler {
-              std::exchange(other.m_sampler, VK_NULL_HANDLE)
-          } {}
+        : DeviceObject { std::move(other) }, m_settings { std::exchange(other.m_settings, {}) },
+          m_sampler { std::exchange(other.m_sampler, VK_NULL_HANDLE) } {}
 
     /////////////////////////////////////
     /////////////////////////////////////
@@ -59,9 +56,9 @@ namespace stormkit::gpu {
         if (&other == this) [[unlikely]]
             return *this;
 
-        m_device   = std::exchange(other.m_device, nullptr);
-        m_settings = std::exchange(other.m_settings, {});
-        m_sampler  = std::exchange(other.m_sampler, VK_NULL_HANDLE);
+        DeviceObject::operator=(std::move(other));
+        m_settings            = std::exchange(other.m_settings, {});
+        m_sampler             = std::exchange(other.m_sampler, VK_NULL_HANDLE);
 
         return *this;
     }

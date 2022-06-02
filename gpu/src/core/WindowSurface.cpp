@@ -8,7 +8,6 @@
     #include <stormkit/wsi/Window.mpp>
 #endif
 
-
 #include <stormkit/core/Format.mpp>
 
 #include <stormkit/gpu/core/CommandBuffer.mpp>
@@ -38,16 +37,18 @@ namespace stormkit::gpu {
                                           .hwnd =
                                               reinterpret_cast<HWND>(m_window->nativeHandle()) };
 
-        CHECK_VK_ERROR(vkCreateWin32SurfaceKHR(*m_instance, &create_info, nullptr, &m_surface));
+        CHECK_VK_ERROR(
+            vkCreateWin32SurfaceKHR(this->instance(), &create_info, nullptr, &m_surface));
     #elif defined(STORMKIT_OS_MACOS)
         const auto create_info = VkMacOSSurfaceCreateInfoMVK {
             .sType = VK_STRUCTURE_TYPE_MACOS_SURFACE_CREATE_INFO_MVK, .pView =
                                                                           m_window->nativeHandle();
         };
-        CHECK_VK_ERROR(vkCreateMacOSSurfaceMVK(instance(), &create_info, nullptr, &m_surface));
+        CHECK_VK_ERROR(
+            vkCreateMacOSSurfaceMVK(this->instance(), &create_info, nullptr, &m_surface));
     #elif defined(STORMKIT_OS_LINUX)
         #if STORMKIT_WSI_BUILD_WAYLAND
-        const auto make_wayland_surface = [&instance = *m_instance,
+        const auto make_wayland_surface = [&instance = this->instance(),
                                            &surface  = m_surface,
                                            &window   = *m_window]() {
             struct Handles {
@@ -67,7 +68,7 @@ namespace stormkit::gpu {
         };
         #endif
         #if STORMKIT_WSI_BUILD_X11
-        const auto make_xcb_surface = [&instance = *m_instance,
+        const auto make_xcb_surface = [&instance = this->instance(),
                                        &surface  = m_surface,
                                        &window   = *m_window]() {
             struct Handles {
@@ -103,7 +104,7 @@ namespace stormkit::gpu {
         const auto create_info =
             VkIOSSurfaceCreateInfoMVK { .sType = VK_STRUCTURE_TYPE_IOS_SURFACE_CREATE_INFO_MVK,
                                         .pView = m_window->nativeHandle() };
-        CHECK_VK_ERROR(vkCreateIOSSurfaceMVK(instance(), &create_info, &m_surface));
+        CHECK_VK_ERROR(vkCreateIOSSurfaceMVK(this->instance(), &create_info, &m_surface));
     #endif
 #else
         elog("WSI disabled in this build");
