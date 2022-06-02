@@ -39,7 +39,7 @@ namespace stormkit::engine {
         auto operator=(GraphResourceBase &&) noexcept -> GraphResourceBase &;
 
         auto id() const noexcept -> GraphID;
-        auto name() const noexcept -> std::string_view;
+        auto name() const noexcept -> const std::string &;
         auto transient() const noexcept -> bool;
         auto creator() const noexcept -> GraphID;
         auto writers() const noexcept -> std::span<const GraphID>;

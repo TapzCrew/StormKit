@@ -61,7 +61,7 @@ namespace stormkit::wsi {
         auto hideMouse() noexcept -> void;
 
         [[nodiscard]] auto size() const noexcept -> const core::ExtentU &;
-        [[nodiscard]] auto title() const noexcept -> std::string_view;
+        [[nodiscard]] auto title() const noexcept -> const std::string &;
         [[nodiscard]] auto videoSettings() const noexcept -> const Monitor &;
 
         [[nodiscard]] auto isOpen() const noexcept -> bool;

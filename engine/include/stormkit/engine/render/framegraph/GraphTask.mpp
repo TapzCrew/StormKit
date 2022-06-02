@@ -27,7 +27,7 @@ namespace stormkit::engine {
         auto operator=(GraphTaskBase &&) noexcept -> GraphTaskBase &;
 
         auto id() const noexcept -> GraphID;
-        auto name() const noexcept -> std::string_view;
+        auto name() const noexcept -> const std::string &;
         auto type() const noexcept -> Type;
         auto cullImune() const noexcept -> bool;
         auto refCount() const noexcept -> core::USize;

@@ -11,7 +11,7 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto GraphResourceBase::name() const noexcept -> std::string_view { return m_name; }
+    inline auto GraphResourceBase::name() const noexcept -> const std::string & { return m_name; }
 
     /////////////////////////////////////
     /////////////////////////////////////

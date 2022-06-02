@@ -10,7 +10,7 @@ namespace stormkit::wsi::details::win32 {
         m_is_visible = false;
     }
 
-    inline auto WindowImpl::title() const noexcept -> std::string_view { return m_title; }
+    inline auto WindowImpl::title() const noexcept -> const std::string & { return m_title; }
     inline auto WindowImpl::videoSettings() const noexcept -> const Monitor & {
         return m_video_settings;
     }

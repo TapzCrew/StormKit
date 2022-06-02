@@ -7,7 +7,7 @@
 namespace stormkit::core {
     ////////////////////////////////////////
     ////////////////////////////////////////
-    inline auto TreeNode::name() const noexcept -> std::string_view { return m_name; }
+    inline auto TreeNode::name() const noexcept -> const std::string & { return m_name; }
 
     ////////////////////////////////////////
     ////////////////////////////////////////

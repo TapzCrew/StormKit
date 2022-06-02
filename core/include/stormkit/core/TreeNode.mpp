@@ -20,7 +20,7 @@ namespace stormkit::core {
 
         static constexpr auto INVALID_INDEX = std::numeric_limits<IndexType>::max();
 
-        [[nodiscard]] auto name() const noexcept -> std::string_view;
+        [[nodiscard]] auto name() const noexcept -> const std::string &;
         auto setName(std::string name) noexcept -> void;
 
         [[nodiscard]] auto parent() const noexcept -> IndexType;

@@ -132,7 +132,7 @@ namespace stormkit::wsi {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto Window::title() const noexcept -> std::string_view { return m_impl->title(); }
+    auto Window::title() const noexcept -> const std::string & { return m_impl->title(); }
 
     /////////////////////////////////////
     /////////////////////////////////////
