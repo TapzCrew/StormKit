@@ -10,7 +10,6 @@
 
 #include <future>
 
-
 #include <stormkit/core/Format.mpp>
 #include <stormkit/core/Memory.mpp>
 #include <stormkit/core/Types.mpp>
@@ -22,12 +21,13 @@
 
 #include <stormkit/gpu/pipeline/RenderPassDescription.mpp>
 
+#include <stormkit/engine/EngineObject.mpp>
 #include <stormkit/engine/Fwd.hpp>
 #include <stormkit/engine/render/framegraph/BakedFrameGraph.mpp>
 #include <stormkit/engine/render/framegraph/GraphTask.mpp>
 
 namespace stormkit::engine {
-    class STORMKIT_PUBLIC FrameGraphBuilder {
+    class STORMKIT_PUBLIC FrameGraphBuilder: public EngineObject {
       public:
         explicit FrameGraphBuilder(Engine &engine);
         ~FrameGraphBuilder();
@@ -128,8 +128,6 @@ namespace stormkit::engine {
             core::HashMap<GraphID, gpu::ImageLayout> &layouts) noexcept
             -> gpu::RenderPassDescription;
         auto allocatePhysicalResources() -> BakedFrameGraph::Data;
-
-        Engine *m_engine;
 
         std::future<void> m_bake_future;
         std::vector<std::unique_ptr<GraphTaskBase>> m_tasks;

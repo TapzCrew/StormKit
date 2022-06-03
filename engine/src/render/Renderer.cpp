@@ -49,7 +49,7 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    Renderer::Renderer(Engine &engine) : m_engine { &engine } {
+    Renderer::Renderer(Engine &engine) : EngineObject { engine } {
         m_instance = std::make_unique<gpu::Instance>();
         renderer_logger.ilog("Render backend successfully initialized");
         renderer_logger.ilog("Using StormKit {}.{}.{} (branch: {}, commit_hash: {}), built with {}",
@@ -64,7 +64,7 @@ namespace stormkit::engine {
         for (const auto &device : m_instance->physicalDevices())
             renderer_logger.ilog("{}", device.info());
 
-        auto &window = m_engine->window();
+        auto &window = this->engine().window();
 
         auto surface = m_instance->allocateWindowSurface(window);
 
@@ -86,9 +86,9 @@ namespace stormkit::engine {
 
         m_render_queue = std::make_unique<RenderQueue>();
 
-        m_builder = std::make_unique<FrameGraphBuilder>(*m_engine);
+        m_builder = std::make_unique<FrameGraphBuilder>(this->engine());
 
-        auto &world = m_engine->world();
+        auto &world = this->engine().world();
 
         world.addSystem<RendererSyncSystem>(*m_render_queue);
 
@@ -108,11 +108,10 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    Renderer::Renderer(Renderer &&other) noexcept {
+    Renderer::Renderer(Renderer &&other) noexcept : EngineObject { std::move(other) } {
         other.m_stop_thread = true;
         if (other.m_render_thread.joinable()) other.m_render_thread.join();
 
-        m_engine           = std::exchange(other.m_engine, nullptr);
         m_build_framegraph = std::exchange(other.m_build_framegraph, {});
 
         m_instance      = std::move(other.m_instance);
@@ -137,8 +136,8 @@ namespace stormkit::engine {
         other.m_stop_thread = true;
         if (other.m_render_thread.joinable()) other.m_render_thread.join();
 
-        m_engine           = std::exchange(other.m_engine, nullptr);
-        m_build_framegraph = std::exchange(other.m_build_framegraph, {});
+        EngineObject::operator=(std::move(other));
+        m_build_framegraph    = std::exchange(other.m_build_framegraph, {});
 
         m_instance      = std::move(other.m_instance);
         m_device        = std::move(other.m_device);

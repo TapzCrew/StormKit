@@ -12,7 +12,7 @@
 namespace stormkit::gpu {
     class STORMKIT_PUBLIC DeviceObject {
       public:
-        explicit DeviceObject(const Device &instance) noexcept;
+        explicit DeviceObject(const Device &device) noexcept;
         ~DeviceObject() noexcept;
 
         DeviceObject(const DeviceObject &) noexcept;

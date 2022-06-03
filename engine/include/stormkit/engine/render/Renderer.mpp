@@ -15,11 +15,12 @@
 
 #include <stormkit/gpu/resource/ImageView.mpp>
 
+#include <stormkit/engine/EngineObject.mpp>
 #include <stormkit/engine/Fwd.hpp>
 #include <stormkit/engine/render/framegraph/GraphResource.mpp>
 
 namespace stormkit::engine {
-    class STORMKIT_PUBLIC Renderer {
+    class STORMKIT_PUBLIC Renderer: public EngineObject {
       public:
         explicit Renderer(Engine &engine);
         ~Renderer();
@@ -48,7 +49,6 @@ namespace stormkit::engine {
         auto threadLoop() -> void;
         auto rebuildFrameGraph() -> void;
 
-        Engine *m_engine = nullptr;
         BuildFrameGraphCallback m_build_framegraph;
 
         gpu::InstanceOwnedPtr m_instance;

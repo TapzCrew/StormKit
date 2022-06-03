@@ -23,8 +23,8 @@ namespace stormkit::engine {
                                      const FrameGraphBuilder &builder,
                                      Data &&data,
                                      BakedFrameGraph *old)
-        : m_engine { &engine }, m_builder { &builder }, m_data { std::move(data) } {
-        const auto &device = m_engine->renderer().device();
+        : EngineObject { engine }, m_builder { &builder }, m_data { std::move(data) } {
+        const auto &device = this->engine().renderer().device();
 
         m_semaphore = device.allocateSemaphore();
 

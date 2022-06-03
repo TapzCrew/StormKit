@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include "DeviceObject.mpp"
-
 namespace stormkit::gpu {
     inline DeviceObject::DeviceObject(const Device &device) noexcept : m_device { &device } {}
     inline DeviceObject::~DeviceObject() noexcept = default;

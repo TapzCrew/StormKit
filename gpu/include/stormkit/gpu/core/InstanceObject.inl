@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include "InstanceObject.mpp"
-
 namespace stormkit::gpu {
     inline InstanceObject::InstanceObject(const Instance &instance) noexcept
         : m_instance { &instance } {}

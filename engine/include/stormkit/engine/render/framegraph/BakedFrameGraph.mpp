@@ -4,16 +4,16 @@
 
 #pragma once
 
-
 #include <stormkit/core/Types.mpp>
 
 #include <stormkit/gpu/Fwd.hpp>
 #include <stormkit/gpu/core/Surface.mpp>
 
+#include <stormkit/engine/EngineObject.mpp>
 #include <stormkit/engine/Fwd.hpp>
 
 namespace stormkit::engine {
-    class STORMKIT_PUBLIC BakedFrameGraph {
+    class STORMKIT_PUBLIC BakedFrameGraph: public EngineObject {
         struct Data {
             struct Task {
                 GraphID id;
@@ -49,7 +49,6 @@ namespace stormkit::engine {
         auto setBackbuffer(gpu::Image &backbuffer) -> void;
 
       private:
-        Engine *m_engine                   = nullptr;
         const FrameGraphBuilder *m_builder = nullptr;
 
         gpu::CommandBufferOwnedPtr m_main_cmb;

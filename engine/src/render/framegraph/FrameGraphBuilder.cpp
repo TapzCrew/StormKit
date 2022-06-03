@@ -28,7 +28,7 @@
 namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
-    FrameGraphBuilder::FrameGraphBuilder(Engine &engine) : m_engine { &engine } {}
+    FrameGraphBuilder::FrameGraphBuilder(Engine &engine) : EngineObject { engine } {}
 
     /////////////////////////////////////
     /////////////////////////////////////
@@ -53,7 +53,7 @@ namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     auto FrameGraphBuilder::bake() -> void {
-        auto &thread_pool = m_engine->threadPool();
+        auto &thread_pool = engine().threadPool();
 
 #ifdef STORMKIT_RENDERER_MULTITHREADED
         m_bake_future = thread_pool.postTask<void>([this]() {
@@ -80,7 +80,7 @@ namespace stormkit::engine {
 #endif
         auto data = allocatePhysicalResources();
 
-        return BakedFrameGraph { *m_engine, *this, std::move(data), old };
+        return BakedFrameGraph { engine(), *this, std::move(data), old };
     }
 
     /////////////////////////////////////
@@ -92,7 +92,7 @@ namespace stormkit::engine {
 #endif
         auto data = allocatePhysicalResources();
 
-        return std::make_unique<BakedFrameGraph>(*m_engine, *this, std::move(data), old);
+        return std::make_unique<BakedFrameGraph>(engine(), *this, std::move(data), old);
     }
 
     /////////////////////////////////////
@@ -150,7 +150,7 @@ namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     auto FrameGraphBuilder::buildPhysicalDescriptions() noexcept -> void {
-        auto &thread_pool = m_engine->threadPool();
+        auto &thread_pool = engine().threadPool();
 
         auto layouts              = core::HashMap<GraphID, gpu::ImageLayout> {};
         m_preprocessed_framegraph = core::transformIf(
@@ -383,11 +383,13 @@ namespace stormkit::engine {
 
         auto output = Data {};
 
-        const auto &device   = m_engine->renderer().device();
+        const auto &device   = engine().renderer().device();
         auto &graphics_queue = device.graphicsQueue();
         auto &compute_queue  = graphics_queue;
 
 #ifdef STORMKIT_RENDERER_MULTITHREADED
+        auto &thread_pool = engine().threadPool();
+
         auto buffer_mutex         = std::mutex {};
         auto image_mutex          = std::mutex {};
         auto graphics_queue_mutex = std::mutex {};
@@ -399,8 +401,7 @@ namespace stormkit::engine {
     #define LOCK_COMPUTE_QUEUE LOCK(compute_queue_mutex)
 
         auto future = core::parallelTransform(
-            m_preprocessed_framegraph,
-            [&](const auto &pass)
+            thread_pool,
 #else
 
     #define LOCK_BUFFER
@@ -409,10 +410,9 @@ namespace stormkit::engine {
     #define LOCK_COMPUTE_QUEUE
 
         output.tasks = core::transform(
-            m_preprocessed_framegraph,
-            [&](const auto &pass)
 #endif
-            {
+            m_preprocessed_framegraph,
+            [&](const auto &pass) {
                 auto task = Data::Task {};
                 task.id   = pass.id;
 
