@@ -4,23 +4,27 @@
 
 #pragma once
 
-#include <stormkit/core/Types.mpp>
+#include <stormkit/core/PlatformMacro.hpp>
 
-#include <stormkit/wsi/Fwd.hpp>
+#include <stormkit/core/Types.mpp>
 
 #include <stormkit/gpu/Fwd.hpp>
 
+#include <stormkit/gpu/resource/Buffer.mpp>
 #include <stormkit/gpu/resource/ImageView.mpp>
 
+#include <stormkit/engine/EngineObject.mpp>
 #include <stormkit/engine/Fwd.hpp>
+#include <stormkit/engine/render/core/ShaderInputBuffer.mpp>
 
 namespace stormkit::engine {
-    class STORMKIT_PUBLIC RenderQueue {
+    class STORMKIT_PUBLIC RenderQueue: public EngineObject {
       public:
+        using StaticMeshInputBuffer      = ShaderInputBuffer<5>;
         using ID                         = core::UInt64;
         static constexpr auto INVALID_ID = std::numeric_limits<ID>::max();
 
-        RenderQueue();
+        explicit RenderQueue(Engine &engine);
         ~RenderQueue();
 
         RenderQueue(const RenderQueue &) = delete;
@@ -33,28 +37,44 @@ namespace stormkit::engine {
         auto removeMesh(ID id) -> void;
 
         auto update() -> void;
+        auto draw(gpu::CommandBuffer &cmb) -> void;
 
       private:
+        RenderQueue(RenderQueue &&other, std::lock_guard<std::mutex> lock) noexcept;
+
         struct RenderEntry {
             RenderEntry(ID _id, const MeshComponent &_mesh) noexcept
-                : id { _id }, mesh { &_mesh } {};
+                : id { _id }, mesh { &_mesh } {}
 
             ID id;
 
-            core::USize vertex_buffer_id;
-            core::USize vertex_buffer_offset;
-
             const MeshComponent *mesh;
+
+            struct SubMesh {
+                StaticMeshInputBuffer::Allocation positions;
+                StaticMeshInputBuffer::Allocation normals;
+                StaticMeshInputBuffer::Allocation colors;
+                StaticMeshInputBuffer::Allocation uvs;
+
+                StaticMeshInputBuffer::Allocation indices;
+            };
+
+            std::vector<SubMesh> submeshes;
         };
+        using RenderEntries = std::vector<RenderEntry>;
 
         std::mutex m_mutex;
 
         ID m_next_id = 0;
-        std::vector<RenderEntry> m_entries;
+        RenderEntries m_entries;
 
-        std::vector<RenderEntry> m_to_be_added;
+        RenderEntries m_to_be_added;
         std::vector<ID> m_to_be_removed;
 
-        std::vector<gpu::Buffer> m_vertex_buffers;
+        StaticMeshInputBuffer m_shader_input;
+
+        std::vector<gpu::CommandBuffer> m_command_buffers;
+        std::vector<gpu::Fence> m_vertex_buffer_fences;
+        std::vector<gpu::Buffer> m_vertex_staging_buffers;
     };
 } // namespace stormkit::engine

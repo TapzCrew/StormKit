@@ -84,14 +84,6 @@ namespace stormkit::engine {
         m_pipeline_cache = m_device->allocatePipelineCache();
         m_shader_cache   = std::make_unique<ShaderCache>(*m_device);
 
-        m_render_queue = std::make_unique<RenderQueue>();
-
-        m_builder = std::make_unique<FrameGraphBuilder>(this->engine());
-
-        auto &world = this->engine().world();
-
-        world.addSystem<RendererSyncSystem>(*m_render_queue);
-
         m_framegraphs.resize(m_surface->bufferingCount());
         m_framegraph_states.resize(m_surface->bufferingCount());
 
@@ -157,6 +149,14 @@ namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     auto Renderer::threadLoop() -> void {
+        m_render_queue = std::make_unique<RenderQueue>(this->engine());
+
+        m_builder = std::make_unique<FrameGraphBuilder>(this->engine());
+
+        auto &world = this->engine().world();
+
+        world.addSystem<RendererSyncSystem>(*m_render_queue);
+
         while (!m_stop_thread) {
             if (m_surface->needRecreate()) [[unlikely]] {
                 m_surface->recreate();
