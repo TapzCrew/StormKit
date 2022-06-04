@@ -49,6 +49,20 @@ namespace stormkit::core {
 
     /////////////////////////////////////
     /////////////////////////////////////
+    template<typename T, std::integral _ID>
+    constexpr Handle<T, _ID>::operator ID() const noexcept {
+        return id;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<typename T, std::integral _ID>
+    constexpr auto Handle<T, _ID>::invalidHandle() noexcept -> Handle {
+        return Handle {};
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
     template<ByteType... T>
     constexpr auto makeStaticByteArray(T... bytes) noexcept {
         return std::array { bytes... };

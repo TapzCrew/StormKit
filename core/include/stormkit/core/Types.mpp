@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "stormkit/core/PlatformMacro.hpp"
 #include <cstddef>
 #include <cstdint>
 
@@ -22,6 +23,11 @@
 #include <stormkit/core/AsCast.mpp>
 #include <stormkit/core/Concepts.mpp>
 #include <stormkit/core/Format.mpp>
+
+#undef INVALID_HANDLE_VALUE
+#undef INVALID_HANDLE
+#undef Handle
+#undef handle
 
 namespace stormkit::core {
     /// \group uint-types Unsigned types
@@ -93,10 +99,10 @@ namespace stormkit::core {
     /// This type is meant to be specialized for a type of object `T` and the type ID `_ID`
     /// \unique_name Handle
     template<typename T, std::integral _ID>
-    struct Handle {
+    struct STORMKIT_PUBLIC Handle {
         using ID = _ID;
 
-        static constexpr auto INVALID_HANDLE = std::numeric_limits<ID>::max();
+        static constexpr auto INVALID_HANDLE_VALUE = std::numeric_limits<ID>::max();
 
         [[nodiscard]] constexpr auto operator<=>(const Handle<T, ID> &) const noexcept
             -> std::strong_ordering = default;
@@ -112,7 +118,11 @@ namespace stormkit::core {
 
         constexpr auto operator--(int) noexcept;
 
-        ID id = INVALID_HANDLE;
+        constexpr operator ID() const noexcept;
+
+        [[nodiscard]] static constexpr auto invalidHandle() noexcept -> Handle;
+
+        ID id = INVALID_HANDLE_VALUE;
     };
 
     template<typename T>
