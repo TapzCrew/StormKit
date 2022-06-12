@@ -49,14 +49,44 @@ package("StormKit")
     option("unity_build")
         set_default(false)
         set_showmenu(true)
+        set_category("root menu/misc")
     option_end()
 
     option("stl_cache_directory", { showmenu = true })
+
+    option("enable_log")
+        set_showmenu(true)
+        set_default(true)
+        set_category("root menu/modules")
+    option_end()
+
+    option("enable_image")
+        set_showmenu(true)
+        set_default(true)
+        set_category("root menu/modules")
+    option_end()
+
+    option("enable_gpu")
+        set_showmenu(true)
+        set_default(true)
+        set_category("root menu/modules")
+    option_end()
+
+    option("enable_entities")
+        set_showmenu(true)
+        set_default(true)
+        add_deps("enable_log")
+        add_deps("enable_image")
+        set_category("root menu/modules")
+    option_end()
+
 
     option("enable_wsi")
         set_showmenu(true)
         add_defines("STORMKIT_WSI_ENABLED")
         set_default(true)
+        add_deps("enable_log")
+        set_category("root menu/modules")
     option_end()
 
     option("enable_wsi_x11")
@@ -80,6 +110,8 @@ package("StormKit")
                 option:enable(false)
             end
         end)
+
+        set_category("root menu/modules_options")
     option_end()
 
     option("enable_wsi_wayland")
@@ -103,10 +135,24 @@ package("StormKit")
                 option:enable(false)
             end
         end)
+
+        set_category("root menu/modules_options")
+    option_end()
+
+    option("enable_engine")
+        set_showmenu(true)
+        set_default(true)
+        set_category("root menu/modules")
+        add_deps("enable_log")
+        add_deps("enable_image")
+        add_deps("enable_gpu")
+        add_deps("enable_entities")
+        add_deps("enable_wsi")
     option_end()
 
     if is_plat("windows") then
         set_runtimes(is_mode("debug") and "MDd" or "MD")
+        add_defines("NOMINMAX", "WIN32_LEAN_AND_MEAN", { public = true })
 
         add_defines("_CRT_SECURE_NO_WARNINGS")
         add_cxxflags("/bigobj", "/permissive-", "/Zc:__cplusplus", "/Zc:externConstexpr", "/Zc:inline", "/Zc:lambda", "/Zc:preprocessor", "/Zc:referenceBinding", "/Zc:strictStrings", "/Zc:throwingNew")
@@ -139,21 +185,30 @@ package("StormKit")
 
     add_vectorexts("mms", "neon", "avx", "avx2", "sse", "sse2", "sse3", "sse4")
 
+    -- core deps
     add_requires("robin-hood-hashing",
                  "frozen",
                  "glm",
-                 "libjpeg",
-                 "libpng",
-                 "gli",
-                 "vulkan-headers",
-                 "vulkan-memory-allocator",
-                 "backward-cpp",
-                 "nzsl")
-    add_requires("volk", { configs = { header_only = true }})
+                 "backward-cpp")
+
+    -- images deps
+    if has_config("enable_image") then
+        add_requires("libjpeg",
+                     "libpng",
+                     "gli")
+    end
+
+    -- render deps
+    if has_config("enable_render") then
+        add_requires("vulkan-headers",
+                     "vulkan-memory-allocator",
+                     "nzsl")
+        add_requires("volk", { configs = { header_only = true }})
+    end
     if not is_plat("windows") then
         add_requires("fmt")
 
-        if is_plat("linux") then
+        if is_plat("linux") and has_config("enable_wsi") then
             add_requires("libxkbcommon", { configs = { x11 = has_config("enable_wsi_x11"),
                                                        wayland = has_config("enable_wsi_wayland") } })
 
@@ -175,14 +230,28 @@ package("StormKit")
     includes("xmake/**.lua")
 
     includes("core/xmake.lua")
-    includes("log/xmake.lua")
     includes("main/xmake.lua")
-    includes("entities/xmake.lua")
-    includes("image/xmake.lua")
+
+    if has_config("enable_log") then
+        includes("log/xmake.lua")
+    end
+
+    if has_config("enable_entities") then
+        includes("entities/xmake.lua")
+    end
+
+    if has_config("enable_image") then
+        includes("image/xmake.lua")
+    end
 
     if has_config("enable_wsi") then
         includes("wsi/xmake.lua")
     end
 
-    includes("gpu/xmake.lua")
+    if has_config("enable_gpu") then
+        includes("gpu/xmake.lua")
+    end
+
+    if has_config("enable_engine") then
     includes("engine/xmake.lua")
+    end
