@@ -4,7 +4,7 @@ module Shader;
 
 struct VertIn
 {
-   [builtin(vertexindex)] vertex_id: i32
+   [builtin(vertex_index)] vertex_id: i32
 }
 
 struct VertOut
