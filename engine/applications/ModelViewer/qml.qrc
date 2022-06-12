@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/">
+        <file alias="MainLinux.qml">qml/MainLinux.qml</file>
+        <file alias="MainMacOS.qml">qml/MainMacOS.qml</file>
+        <file alias="MainWindows.qml">qml/MainWindows.qml</file>
+        <file alias="WindowContent.qml">qml/WindowContent.qml</file>
+    </qresource>
+</RCC>
