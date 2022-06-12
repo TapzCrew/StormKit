@@ -4,9 +4,9 @@
 
 #pragma once
 
-#include "stormkit/core/PlatformMacro.hpp"
 #include <cstddef>
 #include <cstdint>
+#include <stormkit/core/PlatformMacro.hpp>
 
 #include <stormkit/core/FormatMacro.hpp>
 #include <stormkit/core/MemoryMacro.hpp>
