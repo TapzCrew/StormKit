@@ -57,9 +57,6 @@
     #define STORMKIT_BITS_64
     #define STORMKIT_OS STORMKIT_OS_WIN64
 #elif defined(_WIN32)
-extern "C" {
-    #include <windows.h>
-}
     #define STORMKIT_OS_WIN32 "Windows 32 bits"
     #define STORMKIT_OS_WINDOWS STORMKIT_OS_WIN32
     #define STORMKIT_BITS_32
