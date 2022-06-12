@@ -34,4 +34,6 @@ target("stormkit-log")
         os.cp(path.join(target:scriptdir(), "include/*"), path.join(target:installdir(), "include"))
     end)
 
-includes("examples/**/xmake.lua")
+if has_config("enable_examples") then
+    includes("examples/**/xmake.lua")
+end

@@ -45,14 +45,22 @@ set_allowedmodes(allowedmodes)
 set_allowedplats("windows", "mingw", "linux", "macosx")
 set_allowedarchs("windows|x64", "mingw|x86_64", "linux|x86_64", "macosx|x86_64")
 
+
 package("StormKit")
     option("unity_build")
         set_default(false)
         set_showmenu(true)
-        set_category("root menu/misc")
     option_end()
 
-    option("stl_cache_directory", { showmenu = true })
+    option("enable_examples")
+        set_showmenu(true)
+        set_default(true)
+    option_end()
+
+    option("enable_applications")
+        set_showmenu(true)
+        set_default(true)
+    option_end()
 
     option("enable_log")
         set_showmenu(true)
@@ -199,7 +207,7 @@ package("StormKit")
     end
 
     -- render deps
-    if has_config("enable_render") then
+    if has_config("enable_gpu") then
         add_requires("vulkan-headers",
                      "vulkan-memory-allocator",
                      "nzsl")
@@ -253,5 +261,5 @@ package("StormKit")
     end
 
     if has_config("enable_engine") then
-    includes("engine/xmake.lua")
+        includes("engine/xmake.lua")
     end
