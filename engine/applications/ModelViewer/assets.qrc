@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/assets">
+        <file alias="glTF.png">assets/glTF.png</file>
+        <file>assets/glTF.ico</file>
+    </qresource>
+</RCC>

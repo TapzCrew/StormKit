@@ -36,12 +36,15 @@ MicaApplicationWindow {
                 ToolTip {
                     text: qsTr("Open")
                 }
+
+                Layout.rightMargin: 6
             }
 
             Label {
                 text: window.title
                 font.pixelSize: 12
                 font.weight: 400
+                font.family: "Segoe UI Semibold"
 
                 Layout.alignment: Qt.AlignVCenter
             }

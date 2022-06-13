@@ -14,6 +14,8 @@ auto main(int argc, char *argv[]) -> int {
     engine.addImportPath("qrc:/");
 
 #ifdef Q_OS_WINDOWS
+    app.setWindowIcon(QIcon { QStringLiteral("qrc:/assets/glTF.ico") });
+
     QQuickWindow::setDefaultAlphaBuffer(true);
     QQuickStyle::setStyle("WinUI3Style");
     const auto url = QUrl { QStringLiteral("qrc:///MainWindows.qml") };
