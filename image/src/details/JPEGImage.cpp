@@ -172,11 +172,13 @@ namespace stormkit::image::details {
             std::fclose(file);
         }
 
-        if (setjmp(error_data.setjmp_buffer)) {
+        if (std::setjmp(error_data.setjmp_buffer)) {
             jpeg_destroy_compress(&info);
             return core::Unexpected { Error { .reason    = Reason::Failed_To_Save,
                                               .str_error = error_data.msg } };
         }
+
+        return {};
     }
 
     /////////////////////////////////////

@@ -164,9 +164,9 @@ package("StormKit")
 
         add_defines("_CRT_SECURE_NO_WARNINGS")
         add_cxxflags("/bigobj", "/permissive-", "/Zc:__cplusplus", "/Zc:externConstexpr", "/Zc:inline", "/Zc:lambda", "/Zc:preprocessor", "/Zc:referenceBinding", "/Zc:strictStrings", "/Zc:throwingNew")
-        add_cxflags("/w44062") -- Enable warning: switch case not handled
         add_cxflags("/wd4251") -- Disable warning: class needs to have dll-interface to be used by clients of class blah blah blah
         add_cxflags("/wd4297")
+        add_cxflags("/wd4611") -- Disable setjmp warning
 
         if not has_config("enable_cxx20_modules") then
             add_cxxflags("/experimental:module-")
@@ -185,6 +185,7 @@ package("StormKit")
     end
 
     set_fpmodels("fast")
+    set_warnings("allextra", "error")
 
     add_defines("STORMKIT_BUILD")
     if is_mode("debug") then

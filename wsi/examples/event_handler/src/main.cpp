@@ -35,6 +35,8 @@ import stormkit.wsi.key;
 
 NAMED_LOGGER(event_handler_logger, "StormKit.Examples.Log.EventHandler");
 
+////////////////////////////////////////
+////////////////////////////////////////
 auto main([[maybe_unused]] const int argc, [[maybe_unused]] const char **argv) -> int {
     using namespace stormkit;
 
@@ -52,7 +54,7 @@ auto main([[maybe_unused]] const int argc, [[maybe_unused]] const char **argv) -
 
     auto event_handler = wsi::EventHandler { window };
     event_handler.addCallback(wsi::EventType::Closed,
-                              [&](const wsi::Event &event) { window.close(); });
+                              [&]([[maybe_unused]] const wsi::Event &event) { window.close(); });
     event_handler.addCallback(wsi::EventType::Resized, [](const wsi::Event &event) {
         const auto &event_data = core::as<wsi::ResizedEventData>(event.data);
         event_handler_logger.ilog("Resize event: {}", event_data.extent);
@@ -73,18 +75,22 @@ auto main([[maybe_unused]] const int argc, [[maybe_unused]] const char **argv) -
                                   event_data.button,
                                   event_data.position);
     });
-    event_handler.addCallback(wsi::EventType::MouseEntered, [](const wsi::Event &event) {
-        event_handler_logger.ilog("Mouse Entered event");
-    });
-    event_handler.addCallback(wsi::EventType::MouseExited, [](const wsi::Event &event) {
-        event_handler_logger.ilog("Mouse Exited event");
-    });
-    event_handler.addCallback(wsi::EventType::LostFocus, [](const wsi::Event &event) {
-        event_handler_logger.ilog("Lost focus event");
-    });
-    event_handler.addCallback(wsi::EventType::GainedFocus, [](const wsi::Event &event) {
-        event_handler_logger.ilog("Gained focus event");
-    });
+    event_handler.addCallback(wsi::EventType::MouseEntered,
+                              []([[maybe_unused]] const wsi::Event &event) {
+                                  event_handler_logger.ilog("Mouse Entered event");
+                              });
+    event_handler.addCallback(wsi::EventType::MouseExited,
+                              []([[maybe_unused]] const wsi::Event &event) {
+                                  event_handler_logger.ilog("Mouse Exited event");
+                              });
+    event_handler.addCallback(wsi::EventType::LostFocus,
+                              []([[maybe_unused]] const wsi::Event &event) {
+                                  event_handler_logger.ilog("Lost focus event");
+                              });
+    event_handler.addCallback(wsi::EventType::GainedFocus,
+                              []([[maybe_unused]] const wsi::Event &event) {
+                                  event_handler_logger.ilog("Gained focus event");
+                              });
     event_handler.addCallback(wsi::EventType::KeyPressed, [&](const wsi::Event &event) {
         const auto &event_data = core::as<wsi::KeyPressedEventData>(event.data);
 

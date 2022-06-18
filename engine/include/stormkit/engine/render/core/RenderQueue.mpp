@@ -57,6 +57,8 @@ namespace stormkit::engine {
                 StaticMeshInputBuffer::Allocation uvs;
 
                 StaticMeshInputBuffer::Allocation indices;
+
+                core::USize submesh_index;
             };
 
             std::vector<SubMesh> submeshes;

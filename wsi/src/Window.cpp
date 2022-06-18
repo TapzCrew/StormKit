@@ -88,7 +88,7 @@ namespace stormkit::wsi {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto Window::size() const noexcept -> const core::ExtentU & { return m_impl->size(); }
+    auto Window::size() const noexcept -> const core::ExtentU16 & { return m_impl->size(); }
 
     /////////////////////////////////////
     /////////////////////////////////////

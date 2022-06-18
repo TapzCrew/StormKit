@@ -197,12 +197,12 @@ namespace stormkit::engine {
 
             cmb.begin(true);
             cmb.beginDebugRegion("Copy vertex data");
-            const auto count = std::size(entry.mesh->submeshes);
 
             entry.submeshes = core::transform(
                 entry.mesh->submeshes,
                 [&](const auto &submesh) -> RenderEntry::SubMesh {
-                    auto output = RenderEntry::SubMesh {};
+                    auto output          = RenderEntry::SubMesh {};
+                    output.submesh_index = i++;
 
                     const auto positions = core::toConstByteSpan(submesh.vertices.positions());
                     const auto normals   = core::toConstByteSpan(submesh.vertices.normals());
@@ -332,21 +332,34 @@ namespace stormkit::engine {
         }
 
         for (const auto &entry : m_entries) {
-            /*const auto buffers = core::makeStaticArray(m_shader_input.getBuffer(entry.positions),
-                                                       m_shader_input.getBuffer(entry.normals),
-                                                       m_shader_input.getBuffer(entry.colors),
-                                                       m_shader_input.getBuffer(entry.uvs));
+            for (const auto &submesh : entry.submeshes) {
+                const auto &_submesh = entry.mesh->submeshes[submesh.submesh_index];
 
-            const auto &position_block = m_shader_input.getBlock(entry.positions);
-            const auto &normal_block   = m_shader_input.getBlock(entry.normals);
-            const auto &color_block    = m_shader_input.getBlock(entry.colors);
-            const auto &uv_block       = m_shader_input.getBlock(entry.uvs);
+                const auto &position_block = m_shader_input.getBlock(submesh.positions);
+                const auto &normal_block   = m_shader_input.getBlock(submesh.normals);
+                const auto &color_block    = m_shader_input.getBlock(submesh.colors);
+                const auto &uv_block       = m_shader_input.getBlock(submesh.uvs);
 
-            cmb.bindVertexBuffers(buffers,
-                                  { position_block.offset,
-                                    normal_block.offset,
-                                    color_block.offset,
-                                    uv_block.offset });*/
+                auto buffers = core::makeStaticArray(&m_shader_input.getBuffer(submesh.positions),
+                                                     &m_shader_input.getBuffer(submesh.normals),
+                                                     &m_shader_input.getBuffer(submesh.colors),
+                                                     &m_shader_input.getBuffer(submesh.uvs));
+                auto offsets = core::makeStaticArray(position_block.offset,
+                                                     normal_block.offset,
+                                                     color_block.offset,
+                                                     uv_block.offset);
+
+                cmb.bindVertexBuffers(buffers, offsets);
+
+                if (submesh.indices.block == BlockBuffer::Block::Handle::invalidHandle()) {
+                    const auto &buffer = m_shader_input.getBuffer(submesh.indices);
+                    const auto &block  = m_shader_input.getBlock(submesh.indices);
+
+                    cmb.bindIndexBuffer(buffer, block.offset, true);
+                    cmb.drawIndexed(core::as<core::UInt32>(std::size(_submesh.indices)));
+                } else
+                    cmb.draw(core::as<core::UInt32>(std::size(_submesh.vertices.positions())));
+            }
         }
     }
 } // namespace stormkit::engine

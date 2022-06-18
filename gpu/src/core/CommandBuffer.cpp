@@ -142,8 +142,6 @@ namespace stormkit::gpu {
         STORMKIT_EXPECTS(m_command_buffer);
         STORMKIT_EXPECTS(m_state == State::Recording);
 
-        const auto &vk = m_queue->device().table();
-
         if (!vkCmdBeginDebugUtilsLabelEXT || !vkCmdEndDebugUtilsLabelEXT ||
             !vkCmdInsertDebugUtilsLabelEXT)
             return;
@@ -163,8 +161,6 @@ namespace stormkit::gpu {
         STORMKIT_EXPECTS(m_command_buffer);
         STORMKIT_EXPECTS(m_state == State::Recording);
 
-        const auto &vk = m_queue->device().table();
-
         if (!vkCmdBeginDebugUtilsLabelEXT || !vkCmdEndDebugUtilsLabelEXT ||
             !vkCmdInsertDebugUtilsLabelEXT)
             return;
@@ -182,8 +178,6 @@ namespace stormkit::gpu {
     auto CommandBuffer::endDebugRegion() -> void {
         STORMKIT_EXPECTS(m_command_buffer);
         STORMKIT_EXPECTS(m_state == State::Recording);
-
-        const auto &vk = m_queue->device().table();
 
         if (!vkCmdBeginDebugUtilsLabelEXT || !vkCmdEndDebugUtilsLabelEXT ||
             !vkCmdInsertDebugUtilsLabelEXT)
@@ -491,9 +485,9 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     auto CommandBuffer::drawIndirect(const Buffer &buffer,
-                                     core::Int32 offset,
+                                     core::USize offset,
                                      core::UInt32 draw_count,
-                                     core::USize stride) -> void {
+                                     core::UInt32 stride) -> void {
         STORMKIT_EXPECTS(m_command_buffer);
         STORMKIT_EXPECTS(m_state == State::Recording);
         STORMKIT_EXPECTS(draw_count > 0u);
@@ -505,9 +499,9 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     auto CommandBuffer::drawIndexedIndirect(const Buffer &buffer,
-                                            core::Int32 offset,
+                                            core::USize offset,
                                             core::UInt32 draw_count,
-                                            core::USize stride) -> void {
+                                            core::UInt32 stride) -> void {
         STORMKIT_EXPECTS(m_command_buffer);
         STORMKIT_EXPECTS(m_state == State::Recording);
         STORMKIT_EXPECTS(draw_count > 0u);
@@ -535,7 +529,7 @@ namespace stormkit::gpu {
 
         vk.vkCmdBindVertexBuffers(m_command_buffer,
                                   0,
-                                  std::size(_buffers),
+                                  core::as<core::UInt32>(std::size(_buffers)),
                                   std::data(_buffers),
                                   std::data(_offsets));
     }
@@ -572,9 +566,9 @@ namespace stormkit::gpu {
                                    VK_PIPELINE_BIND_POINT_GRAPHICS,
                                    pipeline.vkLayout(),
                                    0,
-                                   std::size(_descriptor_sets),
+                                   core::as<core::UInt32>(std::size(_descriptor_sets)),
                                    std::data(_descriptor_sets),
-                                   std::size(dynamic_offsets),
+                                   core::as<core::UInt32>(std::size(dynamic_offsets)),
                                    std::data(dynamic_offsets));
     }
 
@@ -594,9 +588,9 @@ namespace stormkit::gpu {
                                    VK_PIPELINE_BIND_POINT_COMPUTE,
                                    pipeline.vkLayout(),
                                    0,
-                                   std::size(_descriptor_sets),
+                                   core::as<core::UInt32>(std::size(_descriptor_sets)),
                                    std::data(_descriptor_sets),
-                                   std::size(dynamic_offsets),
+                                   core::as<core::UInt32>(std::size(dynamic_offsets)),
                                    std::data(dynamic_offsets));
     }
 
@@ -661,7 +655,7 @@ namespace stormkit::gpu {
                                   source,
                                   destination,
                                   VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                                  std::size(copy_regions),
+                                  core::as<core::UInt32>(std::size(copy_regions)),
                                   std::data(copy_regions));
     }
 
@@ -708,7 +702,7 @@ namespace stormkit::gpu {
                                   source,
                                   VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                                   destination,
-                                  std::size(copy_regions),
+                                  core::as<core::UInt32>(std::size(copy_regions)),
                                   std::data(copy_regions));
     }
 
@@ -752,7 +746,7 @@ namespace stormkit::gpu {
                           core::as<VkImageLayout>(source_layout),
                           destination,
                           core::as<VkImageLayout>(destination_layout),
-                          std::size(regions),
+                          core::as<core::UInt32>(std::size(regions)),
                           std::data(regions));
     }
 
@@ -797,7 +791,7 @@ namespace stormkit::gpu {
                              core::as<VkImageLayout>(source_layout),
                              destination,
                              core::as<VkImageLayout>(destination_layout),
-                             std::size(regions),
+                             core::as<core::UInt32>(std::size(regions)),
                              std::data(regions));
     }
 
@@ -852,7 +846,7 @@ namespace stormkit::gpu {
                           core::as<VkImageLayout>(source_layout),
                           destination,
                           core::as<VkImageLayout>(destination_layout),
-                          std::size(_regions),
+                          core::as<core::UInt32>(std::size(_regions)),
                           std::data(_regions),
                           core::as<VkFilter>(filter));
     }
@@ -904,7 +898,7 @@ namespace stormkit::gpu {
                                 nullptr,
                                 0,
                                 nullptr,
-                                std::size(barriers),
+                                core::as<core::UInt32>(std::size(barriers)),
                                 std::data(barriers));
     }
 
@@ -924,7 +918,7 @@ namespace stormkit::gpu {
 
         const auto &vk = m_queue->device().table();
         vk.vkCmdExecuteCommands(m_command_buffer,
-                                std::size(_command_buffers),
+                                core::as<core::UInt32>(std::size(_command_buffers)),
                                 std::data(_command_buffers));
     }
 
@@ -932,7 +926,7 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     auto CommandBuffer::pipelineBarrier(PipelineStageFlag src_mask,
                                         PipelineStageFlag dst_mask,
-                                        DependencyFlag dependency,
+                                        [[maybe_unused]] DependencyFlag dependency,
                                         std::span<const MemoryBarrier> memory_barriers,
                                         std::span<const BufferMemoryBarrier> buffer_memory_barriers,
                                         std::span<const ImageMemoryBarrier> image_memory_barriers)
@@ -988,11 +982,11 @@ namespace stormkit::gpu {
                                 core::as<VkPipelineStageFlags>(src_mask),
                                 core::as<VkPipelineStageFlags>(src_mask),
                                 core::as<VkDependencyFlags>(dst_mask),
-                                std::size(_memory_barriers),
+                                core::as<core::UInt32>(std::size(_memory_barriers)),
                                 std::data(_memory_barriers),
-                                std::size(_buffer_memory_barriers),
+                                core::as<core::UInt32>(std::size(_buffer_memory_barriers)),
                                 std::data(_buffer_memory_barriers),
-                                std::size(_image_memory_barriers),
+                                core::as<core::UInt32>(std::size(_image_memory_barriers)),
                                 std::data(_image_memory_barriers));
     }
 
@@ -1012,7 +1006,7 @@ namespace stormkit::gpu {
                               pipeline.vkLayout(),
                               core::as<VkShaderStageFlags>(stage),
                               offset,
-                              std::size(data),
+                              core::as<core::UInt32>(std::size(data)),
                               std::data(data));
     }
 
@@ -1030,7 +1024,7 @@ namespace stormkit::gpu {
                               pipeline.vkLayout(),
                               core::as<VkShaderStageFlags>(stage),
                               offset,
-                              std::size(data),
+                              core::as<core::UInt32>(std::size(data)),
                               std::data(data));
     }
 

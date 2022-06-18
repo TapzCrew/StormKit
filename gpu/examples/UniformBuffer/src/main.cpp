@@ -5,6 +5,8 @@
 
 #include "App.mpp"
 
+////////////////////////////////////////
+////////////////////////////////////////
 auto main(const int argc, const char **argv) -> int {
     using namespace stormkit;
 

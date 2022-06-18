@@ -30,6 +30,8 @@ namespace stormkit::image::details {
 
         auto stream = std::ofstream { filepath, std::ios::binary };
         stream.write(reinterpret_cast<const char *>(std::data(output)), std::size(output));
+
+        return {};
     }
 
     /////////////////////////////////////

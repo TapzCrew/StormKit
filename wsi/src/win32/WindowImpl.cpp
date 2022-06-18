@@ -229,21 +229,21 @@ namespace stormkit::wsi::details::win32 {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto WindowImpl::size() const noexcept -> const core::ExtentU & {
+    auto WindowImpl::size() const noexcept -> const core::ExtentU16 & {
         auto rect = RECT {};
         ZeroMemory(&rect, sizeof(RECT));
 
         GetClientRect(m_window_handle, &rect);
 
-        m_current_size.width  = rect.right - rect.left;
-        m_current_size.height = rect.bottom - rect.top;
+        m_current_size.width  = core::as<core::UInt16>(rect.right - rect.left);
+        m_current_size.height = core::as<core::UInt16>(rect.bottom - rect.top);
 
         return m_current_size;
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto WindowImpl::setKeyRepeatEnabled(bool enabled) noexcept -> void {
+    auto WindowImpl::setKeyRepeatEnabled([[maybe_unused]] bool enabled) noexcept -> void {
         elog("win32::WindowImpl::setKeyRepeatEnabled isn't yet implemented");
     }
 
@@ -270,7 +270,10 @@ namespace stormkit::wsi::details::win32 {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto loadMonitor(HMONITOR _monitor, HDC hdc, LPRECT rect, LPARAM data) -> BOOL {
+    auto loadMonitor(HMONITOR _monitor,
+                     [[maybe_unused]] HDC hdc,
+                     [[maybe_unused]] LPRECT rect,
+                     LPARAM data) -> BOOL {
         if (_monitor == nullptr) return TRUE;
 
         auto &monitors = *reinterpret_cast<std::vector<Monitor> *>(data);

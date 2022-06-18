@@ -30,7 +30,7 @@ namespace stormkit::engine {
 
     class RendererSyncSystem: public entities::System {
       public:
-        RendererSyncSystem(RenderQueue &queue, entities::EntityManager &manager)
+        RendererSyncSystem([[maybe_unused]] RenderQueue &queue, entities::EntityManager &manager)
             : System { manager, 0, {} } {}
 
         RendererSyncSystem(const RendererSyncSystem &) = delete;
@@ -39,12 +39,13 @@ namespace stormkit::engine {
         RendererSyncSystem(RendererSyncSystem &&) noexcept = default;
         auto operator=(RendererSyncSystem &&) noexcept -> RendererSyncSystem & = default;
 
-        auto update(core::Secondf delta) -> void override {};
+        auto update([[maybe_unused]] core::Secondf delta) -> void override {};
 
       private:
-        auto onMessageReceived(const entities::Message &message) -> void override {}
+        auto onMessageReceived([[maybe_unused]] const entities::Message &message) -> void override {
+        }
 
-        RenderQueue *m_render_queue = nullptr;
+        [[maybe_unused]] RenderQueue *m_render_queue = nullptr;
     };
 
     /////////////////////////////////////

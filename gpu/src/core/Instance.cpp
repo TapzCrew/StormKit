@@ -152,8 +152,6 @@ namespace stormkit::gpu {
         auto supported_api_version = volkGetInstanceVersion();
         target_api_version         = std::max(target_api_version, supported_api_version);
 
-        auto count = 0u;
-
         auto extension_count = core::UInt32 { 0 };
         CHECK_VK_ERROR(vkEnumerateInstanceExtensionProperties(nullptr, &extension_count, nullptr));
         auto extensions = std::vector<VkExtensionProperties> { extension_count };
@@ -195,13 +193,13 @@ namespace stormkit::gpu {
             for (const auto &str : VALIDATION_LAYERS) instance_logger.dlog("	{}", str);
             instance_logger.dlog("-------------------------------");
 
-            create_info.enabledLayerCount   = std::size(VALIDATION_LAYERS);
+            create_info.enabledLayerCount   = core::as<core::UInt32>(std::size(VALIDATION_LAYERS));
             create_info.ppEnabledLayerNames = std::data(VALIDATION_LAYERS);
 
             instance_extensions.emplace_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
         }
 
-        create_info.enabledExtensionCount   = std::size(instance_extensions);
+        create_info.enabledExtensionCount = core::as<core::UInt32>(std::size(instance_extensions));
         create_info.ppEnabledExtensionNames = std::data(instance_extensions);
 
         CHECK_VK_ERROR(vkCreateInstance(&create_info, nullptr, &m_instance));

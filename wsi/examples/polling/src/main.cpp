@@ -33,6 +33,8 @@ import stormkit.wsi.key;
 
 LOGGER("StormKit.Examples.Log.Polling");
 
+////////////////////////////////////////
+////////////////////////////////////////
 auto main([[maybe_unused]] const int argc, [[maybe_unused]] const char **argv) -> int {
     using namespace stormkit;
 

@@ -99,8 +99,8 @@ namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
     template<ArithmeticType T, ArithmeticType V>
-    constexpr auto map(V x, V in_min, V in_max, T out_min, T out_max) noexcept {
-        return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+    constexpr auto map(V x, V in_min, V in_max, T out_min, T out_max) noexcept -> T {
+        return as<T>((x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min);
     }
 
     /////////////////////////////////////

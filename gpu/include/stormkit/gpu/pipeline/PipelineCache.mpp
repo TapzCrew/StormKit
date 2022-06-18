@@ -56,14 +56,14 @@ namespace stormkit::gpu {
         struct SerializedCache {
             struct {
                 core::UInt32 magic;
-                core::UInt32 data_size;
+                core::USize data_size;
                 core::UInt64 data_hash;
             } guard;
 
             struct {
                 core::UInt32 version;
-                core::UInt32 vendor_id;
-                core::UInt32 device_id;
+                core::UInt64 vendor_id;
+                core::UInt64 device_id;
             } infos;
 
             struct {

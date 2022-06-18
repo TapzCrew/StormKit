@@ -157,7 +157,7 @@ namespace stormkit::image {
         -> core::ByteSpan {
         const auto mip_size = size(layer, face, level);
 
-        auto offset = 0u;
+        auto offset = std::size_t { 0 };
 
         for (auto i : core::range(layer)) offset += size(i);
 
@@ -179,7 +179,7 @@ namespace stormkit::image {
                             core::UInt32 level) const noexcept -> core::ByteConstSpan {
         const auto mip_size = size(layer, face, level);
 
-        auto offset = 0u;
+        auto offset = std::size_t { 0 };
 
         for (auto i : core::range(layer)) offset += size(i);
 
@@ -340,7 +340,7 @@ namespace stormkit::image {
             case Image::Format::sRGBA8:
             case Image::Format::sBGRA8: return 4;
 
-            default: return 0u;
+            default: break;
         }
 
         return 0u;
@@ -405,7 +405,7 @@ namespace stormkit::image {
             case Image::Format::RGBA32U:
             case Image::Format::RGBA32F: return 4u;
 
-            default: return 0u;
+            default: break;
         }
 
         return 0u;

@@ -94,8 +94,8 @@ namespace stormkit::image {
         }
 
         auto map(core::ByteConstSpan bytes,
-                 core::UInt8 source_count,
-                 core::UInt8 destination_count) noexcept -> core::ByteArray {
+                 core::UInt32 source_count,
+                 core::UInt32 destination_count) noexcept -> core::ByteArray {
             STORMKIT_EXPECTS(source_count <= 4u && source_count > 0u && destination_count <= 4u &&
                              destination_count > 0u);
 
@@ -351,7 +351,7 @@ namespace stormkit::image {
 
                 return {};
             }
-            default: return {};
+            default: break;
         }
 
         return core::Unexpected { Error {
@@ -713,12 +713,15 @@ namespace stormkit::image {
 
         auto image = Image { std::move(image_data) };
 
-        for (auto [layer, face, level, i] :
-             core::generateIndices(image.layers(), image.faces(), image.layers(), pixel_count)) {
-            const auto from_image = details::map(pixel(i, layer, face, level),
-                                                 m_data.bytes_per_channel,
-                                                 image.bytesPerChannel());
-            auto to_image         = image.pixel(i, layer, face, level);
+        for (auto [layer, face, level, i] : core::generateIndicesAs<core::UInt32>(image.layers(),
+                                                                                  image.faces(),
+                                                                                  image.layers(),
+                                                                                  pixel_count)) {
+            const auto from_image =
+                details::map(pixel(core::as<core::USize>(i), layer, face, level),
+                             m_data.bytes_per_channel,
+                             image.bytesPerChannel());
+            auto to_image = image.pixel(core::as<core::USize>(i), layer, face, level);
 
             std::ranges::copy_n(std::ranges::begin(from_image),
                                 std::min(m_data.channel_count, image.channelCount()),
@@ -749,15 +752,16 @@ namespace stormkit::image {
 
         auto image = Image { std::move(image_data) };
 
-        for (auto [layer, face, mip, x, y, z] : core::generateIndices(m_data.layers,
-                                                                      m_data.faces,
-                                                                      m_data.mip_levels,
-                                                                      m_data.extent.width,
-                                                                      m_data.extent.height,
-                                                                      m_data.extent.depth)) {
+        for (auto [layer, face, mip, x, y, z] :
+             core::generateIndicesAs<core::UInt32>(m_data.layers,
+                                                   m_data.faces,
+                                                   m_data.mip_levels,
+                                                   m_data.extent.width,
+                                                   m_data.extent.height,
+                                                   m_data.extent.depth)) {
             const auto inv_x = m_data.extent.width - x - 1u;
             auto output      = image.pixel({ inv_x, y, z }, layer, face, mip);
-            const auto data  = pixel({ x, y, z }, layer, face, mip);
+            // const auto data  = pixel({ x, y, z }, layer, face, mip);
 
             std::ranges::copy(pixel({ x, y, z }, layer, face, mip), std::ranges::begin(output));
         }
@@ -780,12 +784,13 @@ namespace stormkit::image {
 
         auto image = Image { std::move(image_data) };
 
-        for (auto [layer, face, mip, x, y, z] : core::generateIndices(m_data.layers,
-                                                                      m_data.faces,
-                                                                      m_data.mip_levels,
-                                                                      m_data.extent.width,
-                                                                      m_data.extent.height,
-                                                                      m_data.extent.depth)) {
+        for (auto [layer, face, mip, x, y, z] :
+             core::generateIndicesAs<core::UInt32>(m_data.layers,
+                                                   m_data.faces,
+                                                   m_data.mip_levels,
+                                                   m_data.extent.width,
+                                                   m_data.extent.height,
+                                                   m_data.extent.depth)) {
             const auto inv_y = m_data.extent.height - 1u - y;
             auto output      = image.pixel({ x, inv_y, z }, layer, face, mip);
 
@@ -809,12 +814,13 @@ namespace stormkit::image {
 
         auto image = Image { std::move(image_data) };
 
-        for (auto [layer, face, mip, x, y, z] : core::generateIndices(m_data.layers,
-                                                                      m_data.faces,
-                                                                      m_data.mip_levels,
-                                                                      m_data.extent.width,
-                                                                      m_data.extent.height,
-                                                                      m_data.extent.depth)) {
+        for (auto [layer, face, mip, x, y, z] :
+             core::generateIndicesAs<core::UInt32>(m_data.layers,
+                                                   m_data.faces,
+                                                   m_data.mip_levels,
+                                                   m_data.extent.width,
+                                                   m_data.extent.height,
+                                                   m_data.extent.depth)) {
             const auto inv_z = m_data.extent.depth - 1u - z;
             auto output      = image.pixel({ x, z, inv_z }, layer, face, mip);
 

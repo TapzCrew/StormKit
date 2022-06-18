@@ -198,6 +198,8 @@ namespace stormkit::image::details {
 
         auto stream = std::ofstream { filepath, std::ios::binary };
         stream.write(reinterpret_cast<const char *>(std::data(output)), std::size(output));
+
+        return {};
     }
 
     /////////////////////////////////////
@@ -222,7 +224,7 @@ namespace stormkit::image::details {
                 .str_error = "[libpng] Failed to init (png_create_info_struct)" } };
         }
 
-        if (setjmp(png_jmpbuf(png_ptr))) {
+        if (std::setjmp(png_jmpbuf(png_ptr))) {
             png_destroy_info_struct(png_ptr, &info_ptr);
             png_destroy_write_struct(&png_ptr, nullptr);
             return core::Unexpected { Error { .reason = Reason::Failed_To_Parse,

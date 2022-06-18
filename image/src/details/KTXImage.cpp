@@ -79,7 +79,7 @@ namespace stormkit::image::details {
             case gli::FORMAT_RGBA32_SFLOAT_PACK32: return Format::RGBA32F;
             case gli::FORMAT_RGBA8_SRGB_PACK8: return Format::sRGBA8;
             case gli::FORMAT_BGRA8_SRGB_PACK8: return Format::sBGRA8;
-            default: return Format::Undefined;
+            default: break;
         }
 
         return Format::Undefined;
@@ -133,6 +133,8 @@ namespace stormkit::image::details {
 
         auto stream = std::ofstream { filepath, std::ios::binary };
         stream.write(reinterpret_cast<const char *>(std::data(output)), std::size(output));
+
+        return {};
     }
 
     /////////////////////////////////////

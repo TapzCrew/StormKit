@@ -301,7 +301,8 @@ namespace stormkit::gpu {
         const auto byte_count_by_channel = getArraySizeByChannelFor(m_format);
 
         auto _offset = 0u;
-        for (auto [layer, face, mip_level] : core::generateIndices(layers, faces, mip_levels)) {
+        for (auto [layer, face, mip_level] :
+             core::generateIndicesAs<core::UInt32>(layers, faces, mip_levels)) {
             const auto extent = core::ExtentU { std::max(1u, m_extent.width >> mip_level),
                                                 std::max(1u, m_extent.height >> mip_level),
                                                 std::max(1u, m_extent.depth >> mip_level) };

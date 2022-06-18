@@ -230,7 +230,7 @@ namespace stormkit::wsi::details::win32 {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto win32KeyToChar(WPARAM key, LPARAM flags) noexcept -> char {
+    auto win32KeyToChar(WPARAM key, [[maybe_unused]] LPARAM flags) noexcept -> char {
         switch (key) {
             case VK_OEM_COMMA: return ',';
             case VK_OEM_PERIOD: return '.';

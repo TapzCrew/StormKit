@@ -60,7 +60,7 @@ namespace stormkit::core {
     ////////////////////////////////////////
     ////////////////////////////////////////
     auto ThreadPool::joinAll() -> void {
-        for (auto i : range(m_worker_count))
+        for ([[maybe_unused]] auto i : range(m_worker_count))
             postTask<void>(Task::Type::Terminate, {}, ThreadPool::NoFuture);
 
         for (auto &thread : m_workers) {

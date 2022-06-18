@@ -53,10 +53,9 @@ namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     auto FrameGraphBuilder::bake() -> void {
-        auto &thread_pool = engine().threadPool();
-
 #ifdef STORMKIT_RENDERER_MULTITHREADED
-        m_bake_future = thread_pool.postTask<void>([this]() {
+        auto &thread_pool = engine().threadPool();
+        m_bake_future     = thread_pool.postTask<void>([this]() {
 #endif
             for (auto &task : m_tasks)
                 task->m_ref_count = std::size(task->creates()) + std::size(task->writes());
@@ -134,8 +133,8 @@ namespace stormkit::engine {
                 if (writer.refCount() > 0) --writer.m_ref_count;
 
                 if (writer.refCount() == 0 && !writer.cullImune()) {
-                    for (const auto id : writer.reads()) {
-                        auto &read_resource = getResource(id);
+                    for (const auto _id : writer.reads()) {
+                        auto &read_resource = getResource(_id);
 
                         if (read_resource.refCount() > 0) --read_resource.m_ref_count;
 
@@ -150,8 +149,6 @@ namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     auto FrameGraphBuilder::buildPhysicalDescriptions() noexcept -> void {
-        auto &thread_pool = engine().threadPool();
-
         auto layouts              = core::HashMap<GraphID, gpu::ImageLayout> {};
         m_preprocessed_framegraph = core::transformIf(
             m_tasks,
@@ -178,7 +175,7 @@ namespace stormkit::engine {
             },
             [this](const auto resource_id) { return &getResource<ImageDescription>(resource_id); });
 
-        return core::transform(images, [this](const auto &resource) {
+        return core::transform(images, [](const auto &resource) {
             const auto &description = resource->description();
 
             auto usages = gpu::ImageUsageFlag::Transfert_Src;
@@ -241,8 +238,8 @@ namespace stormkit::engine {
         core::HashMap<GraphID, gpu::ImageLayout> &layouts) noexcept -> gpu::RenderPassDescription {
         using AttachmentDescriptionPtr = gpu::AttachmentDescription *;
 
-        auto depth_stencil = AttachmentDescriptionPtr { nullptr };
-        auto output        = gpu::RenderPassDescription {};
+        // auto depth_stencil = AttachmentDescriptionPtr { nullptr };
+        auto output = gpu::RenderPassDescription {};
 
         auto creates = core::copyIf(task.creates(), [this](const auto id) noexcept {
             const auto &resource = getResource(id);

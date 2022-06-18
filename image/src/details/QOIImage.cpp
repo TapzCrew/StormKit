@@ -6,6 +6,7 @@
 #include <stormkit/core/FrozenMap.mpp>
 
 #include "QOIImage.mpp"
+#include "stormkit/core/Types.mpp"
 
 namespace stormkit::image::details {
     template<class E>
@@ -92,10 +93,11 @@ namespace stormkit::image::details {
         auto it         = std::ranges::begin(chunks);
 
         const auto chunks_size = output_size - std::size(END_OF_FILE);
-        for (auto i : core::range(output_size, channels)) {
+        for ([[maybe_unused]] auto i : core::range(output_size, channels)) {
             const auto tag = *it;
 
-            const auto position = std::distance(std::ranges::begin(chunks), it);
+            const auto position =
+                core::as<core::USize>(std::distance(std::ranges::begin(chunks), it));
 
             if (run > 0) --run;
             else if (std::memcmp(&*it, std::data(END_OF_FILE), std::size(END_OF_FILE)) == 0)
@@ -123,9 +125,9 @@ namespace stormkit::image::details {
 
                         previous_pixel = pixel_cache[index];
                     } else if (CHECK(QOI_OPERATION::DIFF)) {
-                        const auto r_diff = ((tag >> 4) & 0x03) - 2;
-                        const auto g_diff = ((tag >> 2) & 0x03) - 2;
-                        const auto b_diff = (tag & 0x03) - 2;
+                        const auto r_diff = core::as<core::UInt8>(((tag >> 4) & 0x03) - 2);
+                        const auto g_diff = core::as<core::UInt8>(((tag >> 2) & 0x03) - 2);
+                        const auto b_diff = core::as<core::UInt8>((tag & 0x03) - 2);
 
                         previous_pixel.rgba.r += r_diff;
                         previous_pixel.rgba.g += g_diff;
@@ -137,9 +139,9 @@ namespace stormkit::image::details {
                         const auto current_r = ((*it) >> 4) & 0x0f;
                         const auto current_b = (*it) & 0x0f;
 
-                        previous_pixel.rgba.r += g_diff - 8 + current_r;
-                        previous_pixel.rgba.g += g_diff;
-                        previous_pixel.rgba.b += g_diff - 8 + current_b;
+                        previous_pixel.rgba.r += core::as<core::UInt8>(g_diff - 8 + current_r);
+                        previous_pixel.rgba.g += core::as<core::UInt8>(g_diff);
+                        previous_pixel.rgba.b += core::as<core::UInt8>(g_diff - 8 + current_b);
 
                         ++it;
                     } else if (CHECK(QOI_OPERATION::RUN)) {
@@ -185,6 +187,8 @@ namespace stormkit::image::details {
 
         auto stream = std::ofstream { filepath, std::ios::binary };
         stream.write(reinterpret_cast<const char *>(std::data(output)), std::size(output));
+
+        return {};
     }
 
     /////////////////////////////////////

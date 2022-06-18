@@ -6,7 +6,6 @@
 
 #include <stormkit/core/AssertMacro.hpp>
 
-
 #include <algorithm>
 #include <array>
 #include <memory>
@@ -16,10 +15,8 @@
 #include <span>
 #include <vector>
 
-
 #include <stormkit/core/HashMap.mpp>
 #include <stormkit/core/Memory.mpp>
-
 
 #include <stormkit/entities/Component.mpp>
 #include <stormkit/entities/Entity.mpp>

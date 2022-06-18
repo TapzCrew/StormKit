@@ -22,7 +22,7 @@ namespace stormkit::engine {
     BakedFrameGraph::BakedFrameGraph(Engine &engine,
                                      const FrameGraphBuilder &builder,
                                      Data &&data,
-                                     BakedFrameGraph *old)
+                                     [[maybe_unused]] BakedFrameGraph *old)
         : EngineObject { engine }, m_builder { &builder }, m_data { std::move(data) } {
         const auto &device = this->engine().renderer().device();
 

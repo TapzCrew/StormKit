@@ -59,7 +59,7 @@ namespace stormkit::engine {
                                                       .type   = gpu::ImageType::T2D,
                                                       .format = gpu::PixelFormat::RGBA8_UNorm });
                 },
-                [=](const auto &data, auto *renderpass, auto &cmb) {
+                [=]([[maybe_unused]] const auto &data, auto *renderpass, auto &cmb) {
                     const auto &vertex_shader   = shader_cache->get(FORWARD_PASS_VERTEX_SHADER);
                     const auto &fragment_shader = shader_cache->get(FORWARD_PASS_FRAGMENT_SHADER);
 

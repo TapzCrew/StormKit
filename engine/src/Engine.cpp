@@ -60,7 +60,8 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto Engine::run(const int argc, const char **argv) -> core::Int32 {
+    auto Engine::run([[maybe_unused]] const int argc, [[maybe_unused]] const char **argv)
+        -> core::Int32 {
         while (m_window->isOpen()) { m_event_handler.update(); }
 
         return EXIT_SUCCESS;

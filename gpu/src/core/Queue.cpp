@@ -109,8 +109,10 @@ namespace stormkit::gpu {
         if (fence) vk_fence = *fence;
 
         const auto submit_infos = std::array { submit_info };
-        CHECK_VK_ERROR(
-            vk.vkQueueSubmit(m_queue, std::size(submit_infos), std::data(submit_infos), vk_fence));
+        CHECK_VK_ERROR(vk.vkQueueSubmit(m_queue,
+                                        core::as<core::UInt32>(std::size(submit_infos)),
+                                        std::data(submit_infos),
+                                        vk_fence));
     }
 
     /////////////////////////////////////

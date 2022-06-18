@@ -20,7 +20,7 @@
 
 namespace stormkit::core {
     namespace details {
-        class DynamicLoaderImpl;
+        struct DynamicLoaderImpl;
     }
     /**
      * @class SharedLibrary

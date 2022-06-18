@@ -115,7 +115,7 @@ namespace stormkit::gpu {
             case PixelFormat::sRGBA8:
             case PixelFormat::sBGRA8: return 4;
 
-            default: return 0u;
+            default: break;
         }
 
         return 0u;
@@ -180,7 +180,7 @@ namespace stormkit::gpu {
             case PixelFormat::RGBA32U:
             case PixelFormat::RGBA32F: return 4u;
 
-            default: return 0u;
+            default: break;
         }
 
         return 0u;

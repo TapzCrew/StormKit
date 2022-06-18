@@ -123,7 +123,7 @@ namespace stormkit::gpu {
         }();
 
         vk.vkUpdateDescriptorSets(device(),
-                                  std::size(write_infos),
+                                  core::as<core::UInt32>(std::size(write_infos)),
                                   std::data(write_infos),
                                   0,
                                   nullptr);

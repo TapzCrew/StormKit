@@ -44,6 +44,8 @@ namespace stormkit::image::details {
         auto &output = *result;
 
         stream.write(reinterpret_cast<const char *>(std::data(output)), std::size(output));
+
+        return {};
     }
 
     /////////////////////////////////////

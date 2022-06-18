@@ -9,7 +9,7 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     Surface::Surface(const Instance &instance, Buffering buffering)
         : InstanceObject { instance }, m_buffering { buffering } {
-        onSwapchainFenceSignaled = [](const auto &fence) {};
+        onSwapchainFenceSignaled = []([[maybe_unused]] const auto &fence) {};
     };
 
     /////////////////////////////////////

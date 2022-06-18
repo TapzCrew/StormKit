@@ -2,7 +2,6 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-
 #include <stormkit/core/Format.mpp>
 
 #include <stormkit/gpu/core/CommandBuffer.mpp>
@@ -134,7 +133,7 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto OffscreenSurface::present(const Frame &frame) -> void {
+    auto OffscreenSurface::present([[maybe_unused]] const Frame &frame) -> void {
         m_current_frame = (m_current_frame + 1);
         if (m_current_frame >= m_buffering_count) m_current_frame -= m_buffering_count;
     }

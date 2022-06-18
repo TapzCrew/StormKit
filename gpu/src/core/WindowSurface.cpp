@@ -236,7 +236,8 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto WindowSurface::setExclusiveFullscreenEnabled(bool enabled) noexcept -> void {}
+    auto WindowSurface::setExclusiveFullscreenEnabled([[maybe_unused]] bool enabled) noexcept
+        -> void {}
 
     /////////////////////////////////////
     /////////////////////////////////////

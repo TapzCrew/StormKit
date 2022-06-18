@@ -63,7 +63,8 @@ namespace stormkit::gpu {
             const auto it = std::ranges::find_if(queue_families, findQueue<QueueFlag::Graphics>());
             if (it == std::ranges::cend(queue_families)) return {};
 
-            return { .id    = std::distance(std::ranges::cbegin(queue_families), it),
+            return { .id = core::as<core::UInt32>(
+                         std::distance(std::ranges::cbegin(queue_families), it)),
                      .count = it->count,
                      .flags = it->flags };
         }();
@@ -74,7 +75,8 @@ namespace stormkit::gpu {
                                      findQueue<QueueFlag::Transfert, QueueFlag::Graphics>());
             if (it == std::ranges::cend(queue_families)) return {};
 
-            return { .id    = std::distance(std::ranges::cbegin(queue_families), it),
+            return { .id = core::as<core::UInt32>(
+                         std::distance(std::ranges::cbegin(queue_families), it)),
                      .count = it->count,
                      .flags = it->flags };
         }();
@@ -85,7 +87,8 @@ namespace stormkit::gpu {
                 findQueue<QueueFlag::Compute, QueueFlag::Graphics, QueueFlag::Transfert>());
             if (it == std::ranges::cend(queue_families)) return {};
 
-            return { .id    = std::distance(std::ranges::cbegin(queue_families), it),
+            return { .id = core::as<core::UInt32>(
+                         std::distance(std::ranges::cbegin(queue_families), it)),
                      .count = it->count,
                      .flags = it->flags };
         }();
@@ -346,7 +349,7 @@ namespace stormkit::gpu {
 
         CHECK_VK_ERROR(m_device_table.vkWaitForFences(
             m_device,
-            std::size(vk_fences),
+            core::as<core::UInt32>(std::size(vk_fences)),
             std::data(vk_fences),
             wait_all,
             std::chrono::duration_cast<std::chrono::nanoseconds>(timeout).count()));
@@ -613,7 +616,7 @@ namespace stormkit::gpu {
 
         auto buffers = std::vector<Buffer> {};
         buffers.reserve(count);
-        for (auto i : core::range(count)) buffers.emplace_back(createBuffer(info));
+        for ([[maybe_unused]] auto i : core::range(count)) buffers.emplace_back(createBuffer(info));
 
         return buffers;
     }
@@ -627,7 +630,8 @@ namespace stormkit::gpu {
         auto buffers = std::vector<BufferOwnedPtr> {};
         buffers.reserve(count);
 
-        for (auto i : core::range(count)) buffers.emplace_back(allocateBuffer(info));
+        for ([[maybe_unused]] auto i : core::range(count))
+            buffers.emplace_back(allocateBuffer(info));
 
         return buffers;
     }
@@ -641,7 +645,8 @@ namespace stormkit::gpu {
         auto buffers = std::vector<BufferSharedPtr> {};
         buffers.reserve(count);
 
-        for (auto i : core::range(count)) buffers.emplace_back(allocateRefCountedBuffer(info));
+        for ([[maybe_unused]] auto i : core::range(count))
+            buffers.emplace_back(allocateRefCountedBuffer(info));
 
         return buffers;
     }

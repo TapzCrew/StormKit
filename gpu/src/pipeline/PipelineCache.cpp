@@ -11,6 +11,7 @@
 #include <fstream>
 
 #include "../Log.mpp"
+#include "stormkit/core/Types.mpp"
 
 namespace stormkit::gpu {
 
@@ -232,7 +233,7 @@ namespace stormkit::gpu {
         const auto data = [&] {
             auto size = core::USize { 0 };
             CHECK_VK_ERROR(vk.vkGetPipelineCacheData(device(), m_pipeline_cache, &size, nullptr));
-            auto d = std::vector<std::byte> { size };
+            auto d = core::ByteArray { size };
             CHECK_VK_ERROR(
                 vk.vkGetPipelineCacheData(device(), m_pipeline_cache, &size, std::data(d)));
 

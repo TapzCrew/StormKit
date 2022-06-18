@@ -19,18 +19,24 @@
 
 using namespace stormkit;
 
+////////////////////////////////////////
+////////////////////////////////////////
 App::App() {
     doInitWindow();
     doInitBaseRenderObjects();
     doInitMeshRenderObjects();
 }
 
+////////////////////////////////////////
+////////////////////////////////////////
 App::~App() {
     ilog("Cleaning");
 
     m_device->waitIdle();
 }
 
+////////////////////////////////////////
+////////////////////////////////////////
 auto App::run([[maybe_unused]] const int argc, [[maybe_unused]] const char **argv) -> core::Int32 {
     namespace Chrono = std::chrono;
     using Clock      = std::chrono::high_resolution_clock;
@@ -95,6 +101,8 @@ auto App::run([[maybe_unused]] const int argc, [[maybe_unused]] const char **arg
     return EXIT_SUCCESS;
 }
 
+////////////////////////////////////////
+////////////////////////////////////////
 auto App::doInitWindow() -> void {
     // First we create the wsi
     const auto window_style = wsi::WindowStyle::All;
@@ -103,6 +111,8 @@ auto App::doInitWindow() -> void {
         std::make_unique<wsi::Window>(WINDOW_TITLE, core::ExtentU { 800u, 600u }, window_style);
 }
 
+////////////////////////////////////////
+////////////////////////////////////////
 auto App::doInitBaseRenderObjects() -> void {
     // We create an instance and initialize device on best available GPU
     m_instance = std::make_unique<gpu::Instance>();
@@ -140,6 +150,8 @@ auto App::doInitBaseRenderObjects() -> void {
     m_queue = core::makeConstObserver(m_device->graphicsQueue());
 }
 
+////////////////////////////////////////
+////////////////////////////////////////
 auto App::doInitMeshRenderObjects() -> void {
     const auto &surface_extent = m_surface->extent();
     const auto surface_extentf = core::ExtentF { surface_extent };
@@ -287,6 +299,8 @@ auto App::doInitMeshRenderObjects() -> void {
     fence.wait();
 }
 
+////////////////////////////////////////
+////////////////////////////////////////
 auto App::doInitPerFrameObjects() -> void {
     const auto &surface_extent = m_surface->extent();
     const auto surface_extentf = core::ExtentF { surface_extent };
@@ -378,5 +392,7 @@ auto App::doInitPerFrameObjects() -> void {
     }
 }
 
-auto App::updateModelMatrix(stormkit::core::Secondf &delta) -> void {
+////////////////////////////////////////
+////////////////////////////////////////
+auto App::updateModelMatrix([[maybe_unused]] stormkit::core::Secondf &delta) -> void {
 }

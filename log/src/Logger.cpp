@@ -21,4 +21,8 @@ namespace stormkit::log {
     /////////////////////////////////////
     Logger::Logger(LogClock::time_point start_time, Severity log_level) noexcept
         : m_start_time { std::move(start_time) }, m_log_level { log_level } {}
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    Logger::~Logger() = default;
 } // namespace stormkit::log

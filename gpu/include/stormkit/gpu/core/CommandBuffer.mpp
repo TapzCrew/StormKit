@@ -105,13 +105,13 @@ namespace stormkit::gpu {
                          core::Int32 vertex_offset   = 0,
                          core::UInt32 first_instance = 0u) -> void;
         auto drawIndirect(const Buffer &buffer,
-                          core::Int32 offset,
+                          core::USize offset,
                           core::UInt32 draw_count,
-                          core::USize stride) -> void;
+                          core::UInt32 stride) -> void;
         auto drawIndexedIndirect(const Buffer &buffer,
-                                 core::Int32 offset,
+                                 core::USize offset,
                                  core::UInt32 draw_count,
-                                 core::USize stride) -> void;
+                                 core::UInt32 stride) -> void;
 
         auto bindVertexBuffers(std::span<const Buffer *> buffers,
                                std::span<const core::UInt64> offsets) -> void;

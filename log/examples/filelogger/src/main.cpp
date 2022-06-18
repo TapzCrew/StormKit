@@ -32,7 +32,9 @@ struct Foo {
 CUSTOM_FORMAT(Foo,
               stormkit::core::format("Foo {{ .a = {}, .b = {}, .c = {} }}", data.a, data.b, data.c))
 
-int main() {
+////////////////////////////////////////
+////////////////////////////////////////
+auto main([[maybe_unused]] const int argc, [[maybe_unused]] const char **argv) -> int {
     using namespace stormkit;
     using log::operator""_module;
 

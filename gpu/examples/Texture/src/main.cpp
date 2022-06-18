@@ -6,7 +6,9 @@
 
 #include "App.mpp"
 
-auto main(const int argc, const char **argv) -> int {
+////////////////////////////////////////
+////////////////////////////////////////
+auto main([[maybe_unused]] const int argc, [[maybe_unused]] const char **argv) -> int {
     using namespace stormkit;
 
     core::setupSignalHandler();

@@ -309,18 +309,19 @@ namespace stormkit::core {
 #endif
 
     namespace details {
-#define FOR(a, b) for (auto a = std::size_t { 0 }; a < b; ++a)
+#define FOR(a, b) for (auto a = T { 0 }; a < b; ++a)
         /////////////////////////////////////
         /////////////////////////////////////
-        inline auto generateIndices(std::size_t a) -> Generator<std::array<std::size_t, 1>> {
+        template<std::integral T>
+        auto generateIndices(T a) -> Generator<std::array<T, 1>> {
             FOR(i, a)
             co_yield std::array { i };
         }
 
         /////////////////////////////////////
         /////////////////////////////////////
-        inline auto generateIndices(std::size_t a, std::size_t b)
-            -> Generator<std::array<std::size_t, 2>> {
+        template<std::integral T>
+        auto generateIndices(T a, T b) -> Generator<std::array<T, 2>> {
             FOR(i, a)
             FOR(j, b)
             co_yield std::array { i, j };
@@ -328,8 +329,8 @@ namespace stormkit::core {
 
         /////////////////////////////////////
         /////////////////////////////////////
-        inline auto generateIndices(std::size_t a, std::size_t b, std::size_t c)
-            -> Generator<std::array<std::size_t, 3>> {
+        template<std::integral T>
+        auto generateIndices(T a, T b, T c) -> Generator<std::array<T, 3>> {
             FOR(i, a)
             FOR(j, b)
             FOR(k, c)
@@ -338,8 +339,8 @@ namespace stormkit::core {
 
         /////////////////////////////////////
         /////////////////////////////////////
-        inline auto generateIndices(std::size_t a, std::size_t b, std::size_t c, std::size_t d)
-            -> Generator<std::array<std::size_t, 4>> {
+        template<std::integral T>
+        auto generateIndices(T a, T b, T c, T d) -> Generator<std::array<T, 4>> {
             FOR(i, a)
             FOR(j, b)
             FOR(k, c)
@@ -349,11 +350,8 @@ namespace stormkit::core {
 
         /////////////////////////////////////
         /////////////////////////////////////
-        inline auto generateIndices(std::size_t a,
-                                    std::size_t b,
-                                    std::size_t c,
-                                    std::size_t d,
-                                    std::size_t e) -> Generator<std::array<std::size_t, 5>> {
+        template<std::integral T>
+        auto generateIndices(T a, T b, T c, T d, T e) -> Generator<std::array<T, 5>> {
             FOR(i, a)
             FOR(j, b)
             FOR(k, c)
@@ -364,12 +362,8 @@ namespace stormkit::core {
 
         /////////////////////////////////////
         /////////////////////////////////////
-        inline auto generateIndices(std::size_t a,
-                                    std::size_t b,
-                                    std::size_t c,
-                                    std::size_t d,
-                                    std::size_t e,
-                                    std::size_t f) -> Generator<std::array<std::size_t, 6>> {
+        template<std::integral T>
+        auto generateIndices(T a, T b, T c, T d, T e, T f) -> Generator<std::array<T, 6>> {
             FOR(i, a)
             FOR(j, b)
             FOR(k, c)
@@ -381,13 +375,8 @@ namespace stormkit::core {
 
         /////////////////////////////////////
         /////////////////////////////////////
-        inline auto generateIndices(std::size_t a,
-                                    std::size_t b,
-                                    std::size_t c,
-                                    std::size_t d,
-                                    std::size_t e,
-                                    std::size_t f,
-                                    std::size_t g) -> Generator<std::array<std::size_t, 7>> {
+        template<std::integral T>
+        auto generateIndices(T a, T b, T c, T d, T e, T f, T g) -> Generator<std::array<T, 7>> {
             FOR(i, a)
             FOR(j, b)
             FOR(k, c)
@@ -406,7 +395,7 @@ namespace stormkit::core {
     /////////////////////////////////////
     template<std::convertible_to<std::size_t>... Args>
     auto generateIndices(Args... args) -> Generator<std::array<std::size_t, sizeof...(Args)>> {
-        return details::generateIndices(core::as<std::size_t>(args)...);
+        return generateIndicesAs<std::size_t>(core::as<std::size_t>(args)...);
     }
 
     /////////////////////////////////////
@@ -414,6 +403,21 @@ namespace stormkit::core {
     template<std::ranges::range... Args>
     auto generateIndices(const Args &...args)
         -> Generator<std::array<std::size_t, sizeof...(Args)>> {
-        return details::generateIndices(std::size(args)...);
+        return generateIndicesAs<std::size_t>(std::size(args)...);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<std::integral T, std::convertible_to<T>... Args>
+    auto generateIndicesAs(Args... args) -> Generator<std::array<T, sizeof...(Args)>> {
+        return details::generateIndices<T>(core::as<T>(args)...);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<std::integral T, std::ranges::range... Args>
+    auto generateIndicesAs(const Args &...args)
+        -> Generator<std::array<std::size_t, sizeof...(Args)>> {
+        return details::generateIndices<T>(core::as<T>(std::size(args))...);
     }
 } // namespace stormkit::core

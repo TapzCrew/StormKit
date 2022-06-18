@@ -50,7 +50,7 @@ namespace stormkit::wsi::details::win32 {
         auto hideMouse() noexcept -> void;
         auto unhideMouse() noexcept -> void;
 
-        [[nodiscard]] auto size() const noexcept -> const core::ExtentU &;
+        [[nodiscard]] auto size() const noexcept -> const core::ExtentU16 &;
         [[nodiscard]] auto title() const noexcept -> const std::string &;
         [[nodiscard]] auto videoSettings() const noexcept -> const Monitor &;
 
@@ -95,9 +95,9 @@ namespace stormkit::wsi::details::win32 {
 
         LONG m_last_style;
         LONG m_last_style_ex;
-        mutable core::ExtentU m_current_size = { 0u, 0u };
-        core::ExtentU m_last_size            = { 0u, 0u };
-        core::Vector2u m_last_position       = { 0u, 0u };
+        mutable core::ExtentU16 m_current_size = { 0u, 0u };
+        core::ExtentU16 m_last_size            = { 0u, 0u };
+        core::Vector2u m_last_position         = { 0u, 0u };
 
         HWND m_window_handle = nullptr;
 
