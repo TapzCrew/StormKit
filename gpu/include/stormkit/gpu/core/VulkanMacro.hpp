@@ -21,9 +21,9 @@
                          STORMKIT_CURRENT_LINE);    \
         } while (false);
 #else
-    #define CHECK_VK_ERROR(line)                     \
-        {                                            \
-            const auto _result = line;               \
-            STORMKIT_ENSURES(_result == VK_SUCCESS); \
+    #define CHECK_VK_ERROR(line)                        \
+        {                                               \
+            [[maybe_unused]] const auto _result = line; \
+            STORMKIT_ENSURES(_result == VK_SUCCESS);    \
         }
 #endif

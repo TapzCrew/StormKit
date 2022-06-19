@@ -11,13 +11,14 @@ target("model_viewer")
     add_files("src/*.cpp")
     add_files("src/*.hpp")
     add_files("*.qrc")
+    add_headerfiles("src/*.hpp")
     add_headerfiles("src/*.mpp")
 
     if is_plat("windows") then
         add_files("win32/*.rc")
     end
 
-    add_deps("stormkit-engine")
+    add_deps("stormkit-core", "stormkit-engine")
     add_frameworks("QtCore",
                    "QtGui",
                    "QtQml",

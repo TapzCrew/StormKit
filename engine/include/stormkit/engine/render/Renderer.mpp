@@ -12,6 +12,7 @@
 
 #include <stormkit/gpu/Fwd.hpp>
 #include <stormkit/gpu/core/CommandBuffer.mpp>
+#include <stormkit/gpu/core/Surface.mpp>
 
 #include <stormkit/gpu/resource/ImageView.mpp>
 
@@ -23,6 +24,7 @@ namespace stormkit::engine {
     class STORMKIT_PUBLIC Renderer: public EngineObject {
       public:
         explicit Renderer(Engine &engine);
+        Renderer(Engine &engine, const core::ExtentU &extent, gpu::Surface::Buffering buffering);
         ~Renderer();
 
         Renderer(const Renderer &) = delete;

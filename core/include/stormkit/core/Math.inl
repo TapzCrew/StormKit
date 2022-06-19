@@ -22,14 +22,14 @@ namespace stormkit::core {
     /////////////////////////////////////
     template<ArithmeticType T>
     template<ArithmeticType U>
-    constexpr Extent<T>::Extent(const Extent<U> &other) noexcept
+    constexpr Extent<T>::Extent(const Extent<U>& other) noexcept
         : width { as<UnderlyingType>(other.width) }, height { as<UnderlyingType>(other.height) },
           depth { as<UnderlyingType>(other.depth) } {}
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<ArithmeticType T>
-    constexpr auto Extent<T>::operator<=>(const Extent &other) const noexcept -> OrderingType {
+    constexpr auto Extent<T>::operator<=>(const Extent<T>& other) const noexcept -> OrderingType {
         if (auto ret = width <=> other.width; ret != 0) return ret;
         if (auto ret = height <=> other.height; ret != 0) return ret;
         if (auto ret = depth <=> other.depth; ret != 0) return ret;
@@ -40,7 +40,7 @@ namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
     template<ArithmeticType T>
-    constexpr auto Extent<T>::operator==(const Extent &other) const noexcept -> bool {
+    constexpr auto Extent<T>::operator==(const Extent<T>& other) const noexcept -> bool {
         return isEqual<T>(width, other.width) && isEqual<T>(height, other.height) &&
                isEqual<T>(depth, other.depth);
     }
@@ -62,7 +62,7 @@ namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
     template<ArithmeticType T>
-    constexpr auto Extent<T>::operator*=(UnderlyingType factor) noexcept -> Extent & {
+    constexpr auto Extent<T>::operator*=(UnderlyingType factor) noexcept -> Extent& {
         width *= factor;
         height *= factor;
         depth *= factor;
@@ -72,7 +72,7 @@ namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
     template<ArithmeticType T>
-    constexpr auto Extent<T>::operator/=(UnderlyingType factor) noexcept -> Extent & {
+    constexpr auto Extent<T>::operator/=(UnderlyingType factor) noexcept -> Extent& {
         width /= factor;
         height /= factor;
         depth /= factor;
@@ -84,7 +84,7 @@ namespace stormkit::core {
 /////////////////////////////////////
 template<stormkit::core::ArithmeticType T>
 constexpr stormkit::core::Hash64 std::hash<stormkit::core::Extent<T>>::operator()(
-    const stormkit::core::Extent<T> &extent) const noexcept {
+    const stormkit::core::Extent<T>& extent) const noexcept {
     auto hash = stormkit::core::Hash64 { 0 };
     stormkit::core::hashCombine(hash, extent.width);
     stormkit::core::hashCombine(hash, extent.height);

@@ -14,10 +14,15 @@
 
 #include <stormkit/engine/Fwd.hpp>
 
+#include <stormkit/gpu/core/Surface.mpp>
+
 namespace stormkit::engine {
     class STORMKIT_PUBLIC Engine {
       public:
         explicit Engine(wsi::Window &window);
+        explicit Engine(const core::ExtentU &extent,
+                        gpu::Surface::Buffering buffering = gpu::Surface::Buffering::Triple);
+
         ~Engine();
 
         Engine(const Engine &) = delete;
@@ -40,7 +45,7 @@ namespace stormkit::engine {
 
       private:
         wsi::Window *m_window = nullptr;
-        wsi::EventHandler m_event_handler;
+        wsi::EventHandlerOwnedPtr m_event_handler;
 
         core::ThreadPool m_thread_pool;
 

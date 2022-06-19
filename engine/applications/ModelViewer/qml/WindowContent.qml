@@ -1,6 +1,7 @@
 import QtQuick 6.3
 import QtQuick.Controls 6.3
 import QtQuick.Layouts 6.3
+import ModelViewer
 
 Item {
     id: root
@@ -33,17 +34,13 @@ Item {
 
             clip: true
 
-            Rectangle {
-                color: "black"
-
+            StormKitView {
                 x: 1
                 y: 1
                 width: parent.width - 2
                 height: parent.height - 2
 
                 clip: true
-
-                radius: 4
             }
         }
     }

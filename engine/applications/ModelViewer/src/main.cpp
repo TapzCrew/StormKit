@@ -7,11 +7,15 @@
 #include <QtQuick/QQuickWindow>
 #include <QtQuickControls2/QQuickStyle>
 
+#include "StormKitView.hpp"
+
 auto main(int argc, char *argv[]) -> int {
     auto app = QGuiApplication { argc, argv };
 
     auto engine = QQmlApplicationEngine {};
-    engine.addImportPath("qrc:/");
+    engine.addImportPath("qrc:///");
+
+    // QQuickWindow::setGraphicsApi(QSGRendererInterface::Vulkan);
 
 #ifdef Q_OS_WINDOWS
     app.setWindowIcon(QIcon { QStringLiteral("qrc:/assets/glTF.ico") });
@@ -27,11 +31,13 @@ auto main(int argc, char *argv[]) -> int {
 
 #endif
 
+    qmlRegisterType<StormKitView>("ModelViewer", 1, 0, "StormKitView");
+
     QObject::connect(
         &engine,
         &QQmlApplicationEngine::objectCreated,
         &app,
-        [url](QObject *obj, const QUrl &objUrl) {
+        [url](QObject *obj, const QUrl& objUrl) {
             if (!obj && url == objUrl) QCoreApplication::exit(-1);
         },
         Qt::QueuedConnection);

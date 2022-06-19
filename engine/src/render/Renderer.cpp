@@ -19,6 +19,7 @@
 
 #include <stormkit/gpu/core/Device.mpp>
 #include <stormkit/gpu/core/Instance.mpp>
+#include <stormkit/gpu/core/OffscreenSurface.mpp>
 #include <stormkit/gpu/core/PhysicalDevice.mpp>
 #include <stormkit/gpu/core/PhysicalDeviceInfo.mpp>
 #include <stormkit/gpu/core/Queue.mpp>
@@ -30,19 +31,19 @@ namespace stormkit::engine {
 
     class RendererSyncSystem: public entities::System {
       public:
-        RendererSyncSystem([[maybe_unused]] RenderQueue &queue, entities::EntityManager &manager)
+        RendererSyncSystem([[maybe_unused]] RenderQueue& queue, entities::EntityManager& manager)
             : System { manager, 0, {} } {}
 
-        RendererSyncSystem(const RendererSyncSystem &) = delete;
-        auto operator=(const RendererSyncSystem &) -> RendererSyncSystem & = delete;
+        RendererSyncSystem(const RendererSyncSystem&) = delete;
+        auto operator=(const RendererSyncSystem&) -> RendererSyncSystem& = delete;
 
-        RendererSyncSystem(RendererSyncSystem &&) noexcept = default;
-        auto operator=(RendererSyncSystem &&) noexcept -> RendererSyncSystem & = default;
+        RendererSyncSystem(RendererSyncSystem&&) noexcept = default;
+        auto operator=(RendererSyncSystem&&) noexcept -> RendererSyncSystem& = default;
 
         auto update([[maybe_unused]] core::Secondf delta) -> void override {};
 
       private:
-        auto onMessageReceived([[maybe_unused]] const entities::Message &message) -> void override {
+        auto onMessageReceived([[maybe_unused]] const entities::Message& message) -> void override {
         }
 
         [[maybe_unused]] RenderQueue *m_render_queue = nullptr;
@@ -50,7 +51,8 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    Renderer::Renderer(Engine &engine) : EngineObject { engine } {
+    Renderer::Renderer(Engine& engine)
+        : EngineObject { engine }, m_build_framegraph { [](auto&) {} } {
         m_instance = std::make_unique<gpu::Instance>();
         renderer_logger.ilog("Render backend successfully initialized");
         renderer_logger.ilog("Using StormKit {}.{}.{} (branch: {}, commit_hash: {}), built with {}",
@@ -62,18 +64,61 @@ namespace stormkit::engine {
                              STORMKIT_COMPILER);
 
         renderer_logger.ilog("--------- Physical Devices ----------");
-        for (const auto &device : m_instance->physicalDevices())
+        for (const auto& device : m_instance->physicalDevices())
             renderer_logger.ilog("{}", device.info());
 
-        auto &window = this->engine().window();
+        auto& window = this->engine().window();
 
         auto surface = m_instance->allocateWindowSurface(window);
 
-        const auto &physical_device = m_instance->pickPhysicalDevice(*surface);
+        const auto& physical_device = m_instance->pickPhysicalDevice(*surface);
 
         m_surface = std::move(surface);
 
-        const auto &physical_device_info = physical_device.info();
+        const auto& physical_device_info = physical_device.info();
+
+        renderer_logger.ilog("Using physical device {} ({:#06x})",
+                             physical_device_info.device_name,
+                             physical_device_info.device_id);
+
+        m_device = physical_device.allocateLogicalDevice();
+        m_surface->initialize(*m_device);
+
+        m_pipeline_cache = m_device->allocatePipelineCache();
+        m_shader_cache   = std::make_unique<ShaderCache>(*m_device);
+
+        m_framegraphs.resize(m_surface->bufferingCount());
+        m_framegraph_states.resize(m_surface->bufferingCount());
+
+        m_render_thread = std::thread { [this] { threadLoop(); } };
+        core::setThreadName(m_render_thread, "StormKit:RenderThread");
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    Renderer::Renderer(Engine& engine,
+                       const core::ExtentU& extent,
+                       gpu::Surface::Buffering buffering)
+        : EngineObject { engine }, m_build_framegraph { [](auto&) {} } {
+        m_instance = std::make_unique<gpu::Instance>();
+        renderer_logger.ilog("Render backend successfully initialized");
+        renderer_logger.ilog("Using StormKit {}.{}.{} (branch: {}, commit_hash: {}), built with {}",
+                             core::STORMKIT_MAJOR_VERSION,
+                             core::STORMKIT_MINOR_VERSION,
+                             core::STORMKIT_PATCH_VERSION,
+                             core::STORMKIT_GIT_BRANCH,
+                             core::STORMKIT_GIT_COMMIT_HASH,
+                             STORMKIT_COMPILER);
+
+        renderer_logger.ilog("--------- Physical Devices ----------");
+        for (const auto& device : m_instance->physicalDevices())
+            renderer_logger.ilog("{}", device.info());
+
+        m_surface = m_instance->allocateOffscreenSurface(extent, buffering);
+
+        const auto& physical_device = m_instance->pickPhysicalDevice();
+
+        const auto& physical_device_info = physical_device.info();
 
         renderer_logger.ilog("Using physical device {} ({:#06x})",
                              physical_device_info.device_name,
@@ -101,7 +146,7 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    Renderer::Renderer(Renderer &&other) noexcept : EngineObject { std::move(other) } {
+    Renderer::Renderer(Renderer&& other) noexcept : EngineObject { std::move(other) } {
         other.m_stop_thread = true;
         if (other.m_render_thread.joinable()) other.m_render_thread.join();
 
@@ -122,7 +167,7 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto Renderer::operator=(Renderer &&other) noexcept -> Renderer & {
+    auto Renderer::operator=(Renderer&& other) noexcept -> Renderer& {
         if (&other == this) [[unlikely]]
             return *this;
 
@@ -154,7 +199,7 @@ namespace stormkit::engine {
 
         m_builder = std::make_unique<FrameGraphBuilder>(this->engine());
 
-        auto &world = this->engine().world();
+        auto& world = this->engine().world();
 
         world.addSystem<RendererSyncSystem>(*m_render_queue);
 
@@ -176,7 +221,7 @@ namespace stormkit::engine {
 
             auto frame = std::move(m_surface->acquireNextFrame().value());
 
-            auto &framegraph = m_framegraphs[frame.image_index];
+            auto& framegraph = m_framegraphs[frame.image_index];
             if (m_framegraph_states[frame.image_index] == FrameGraphState::Old) {
                 framegraph = m_builder->allocateFrameGraph(framegraph.get());
                 framegraph->setBackbuffer(m_surface->images()[frame.image_index]);

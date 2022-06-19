@@ -116,9 +116,10 @@ namespace stormkit::image {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto Image::size(core::UInt32 layer,
-                            core::UInt32 face,
-                            core::UInt32 level) const noexcept -> core::USize {
+    inline auto Image::size(
+        [[maybe_unused]] core::UInt32 layer, // TODO Use layer and face to get correct size
+        [[maybe_unused]] core::UInt32 face,
+        core::UInt32 level) const noexcept -> core::USize {
         STORMKIT_EXPECTS(m_data.mip_levels > level);
         STORMKIT_EXPECTS(m_data.faces > face);
         STORMKIT_EXPECTS(m_data.layers > layer);

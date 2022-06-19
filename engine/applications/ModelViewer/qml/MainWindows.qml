@@ -21,40 +21,33 @@ MicaApplicationWindow {
 
     onIsDarkThemeEnabledChanged: window.WinUI3Style.theme = WinUI3Style.System
 
-    ColumnLayout {
+    titleBarExpended: true
+
+    titlebar: RowLayout {
+        ToolButton {
+            font.family: WinUI3Style.iconFont
+            text: String.fromCodePoint(0xe8e5)
+
+            ToolTip {
+                text: qsTr("Open")
+            }
+
+            Layout.rightMargin: 6
+        }
+
+        Label {
+            text: window.title
+            font.pixelSize: 12
+            font.weight: 400
+            font.family: "Segoe UI Semibold"
+
+            Layout.alignment: Qt.AlignVCenter
+        }
+    }
+
+    WindowContent {
+        id: window_content
+
         anchors.fill: parent
-
-        id: layout
-
-        RowLayout {
-            Layout.fillWidth: true
-
-            ToolButton {
-                font.family: WinUI3Style.iconFont
-                text: String.fromCodePoint(0xe8e5)
-
-                ToolTip {
-                    text: qsTr("Open")
-                }
-
-                Layout.rightMargin: 6
-            }
-
-            Label {
-                text: window.title
-                font.pixelSize: 12
-                font.weight: 400
-                font.family: "Segoe UI Semibold"
-
-                Layout.alignment: Qt.AlignVCenter
-            }
-        }
-
-        WindowContent {
-            id: content
-
-            Layout.fillHeight: true
-            Layout.fillWidth: true
-        }
     }
 }

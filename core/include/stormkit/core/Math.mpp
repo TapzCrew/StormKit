@@ -304,7 +304,7 @@ namespace stormkit::core {
     /// std::is_integral).
     /// \unique_name ExtentBase<T>
     template<ArithmeticType T>
-    struct STORMKIT_PUBLIC Extent {
+    struct Extent {
         using UnderlyingType = T;
 
         using OrderingType = std::
@@ -328,7 +328,7 @@ namespace stormkit::core {
         /// Construct a copy of other.
         ///
         /// \param other UnderlyingType copied extent.
-        constexpr Extent(const Extent<UnderlyingType> &other) noexcept = default;
+        constexpr Extent(const Extent<UnderlyingType>& other) noexcept = default;
 
         /// \brief Move constructor.
         ///
@@ -336,19 +336,19 @@ namespace stormkit::core {
         /// was pointing to.
         ///
         /// \param other UnderlyingType moved extent.
-        constexpr Extent(Extent<UnderlyingType> &&other) noexcept = default;
+        constexpr Extent(Extent<UnderlyingType>&& other) noexcept = default;
 
         /// \brief Assigns other to this extent and returns a reference to this extent.
         /// \param other UnderlyingType extent copied.
         /// \returns UnderlyingType reference of the copied extent.
-        constexpr auto operator         =(const Extent<UnderlyingType> &other) noexcept
-            -> Extent<UnderlyingType> & = default;
+        constexpr auto operator        =(const Extent<UnderlyingType>        &other) noexcept
+            -> Extent<UnderlyingType>& = default;
 
         /// \brief Move assign other to this Extent instance.
         /// \param other UnderlyingType extent moved.
         /// \returns UnderlyingType reference of the moved extent.
-        constexpr auto operator         =(Extent<UnderlyingType> &&other) noexcept
-            -> Extent<UnderlyingType> & = default;
+        constexpr auto operator        =(Extent<UnderlyingType>        &&other) noexcept
+            -> Extent<UnderlyingType>& = default;
 
         /// \brief Construct a extent from the convertion of an other extent.
         ///
@@ -358,19 +358,19 @@ namespace stormkit::core {
         /// \requires `U` need to be an arithmetic type (satisfy std::is_floating_point or
         /// std::is_integral).
         template<ArithmeticType U>
-        constexpr Extent(const Extent<U> &other) noexcept;
+        constexpr Extent(const Extent<U>& other) noexcept;
 
         /// \output_section Publics operators members
         /// \brief UnderlyingType the equality with an other extent.
         /// \param other UnderlyingType extent to test
         /// \returns true if this extent is equal to `other`, otherwise returns false.
-        [[nodiscard]] constexpr auto operator<=>(const Extent<UnderlyingType> &other) const noexcept
+        [[nodiscard]] constexpr auto operator<=>(const Extent<UnderlyingType>& other) const noexcept
             -> OrderingType;
 
         /// \brief UnderlyingType the equality with an other extent.
         /// \param other UnderlyingType extent to test
         /// \returns true if this extent is equal to `other`, otherwise returns false.
-        [[nodiscard]] constexpr auto operator==(const Extent<UnderlyingType> &other) const noexcept
+        [[nodiscard]] constexpr auto operator==(const Extent<UnderlyingType>& other) const noexcept
             -> bool;
 
         /// \brief Multiply an extent with a factor.
@@ -389,13 +389,13 @@ namespace stormkit::core {
         /// \param factor UnderlyingType factor to multiply
         /// \returns A reference to this after the multiplication with `factor`
         [[nodiscard]] constexpr auto operator*=(UnderlyingType factor) noexcept
-            -> Extent<UnderlyingType> &;
+            -> Extent<UnderlyingType>&;
 
         /// \brief Divide this extent with a factor.
         /// \param factor UnderlyingType factor to divide
         /// \returns A reference to this after the division with `factor`
         [[nodiscard]] constexpr auto operator/=(UnderlyingType factor) noexcept
-            -> Extent<UnderlyingType> &;
+            -> Extent<UnderlyingType>&;
 
         /// \output_section Publics member
         /// \brief Width attribute.
@@ -614,7 +614,7 @@ namespace stormkit::core {
 template<stormkit::core::ArithmeticType T>
 struct std::hash<stormkit::core::Extent<T>> {
     [[nodiscard]] constexpr stormkit::core::Hash64
-        operator()(const stormkit::core::Extent<T> &extent) const noexcept;
+        operator()(const stormkit::core::Extent<T>& extent) const noexcept;
 };
 
 CUSTOM_FORMAT(stormkit::core::Vector2f, stormkit::core::toString(data))
