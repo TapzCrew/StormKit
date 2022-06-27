@@ -17,9 +17,7 @@ MicaApplicationWindow {
     visible: true
     title: qsTr("Model Viewer")
 
-    WinUI3Style.theme: WinUI3Style.Theme.System
-
-    onIsDarkThemeEnabledChanged: window.WinUI3Style.theme = WinUI3Style.System
+    WinUI3Style.theme: WinUI3Style.Theme.Dark
 
     titleBarExpended: true
 
