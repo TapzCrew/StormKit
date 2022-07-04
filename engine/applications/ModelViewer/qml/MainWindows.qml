@@ -19,7 +19,7 @@ MicaApplicationWindow {
 
     WinUI3Style.theme: WinUI3Style.Theme.Dark
 
-    titleBarExpended: true
+    titleBarExpanded: true
 
     titlebar: RowLayout {
         ToolButton {
@@ -29,19 +29,21 @@ MicaApplicationWindow {
             ToolTip {
                 text: qsTr("Open")
             }
-
-            Layout.rightMargin: 6
         }
 
         Label {
             text: window.title
             font.pixelSize: 12
-            font.weight: 400
+            font.weight: 450
             font.family: "Segoe UI Semibold"
+
+            Layout.leftMargin: 6
 
             Layout.alignment: Qt.AlignVCenter
         }
     }
+
+    enableSideMenu: false
 
     WindowContent {
         id: window_content

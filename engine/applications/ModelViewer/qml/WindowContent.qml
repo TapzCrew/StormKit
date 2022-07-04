@@ -6,6 +6,8 @@ import ModelViewer
 Item {
     id: root
 
+    anchors.leftMargin: 8
+
     GridLayout {
         id: main_layout
 
