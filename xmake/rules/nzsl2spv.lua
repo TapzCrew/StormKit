@@ -14,7 +14,7 @@ rule("utils.nzsl2spv")
         batchcmds:show_progress(opt.progress, "${color.build.object}generating.nzsl2spv %s", sourcefile_nzsl)
         batchcmds:mkdir(outputdir)
 
-        batchcmds:vrunv("nzslc", { "--optimize", "--output=@stdout", "--compile=spv-dis", sourcefile_nzsl})
+        batchcmds:vrunv("nzslc", { "--compile=spv-header", "--optimize", "--spv-version", "110", "-i", sourcefile_nzsl, "-o", outputdir})
 
         local outputfile = path.join(outputdir, format("%s.h", path.filename(sourcefile_nzsl)))
 
