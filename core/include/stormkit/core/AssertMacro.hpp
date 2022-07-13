@@ -15,22 +15,40 @@ namespace stormkit::core::details {
     struct AssertFailure {
         AssertFailure(const char *type, const char *message) {
             std::fprintf(stderr, "%s failure: %s", type, message);
+    #ifdef STORMKIT_OS_MACOS
+            std::exit(EXIT_FAILURE);
+    #else
             std::quick_exit(EXIT_FAILURE);
+    #endif
         }
     };
 } // namespace stormkit::core::details
 
     #define STORMKIT_ASSERT_LINE STORMKIT_STRINGIFY(STORMKIT_CURRENT_LINE)
-    #define STORMKIT_ASSERT_BASE(condition, type, message)                                \
-        do {                                                                              \
-            if (!(condition)) [[unlikely]] {                                              \
-                std::cerr << type " `" #condition "` failed in " << STORMKIT_CURRENT_FILE \
-                          << " line " << STORMKIT_CURRENT_LINE << "\n "                   \
-                          << STORMKIT_CURRENT_FUNCTION << "\n\t" << message << std::endl; \
-                stormkit::core::printStacktrace();                                        \
-                std::quick_exit(EXIT_FAILURE);                                            \
-            }                                                                             \
-        } while (false)
+    #ifdef STORMKIT_OS_MACOS
+        #define STORMKIT_ASSERT_BASE(condition, type, message)                                \
+            do {                                                                              \
+                if (!(condition)) [[unlikely]] {                                              \
+                    std::cerr << type " `" #condition "` failed in " << STORMKIT_CURRENT_FILE \
+                              << " line " << STORMKIT_CURRENT_LINE << "\n "                   \
+                              << STORMKIT_CURRENT_FUNCTION << "\n\t" << message << std::endl; \
+                    stormkit::core::printStacktrace();                                        \
+                    std::exit(EXIT_FAILURE);                                                  \
+                }                                                                             \
+            } while (false)
+
+    #else
+        #define STORMKIT_ASSERT_BASE(condition, type, message)                                \
+            do {                                                                              \
+                if (!(condition)) [[unlikely]] {                                              \
+                    std::cerr << type " `" #condition "` failed in " << STORMKIT_CURRENT_FILE \
+                              << " line " << STORMKIT_CURRENT_LINE << "\n "                   \
+                              << STORMKIT_CURRENT_FUNCTION << "\n\t" << message << std::endl; \
+                    stormkit::core::printStacktrace();                                        \
+                    std::quick_exit(EXIT_FAILURE);                                            \
+                }                                                                             \
+            } while (false)
+    #endif
 
     #define STORMKIT_CONSTEXPR_ASSERT_BASE(condition, type, message)                        \
         if (std::is_constant_evaluated())                                                   \
@@ -99,16 +117,28 @@ namespace stormkit::core::details {
     #define STORMKIT_CONSTEXPR_EXPECTS_MESSAGE(condition, message) \
         STORMKIT_CONSTEXPR_ASSERT_BASE(condition, "Postcondition", message)
 #else
-    #define STORMKIT_ENSURES(condition)
-    #define STORMKIT_ENSURES_MESSAGE(condition, message)
-    #define STORMKIT_EXPECTS(condition)
-    #define STORMKIT_EXPECTS_MESSAGE(condition, message)
-    #define STORMKIT_ASSERT(condition)
-    #define STORMKIT_ASSERT_MESSAGE(condition, message)
-    #define STORMKIT_CONSTEXPR_ENSURES(condition)
-    #define STORMKIT_CONSTEXPR_ENSURES_MESSAGE(condition, message)
-    #define STORMKIT_CONSTEXPR_EXPECTS(condition)
-    #define STORMKIT_CONSTEXPR_EXPECTS_MESSAGE(condition, message)
-    #define STORMKIT_CONSTEXPR_ASSERT(condition)
-    #define STORMKIT_CONSTEXPR_ASSERT_MESSAGE(condition, message)
+    #define STORMKIT_ENSURES(condition) ((void)(condition))
+    #define STORMKIT_ENSURES_MESSAGE(condition, message) \
+        ((void)(condition));                             \
+        ((void)(message))
+    #define STORMKIT_EXPECTS(condition) ((void)(condition))
+    #define STORMKIT_EXPECTS_MESSAGE(condition, message) \
+        ((void)(condition));                             \
+        ((void)(message))
+    #define STORMKIT_ASSERT(condition) ((void)(condition))
+    #define STORMKIT_ASSERT_MESSAGE(condition, message) \
+        ((void)(condition));                            \
+        ((void)(message))
+    #define STORMKIT_CONSTEXPR_ENSURES(condition) ((void)(condition))
+    #define STORMKIT_CONSTEXPR_ENSURES_MESSAGE(condition, message) \
+        ((void)(condition));                                       \
+        ((void)(message))
+    #define STORMKIT_CONSTEXPR_EXPECTS(condition) ((void)(condition))
+    #define STORMKIT_CONSTEXPR_EXPECTS_MESSAGE(condition, message) \
+        ((void)(condition));                                       \
+        ((void)(message))
+    #define STORMKIT_CONSTEXPR_ASSERT(condition) ((void)(condition))
+    #define STORMKIT_CONSTEXPR_ASSERT_MESSAGE(condition, message) \
+        ((void)(condition));                                      \
+        ((void)(message))
 #endif
