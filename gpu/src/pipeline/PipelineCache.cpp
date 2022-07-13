@@ -2,13 +2,13 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
+#include <stormkit/core/Fstream.mpp>
+
 #include <stormkit/gpu/core/Device.mpp>
 #include <stormkit/gpu/core/PhysicalDevice.mpp>
 
 #include <stormkit/gpu/pipeline/PipelineCache.mpp>
 #include <stormkit/gpu/pipeline/RenderPass.mpp>
-
-#include <fstream>
 
 #include "../Log.mpp"
 #include "stormkit/core/Types.mpp"
@@ -17,7 +17,7 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    PipelineCache::PipelineCache(const Device &device, std::filesystem::path path)
+    PipelineCache::PipelineCache(const Device& device, std::filesystem::path path)
         : DeviceObject { device }, m_path { std::move(path) } {
         if (std::filesystem::exists(m_path)) readPipelineCache();
         else
@@ -28,7 +28,7 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     PipelineCache::~PipelineCache() {
         if (m_pipeline_cache != VK_NULL_HANDLE) [[likely]] {
-            const auto &vk = device().table();
+            const auto& vk = device().table();
 
             saveCache();
 
@@ -38,32 +38,33 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    PipelineCache::PipelineCache(PipelineCache &&other) noexcept
+    PipelineCache::PipelineCache(PipelineCache&& other) noexcept
         : DeviceObject { std::move(other) }, m_path { std::exchange(other.m_path, {}) },
           m_pipeline_cache { std::exchange(other.m_pipeline_cache, VK_NULL_HANDLE) },
           m_graphics_pipelines { std::move(other.m_graphics_pipelines) }, m_compute_pipelines {
               std::move(other.m_compute_pipelines)
-          } {}
+          } {
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto PipelineCache::operator=(PipelineCache &&other) noexcept -> PipelineCache & {
+    auto PipelineCache::operator=(PipelineCache&& other) noexcept -> PipelineCache& {
         if (&other == this) [[unlikely]]
             return *this;
 
         DeviceObject::operator=(std::move(other));
-        m_path                = std::exchange(other.m_path, {});
-        m_pipeline_cache      = std::exchange(other.m_pipeline_cache, VK_NULL_HANDLE);
-        m_graphics_pipelines  = std::move(other.m_graphics_pipelines);
-        m_compute_pipelines   = std::move(other.m_compute_pipelines);
+        m_path               = std::exchange(other.m_path, {});
+        m_pipeline_cache     = std::exchange(other.m_pipeline_cache, VK_NULL_HANDLE);
+        m_graphics_pipelines = std::move(other.m_graphics_pipelines);
+        m_compute_pipelines  = std::move(other.m_compute_pipelines);
 
         return *this;
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto PipelineCache::getPipeline(const GraphicsPipelineState &state, const RenderPass &pass)
-        -> GraphicsPipeline & {
+    auto PipelineCache::getPipeline(const GraphicsPipelineState& state, const RenderPass& pass)
+        -> GraphicsPipeline& {
         const auto pass_description = pass.description();
         if (!has(state, pass_description)) {
             auto pipeline = device().createGraphicsPipeline(this);
@@ -76,7 +77,7 @@ namespace stormkit::gpu {
         }
 
         return std::ranges::find_if(m_graphics_pipelines[state],
-                                    [&pass_description](const auto &d) {
+                                    [&pass_description](const auto& d) {
                                         return d.first.isCompatible(pass_description);
                                     })
             ->second;
@@ -84,7 +85,7 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto PipelineCache::getPipeline(const ComputePipelineState &state) -> ComputePipeline & {
+    auto PipelineCache::getPipeline(const ComputePipelineState& state) -> ComputePipeline& {
         if (!has(state)) {
             auto pipeline = device().createComputePipeline(core::makeConstObserver(this));
 
@@ -98,16 +99,16 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto PipelineCache::has(const GraphicsPipelineState &state,
-                            const RenderPassDescription &description) const noexcept -> bool {
+    auto PipelineCache::has(const GraphicsPipelineState& state,
+                            const RenderPassDescription& description) const noexcept -> bool {
         auto it = m_graphics_pipelines.find(state);
         // auto it = core::ranges::find(m_pipelines, state);
         if (it == std::cend(m_graphics_pipelines)) return false;
 
-        const auto &lookup = it->second;
+        const auto& lookup = it->second;
 
         auto it2 =
-            std::find_if(std::cbegin(lookup), std::cend(lookup), [&description](const auto &d) {
+            std::find_if(std::cbegin(lookup), std::cend(lookup), [&description](const auto& d) {
                 return d.first.isCompatible(description);
             });
 
@@ -116,14 +117,14 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto PipelineCache::has(const ComputePipelineState &state) const noexcept -> bool {
+    auto PipelineCache::has(const ComputePipelineState& state) const noexcept -> bool {
         return m_compute_pipelines.find(state) != std::cend(m_compute_pipelines);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     auto PipelineCache::createNewPipelineCache() -> void {
-        const auto &vk = device().table();
+        const auto& vk = device().table();
 
         ilog("Creating new pipeline cache at {}", m_path.string());
 
@@ -150,18 +151,16 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     auto PipelineCache::readPipelineCache() -> void {
-        const auto &vk = device().table();
+        const auto& vk = device().table();
 
         const auto physical_device_infos = device().physicalDevice().info();
 
         ilog("Loading pipeline cache {}", m_path.string());
 
-        auto stream = std::basic_fstream<std::byte> { m_path.string(), std::ios::binary };
-
-        stream.read(core::as<core::Byte *>(&m_serialized.guard), sizeof(m_serialized.guard));
-        stream.read(core::as<core::Byte *>(&m_serialized.infos), sizeof(m_serialized.infos));
-        stream.read(core::as<core::Byte *>(std::data(m_serialized.uuid.value)),
-                    std::size(m_serialized.uuid.value));
+        auto stream = std::ifstream { m_path.string(), std::ios::binary };
+        core::read(stream, core::toByteSpan(m_serialized.guard));
+        core::read(stream, core::toByteSpan(m_serialized.infos));
+        core::read(stream, core::toByteSpan(m_serialized.uuid.value));
 
         if (m_serialized.guard.magic != MAGIC) {
             elog("Invalid pipeline cache magic number, have {}, expected: {}",
@@ -208,13 +207,7 @@ namespace stormkit::gpu {
             return;
         }
 
-        const auto data = [&] {
-            auto d = std::vector<std::byte> {};
-            d.resize(m_serialized.guard.data_size);
-            stream.read(std::data(d), std::size(d));
-
-            return d;
-        }();
+        const auto data = core::read(stream, m_serialized.guard.data_size);
 
         const auto create_info =
             VkPipelineCacheCreateInfo { .sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO,
@@ -228,7 +221,7 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     auto PipelineCache::saveCache() -> void {
-        const auto &vk = device().table();
+        const auto& vk = device().table();
 
         const auto data = [&] {
             auto size = core::USize { 0 };
@@ -247,12 +240,10 @@ namespace stormkit::gpu {
 
         for (auto v : data) core::hashCombine(m_serialized.guard.data_hash, v);
 
-        auto stream =
-            std::basic_ofstream<core::Byte> { m_path.string(), std::ios::binary | std::ios::trunc };
-        stream.write(core::as<core::Byte *>(&m_serialized.guard), sizeof(m_serialized.guard));
-        stream.write(core::as<core::Byte *>(&m_serialized.infos), sizeof(m_serialized.infos));
-        stream.write(core::as<core::Byte *>(std::data(m_serialized.uuid.value)),
-                     std::size(m_serialized.uuid.value));
-        stream.write(std::data(data), std::size(data));
+        auto stream = std::ofstream { m_path.string(), std::ios::binary | std::ios::trunc };
+        core::write(stream, core::toConstByteSpan(m_serialized.guard));
+        core::write(stream, core::toConstByteSpan(m_serialized.infos));
+        core::write(stream, core::toConstByteSpan(m_serialized.uuid.value));
+        core::write(stream, core::toConstByteSpan(data));
     }
 } // namespace stormkit::gpu

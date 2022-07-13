@@ -2,13 +2,14 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#include <fstream>
 #include <streambuf>
 
 #ifdef STORMKIT_ENABLE_SPIRV_INTROSPECT
     /////////// - spirv-cross - ///////////
     #include <spirv_glsl.hpp>
 #endif
+
+#include <stormkit/core/Fstream.mpp>
 
 #include <stormkit/gpu/core/Device.mpp>
 #include <stormkit/gpu/core/PhysicalDevice.mpp>
@@ -18,17 +19,15 @@
 namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
-    Shader::Shader(std::filesystem::path filepath, ShaderStageFlag type, const Device &device)
+    Shader::Shader(std::filesystem::path filepath, ShaderStageFlag type, const Device& device)
         : DeviceObject { device }, m_type { type } /* , m_descriptor_set_layout {
                                             m_device->createDescriptorSetLayout()
                                             } */
     {
-        auto stream =
-            std::basic_ifstream<std::byte> { filepath.string(), std::ios::binary | std::ios::ate };
-        auto size = stream.tellg();
+        auto stream     = std::ifstream { filepath.string(), std::ios::binary | std::ios::ate };
+        const auto size = stream.tellg();
 
-        m_source.resize(size);
-        stream.read(std::data(m_source), size);
+        m_source = core::read(stream, size);
 
         compile();
         reflect();
@@ -36,7 +35,7 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    Shader::Shader(core::ByteConstSpan data, ShaderStageFlag type, const Device &device)
+    Shader::Shader(core::ByteConstSpan data, ShaderStageFlag type, const Device& device)
         : DeviceObject { device }, m_type {
               type
           } /*, m_descriptor_set_layout {
@@ -51,17 +50,18 @@ m_device->createDescriptorSetLayout()
 
     /////////////////////////////////////
     /////////////////////////////////////
-    Shader::Shader(std::span<const SpirvID> data, ShaderStageFlag type, const Device &device)
+    Shader::Shader(std::span<const SpirvID> data, ShaderStageFlag type, const Device& device)
         : Shader { { reinterpret_cast<const core::Byte *>(std::data(data)),
                      std::size(data) * sizeof(SpirvID) },
                    type,
-                   device } {}
+                   device } {
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
     Shader::~Shader() {
         if (m_shader_module != VK_NULL_HANDLE) [[likely]] {
-            const auto &vk = device().table();
+            const auto& vk = device().table();
 
             vk.vkDestroyShaderModule(device(), m_shader_module, nullptr);
         }
@@ -69,23 +69,24 @@ m_device->createDescriptorSetLayout()
 
     /////////////////////////////////////
     /////////////////////////////////////
-    Shader::Shader(Shader &&other) noexcept
+    Shader::Shader(Shader&& other) noexcept
         : DeviceObject { std::move(other) }, m_type { std::exchange(other.m_type,
                                                                     ShaderStageFlag::None) },
           m_source { std::move(other.m_source) }, m_shader_module {
               std::exchange(other.m_shader_module, VK_NULL_HANDLE)
-          } {}
+          } {
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto Shader::operator=(Shader &&other) noexcept -> Shader & {
+    auto Shader::operator=(Shader&& other) noexcept -> Shader& {
         if (&other == this) [[unlikely]]
             return *this;
 
         DeviceObject::operator=(std::move(other));
-        m_type                = std::exchange(other.m_type, ShaderStageFlag::None);
-        m_source              = std::move(other.m_source);
-        m_shader_module       = std::exchange(other.m_shader_module, VK_NULL_HANDLE);
+        m_type          = std::exchange(other.m_type, ShaderStageFlag::None);
+        m_source        = std::move(other.m_source);
+        m_shader_module = std::exchange(other.m_shader_module, VK_NULL_HANDLE);
 
         return *this;
     }
@@ -93,7 +94,7 @@ m_device->createDescriptorSetLayout()
     /////////////////////////////////////
     /////////////////////////////////////
     auto Shader::compile() noexcept -> void {
-        const auto &vk = device().table();
+        const auto& vk = device().table();
 
         const auto create_info =
             VkShaderModuleCreateInfo { .sType    = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
@@ -116,7 +117,7 @@ m_device->createDescriptorSetLayout()
         const auto add_bindings = [this,
                                    &compiler](core::span<const spirv_cross::Resource> resources,
                                               gpu::DescriptorType type) {
-            for (const auto &resource : resources) {
+            for (const auto& resource : resources) {
                 /*const auto set =
                     spvc_compiler_get_decoration(compiler, resources[i].id,
                    SpvDecorationDescriptorSet);*/

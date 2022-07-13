@@ -2,6 +2,8 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
+#include <stormkit/core/Fstream.mpp>
+
 #include "TARGAImage.mpp"
 
 namespace stormkit::image::details {
@@ -29,7 +31,7 @@ namespace stormkit::image::details {
         auto& output = *result;
 
         auto stream = std::ofstream { filepath, std::ios::binary };
-        stream.write(reinterpret_cast<const char *>(std::data(output)), std::size(output));
+        core::write(stream, core::toConstByteSpan(output));
 
         return {};
     }

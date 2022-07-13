@@ -5,6 +5,7 @@
 #include <ranges>
 
 #include <stormkit/core/Coroutines.mpp>
+#include <stormkit/core/Fstream.mpp>
 
 #include "PPMImage.mpp"
 
@@ -43,7 +44,7 @@ namespace stormkit::image::details {
 
         auto& output = *result;
 
-        stream.write(reinterpret_cast<const char *>(std::data(output)), std::size(output));
+        core::write(stream, core::toConstByteSpan(output));
 
         return {};
     }

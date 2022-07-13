@@ -4,6 +4,7 @@
 
 #include <stormkit/core/Color.mpp>
 #include <stormkit/core/FrozenMap.mpp>
+#include <stormkit/core/Fstream.mpp>
 
 #include "QOIImage.mpp"
 #include "stormkit/core/Types.mpp"
@@ -186,7 +187,7 @@ namespace stormkit::image::details {
         auto& output = *result;
 
         auto stream = std::ofstream { filepath, std::ios::binary };
-        stream.write(reinterpret_cast<const char *>(std::data(output)), std::size(output));
+        core::write(stream, core::toConstByteSpan(output));
 
         return {};
     }

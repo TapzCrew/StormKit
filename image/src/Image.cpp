@@ -6,6 +6,7 @@
 
 #include <stormkit/core/Coroutines.mpp>
 #include <stormkit/core/Format.mpp>
+#include <stormkit/core/Fstream.mpp>
 #include <stormkit/core/Numerics.mpp>
 #include <stormkit/core/Strings.mpp>
 #include <stormkit/core/Types.mpp>
@@ -241,16 +242,10 @@ namespace stormkit::image {
         }
 
         const auto data = [&filepath]() {
-            auto file = std::ifstream { filepath, std::ios::binary };
+            auto stream     = std::ifstream { filepath, std::ios::binary | std::ios::ate };
+            const auto size = stream.tellg();
 
-            file.seekg(0, std::ios::end);
-            auto file_size = core::as<std::size_t>(std::streamoff { file.tellg() });
-            file.seekg(0, std::ios::beg);
-
-            auto data = core::ByteArray { file_size };
-            file.read(reinterpret_cast<char *>(std::data(data)), file_size);
-
-            return data;
+            return core::read(stream, size);
         }();
 
         if (codec == Image::Codec::Autodetect) codec = details::filenameToCodec(filepath);
