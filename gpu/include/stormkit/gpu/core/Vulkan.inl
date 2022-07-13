@@ -87,7 +87,11 @@ namespace stormkit::gpu {
 
         core::printStacktrace();
 
+    #ifdef STORMKIT_OS_MACOS
+        std::exit(EXIT_FAILURE);
+    #else
         std::quick_exit(EXIT_FAILURE);
+    #endif
     }
 
     /////////////////////////////////////
