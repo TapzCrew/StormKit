@@ -40,6 +40,6 @@ target("stormkit-gpu")
         os.cp(path.join(target:scriptdir(), "include/*"), path.join(target:installdir(), "include"))
     end)
 
-if has_config("enable_examples") then
+if has_config("enable_examples") and has_config("enable_wsi") then
     includes("examples/**/xmake.lua")
 end
