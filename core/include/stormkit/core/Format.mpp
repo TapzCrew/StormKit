@@ -18,9 +18,11 @@
 #include <ranges>
 #include <string>
 #include <vector>
+
 #ifdef STORMKIT_HAS_STL_FORMAT
     #include <format>
 #endif
+
 #include <stormkit/core/AsCast.mpp>
 #include <stormkit/core/Concepts.mpp>
 
@@ -64,6 +66,9 @@ namespace stormkit::core {
     using fmt::format;
     using fmt::format_to;
     using fmt::runtime;
+    using fmt::make_format_args;
+    using fmt::vformat;
+    using fmt::vformat_to;
 } // namespace stormkit::core
 
 template<class T>

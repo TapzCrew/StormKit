@@ -4,7 +4,16 @@
 
 #pragma once
 
-#if __has_include(<format>)
+#if defined(__cpp_lib_format)
+    #define STORMKIT_HAS_STL_FORMAT
+#elif __has_include(<fmt/format.h>)
+    #define STORMKIT_HAS_FMT_FORMAT
+    #include <fmt/format.h>
+#else
+    #error "No Format fallback"
+#endif
+
+#ifdef STORMKIT_HAS_STL_FORMAT
     #define FORMATTER(TYPE, OUTPUT_STR, ...)                        \
         inline auto toString(const TYPE &data) noexcept {           \
             return stormkit::core::format(OUTPUT_STR, __VA_ARGS__); \
@@ -26,7 +35,7 @@
                 return ctx.out();                                       \
             }                                                           \
         };
-#elif __has_include(<fmt/format.h>)
+#elif defined(STORMKIT_HAS_FMT_FORMAT)
     #define FORMATTER(TYPE, OUTPUT_STR, ...)                        \
         inline auto toString(const TYPE &data) noexcept {           \
             return stormkit::core::format(OUTPUT_STR, __VA_ARGS__); \
