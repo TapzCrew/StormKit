@@ -30,7 +30,7 @@ target("stormkit-core")
 
     add_files("src/*.cpp")
 
-    if is_plat("linux") then       add_files("src/posix/*.cpp")
+    if is_plat("linux") or is_plat("macosx") then       add_files("src/posix/*.cpp")
     elseif is_plat("windows") then add_files("src/win32/*.cpp") end
 
     add_headerfiles("include/(stormkit/**.mpp)")
