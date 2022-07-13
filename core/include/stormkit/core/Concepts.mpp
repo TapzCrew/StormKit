@@ -23,25 +23,27 @@ namespace stormkit::core {
     concept ByteType = std::same_as<T, std::byte>;
 
     template<class T>
-    concept NonByteType = !ByteType<T>;
+    concept NonByteType = !
+    ByteType<T>;
 
     template<class T>
-    concept EnumerationType = std::is_enum_v<T> && !std::same_as<T, std::byte>;
+    concept EnumerationType = std::is_enum_v<T> && !
+    std::same_as<T, std::byte>;
 
     template<class T>
-    concept HashableType = requires(T &a) {
-        { std::hash<T> {}(a) } -> std::convertible_to<std::size_t>;
-    };
+    concept HashableType = requires(T& a) {
+                               { std::hash<T> {}(a) } -> std::convertible_to<std::size_t>;
+                           };
 
     template<class T>
     concept ArithmeticType = std::integral<T> || std::floating_point<T>;
 
     template<class T>
-    concept SmartPointerType = requires(T &a) {
-        a.operator->();
-        a.operator*();
-        a.get();
-    };
+    concept SmartPointerType = requires(T& a) {
+                                   a.operator->();
+                                   a.operator*();
+                                   a.get();
+                               };
 
     template<class T>
     concept RawPointerType = std::is_pointer_v<T>;
@@ -50,18 +52,18 @@ namespace stormkit::core {
     concept PointerType = RawPointerType<T> || SmartPointerType<T>;
 
     template<class T>
-    concept NonPointerType = !PointerType<T>;
+    concept NonPointerType = !
+    PointerType<T>;
 
     template<class T>
-    concept PreIncrementableType = requires(T &a) {
-        a.operator--();
-    };
+    concept PreIncrementableType = requires(T& a) { a.operator--(); };
 
     template<class T, class U>
     concept Is = std::same_as<std::remove_cvref_t<T>, std::remove_cvref_t<U>>;
 
     template<class T, class U>
-    concept IsNot = !Is<T, U>;
+    concept IsNot = !
+    Is<T, U>;
 
     template<class T>
     concept StringLikeType = std::convertible_to<T, std::string_view>;
@@ -70,22 +72,25 @@ namespace stormkit::core {
     concept ReferenceType = std::is_lvalue_reference_v<T>;
 
     template<class T>
-    concept BooleanTestableType = details::BooleanTestableType<T> && requires(T &&t) {
-        { !std::forward<T>(t) } -> details::BooleanTestableType;
-    };
+    concept BooleanTestableType =
+        details::BooleanTestableType<T> && requires(T&& t) {
+                                               {
+                                                   !std::forward<T>(t)
+                                                   } -> details::BooleanTestableType;
+                                           };
 
     template<class T, class... Args>
     concept PredicateType = std::predicate<T, Args...>;
 
     template<class T, class U>
-    concept UnaryPredicateType = PredicateType<T, const U &>;
+    concept UnaryPredicateType = PredicateType<T, const U&>;
 
     template<class T, class U>
-    concept BinaryPredicateType = PredicateType<T, const U &, const U &>;
+    concept BinaryPredicateType = PredicateType<T, const U&, const U&>;
 
     template<class T, class U>
     concept HashFuncType = std::regular_invocable<T, U> &&
-        std::convertible_to<std::invoke_result_t<T, U>, std::uint64_t>;
+                           std::convertible_to<std::invoke_result_t<T, U>, std::uint64_t>;
 } // namespace stormkit::core
 
 #if defined(STORMKIT_CXX20_MODULES)

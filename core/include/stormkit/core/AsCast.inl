@@ -23,28 +23,30 @@ namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
     template<typename To, typename... Args>
-    constexpr auto is(const std::variant<Args...> &variant) noexcept -> bool {
+    constexpr auto is(const std::variant<Args...>& variant) noexcept -> bool {
         return std::holds_alternative<To>(variant);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<typename To, ReferenceType From>
-    requires std::derived_from<To, std::remove_cvref_t<From>>
-    constexpr auto is(From &&value) noexcept -> bool { return is<To>(&value); }
+        requires std::derived_from<To, std::remove_cvref_t<From>>
+    constexpr auto is(From&& value) noexcept -> bool {
+        return is<To>(&value);
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<typename To, RawPointerType From>
-    requires std::derived_from<To, std::remove_pointer_t<From>>
-    constexpr auto is(From &&value) noexcept -> bool {
+        requires std::derived_from<To, std::remove_pointer_t<From>>
+    constexpr auto is(From&& value) noexcept -> bool {
         return dynamic_cast<const To *>(value) != nullptr;
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<typename To, typename... Args>
-    constexpr auto as(std::variant<Args...> &variant) noexcept -> To & {
+    constexpr auto as(std::variant<Args...>& variant) noexcept -> To& {
         STORMKIT_CONSTEXPR_EXPECTS(is<To>(variant));
 
         return std::get<To>(variant);
@@ -53,7 +55,7 @@ namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
     template<typename To, typename... Args>
-    constexpr auto as(std::variant<Args...> &&variant) noexcept -> To && {
+    constexpr auto as(std::variant<Args...>&& variant) noexcept -> To&& {
         STORMKIT_CONSTEXPR_EXPECTS(is<To>(variant));
 
         return std::get<To>(std::move(variant));
@@ -62,7 +64,7 @@ namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
     template<typename To, typename... Args>
-    constexpr auto as(const std::variant<Args...> &variant) noexcept -> const To & {
+    constexpr auto as(const std::variant<Args...>& variant) noexcept -> const To& {
         STORMKIT_CONSTEXPR_EXPECTS(is<To>(variant));
 
         return std::get<To>(variant);
@@ -71,7 +73,7 @@ namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
     template<typename To, typename... Args>
-    constexpr auto as(const std::variant<Args...> &&variant) noexcept -> const To && {
+    constexpr auto as(const std::variant<Args...>&& variant) noexcept -> const To&& {
         STORMKIT_CONSTEXPR_EXPECTS(is<To>(variant));
 
         return std::get<To>(std::move(variant));
@@ -101,10 +103,10 @@ namespace stormkit::core {
     /////////////////////////////////////
     template<std::signed_integral To, std::unsigned_integral From>
     constexpr auto as(From value) noexcept -> To {
-        using type = details::SafeTypeHelperType<To, From>;
+        using Type = details::SafeTypeHelperType<To, From>;
 
-        STORMKIT_CONSTEXPR_EXPECTS(static_cast<type>(std::numeric_limits<To>::max()) >
-                                   static_cast<type>(value));
+        STORMKIT_CONSTEXPR_EXPECTS(static_cast<Type>(std::numeric_limits<To>::max()) >
+                                   static_cast<Type>(value));
 
         return static_cast<To>(value);
     }
@@ -113,11 +115,11 @@ namespace stormkit::core {
     /////////////////////////////////////
     template<std::unsigned_integral To, std::signed_integral From>
     constexpr auto as(From value) noexcept -> To {
-        using type = details::SafeTypeHelperType<To, From>;
+        using Type = details::SafeTypeHelperType<To, From>;
 
         STORMKIT_CONSTEXPR_EXPECTS(value >= 0);
-        STORMKIT_CONSTEXPR_EXPECTS(static_cast<type>(std::numeric_limits<To>::max()) >
-                                   static_cast<type>(value));
+        STORMKIT_CONSTEXPR_EXPECTS(static_cast<Type>(std::numeric_limits<To>::max()) >
+                                   static_cast<Type>(value));
 
         return static_cast<To>(value);
     }
@@ -146,10 +148,10 @@ namespace stormkit::core {
     /////////////////////////////////////
     template<std::floating_point To, std::unsigned_integral From>
     constexpr auto as(From value) noexcept -> To {
-        using type = details::SafeTypeHelperType<To, From>;
+        using Type = details::SafeTypeHelperType<To, From>;
 
-        STORMKIT_CONSTEXPR_EXPECTS(static_cast<type>(std::numeric_limits<To>::max()) >
-                                   static_cast<type>(value));
+        STORMKIT_CONSTEXPR_EXPECTS(static_cast<Type>(std::numeric_limits<To>::max()) >
+                                   static_cast<Type>(value));
 
         return static_cast<To>(value);
     }
@@ -170,16 +172,17 @@ namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
     template<std::integral To, EnumerationType From>
-    requires(!ByteType<To>) constexpr auto as(From value) noexcept -> To {
+        requires(!ByteType<To>)
+    constexpr auto as(From value) noexcept -> To {
         return as<To>(static_cast<std::underlying_type_t<From>>(value));
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<EnumerationType To, std::integral From>
-    requires(!ByteType<From>) constexpr auto as(From value) noexcept -> To {
+        requires(!ByteType<From>)
+    constexpr auto as(From value) noexcept -> To {
         using UnderlyingType = std::underlying_type_t<To>;
-        using Type           = details::SafeTypeHelperType<UnderlyingType, From>;
 
         STORMKIT_CONSTEXPR_EXPECTS(std::numeric_limits<UnderlyingType>::max() > value);
 
@@ -218,29 +221,33 @@ namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
     template<ReferenceType To, ReferenceType From>
-    requires std::derived_from<std::remove_cvref_t<To>, std::remove_cvref_t<From>>
-    constexpr auto as(From &&value) -> To { return static_cast<To>(value); }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    template<RawPointerType To, RawPointerType From>
-    requires std::derived_from<std::remove_cvref_t<std::remove_pointer_t<To>>,
-                               std::remove_cvref_t<std::remove_pointer_t<From>>>
-    constexpr auto as(From &&value) noexcept -> To { return dynamic_cast<To>(value); }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    template<typename To, std::convertible_to<To> From>
-    requires(!ArithmeticType<To> && !ArithmeticType<From>) constexpr auto as(From &value) noexcept
-        -> To {
+        requires std::derived_from<std::remove_cvref_t<To>, std::remove_cvref_t<From>>
+    constexpr auto as(From&& value) -> To {
         return static_cast<To>(value);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<RawPointerType To, RawPointerType From>
-    requires(ByteType<std::remove_cvref_t<std::remove_pointer_t<To>>>)
-        [[nodiscard]] constexpr auto as(From value) noexcept -> To {
+        requires std::derived_from<std::remove_cvref_t<std::remove_pointer_t<To>>,
+                                   std::remove_cvref_t<std::remove_pointer_t<From>>>
+    constexpr auto as(From&& value) noexcept -> To {
+        return dynamic_cast<To>(value);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<typename To, std::convertible_to<To> From>
+        requires(!ArithmeticType<To> && !ArithmeticType<From>)
+    constexpr auto as(From& value) noexcept -> To {
+        return static_cast<To>(value);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<RawPointerType To, RawPointerType From>
+        requires(ByteType<std::remove_cvref_t<std::remove_pointer_t<To>>>)
+    [[nodiscard]] constexpr auto as(From value) noexcept -> To {
         return reinterpret_cast<To>(value);
     }
 } // namespace stormkit::core

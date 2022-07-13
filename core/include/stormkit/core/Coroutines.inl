@@ -9,7 +9,7 @@ namespace stormkit::core {
         class GeneratorPromise {
           public:
             using value_type     = std::remove_reference_t<T>;
-            using reference_type = std::conditional_t<std::is_reference_v<T>, T, T &>;
+            using reference_type = std::conditional_t<std::is_reference_v<T>, T, T&>;
             using pointer_type   = std::conditional_t<std::is_pointer_v<T>, T, T *>;
 
             auto get_return_object() noexcept -> Generator<T>;
@@ -18,9 +18,9 @@ namespace stormkit::core {
             constexpr auto final_suspend() const noexcept -> std::suspend_always;
 
             template<typename U = T, std::enable_if_t<!std::is_rvalue_reference_v<U>, int> = 0>
-            auto yield_value(std::remove_reference_t<T> &value) noexcept -> std::suspend_always;
+            auto yield_value(std::remove_reference_t<T>& value) noexcept -> std::suspend_always;
 
-            auto yield_value(std::remove_reference_t<T> &&value) noexcept -> std::suspend_always;
+            auto yield_value(std::remove_reference_t<T>&& value) noexcept -> std::suspend_always;
 
             auto unhandled_exception() noexcept -> void;
 
@@ -28,7 +28,7 @@ namespace stormkit::core {
             auto value() const noexcept -> reference_type;
 
             template<typename U>
-            std::suspend_never await_transform(U &&value) = delete;
+            std::suspend_never await_transform(U&& value) = delete;
 
             auto rethrow_if_exception() -> void;
 
@@ -55,18 +55,18 @@ namespace stormkit::core {
             explicit GeneratorIterator(CoroutineHandle coroutine) noexcept;
             ~GeneratorIterator() noexcept;
 
-            GeneratorIterator(const GeneratorIterator &) noexcept;
-            auto operator=(const GeneratorIterator &) noexcept -> GeneratorIterator &;
+            GeneratorIterator(const GeneratorIterator&) noexcept;
+            auto operator=(const GeneratorIterator&) noexcept -> GeneratorIterator&;
 
-            GeneratorIterator(GeneratorIterator &&) noexcept;
-            auto operator=(GeneratorIterator &&) noexcept -> GeneratorIterator &;
+            GeneratorIterator(GeneratorIterator&&) noexcept;
+            auto operator=(GeneratorIterator&&) noexcept -> GeneratorIterator&;
 
-            friend auto operator==(const GeneratorIterator &, GeneratorSentinel) noexcept -> bool;
-            friend auto operator!=(const GeneratorIterator &, GeneratorSentinel) noexcept -> bool;
-            friend auto operator==(GeneratorSentinel, const GeneratorIterator &) noexcept -> bool;
-            friend auto operator!=(GeneratorSentinel, const GeneratorIterator &) noexcept -> bool;
+            friend auto operator==(const GeneratorIterator&, GeneratorSentinel) noexcept -> bool;
+            friend auto operator!=(const GeneratorIterator&, GeneratorSentinel) noexcept -> bool;
+            friend auto operator==(GeneratorSentinel, const GeneratorIterator&) noexcept -> bool;
+            friend auto operator!=(GeneratorSentinel, const GeneratorIterator&) noexcept -> bool;
 
-            auto operator++() -> GeneratorIterator &;
+            auto operator++() -> GeneratorIterator&;
 
             auto operator++(int) -> void;
 
@@ -107,7 +107,7 @@ namespace stormkit::core {
         /////////////////////////////////////
         template<typename T>
         template<typename U, std::enable_if_t<!std::is_rvalue_reference_v<U>, int>>
-        auto GeneratorPromise<T>::yield_value(std::remove_reference_t<T> &value) noexcept
+        auto GeneratorPromise<T>::yield_value(std::remove_reference_t<T>& value) noexcept
             -> std::suspend_always {
             m_value = std::addressof(value);
 
@@ -117,7 +117,7 @@ namespace stormkit::core {
         /////////////////////////////////////
         /////////////////////////////////////
         template<typename T>
-        auto GeneratorPromise<T>::yield_value(std::remove_reference_t<T> &&value) noexcept
+        auto GeneratorPromise<T>::yield_value(std::remove_reference_t<T>&& value) noexcept
             -> std::suspend_always {
             m_value = std::addressof(value);
 
@@ -127,7 +127,8 @@ namespace stormkit::core {
         /////////////////////////////////////
         /////////////////////////////////////
         template<typename T>
-        auto GeneratorPromise<T>::return_void() const noexcept -> void {}
+        auto GeneratorPromise<T>::return_void() const noexcept -> void {
+        }
 
         /////////////////////////////////////
         /////////////////////////////////////
@@ -158,7 +159,8 @@ namespace stormkit::core {
         /////////////////////////////////////
         template<typename T>
         GeneratorIterator<T>::GeneratorIterator(CoroutineHandle coroutine) noexcept
-            : m_coroutine { coroutine } {}
+            : m_coroutine { coroutine } {
+        }
 
         /////////////////////////////////////
         /////////////////////////////////////
@@ -168,55 +170,55 @@ namespace stormkit::core {
         /////////////////////////////////////
         /////////////////////////////////////
         template<typename T>
-        GeneratorIterator<T>::GeneratorIterator(const GeneratorIterator &) noexcept = default;
+        GeneratorIterator<T>::GeneratorIterator(const GeneratorIterator&) noexcept = default;
 
         template<typename T>
-        auto GeneratorIterator<T>::GeneratorIterator::operator=(const GeneratorIterator &) noexcept
-            -> GeneratorIterator                            & = default;
-
-        /////////////////////////////////////
-        /////////////////////////////////////
-        template<typename T>
-        GeneratorIterator<T>::GeneratorIterator(GeneratorIterator &&) noexcept = default;
+        auto GeneratorIterator<T>::GeneratorIterator::operator=(const GeneratorIterator&) noexcept
+            -> GeneratorIterator& = default;
 
         /////////////////////////////////////
         /////////////////////////////////////
         template<typename T>
-        auto GeneratorIterator<T>::GeneratorIterator::operator=(GeneratorIterator &&) noexcept
-            -> GeneratorIterator                            & = default;
+        GeneratorIterator<T>::GeneratorIterator(GeneratorIterator&&) noexcept = default;
 
         /////////////////////////////////////
         /////////////////////////////////////
         template<typename T>
-        auto operator==(const GeneratorIterator<T> &it, GeneratorSentinel) noexcept -> bool {
+        auto GeneratorIterator<T>::GeneratorIterator::operator=(GeneratorIterator&&) noexcept
+            -> GeneratorIterator& = default;
+
+        /////////////////////////////////////
+        /////////////////////////////////////
+        template<typename T>
+        auto operator==(const GeneratorIterator<T>& it, GeneratorSentinel) noexcept -> bool {
             return !it.m_coroutine || it.m_coroutine.done();
         }
 
         /////////////////////////////////////
         /////////////////////////////////////
         template<typename T>
-        auto operator!=(const GeneratorIterator<T> &it, GeneratorSentinel s) noexcept -> bool {
+        auto operator!=(const GeneratorIterator<T>& it, GeneratorSentinel s) noexcept -> bool {
             return !(it == s);
         }
 
         /////////////////////////////////////
         /////////////////////////////////////
         template<typename T>
-        auto operator==(GeneratorSentinel s, const GeneratorIterator<T> &it) noexcept -> bool {
+        auto operator==(GeneratorSentinel s, const GeneratorIterator<T>& it) noexcept -> bool {
             return it == s;
         }
 
         /////////////////////////////////////
         /////////////////////////////////////
         template<typename T>
-        auto operator!=(GeneratorSentinel s, const GeneratorIterator<T> &it) noexcept -> bool {
+        auto operator!=(GeneratorSentinel s, const GeneratorIterator<T>& it) noexcept -> bool {
             return it != s;
         }
 
         /////////////////////////////////////
         /////////////////////////////////////
         template<typename T>
-        auto GeneratorIterator<T>::operator++() -> GeneratorIterator & {
+        auto GeneratorIterator<T>::operator++() -> GeneratorIterator& {
             m_coroutine.resume();
 
             if (m_coroutine.done()) [[unlikely]]
@@ -258,7 +260,8 @@ namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
     template<typename T>
-    Generator<T>::Generator(CoroutineHandle handle) noexcept : m_coroutine { handle } {}
+    Generator<T>::Generator(CoroutineHandle handle) noexcept : m_coroutine { handle } {
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
@@ -271,13 +274,14 @@ namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
     template<typename T>
-    Generator<T>::Generator(Generator &&other) noexcept
-        : m_coroutine { std::exchange(other.m_coroutine, nullptr) } {}
+    Generator<T>::Generator(Generator&& other) noexcept
+        : m_coroutine { std::exchange(other.m_coroutine, nullptr) } {
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<typename T>
-    auto Generator<T>::operator=(Generator &&other) noexcept -> Generator & {
+    auto Generator<T>::operator=(Generator&& other) noexcept -> Generator& {
         if (&other == this) [[unlikely]]
             return *this;
 
@@ -393,21 +397,6 @@ namespace stormkit::core {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    template<std::convertible_to<std::size_t>... Args>
-    auto generateIndices(Args... args) -> Generator<std::array<std::size_t, sizeof...(Args)>> {
-        return generateIndicesAs<std::size_t>(core::as<std::size_t>(args)...);
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    template<std::ranges::range... Args>
-    auto generateIndices(const Args &...args)
-        -> Generator<std::array<std::size_t, sizeof...(Args)>> {
-        return generateIndicesAs<std::size_t>(std::size(args)...);
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
     template<std::integral T, std::convertible_to<T>... Args>
     auto generateIndicesAs(Args... args) -> Generator<std::array<T, sizeof...(Args)>> {
         return details::generateIndices<T>(core::as<T>(args)...);
@@ -416,8 +405,23 @@ namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
     template<std::integral T, std::ranges::range... Args>
-    auto generateIndicesAs(const Args &...args)
+    auto generateIndicesAs(const Args&...args)
         -> Generator<std::array<std::size_t, sizeof...(Args)>> {
         return details::generateIndices<T>(core::as<T>(std::size(args))...);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<std::convertible_to<std::size_t>... Args>
+    auto generateIndices(Args... args) -> Generator<std::array<std::size_t, sizeof...(Args)>> {
+        return generateIndicesAs<std::size_t>(core::as<std::size_t>(args)...);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<std::ranges::range... Args>
+    auto generateIndices(const Args&...args)
+        -> Generator<std::array<std::size_t, sizeof...(Args)>> {
+        return generateIndicesAs<std::size_t>(std::size(args)...);
     }
 } // namespace stormkit::core

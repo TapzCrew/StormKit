@@ -24,8 +24,8 @@
 namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
-    WindowSurface::WindowSurface(const wsi::Window &window,
-                                 const gpu::Instance &instance,
+    WindowSurface::WindowSurface(const wsi::Window& window,
+                                 const gpu::Instance& instance,
                                  Surface::Buffering buffering)
         : Surface { instance, buffering }, m_window { &window } {
 #if STORMKIT_WSI_ENABLED
@@ -118,7 +118,7 @@ namespace stormkit::gpu {
         if (!m_initialized) [[unlikely]]
             return;
 
-        auto &in_flight = m_in_flight_fences[m_current_frame];
+        auto& in_flight = m_in_flight_fences[m_current_frame];
         onSwapchainFenceSignaled(in_flight);
 
         destroy();
@@ -129,18 +129,20 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    WindowSurface::WindowSurface(WindowSurface &&other) noexcept
+    WindowSurface::WindowSurface(WindowSurface&& other) noexcept
         : Surface { std::move(other) }, m_window { std::exchange(other.m_window, nullptr) },
           m_initialized { std::exchange(other.m_initialized, false) },
-          m_surface { std::exchange(other.m_surface, VK_NULL_HANDLE) },
-          m_swapchain { std::exchange(other.m_swapchain, VK_NULL_HANDLE) },
-          m_old_swapchain { std::exchange(other.m_old_swapchain, VK_NULL_HANDLE) },
           m_exclusive_fullscreen_enabled { std::exchange(other.m_exclusive_fullscreen_enabled,
-                                                         false) } {}
+                                                         false) },
+          m_surface { std::exchange(other.m_surface, VK_NULL_HANDLE) },
+          m_swapchain { std::exchange(other.m_swapchain, VK_NULL_HANDLE) }, m_old_swapchain {
+              std::exchange(other.m_old_swapchain, VK_NULL_HANDLE)
+          } {
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto WindowSurface::operator=(WindowSurface &&other) noexcept -> WindowSurface & {
+    auto WindowSurface::operator=(WindowSurface&& other) noexcept -> WindowSurface& {
         if (&other == this) [[unlikely]]
             return *this;
 
@@ -159,7 +161,7 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto WindowSurface::initialize(const Device &device) -> void {
+    auto WindowSurface::initialize(const Device& device) -> void {
 #if STORMKIT_WSI_ENABLED
         m_device         = &device;
         m_graphics_queue = &device.graphicsQueue();
@@ -237,7 +239,8 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     auto WindowSurface::setExclusiveFullscreenEnabled([[maybe_unused]] bool enabled) noexcept
-        -> void {}
+        -> void {
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
@@ -246,11 +249,11 @@ namespace stormkit::gpu {
         STORMKIT_EXPECTS(m_device);
         STORMKIT_EXPECTS(m_surface);
         STORMKIT_EXPECTS(m_swapchain);
-        const auto &vk = m_device->table();
+        const auto& vk = m_device->table();
 
-        const auto &image_available = m_image_availables[m_current_frame];
-        const auto &render_finished = m_render_finisheds[m_current_frame];
-        auto &in_flight             = m_in_flight_fences[m_current_frame];
+        const auto& image_available = m_image_availables[m_current_frame];
+        const auto& render_finished = m_render_finisheds[m_current_frame];
+        auto& in_flight             = m_in_flight_fences[m_current_frame];
 
         if (const auto result = in_flight.wait(std::chrono::milliseconds { 1000 });
             result != Result::Success) {
@@ -258,7 +261,7 @@ namespace stormkit::gpu {
                  m_current_frame,
                  to_string(result));
 
-            return core::Unexpected { result };
+            return core::makeUnexpected(result);
         }
 
         onSwapchainFenceSignaled(in_flight);
@@ -303,12 +306,12 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto WindowSurface::present(const gpu::WindowSurface::Frame &frame) -> void {
+    auto WindowSurface::present(const gpu::WindowSurface::Frame& frame) -> void {
 #if STORMKIT_WSI_ENABLED
         STORMKIT_EXPECTS(m_device);
         STORMKIT_EXPECTS(m_surface);
         STORMKIT_EXPECTS(m_swapchain);
-        const auto &vk = device().table();
+        const auto& vk = device().table();
 
         const auto vk_wait_semaphore = frame.render_finished->vkHandle();
 
@@ -349,9 +352,9 @@ namespace stormkit::gpu {
         STORMKIT_EXPECTS(m_device);
         STORMKIT_EXPECTS(m_surface);
 
-        const auto &vk = m_device->table();
+        const auto& vk = m_device->table();
 
-        const auto &physical_device = m_device->physicalDevice();
+        const auto& physical_device = m_device->physicalDevice();
 
         const auto capabilities = [&] {
             auto c = VkSurfaceCapabilitiesKHR {};
@@ -437,8 +440,8 @@ namespace stormkit::gpu {
 
         m_images.reserve(std::size(m_vk_images));
         auto i = 0u;
-        for (const auto &vk_image : m_vk_images) {
-            auto &image = m_images.emplace_back(*m_device, m_extent, m_pixel_format, vk_image);
+        for (const auto& vk_image : m_vk_images) {
+            auto& image = m_images.emplace_back(*m_device, m_extent, m_pixel_format, vk_image);
 
             m_device->setObjectName(image, core::format("StormKit:SwapchainImage ({})", i++));
         }
@@ -448,7 +451,7 @@ namespace stormkit::gpu {
         auto transition_command_buffer = m_graphics_queue->createCommandBuffer();
 
         transition_command_buffer.begin(true);
-        for (auto &image : m_images)
+        for (auto& image : m_images)
             transition_command_buffer.transitionImageLayout(image,
                                                             ImageLayout::Undefined,
                                                             ImageLayout::Present_Src);
@@ -473,7 +476,7 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     auto WindowSurface::destroySwapchain() -> void {
 #if STORMKIT_WSI_ENABLED
-        auto &vk = m_device->table();
+        auto& vk = m_device->table();
 
         if (m_old_swapchain != VK_NULL_HANDLE) [[unlikely]] {
             vk.vkDestroySwapchainKHR(*m_device, m_old_swapchain, nullptr);
@@ -495,7 +498,7 @@ namespace stormkit::gpu {
         WindowSurface::chooseSwapSurfaceFormat(std::span<const VkSurfaceFormatKHR> formats) noexcept
         -> VkSurfaceFormatKHR {
 #if STORMKIT_WSI_ENABLED
-        for (const auto &format : formats) {
+        for (const auto& format : formats) {
             if (format.format == VK_FORMAT_B8G8R8A8_UNORM &&
                 format.colorSpace == VK_COLORSPACE_SRGB_NONLINEAR_KHR)
                 return format;
@@ -515,7 +518,7 @@ namespace stormkit::gpu {
 #if STORMKIT_WSI_ENABLED
         auto present_mode_ = VkPresentModeKHR { VK_PRESENT_MODE_FIFO_KHR };
 
-        for (const auto &present_mode : present_modes) {
+        for (const auto& present_mode : present_modes) {
             if (present_mode == VK_PRESENT_MODE_IMMEDIATE_KHR) return present_mode;
             else if (present_mode == VK_PRESENT_MODE_MAILBOX_KHR)
                 return present_mode;
@@ -530,7 +533,7 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto WindowSurface::chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities) noexcept
+    auto WindowSurface::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities) noexcept
         -> VkExtent2D {
 #if STORMKIT_WSI_ENABLED
         constexpr static auto int_max = std::numeric_limits<core::UInt32>::max();
@@ -556,7 +559,7 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto WindowSurface::chooseImageCount(const VkSurfaceCapabilitiesKHR &capabilities) noexcept
+    auto WindowSurface::chooseImageCount(const VkSurfaceCapabilitiesKHR& capabilities) noexcept
         -> core::UInt32 {
 #if STORMKIT_WSI_ENABLED
         auto image_count = capabilities.minImageCount + 1;

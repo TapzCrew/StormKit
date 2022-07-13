@@ -11,13 +11,13 @@
 namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
-    DescriptorPool::DescriptorPool(const Device &device,
+    DescriptorPool::DescriptorPool(const Device& device,
                                    std::span<const Size> sizes,
                                    core::UInt32 max_sets)
         : DeviceObject { device } {
-        const auto &vk = this->device().table();
+        const auto& vk = this->device().table();
 
-        const auto _sizes = core::transform(sizes, [&](const auto &s) {
+        const auto _sizes = core::transform(sizes, [&](const auto& s) {
             return VkDescriptorPoolSize { .type            = core::as<VkDescriptorType>(s.type),
                                           .descriptorCount = s.descriptor_count };
         });
@@ -38,7 +38,7 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     DescriptorPool::~DescriptorPool() {
         if (m_descriptor_pool != VK_NULL_HANDLE) [[likely]] {
-            const auto &vk = device().table();
+            const auto& vk = device().table();
 
             vk.vkDestroyDescriptorPool(device(), m_descriptor_pool, nullptr);
         }
@@ -46,19 +46,20 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    DescriptorPool::DescriptorPool(DescriptorPool &&other) noexcept
+    DescriptorPool::DescriptorPool(DescriptorPool&& other) noexcept
         : DeviceObject { std::move(other) }, m_descriptor_pool {
               std::exchange(other.m_descriptor_pool, VK_NULL_HANDLE)
-          } {}
+          } {
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto DescriptorPool::operator=(DescriptorPool &&other) noexcept -> DescriptorPool & {
+    auto DescriptorPool::operator=(DescriptorPool&& other) noexcept -> DescriptorPool& {
         if (&other == this) [[unlikely]]
             return *this;
 
         DeviceObject::operator=(std::move(other));
-        m_descriptor_pool     = std::exchange(other.m_descriptor_pool, VK_NULL_HANDLE);
+        m_descriptor_pool = std::exchange(other.m_descriptor_pool, VK_NULL_HANDLE);
 
         return *this;
     }
@@ -66,32 +67,28 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     auto DescriptorPool::createDescriptorSets(core::USize count,
-                                              const DescriptorSetLayout &layout) const
+                                              const DescriptorSetLayout& layout) const
         -> std::vector<gpu::DescriptorSet> {
         STORMKIT_EXPECTS(m_descriptor_pool);
         const auto [vk_sets, types] = createVkDescriptorSets(count, layout);
 
-        return core::transform(vk_sets,
-                               [this, &vk_sets = vk_sets, &types = types](
-                                   const auto &v) -> DescriptorSet {
-                                   return DescriptorSet { *this,
-                                                          std::move(types),
-                                                          v,
-                                                          [this](auto set) {
-                                                              deleteDescriptorSet(set);
-                                                          },
-                                                          DescriptorSet::Tag {} };
-                               });
+        return core::transform(vk_sets, [this, &types = types](const auto& v) -> DescriptorSet {
+            return DescriptorSet { *this,
+                                   std::move(types),
+                                   v,
+                                   [this](auto set) { deleteDescriptorSet(set); },
+                                   DescriptorSet::Tag {} };
+        });
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     auto DescriptorPool::allocateDescriptorSets(core::USize count,
-                                                const DescriptorSetLayout &layout) const
+                                                const DescriptorSetLayout& layout) const
         -> std::vector<gpu::DescriptorSetOwnedPtr> {
         const auto [vk_sets, types] = createVkDescriptorSets(count, layout);
 
-        return core::transform(vk_sets, [this, &vk_sets = vk_sets, &types = types](const auto &v) {
+        return core::transform(vk_sets, [this, &types = types](const auto& v) {
             return std::make_unique<DescriptorSet>(
                 *this,
                 types,
@@ -104,11 +101,11 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     auto DescriptorPool::allocateRefCountedDescriptorSets(core::USize count,
-                                                          const DescriptorSetLayout &layout) const
+                                                          const DescriptorSetLayout& layout) const
         -> std::vector<gpu::DescriptorSetSharedPtr> {
         const auto [vk_sets, types] = createVkDescriptorSets(count, layout);
 
-        return core::transform(vk_sets, [this, &vk_sets = vk_sets, &types = types](const auto &v) {
+        return core::transform(vk_sets, [this, &types = types](const auto& v) {
             return std::make_shared<DescriptorSet>(
                 *this,
                 types,
@@ -121,13 +118,13 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     auto DescriptorPool::createVkDescriptorSets(core::USize count,
-                                                const DescriptorSetLayout &layout) const
+                                                const DescriptorSetLayout& layout) const
         -> std::pair<std::vector<VkDescriptorSet>, std::vector<DescriptorType>> {
-        const auto &vk = device().table();
+        const auto& vk = device().table();
 
         const auto layouts = std::vector { count, layout.vkHandle() };
 
-        auto types = core::transform(layout.bindings(), [](const auto &b) { return b.type; });
+        auto types = core::transform(layout.bindings(), [](const auto& b) { return b.type; });
 
         const auto allocate_info =
             VkDescriptorSetAllocateInfo { .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
@@ -147,7 +144,7 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     auto DescriptorPool::deleteDescriptorSet(VkDescriptorSet set) const -> void {
-        const auto &vk = device().table();
+        const auto& vk = device().table();
         vk.vkFreeDescriptorSets(device(), m_descriptor_pool, 1, &set);
     }
 } // namespace stormkit::gpu

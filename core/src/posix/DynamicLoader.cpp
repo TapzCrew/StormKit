@@ -36,7 +36,7 @@ namespace stormkit::core {
     ////////////////////////////////////////
     ////////////////////////////////////////
     DynamicLoader::DynamicLoader(std::filesystem::path filepath)
-        : m_filepath { std::move(filepath) }, m_impl {} {
+        : m_impl {}, m_filepath { std::move(filepath) } {
         m_impl->library_handle = dlopen(m_filepath.c_str(), RTLD_LAZY | RTLD_LOCAL);
 
         if (!m_impl->library_handle) {
@@ -56,14 +56,15 @@ namespace stormkit::core {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    DynamicLoader::DynamicLoader(DynamicLoader &&other) noexcept
+    DynamicLoader::DynamicLoader(DynamicLoader&& other) noexcept
         : m_impl { std::exchange(other.m_impl, {}) }, m_is_loaded { std::exchange(other.m_is_loaded,
                                                                                   false) },
-          m_filepath { std::move(other.m_filepath) } {}
+          m_filepath { std::move(other.m_filepath) } {
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto DynamicLoader::operator=(DynamicLoader &&other) noexcept -> DynamicLoader & {
+    auto DynamicLoader::operator=(DynamicLoader&& other) noexcept -> DynamicLoader& {
         if (&other == this) [[unlikely]]
             return *this;
 
@@ -78,7 +79,7 @@ namespace stormkit::core {
     ////////////////////////////////////////
     auto DynamicLoader::doGetFunc(std::string_view name) const -> void * {
         auto func =
-            dlsym(const_cast<core::Pimpl<details::DynamicLoaderImpl> &>(m_impl)->library_handle,
+            dlsym(const_cast<core::Pimpl<details::DynamicLoaderImpl>&>(m_impl)->library_handle,
                   std::data(name));
 
         if (!func) {

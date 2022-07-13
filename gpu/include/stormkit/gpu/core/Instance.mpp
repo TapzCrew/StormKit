@@ -32,47 +32,47 @@ namespace stormkit::gpu {
         explicit Instance(std::string app_name = "");
         ~Instance();
 
-        Instance(const Instance &) = delete;
-        auto operator=(const Instance &) -> Instance & = delete;
+        Instance(const Instance&)                    = delete;
+        auto operator=(const Instance&) -> Instance& = delete;
 
-        Instance(Instance &&) noexcept;
-        auto operator=(Instance &&) noexcept -> Instance &;
+        Instance(Instance&&) noexcept;
+        auto operator=(Instance&&) noexcept -> Instance&;
 
 #ifdef STORMKIT_WSI_ENABLED
         [[nodiscard]] auto
-            createWindowSurface(const wsi::Window &window,
+            createWindowSurface(const wsi::Window& window,
                                 Surface::Buffering buffering = Surface::Buffering::Swapchain) const
             -> WindowSurface;
         [[nodiscard]] auto allocateWindowSurface(
-            const wsi::Window &window,
+            const wsi::Window& window,
             Surface::Buffering buffering = Surface::Buffering::Swapchain) const
             -> WindowSurfaceOwnedPtr;
         [[nodiscard]] auto allocateRefCountedWindowSurface(
-            const wsi::Window &window,
+            const wsi::Window& window,
             Surface::Buffering buffering = Surface::Buffering::Swapchain) const
             -> WindowSurfaceSharedPtr;
 #endif
 
         [[nodiscard]] auto
-            createOffscreenSurface(const core::ExtentU &extent,
+            createOffscreenSurface(const core::ExtentU& extent,
                                    Surface::Buffering buffering = Surface::Buffering::Triple) const
             -> OffscreenSurface;
         [[nodiscard]] auto allocateOffscreenSurface(
-            const core::ExtentU &extent,
+            const core::ExtentU& extent,
             Surface::Buffering buffering = Surface::Buffering::Triple) const
             -> OffscreenSurfaceOwnedPtr;
         [[nodiscard]] auto allocateRefCountedOffscreenSurface(
-            const core::ExtentU &extent,
+            const core::ExtentU& extent,
             Surface::Buffering buffering = Surface::Buffering::Triple) const
             -> OffscreenSurfaceSharedPtr;
 
-        [[nodiscard]] auto pickPhysicalDevice() const noexcept -> const gpu::PhysicalDevice &;
-        [[nodiscard]] auto pickPhysicalDevice(const WindowSurface &surface) noexcept
-            -> const gpu::PhysicalDevice &;
+        [[nodiscard]] auto pickPhysicalDevice() const noexcept -> const PhysicalDevice&;
+        [[nodiscard]] auto pickPhysicalDevice(const WindowSurface& surface) noexcept
+            -> const PhysicalDevice&;
 
-        [[nodiscard]] auto physicalDevices() -> std::span<const PhysicalDevice>;
+        [[nodiscard]] auto physicalDevices() const noexcept -> std::span<const PhysicalDevice>;
 
-        [[nodiscard]] auto loader() const noexcept -> const DynamicLoader &;
+        [[nodiscard]] auto loader() const noexcept -> const DynamicLoader&;
 
         [[nodiscard]] operator VkInstance() const noexcept;
         [[nodiscard]] auto vkHandle() const noexcept -> VkInstance;

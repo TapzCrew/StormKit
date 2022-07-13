@@ -8,7 +8,7 @@ namespace stormkit::log {
     ////////////////////////////////////////
     ////////////////////////////////////////
     template<class T, typename... Args>
-    auto LogHandler::setupLogger(Args &&...param_args) -> void {
+    auto LogHandler::setupLogger(Args&&...param_args) -> void {
         using LogClock = std::chrono::high_resolution_clock;
         static_assert(std::is_base_of<Logger, T>::value, "T must inherit Logger");
 
@@ -25,14 +25,15 @@ namespace stormkit::log {
     ////////////////////////////////////////
     template<typename... Args>
     auto LogHandler::log(Severity severity,
-                         const Module &m,
+                         const Module& m,
                          std::string_view format_string,
-                         Args &&...param_args) -> void {
+                         Args&&...param_args) -> void {
         if (!m_logger) setupDefaultLogger();
 
+        const auto format  = format_string;
         auto memory_buffer = std::string {};
         core::vformat_to(std::back_inserter(memory_buffer),
-                         core::runtime(format_string),
+                         format,
                          core::make_format_args(std::forward<Args>(param_args)...));
 
         logger().write(severity, m, std::data(memory_buffer));
@@ -41,7 +42,7 @@ namespace stormkit::log {
     ////////////////////////////////////////
     ////////////////////////////////////////
     template<typename... Args>
-    auto LogHandler::log(Severity severity, std::string_view format_string, Args &&...param_args)
+    auto LogHandler::log(Severity severity, std::string_view format_string, Args&&...param_args)
         -> void {
         log(severity, ""_module, format_string, std::forward<Args>(param_args)...);
     }
@@ -49,35 +50,35 @@ namespace stormkit::log {
     ////////////////////////////////////////
     ////////////////////////////////////////
     template<typename... Args>
-    auto LogHandler::dlog(Args &&...param_args) -> void {
+    auto LogHandler::dlog(Args&&...param_args) -> void {
         log(Severity::Debug, std::forward<Args>(param_args)...);
     }
 
     ////////////////////////////////////////
     ////////////////////////////////////////
     template<typename... Args>
-    auto LogHandler::ilog(Args &&...param_args) -> void {
+    auto LogHandler::ilog(Args&&...param_args) -> void {
         log(Severity::Info, std::forward<Args>(param_args)...);
     }
 
     ////////////////////////////////////////
     ////////////////////////////////////////
     template<typename... Args>
-    auto LogHandler::wlog(Args &&...param_args) -> void {
+    auto LogHandler::wlog(Args&&...param_args) -> void {
         log(Severity::Warning, std::forward<Args>(param_args)...);
     }
 
     ////////////////////////////////////////
     ////////////////////////////////////////
     template<typename... Args>
-    auto LogHandler::elog(Args &&...param_args) -> void {
+    auto LogHandler::elog(Args&&...param_args) -> void {
         log(Severity::Error, std::forward<Args>(param_args)...);
     }
 
     ////////////////////////////////////////
     ////////////////////////////////////////
     template<typename... Args>
-    auto LogHandler::flog(Args &&...param_args) -> void {
+    auto LogHandler::flog(Args&&...param_args) -> void {
         log(Severity::Fatal, std::forward<Args>(param_args)...);
     }
 

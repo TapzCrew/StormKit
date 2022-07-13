@@ -25,11 +25,11 @@ namespace stormkit::gpu {
 
         ~PhysicalDevice();
 
-        PhysicalDevice(const PhysicalDevice &) = delete;
-        auto operator=(const PhysicalDevice &) -> PhysicalDevice & = delete;
+        PhysicalDevice(const PhysicalDevice&)                    = delete;
+        auto operator=(const PhysicalDevice&) -> PhysicalDevice& = delete;
 
-        PhysicalDevice(PhysicalDevice &&) noexcept;
-        auto operator=(PhysicalDevice &&) noexcept -> PhysicalDevice &;
+        PhysicalDevice(PhysicalDevice&&) noexcept;
+        auto operator=(PhysicalDevice&&) noexcept -> PhysicalDevice&;
 
         [[nodiscard]] auto checkExtensionSupport(std::string_view extension) const noexcept -> bool;
         [[nodiscard]] auto
@@ -39,10 +39,10 @@ namespace stormkit::gpu {
             checkExtensionSupport(std::span<const core::CZString> extensions) const noexcept
             -> bool;
 
-        auto checkIfPresentSupportIsEnabled(const WindowSurface &surface) noexcept -> void;
+        auto checkIfPresentSupportIsEnabled(const WindowSurface& surface) noexcept -> void;
 
-        [[nodiscard]] auto info() const noexcept -> const PhysicalDeviceInfo &;
-        [[nodiscard]] auto capabilities() const noexcept -> const RenderCapabilities &;
+        [[nodiscard]] auto info() const noexcept -> const PhysicalDeviceInfo&;
+        [[nodiscard]] auto capabilities() const noexcept -> const RenderCapabilities&;
         [[nodiscard]] auto memoryProperties() const noexcept -> std::span<const MemoryPropertyFlag>;
 
         [[nodiscard]] auto queueFamilies() const noexcept -> std::span<const QueueFamily>;
@@ -55,7 +55,7 @@ namespace stormkit::gpu {
         [[nodiscard]] VkPhysicalDevice vkHandle() const noexcept;
 
       private:
-        PhysicalDevice(VkPhysicalDevice physical_device, const Instance &instance);
+        PhysicalDevice(VkPhysicalDevice physical_device, const Instance& instance);
 
         VkPhysicalDevice m_physical_device = VK_NULL_HANDLE;
 
@@ -73,7 +73,7 @@ namespace stormkit::gpu {
 
     constexpr auto
         computeUniformBufferOffsetAlignement(core::USize size,
-                                             const RenderCapabilities &capabilities) noexcept
+                                             const RenderCapabilities& capabilities) noexcept
         -> core::USize;
 } // namespace stormkit::gpu
 
