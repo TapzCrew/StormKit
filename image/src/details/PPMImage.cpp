@@ -21,19 +21,19 @@ namespace stormkit::image::details {
     /////////////////////////////////////
     auto loadPPM([[maybe_unused]] core::ByteConstSpan data) noexcept
         -> core::Expected<image::Image, image::Image::Error> {
-        return core::Unexpected { Error { .reason    = Reason::Not_Implemented,
-                                          .str_error = "loader from memory" } };
+        return core::makeUnexpected(
+            Error { .reason = Reason::Not_Implemented, .str_error = "loader from memory" });
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto savePPM(const image::Image &image,
+    auto savePPM(const image::Image& image,
                  image::Image::CodecArgs args,
-                 const std::filesystem::path &filepath) noexcept
+                 const std::filesystem::path& filepath) noexcept
         -> core::Expected<void, image::Image::Error> {
         auto result = savePPM(image, args);
 
-        if (!result) return core::Unexpected { result.error() };
+        if (!result) return core::makeUnexpected(result.error());
 
         auto stream = std::ofstream {};
 
@@ -41,7 +41,7 @@ namespace stormkit::image::details {
         else
             stream.open(filepath, std::ios::binary);
 
-        auto &output = *result;
+        auto& output = *result;
 
         stream.write(reinterpret_cast<const char *>(std::data(output)), std::size(output));
 
@@ -50,10 +50,10 @@ namespace stormkit::image::details {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto savePPM(const image::Image &image, image::Image::CodecArgs args) noexcept
+    auto savePPM(const image::Image& image, image::Image::CodecArgs args) noexcept
         -> core::Expected<core::ByteArray, image::Image::Error> {
         const auto output_image = image.toFormat(Format::RGB8_UNorm);
-        const auto &data        = output_image.imageData();
+        const auto& data        = output_image.imageData();
 
         auto output = core::ByteArray {};
 
@@ -61,7 +61,7 @@ namespace stormkit::image::details {
             auto result =
                 core::format("P3\n{}\n{}\n255\n"sv, data.extent.width, data.extent.height);
 
-            const auto &extent = output_image.extent();
+            const auto& extent = output_image.extent();
             for (auto [i, j] : core::generateIndices(extent.height, extent.width)) {
                 auto pixel = output_image.pixel(i * output_image.extent().width + j);
 

@@ -14,17 +14,17 @@ namespace stormkit::image::details {
     /////////////////////////////////////
     auto loadHDR([[maybe_unused]] core::ByteConstSpan data) noexcept
         -> core::Expected<image::Image, image::Image::Error> {
-        return core::Unexpected { Error { .reason    = Reason::Not_Implemented,
-                                          .str_error = "loader from file" } };
+        return core::makeUnexpected(
+            Error { .reason = Reason::Not_Implemented, .str_error = "loader from file" });
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto saveHDR(const image::Image &image, const std::filesystem::path &filepath) noexcept
+    auto saveHDR(const image::Image& image, const std::filesystem::path& filepath) noexcept
         -> core::Expected<void, image::Image::Error> {
         auto result = saveHDR(image);
 
-        if (!result) return core::Unexpected { result.error() };
+        if (!result) return core::makeUnexpected(result.error());
 
         auto &output = *result;
 
@@ -36,9 +36,9 @@ namespace stormkit::image::details {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    [[nodiscard]] auto saveHDR([[maybe_unused]] const image::Image &image) noexcept
+    [[nodiscard]] auto saveHDR([[maybe_unused]] const image::Image& image) noexcept
         -> core::Expected<core::ByteArray, image::Image::Error> {
-        return tl::unexpected { Error { .reason    = Reason::Not_Implemented,
-                                        .str_error = "save to file" } };
+        return core::makeUnexpected(
+            Error { .reason = Reason::Not_Implemented, .str_error = "save to file" });
     }
 } // namespace stormkit::image::details

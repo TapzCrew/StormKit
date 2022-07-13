@@ -98,8 +98,8 @@ namespace stormkit::image::details {
         const auto format     = toStormFormat(image.format());
 
         if (format == Format::Undefined)
-            return core::Unexpected { Error { .reason    = Reason::Failed_To_Parse,
-                                              .str_error = "Unsupported pixel format" } };
+            return core::makeUnexpected(Error { .reason    = Reason::Failed_To_Parse,
+                                                .str_error = "Unsupported pixel format" });
 
         auto image_memory = core::ByteArray {};
         image_memory.resize(image.size());
@@ -123,11 +123,11 @@ namespace stormkit::image::details {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto saveKTX(const image::Image &image, const std::filesystem::path &filepath) noexcept
+    auto saveKTX(const image::Image& image, const std::filesystem::path& filepath) noexcept
         -> core::Expected<void, image::Image::Error> {
         auto result = saveKTX(image);
 
-        if (!result) return core::Unexpected { result.error() };
+        if (!result) return core::makeUnexpected(result.error());
 
         auto &output = *result;
 
@@ -139,9 +139,9 @@ namespace stormkit::image::details {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto saveKTX([[maybe_unused]] const image::Image &image) noexcept
+    auto saveKTX([[maybe_unused]] const image::Image& image) noexcept
         -> core::Expected<core::ByteArray, image::Image::Error> {
-        return tl::unexpected { Error { .reason    = Reason::Not_Implemented,
-                                        .str_error = "save to file" } };
+        return core::makeUnexpected(
+            Error { .reason = Reason::Not_Implemented, .str_error = "save to file" });
     }
 } // namespace stormkit::image::details

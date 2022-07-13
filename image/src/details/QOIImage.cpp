@@ -57,7 +57,7 @@ namespace stormkit::image::details {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    constexpr auto indexHash(const Pixel &pixel) noexcept {
+    constexpr auto indexHash(const Pixel& pixel) noexcept {
         return (pixel.rgba.r * 3u + pixel.rgba.g * 5u + pixel.rgba.b * 7u + pixel.rgba.a * 11u) %
                PIXEL_CACHE_SIZE;
     }
@@ -151,14 +151,14 @@ namespace stormkit::image::details {
 #undef CHECK
                 }
 
-                auto &cached = pixel_cache[indexHash(previous_pixel)];
+                auto& cached = pixel_cache[indexHash(previous_pixel)];
                 cached       = previous_pixel;
             }
 
             std::ranges::transform(std::begin(previous_pixel.data),
                                    std::end(previous_pixel.data) - diff,
                                    std::back_inserter(output),
-                                   [](const auto &b) { return core::as<core::Byte>(b); });
+                                   [](const auto& b) { return core::as<core::Byte>(b); });
         }
 
         auto image_data = image::Image::ImageData { .extent            = extent,
@@ -177,13 +177,13 @@ namespace stormkit::image::details {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto saveQOI(const image::Image &image, const std::filesystem::path &filepath) noexcept
+    auto saveQOI(const image::Image& image, const std::filesystem::path& filepath) noexcept
         -> core::Expected<void, image::Image::Error> {
         auto result = saveQOI(image);
 
-        if (!result) return core::Unexpected { result.error() };
+        if (!result) return core::makeUnexpected(result.error());
 
-        auto &output = *result;
+        auto& output = *result;
 
         auto stream = std::ofstream { filepath, std::ios::binary };
         stream.write(reinterpret_cast<const char *>(std::data(output)), std::size(output));
@@ -193,9 +193,9 @@ namespace stormkit::image::details {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    [[nodiscard]] auto saveQOI([[maybe_unused]] const image::Image &image) noexcept
+    [[nodiscard]] auto saveQOI([[maybe_unused]] const image::Image& image) noexcept
         -> core::Expected<core::ByteArray, image::Image::Error> {
-        return tl::unexpected { Error { .reason    = Reason::Not_Implemented,
-                                        .str_error = "save to file" } };
+        return core::makeUnexpected(
+            Error { .reason = Reason::Not_Implemented, .str_error = "save to file" });
     }
 } // namespace stormkit::image::details

@@ -21,4 +21,10 @@ namespace stormkit::core {
     template<class E>
     using Unexpected = tl::unexpected<E>;
 
+    using tl::make_unexpected;
+
+    template<typename E>
+    auto makeUnexpected(E&& e) {
+        return make_unexpected(std::forward<E>(e));
+    }
 } // namespace stormkit::core

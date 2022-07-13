@@ -20,17 +20,17 @@ namespace stormkit::image::details {
     namespace png {
         struct ReadParam {
             core::USize readed;
-            core::ByteConstSpan &data;
+            core::ByteConstSpan& data;
         };
 
         struct WriteParam {
-            core::ByteArray &data;
+            core::ByteArray& data;
         };
 
         /////////////////////////////////////
         /////////////////////////////////////
         static auto read_func(png_struct *ps, png_byte *d, png_size_t length) noexcept -> void {
-            auto &param = *reinterpret_cast<ReadParam *>(png_get_io_ptr(ps));
+            auto& param = *reinterpret_cast<ReadParam *>(png_get_io_ptr(ps));
 
             auto _d   = core::toByteSpan(d, length);
             auto data = param.data.subspan(param.readed, length);
@@ -43,7 +43,7 @@ namespace stormkit::image::details {
         /////////////////////////////////////
         /////////////////////////////////////
         static auto write_func(png_struct *ps, png_byte *d, png_size_t length) -> void {
-            auto &param = *reinterpret_cast<WriteParam *>(png_get_io_ptr(ps));
+            auto& param = *reinterpret_cast<WriteParam *>(png_get_io_ptr(ps));
 
             auto _d = core::toByteSpan(d, length);
             param.data.reserve(std::size(param.data) + length);
@@ -64,22 +64,22 @@ namespace stormkit::image::details {
 
         auto sig = reinterpret_cast<png_const_bytep>(std::data(data));
         if (!png_check_sig(sig, 8u))
-            return core::Unexpected { Error { .reason = Reason::Failed_To_Parse,
-                                              .str_error =
-                                                  "[libpng] Failed to validate PNG signature" } };
+            return core::makeUnexpected(
+                Error { .reason    = Reason::Failed_To_Parse,
+                        .str_error = "[libpng] Failed to validate PNG signature" });
 
         auto png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
         if (!png_ptr)
-            return core::Unexpected { Error {
-                .reason    = Reason::Failed_To_Parse,
-                .str_error = "[libpng] Failed to init (png_create_read_struct)" } };
+            return core::makeUnexpected(
+                Error { .reason    = Reason::Failed_To_Parse,
+                        .str_error = "[libpng] Failed to init (png_create_read_struct)" });
 
         auto info_ptr = png_create_info_struct(png_ptr);
         if (!info_ptr) {
             png_destroy_read_struct(&png_ptr, nullptr, nullptr);
-            return core::Unexpected { Error {
-                .reason    = Reason::Failed_To_Parse,
-                .str_error = "[libpng] Failed to init (png_create_info_struct)" } };
+            return core::makeUnexpected(
+                Error { .reason    = Reason::Failed_To_Parse,
+                        .str_error = "[libpng] Failed to init (png_create_info_struct)" });
         }
 
         png_set_read_fn(png_ptr, &read_param, png::read_func);
@@ -188,11 +188,11 @@ namespace stormkit::image::details {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto savePNG(const image::Image &image, const std::filesystem::path &filepath) noexcept
+    auto savePNG(const image::Image& image, const std::filesystem::path& filepath) noexcept
         -> core::Expected<void, image::Image::Error> {
         auto result = savePNG(image);
 
-        if (!result) return core::Unexpected { result.error() };
+        if (!result) return core::makeUnexpected(result.error());
 
         auto &output = *result;
 
@@ -204,7 +204,7 @@ namespace stormkit::image::details {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto savePNG(const image::Image &image) noexcept
+    auto savePNG(const image::Image& image) noexcept
         -> core::Expected<core::ByteArray, image::Image::Error> {
         auto output = core::ByteArray {};
 
@@ -212,29 +212,29 @@ namespace stormkit::image::details {
 
         auto png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
         if (!png_ptr)
-            return core::Unexpected { Error {
-                .reason    = Reason::Failed_To_Parse,
-                .str_error = "[libpng] Failed to init (png_create_write_struct)" } };
+            return core::makeUnexpected(
+                Error { .reason    = Reason::Failed_To_Parse,
+                        .str_error = "[libpng] Failed to init (png_create_write_struct)" });
 
         auto info_ptr = png_create_info_struct(png_ptr);
         if (!info_ptr) {
             png_destroy_write_struct(&png_ptr, nullptr);
-            return core::Unexpected { Error {
-                .reason    = Reason::Failed_To_Parse,
-                .str_error = "[libpng] Failed to init (png_create_info_struct)" } };
+            return core::makeUnexpected(
+                Error { .reason    = Reason::Failed_To_Parse,
+                        .str_error = "[libpng] Failed to init (png_create_info_struct)" });
         }
 
-        if (std::setjmp(png_jmpbuf(png_ptr))) {
+        if (setjmp(png_jmpbuf(png_ptr))) {
             png_destroy_info_struct(png_ptr, &info_ptr);
             png_destroy_write_struct(&png_ptr, nullptr);
-            return core::Unexpected { Error { .reason = Reason::Failed_To_Parse,
-                                              .str_error =
-                                                  "[libpng] Unkown error during png creation" } };
+            return core::makeUnexpected(
+                Error { .reason    = Reason::Failed_To_Parse,
+                        .str_error = "[libpng] Unkown error during png creation" });
         }
 
         png_set_write_fn(png_ptr, &write_param, png::write_func, nullptr);
 
-        const auto &data = image.imageData();
+        const auto& data = image.imageData();
 
         png_set_IHDR(png_ptr,
                      info_ptr,

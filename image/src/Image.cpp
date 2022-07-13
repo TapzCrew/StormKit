@@ -49,7 +49,7 @@ namespace stormkit::image {
 
         constexpr auto JPEG_HEADER = core::makeStaticByteArray(0xFF_b, 0xD8_b);
 
-        auto filenameToCodec(const std::filesystem::path &filename) noexcept -> Image::Codec {
+        auto filenameToCodec(const std::filesystem::path& filename) noexcept -> Image::Codec {
             STORMKIT_EXPECTS(std::filesystem::exists(filename));
             STORMKIT_EXPECTS(filename.has_extension());
             STORMKIT_EXPECTS(!std::filesystem::is_directory(filename));
@@ -182,17 +182,19 @@ namespace stormkit::image {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    Image::Image(ImageData &&data) noexcept : Image {} { m_data = std::move(data); }
+    Image::Image(ImageData&& data) noexcept : Image {} {
+        m_data = std::move(data);
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    Image::Image(const core::ExtentU &extent, Format format) noexcept : Image {} {
+    Image::Image(const core::ExtentU& extent, Format format) noexcept : Image {} {
         create(extent, format);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    Image::Image(const std::filesystem::path &filepath, Image::Codec codec) noexcept : Image {} {
+    Image::Image(const std::filesystem::path& filepath, Image::Codec codec) noexcept : Image {} {
         [[maybe_unused]] const auto _ = loadFromFile(filepath, codec);
     }
 
@@ -204,19 +206,19 @@ namespace stormkit::image {
 
     ////////////////////////////////////////
     ////////////////////////////////////////
-    Image::Image(const Image &rhs) noexcept = default;
+    Image::Image(const Image& rhs) noexcept = default;
 
     ////////////////////////////////////////
     ////////////////////////////////////////
-    auto Image::operator=(const Image &rhs) noexcept -> Image & = default;
+    auto Image::operator=(const Image& rhs) noexcept -> Image& = default;
 
     ////////////////////////////////////////
     ////////////////////////////////////////
-    Image::Image(Image &&) noexcept = default;
+    Image::Image(Image&&) noexcept = default;
 
     ////////////////////////////////////////
     ////////////////////////////////////////
-    auto Image::operator=(Image &&) noexcept -> Image & = default;
+    auto Image::operator=(Image&&) noexcept -> Image& = default;
 
     ////////////////////////////////////////
     ////////////////////////////////////////
@@ -232,10 +234,10 @@ namespace stormkit::image {
         STORMKIT_EXPECTS(!std::empty(filepath));
 
         if (!std::filesystem::exists(filepath)) {
-            return core::Unexpected { Error {
-                .reason    = Error::Reason::File_Not_Found,
-                .str_error = core::format("Failed to open file {}\n    > Incorrect path",
-                                          filepath.string()) } };
+            return core::makeUnexpected(
+                Error { .reason    = Error::Reason::File_Not_Found,
+                        .str_error = core::format("Failed to open file {}\n    > Incorrect path",
+                                                  filepath.string()) });
         }
 
         const auto data = [&filepath]() {
@@ -256,11 +258,11 @@ namespace stormkit::image {
             case Image::Codec::JPEG: {
                 auto result = details::loadJPG(data);
                 if (!result) {
-                    return core::Unexpected { Error {
-                        .reason    = result.error().reason,
-                        .str_error = core::format("Failed to load file {}\n    > {}",
-                                                  filepath.string(),
-                                                  result.error().str_error) } };
+                    return core::makeUnexpected(
+                        Error { .reason    = result.error().reason,
+                                .str_error = core::format("Failed to load file {}\n    > {}",
+                                                          filepath.string(),
+                                                          result.error().str_error) });
                 }
 
                 *this = std::move(*result);
@@ -270,11 +272,11 @@ namespace stormkit::image {
             case Image::Codec::PNG: {
                 auto result = details::loadPNG(data);
                 if (!result) {
-                    return core::Unexpected { Error {
-                        .reason    = result.error().reason,
-                        .str_error = core::format("Failed to load file {}\n    > {}",
-                                                  filepath.string(),
-                                                  result.error().str_error) } };
+                    return core::makeUnexpected(
+                        Error { .reason    = result.error().reason,
+                                .str_error = core::format("Failed to load file {}\n    > {}",
+                                                          filepath.string(),
+                                                          result.error().str_error) });
                 } // namespace stormkit::image
 
                 *this = std::move(*result);
@@ -284,11 +286,11 @@ namespace stormkit::image {
             case Image::Codec::TARGA: {
                 auto result = details::loadTGA(data);
                 if (!result) {
-                    return core::Unexpected { Error {
-                        .reason    = result.error().reason,
-                        .str_error = core::format("Failed to load file {}\n    > {}",
-                                                  filepath.string(),
-                                                  result.error().str_error) } };
+                    return core::makeUnexpected(
+                        Error { .reason    = result.error().reason,
+                                .str_error = core::format("Failed to load file {}\n    > {}",
+                                                          filepath.string(),
+                                                          result.error().str_error) });
                 }
 
                 *this = std::move(*result);
@@ -298,11 +300,11 @@ namespace stormkit::image {
             case Image::Codec::PPM: {
                 auto result = details::loadPPM(data);
                 if (!result) {
-                    return core::Unexpected { Error {
-                        .reason    = result.error().reason,
-                        .str_error = core::format("Failed to load file {}\n    > {}",
-                                                  filepath.string(),
-                                                  result.error().str_error) } };
+                    return core::makeUnexpected(
+                        Error { .reason    = result.error().reason,
+                                .str_error = core::format("Failed to load file {}\n    > {}",
+                                                          filepath.string(),
+                                                          result.error().str_error) });
                 }
 
                 *this = std::move(*result);
@@ -312,11 +314,11 @@ namespace stormkit::image {
             case Image::Codec::HDR: {
                 auto result = details::loadHDR(data);
                 if (!result) {
-                    return core::Unexpected { Error {
-                        .reason    = result.error().reason,
-                        .str_error = core::format("Failed to load file {}\n    > {}",
-                                                  filepath.string(),
-                                                  result.error().str_error) } };
+                    return core::makeUnexpected(
+                        Error { .reason    = result.error().reason,
+                                .str_error = core::format("Failed to load file {}\n    > {}",
+                                                          filepath.string(),
+                                                          result.error().str_error) });
                 }
 
                 *this = std::move(*result);
@@ -326,11 +328,11 @@ namespace stormkit::image {
             case Image::Codec::KTX: {
                 auto result = details::loadKTX(data);
                 if (!result) {
-                    return core::Unexpected { Error {
-                        .reason    = result.error().reason,
-                        .str_error = core::format("Failed to load file {}\n    > {}",
-                                                  filepath.string(),
-                                                  result.error().str_error) } };
+                    return core::makeUnexpected(
+                        Error { .reason    = result.error().reason,
+                                .str_error = core::format("Failed to load file {}\n    > {}",
+                                                          filepath.string(),
+                                                          result.error().str_error) });
                 }
 
                 *this = std::move(*result);
@@ -340,11 +342,11 @@ namespace stormkit::image {
             case Image::Codec::QOI: {
                 auto result = details::loadQOI(data);
                 if (!result) {
-                    return core::Unexpected { Error {
-                        .reason    = result.error().reason,
-                        .str_error = core::format("Failed to load file {}\n    > {}",
-                                                  filepath.string(),
-                                                  result.error().str_error) } };
+                    return core::makeUnexpected(
+                        Error { .reason    = result.error().reason,
+                                .str_error = core::format("Failed to load file {}\n    > {}",
+                                                          filepath.string(),
+                                                          result.error().str_error) });
                 }
 
                 *this = std::move(*result);
@@ -354,10 +356,10 @@ namespace stormkit::image {
             default: break;
         }
 
-        return core::Unexpected { Error {
-            .reason    = Error::Reason::Invalid_Format,
-            .str_error = core::format("Failed to save image from {}\n    > Invalid format",
-                                      filepath.string()) } };
+        return core::makeUnexpected(
+            Error { .reason    = Error::Reason::Invalid_Format,
+                    .str_error = core::format("Failed to save image from {}\n    > Invalid format",
+                                              filepath.string()) });
     }
 
     /////////////////////////////////////
@@ -372,10 +374,10 @@ namespace stormkit::image {
             case Image::Codec::JPEG: {
                 auto result = details::loadJPG(data);
                 if (!result) {
-                    return core::Unexpected { Error {
+                    return core::makeUnexpected(Error {
                         .reason    = result.error().reason,
                         .str_error = core::format("Failed to load JPEG image from data\n    > {}",
-                                                  result.error().str_error) } };
+                                                  result.error().str_error) });
                 }
 
                 *this = std::move(*result);
@@ -385,10 +387,10 @@ namespace stormkit::image {
             case Image::Codec::PNG: {
                 auto result = details::loadPNG(data);
                 if (!result) {
-                    return core::Unexpected { Error {
+                    return core::makeUnexpected(Error {
                         .reason    = result.error().reason,
                         .str_error = core::format("Failed to load PNG image from data\n    > {}",
-                                                  result.error().str_error) } };
+                                                  result.error().str_error) });
                 }
 
                 *this = std::move(*result);
@@ -398,10 +400,10 @@ namespace stormkit::image {
             case Image::Codec::TARGA: {
                 auto result = details::loadTGA(data);
                 if (!result) {
-                    return core::Unexpected { Error {
+                    return core::makeUnexpected(Error {
                         .reason    = result.error().reason,
                         .str_error = core::format("Failed to load TARGA image from data\n    > {}",
-                                                  result.error().str_error) } };
+                                                  result.error().str_error) });
                 }
 
                 *this = std::move(*result);
@@ -411,10 +413,10 @@ namespace stormkit::image {
             case Image::Codec::PPM: {
                 auto result = details::loadPPM(data);
                 if (!result) {
-                    return core::Unexpected { Error {
+                    return core::makeUnexpected(Error {
                         .reason    = result.error().reason,
                         .str_error = core::format("Failed to load PPM image from data\n    > {}",
-                                                  result.error().str_error) } };
+                                                  result.error().str_error) });
                 }
 
                 *this = std::move(*result);
@@ -424,10 +426,10 @@ namespace stormkit::image {
             case Image::Codec::HDR: {
                 auto result = details::loadHDR(data);
                 if (!result) {
-                    return core::Unexpected { Error {
+                    return core::makeUnexpected(Error {
                         .reason    = result.error().reason,
                         .str_error = core::format("Failed to load HDR image from data\n    > {}",
-                                                  result.error().str_error) } };
+                                                  result.error().str_error) });
                 }
 
                 *this = std::move(*result);
@@ -437,10 +439,10 @@ namespace stormkit::image {
             case Image::Codec::KTX: {
                 auto result = details::loadKTX(data);
                 if (!result) {
-                    return core::Unexpected { Error {
+                    return core::makeUnexpected(Error {
                         .reason    = result.error().reason,
                         .str_error = core::format("Failed to load KTX image from data\n    > {}",
-                                                  result.error().str_error) } };
+                                                  result.error().str_error) });
                 }
 
                 *this = std::move(*result);
@@ -450,21 +452,22 @@ namespace stormkit::image {
             case Image::Codec::QOI: {
                 auto result = details::loadQOI(data);
                 if (!result) {
-                    return core::Unexpected { Error {
+                    return core::makeUnexpected(Error {
                         .reason    = result.error().reason,
                         .str_error = core::format("Failed to load QOI image from data\n    > {}",
-                                                  result.error().str_error) } };
+                                                  result.error().str_error) });
                 }
 
                 *this = std::move(*result);
 
                 return {};
             }
+            default: break;
         }
 
-        return core::Unexpected { Error { .reason = Error::Reason::Invalid_Format,
-                                          .str_error =
-                                              "Failed to load image\n    > Invalid format" } };
+        return core::makeUnexpected(
+            Error { .reason    = Error::Reason::Invalid_Format,
+                    .str_error = "Failed to load image\n    > Invalid format" });
     }
 
     /////////////////////////////////////
@@ -484,77 +487,77 @@ namespace stormkit::image {
             case Image::Codec::JPEG: {
                 auto result = details::saveJPG(*this, filepath);
                 if (!result) {
-                    return core::Unexpected { Error {
-                        .reason    = result.error().reason,
-                        .str_error = core::format("Failed to save to file {}\n    > {}",
-                                                  filepath.string(),
-                                                  result.error().str_error) } };
+                    return core::makeUnexpected(
+                        Error { .reason    = result.error().reason,
+                                .str_error = core::format("Failed to save to file {}\n    > {}",
+                                                          filepath.string(),
+                                                          result.error().str_error) });
                 }
                 return {};
             }
             case Image::Codec::PNG: {
                 auto result = details::savePNG(*this, filepath);
                 if (!result) {
-                    return core::Unexpected { Error {
-                        .reason    = result.error().reason,
-                        .str_error = core::format("Failed to load to file {}\n    > {}",
-                                                  filepath.string(),
-                                                  result.error().str_error) } };
+                    return core::makeUnexpected(
+                        Error { .reason    = result.error().reason,
+                                .str_error = core::format("Failed to load to file {}\n    > {}",
+                                                          filepath.string(),
+                                                          result.error().str_error) });
                 }
                 return {};
             }
             case Image::Codec::TARGA: {
                 auto result = details::saveTGA(*this, filepath);
                 if (!result) {
-                    return core::Unexpected { Error {
-                        .reason    = result.error().reason,
-                        .str_error = core::format("Failed to load to file {}\n    > {}",
-                                                  filepath.string(),
-                                                  result.error().str_error) } };
+                    return core::makeUnexpected(
+                        Error { .reason    = result.error().reason,
+                                .str_error = core::format("Failed to load to file {}\n    > {}",
+                                                          filepath.string(),
+                                                          result.error().str_error) });
                 }
                 return {};
             }
             case Image::Codec::PPM: {
                 auto result = details::savePPM(*this, args, filepath);
                 if (!result) {
-                    return core::Unexpected { Error {
-                        .reason    = result.error().reason,
-                        .str_error = core::format("Failed to load to file {}\n    > {}",
-                                                  filepath.string(),
-                                                  result.error().str_error) } };
+                    return core::makeUnexpected(
+                        Error { .reason    = result.error().reason,
+                                .str_error = core::format("Failed to load to file {}\n    > {}",
+                                                          filepath.string(),
+                                                          result.error().str_error) });
                 }
                 return {};
             }
             case Image::Codec::HDR: {
                 auto result = details::saveHDR(*this, filepath);
                 if (!result) {
-                    return core::Unexpected { Error {
-                        .reason    = result.error().reason,
-                        .str_error = core::format("Failed to load to file {}\n    > {}",
-                                                  filepath.string(),
-                                                  result.error().str_error) } };
+                    return core::makeUnexpected(
+                        Error { .reason    = result.error().reason,
+                                .str_error = core::format("Failed to load to file {}\n    > {}",
+                                                          filepath.string(),
+                                                          result.error().str_error) });
                 }
                 return {};
             }
             case Image::Codec::KTX: {
                 auto result = details::saveKTX(*this, filepath);
                 if (!result) {
-                    return core::Unexpected { Error {
-                        .reason    = result.error().reason,
-                        .str_error = core::format("Failed to load to file {}\n    > {}",
-                                                  filepath.string(),
-                                                  result.error().str_error) } };
+                    return core::makeUnexpected(
+                        Error { .reason    = result.error().reason,
+                                .str_error = core::format("Failed to load to file {}\n    > {}",
+                                                          filepath.string(),
+                                                          result.error().str_error) });
                 }
                 return {};
             }
             case Image::Codec::QOI: {
                 auto result = details::saveQOI(*this, filepath);
                 if (!result) {
-                    return core::Unexpected { Error {
-                        .reason    = result.error().reason,
-                        .str_error = core::format("Failed to load to file {}\n    > {}",
-                                                  filepath.string(),
-                                                  result.error().str_error) } };
+                    return core::makeUnexpected(
+                        Error { .reason    = result.error().reason,
+                                .str_error = core::format("Failed to load to file {}\n    > {}",
+                                                          filepath.string(),
+                                                          result.error().str_error) });
                 }
                 return {};
             }
@@ -562,10 +565,10 @@ namespace stormkit::image {
             default: break;
         }
 
-        return core::Unexpected { Error {
-            .reason    = Error::Reason::Invalid_Format,
-            .str_error = core::format("Failed to save image to {}\n    > Invalid format",
-                                      filepath.string()) } };
+        return core::makeUnexpected(
+            Error { .reason    = Error::Reason::Invalid_Format,
+                    .str_error = core::format("Failed to save image to {}\n    > Invalid format",
+                                              filepath.string()) });
     }
 
     /////////////////////////////////////
@@ -582,10 +585,10 @@ namespace stormkit::image {
             case Image::Codec::JPEG: {
                 auto result = details::saveJPG(*this);
                 if (!result) {
-                    return core::Unexpected { Error {
+                    return core::makeUnexpected(Error {
                         .reason    = result.error().reason,
                         .str_error = core::format("Failed to load KTX image from data\n    > {}",
-                                                  result.error().str_error) } };
+                                                  result.error().str_error) });
                 }
 
                 return *result;
@@ -593,10 +596,10 @@ namespace stormkit::image {
             case Image::Codec::PNG: {
                 auto result = details::savePNG(*this);
                 if (!result) {
-                    return core::Unexpected { Error {
+                    return core::makeUnexpected(Error {
                         .reason    = result.error().reason,
                         .str_error = core::format("Failed to load KTX image from data\n    > {}",
-                                                  result.error().str_error) } };
+                                                  result.error().str_error) });
                 }
 
                 return *result;
@@ -604,10 +607,10 @@ namespace stormkit::image {
             case Image::Codec::TARGA: {
                 auto result = details::saveTGA(*this);
                 if (!result) {
-                    return core::Unexpected { Error {
+                    return core::makeUnexpected(Error {
                         .reason    = result.error().reason,
                         .str_error = core::format("Failed to load KTX image from data\n    > {}",
-                                                  result.error().str_error) } };
+                                                  result.error().str_error) });
                 }
 
                 return *result;
@@ -615,10 +618,10 @@ namespace stormkit::image {
             case Image::Codec::PPM: {
                 auto result = details::savePPM(*this, args);
                 if (!result) {
-                    return core::Unexpected { Error {
+                    return core::makeUnexpected(Error {
                         .reason    = result.error().reason,
                         .str_error = core::format("Failed to load KTX image from data\n    > {}",
-                                                  result.error().str_error) } };
+                                                  result.error().str_error) });
                 }
 
                 return *result;
@@ -626,10 +629,10 @@ namespace stormkit::image {
             case Image::Codec::HDR: {
                 auto result = details::saveHDR(*this);
                 if (!result) {
-                    return core::Unexpected { Error {
+                    return core::makeUnexpected(Error {
                         .reason    = result.error().reason,
                         .str_error = core::format("Failed to load KTX image from data\n    > {}",
-                                                  result.error().str_error) } };
+                                                  result.error().str_error) });
                 }
 
                 return *result;
@@ -637,10 +640,10 @@ namespace stormkit::image {
             case Image::Codec::KTX: {
                 auto result = details::saveKTX(*this);
                 if (!result) {
-                    return core::Unexpected { Error {
+                    return core::makeUnexpected(Error {
                         .reason    = result.error().reason,
                         .str_error = core::format("Failed to load KTX image from data\n    > {}",
-                                                  result.error().str_error) } };
+                                                  result.error().str_error) });
                 }
 
                 return *result;
@@ -648,10 +651,10 @@ namespace stormkit::image {
             case Image::Codec::QOI: {
                 auto result = details::saveQOI(*this);
                 if (!result) {
-                    return core::Unexpected { Error {
+                    return core::makeUnexpected(Error {
                         .reason    = result.error().reason,
                         .str_error = core::format("Failed to load QOI image from data\n    > {}",
-                                                  result.error().str_error) } };
+                                                  result.error().str_error) });
                 }
 
                 return *result;
@@ -660,9 +663,9 @@ namespace stormkit::image {
             default: break;
         }
 
-        return core::Unexpected { Error { .reason = Error::Reason::Invalid_Format,
-                                          .str_error =
-                                              "Failed to save image\n    > Invalid format" } };
+        return core::makeUnexpected(
+            Error { .reason    = Error::Reason::Invalid_Format,
+                    .str_error = "Failed to save image\n    > Invalid format" });
     }
 
     /////////////////////////////////////
@@ -733,7 +736,7 @@ namespace stormkit::image {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto Image::scale([[maybe_unused]] const core::ExtentU &) const noexcept -> Image {
+    auto Image::scale([[maybe_unused]] const core::ExtentU&) const noexcept -> Image {
         return *this;
     }
 

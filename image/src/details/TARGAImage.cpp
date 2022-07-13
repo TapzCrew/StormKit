@@ -14,19 +14,19 @@ namespace stormkit::image::details {
     /////////////////////////////////////
     auto loadTGA([[maybe_unused]] core::ByteConstSpan data) noexcept
         -> core::Expected<image::Image, image::Image::Error> {
-        return core::Unexpected { Error { .reason    = Reason::Not_Implemented,
-                                          .str_error = "loader from memory" } };
+        return core::makeUnexpected(
+            Error { .reason = Reason::Not_Implemented, .str_error = "loader from memory" });
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto saveTGA(const image::Image &image, const std::filesystem::path &filepath) noexcept
+    auto saveTGA(const image::Image& image, const std::filesystem::path& filepath) noexcept
         -> core::Expected<void, image::Image::Error> {
         auto result = saveTGA(image);
 
-        if (!result) return core::Unexpected { result.error() };
+        if (!result) return core::makeUnexpected(result.error());
 
-        auto &output = *result;
+        auto& output = *result;
 
         auto stream = std::ofstream { filepath, std::ios::binary };
         stream.write(reinterpret_cast<const char *>(std::data(output)), std::size(output));
@@ -36,9 +36,9 @@ namespace stormkit::image::details {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto saveTGA([[maybe_unused]] const image::Image &image) noexcept
+    auto saveTGA([[maybe_unused]] const image::Image& image) noexcept
         -> core::Expected<core::ByteArray, image::Image::Error> {
-        return tl::unexpected { Error { .reason    = Reason::Not_Implemented,
-                                        .str_error = "save to file" } };
+        return core::makeUnexpected(
+            Error { .reason = Reason::Not_Implemented, .str_error = "save to file" });
     }
 } // namespace stormkit::image::details

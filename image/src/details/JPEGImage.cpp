@@ -60,8 +60,8 @@ namespace stormkit::image::details {
 
         jpeg_create_decompress(&info);
         if (setjmp(error_data.setjmp_buffer)) {
-            return core::Unexpected { Error { .reason    = Reason::Failed_To_Parse,
-                                              .str_error = error_data.msg } };
+            return core::makeUnexpected(
+                Error { .reason = Reason::Failed_To_Parse, .str_error = error_data.msg });
         }
 
         jpeg_mem_src(&info,
@@ -94,8 +94,8 @@ namespace stormkit::image::details {
 
         if (setjmp(error_data.setjmp_buffer)) {
             jpeg_destroy_decompress(&info);
-            return core::Unexpected { Error { .reason    = Reason::Failed_To_Parse,
-                                              .str_error = error_data.msg } };
+            return core::makeUnexpected(
+                Error { .reason = Reason::Failed_To_Parse, .str_error = error_data.msg });
         }
 
         auto image_data = image::Image::ImageData {};
@@ -114,7 +114,7 @@ namespace stormkit::image::details {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto saveJPG(const image::Image &image, const std::filesystem::path &filepath) noexcept
+    auto saveJPG(const image::Image& image, const std::filesystem::path& filepath) noexcept
         -> core::Expected<void, image::Image::Error> {
         auto _filename = filepath;
 
@@ -138,12 +138,12 @@ namespace stormkit::image::details {
                 error      = std::strerror(errno);
                 error.shrink_to_fit();
 
-                return core::Unexpected { Error { .reason    = Reason::Failed_To_Save,
-                                                  .str_error = error_data.msg } };
+                return core::makeUnexpected(
+                    Error { .reason = Reason::Failed_To_Save, .str_error = error_data.msg });
             }
 
             auto data          = image_rgb.data(0, 0, 0);
-            const auto &extent = image_rgb.extent(0);
+            const auto& extent = image_rgb.extent(0);
 
             jpeg_create_compress(&info);
             jpeg_stdio_dest(&info, file);
@@ -172,10 +172,10 @@ namespace stormkit::image::details {
             std::fclose(file);
         }
 
-        if (std::setjmp(error_data.setjmp_buffer)) {
+        if (setjmp(error_data.setjmp_buffer)) {
             jpeg_destroy_compress(&info);
-            return core::Unexpected { Error { .reason    = Reason::Failed_To_Save,
-                                              .str_error = error_data.msg } };
+            return core::makeUnexpected(
+                Error { .reason = Reason::Failed_To_Save, .str_error = error_data.msg });
         }
 
         return {};
@@ -183,7 +183,7 @@ namespace stormkit::image::details {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto saveJPG(const image::Image &image) noexcept
+    auto saveJPG(const image::Image& image) noexcept
         -> core::Expected<core::ByteArray, image::Image::Error> {
         using uchar_ptr = unsigned char *;
 
@@ -201,7 +201,7 @@ namespace stormkit::image::details {
         error_mgr.error_exit = jpg::error_callback;
 
         auto data          = image_rgb.data(0, 0, 0);
-        const auto &extent = image_rgb.extent(0);
+        const auto& extent = image_rgb.extent(0);
 
         jpeg_create_compress(&info);
 
@@ -230,8 +230,8 @@ namespace stormkit::image::details {
 
         if (setjmp(error_data.setjmp_buffer)) {
             jpeg_destroy_compress(&info);
-            return core::Unexpected { Error { .reason    = Reason::Failed_To_Save,
-                                              .str_error = error_data.msg } };
+            return core::makeUnexpected(
+                Error { .reason = Reason::Failed_To_Save, .str_error = error_data.msg });
         }
 
         auto output = core::ByteArray {};
