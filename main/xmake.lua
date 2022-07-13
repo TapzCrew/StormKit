@@ -13,7 +13,7 @@ target("stormkit-main")
     if is_plat("windows") then      add_files("src/win32/*.cpp")
     elseif is_plat("linux") then    add_files("src/linux/*.cpp")
     elseif is_plat("iphoneos") then add_files("src/ios/*.cpp")
-    elseif is_plat("macosx") then   add_files("src/macos/*.cpp")
+    elseif is_plat("macosx") then   add_files("src/macos/*.mm")
     elseif is_plat("android") then  add_files("src/android/*.cpp") end
 
     add_includedirs("include", { public = true })
