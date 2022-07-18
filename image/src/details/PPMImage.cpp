@@ -4,10 +4,10 @@
 
 #include <ranges>
 
-#include <stormkit/core/Coroutines.mpp>
-#include <stormkit/core/Fstream.mpp>
+#include <stormkit/core/Coroutines.hpp>
+#include <stormkit/core/Fstream.hpp>
 
-#include "PPMImage.mpp"
+#include "PPMImage.hpp"
 
 using namespace std::literals;
 

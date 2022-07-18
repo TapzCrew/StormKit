@@ -33,8 +33,8 @@ target("stormkit-core")
     if is_plat("linux") or is_plat("macosx") then       add_files("src/posix/*.cpp")
     elseif is_plat("windows") then add_files("src/win32/*.cpp") end
 
-    add_headerfiles("include/(stormkit/**.mpp)")
-    add_headerfiles("src/**.mpp")
+    add_headerfiles("include/(stormkit/**.hpp)")
+    add_headerfiles("src/**.hpp")
 
     add_packages("glm", "robin-hood-hashing", "frozen", "backward-cpp", { public = true })
 
@@ -47,7 +47,7 @@ target("stormkit-core")
     add_includedirs("$(buildir)/include")
 
     set_configdir("$(buildir)/include/")
-    add_configfiles("include/(stormkit/**.mpp.in)")
+    add_configfiles("include/(stormkit/**.hpp.in)")
 
     set_group("libraries")
 
@@ -57,6 +57,6 @@ target("stormkit-core")
 
     on_install(function(target)
         os.cp(path.join(target:scriptdir(), "include"), path.join(target:installdir(), "include"))
-        os.rm(path.join(target:installdir(), "include/stormkit/core/Configure.mpp.in"))
-        os.cp("$(buildir)/include/stormkit/core/Configure.mpp", path.join(target:installdir(), "include/stormkit/core/Configure.mpp"))
+        os.rm(path.join(target:installdir(), "include/stormkit/core/Configure.hpp.in"))
+        os.cp("$(buildir)/include/stormkit/core/Configure.hpp", path.join(target:installdir(), "include/stormkit/core/Configure.hpp"))
     end)

@@ -1,6 +1,6 @@
-#include <stormkit/gpu/core/Types.mpp>
+#include <stormkit/gpu/core/Types.hpp>
 
-#include <stormkit/gpu/pipeline/DescriptorSet.mpp>
+#include <stormkit/gpu/pipeline/DescriptorSet.hpp>
 
 using namespace stormkit;
 

@@ -1,4 +1,4 @@
-#include <stormkit/gpu/pipeline/VertexBindingDescription.mpp>
+#include <stormkit/gpu/pipeline/VertexBindingDescription.hpp>
 
 using namespace stormkit;
 

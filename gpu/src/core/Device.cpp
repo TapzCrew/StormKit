@@ -4,12 +4,12 @@
 
 #include <optional>
 
-#include <stormkit/gpu/core/Device.mpp>
-#include <stormkit/gpu/core/Instance.mpp>
-#include <stormkit/gpu/core/PhysicalDevice.mpp>
-#include <stormkit/gpu/core/PhysicalDeviceInfo.mpp>
-#include <stormkit/gpu/core/Queue.mpp>
-#include <stormkit/gpu/core/RenderCapabilities.mpp>
+#include <stormkit/gpu/core/Device.hpp>
+#include <stormkit/gpu/core/Instance.hpp>
+#include <stormkit/gpu/core/PhysicalDevice.hpp>
+#include <stormkit/gpu/core/PhysicalDeviceInfo.hpp>
+#include <stormkit/gpu/core/Queue.hpp>
+#include <stormkit/gpu/core/RenderCapabilities.hpp>
 
 #include <stormkit/log/LogMacro.hpp>
 

@@ -2,14 +2,14 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#include <stormkit/core/FrozenMap.mpp>
+#include <stormkit/core/FrozenMap.hpp>
 
-#include <stormkit/gpu/core/CommandBuffer.mpp>
-#include <stormkit/gpu/core/Device.mpp>
-#include <stormkit/gpu/core/Enums.mpp>
-#include <stormkit/gpu/core/Queue.mpp>
+#include <stormkit/gpu/core/CommandBuffer.hpp>
+#include <stormkit/gpu/core/Device.hpp>
+#include <stormkit/gpu/core/Enums.hpp>
+#include <stormkit/gpu/core/Queue.hpp>
 
-#include <stormkit/gpu/pipeline/Framebuffer.mpp>
+#include <stormkit/gpu/pipeline/Framebuffer.hpp>
 
 namespace stormkit::gpu {
     namespace details {

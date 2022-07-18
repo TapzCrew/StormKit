@@ -4,7 +4,7 @@
 
 #include <ranges>
 
-#include "JPEGImage.mpp"
+#include "JPEGImage.hpp"
 
 #include <csetjmp>
 

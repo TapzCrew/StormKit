@@ -9,12 +9,12 @@
     #include <spirv_glsl.hpp>
 #endif
 
-#include <stormkit/core/Fstream.mpp>
+#include <stormkit/core/Fstream.hpp>
 
-#include <stormkit/gpu/core/Device.mpp>
-#include <stormkit/gpu/core/PhysicalDevice.mpp>
+#include <stormkit/gpu/core/Device.hpp>
+#include <stormkit/gpu/core/PhysicalDevice.hpp>
 
-#include <stormkit/gpu/resource/Shader.mpp>
+#include <stormkit/gpu/resource/Shader.hpp>
 
 namespace stormkit::gpu {
     /////////////////////////////////////

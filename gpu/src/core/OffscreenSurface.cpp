@@ -2,18 +2,18 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#include <stormkit/core/Format.mpp>
+#include <stormkit/core/Format.hpp>
 
-#include <stormkit/gpu/core/CommandBuffer.mpp>
-#include <stormkit/gpu/core/Device.mpp>
-#include <stormkit/gpu/core/Enums.mpp>
-#include <stormkit/gpu/core/Instance.mpp>
-#include <stormkit/gpu/core/OffscreenSurface.mpp>
-#include <stormkit/gpu/core/PhysicalDevice.mpp>
-#include <stormkit/gpu/core/Queue.mpp>
+#include <stormkit/gpu/core/CommandBuffer.hpp>
+#include <stormkit/gpu/core/Device.hpp>
+#include <stormkit/gpu/core/Enums.hpp>
+#include <stormkit/gpu/core/Instance.hpp>
+#include <stormkit/gpu/core/OffscreenSurface.hpp>
+#include <stormkit/gpu/core/PhysicalDevice.hpp>
+#include <stormkit/gpu/core/Queue.hpp>
 
-#include <stormkit/gpu/sync/Fence.mpp>
-#include <stormkit/gpu/sync/Semaphore.mpp>
+#include <stormkit/gpu/sync/Fence.hpp>
+#include <stormkit/gpu/sync/Semaphore.hpp>
 
 namespace stormkit::gpu {
     /////////////////////////////////////

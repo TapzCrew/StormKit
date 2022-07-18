@@ -3,7 +3,7 @@
 // found in the top-level of this distribution
 
 
-#include <stormkit/entities/MessageBus.mpp>
+#include <stormkit/entities/MessageBus.hpp>
 
 namespace stormkit::entities {
     /////////////////////////////////////

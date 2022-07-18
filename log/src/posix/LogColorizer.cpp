@@ -17,7 +17,7 @@ import <iostream>;
     #include <string_view>
 
     /////////// - StormKit::log - ///////////
-    #include "../LogColorizer.mpp"
+    #include "../LogColorizer.hpp"
 #endif
 
 using std::literals::string_view_literals::operator""sv;

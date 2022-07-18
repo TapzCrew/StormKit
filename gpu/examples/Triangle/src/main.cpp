@@ -6,6 +6,8 @@
 
 #include "App.mpp"
 
+#include <stormkit/core/Ranges.mpp>
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 auto main([[maybe_unused]] const int argc, [[maybe_unused]] const char **argv) -> int {

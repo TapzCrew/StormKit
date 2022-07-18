@@ -5,11 +5,11 @@
 
 #include <array>
 
-#include <stormkit/gpu/core/CommandBuffer.mpp>
-#include <stormkit/gpu/core/Device.mpp>
-#include <stormkit/gpu/core/Queue.mpp>
-#include <stormkit/gpu/sync/Fence.mpp>
-#include <stormkit/gpu/sync/Semaphore.mpp>
+#include <stormkit/gpu/core/CommandBuffer.hpp>
+#include <stormkit/gpu/core/Device.hpp>
+#include <stormkit/gpu/core/Queue.hpp>
+#include <stormkit/gpu/sync/Fence.hpp>
+#include <stormkit/gpu/sync/Semaphore.hpp>
 
 namespace stormkit::gpu {
     /////////////////////////////////////

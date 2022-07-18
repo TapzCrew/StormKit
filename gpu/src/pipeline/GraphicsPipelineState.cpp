@@ -1,5 +1,5 @@
-#include <stormkit/gpu/pipeline/DescriptorSetLayout.mpp>
-#include <stormkit/gpu/pipeline/GraphicsPipelineState.mpp>
+#include <stormkit/gpu/pipeline/DescriptorSetLayout.hpp>
+#include <stormkit/gpu/pipeline/GraphicsPipelineState.hpp>
 
 using namespace stormkit;
 

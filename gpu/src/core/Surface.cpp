@@ -2,7 +2,7 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#include <stormkit/gpu/core/Surface.mpp>
+#include <stormkit/gpu/core/Surface.hpp>
 
 namespace stormkit::gpu {
     /////////////////////////////////////

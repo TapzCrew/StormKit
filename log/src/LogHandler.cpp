@@ -2,8 +2,8 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#include <stormkit/log/ConsoleLogger.mpp>
-#include <stormkit/log/LogHandler.mpp>
+#include <stormkit/log/ConsoleLogger.hpp>
+#include <stormkit/log/LogHandler.hpp>
 
 namespace stormkit::log {
     /////////////////////////////////////

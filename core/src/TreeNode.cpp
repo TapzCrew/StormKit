@@ -1,5 +1,5 @@
 
-#include <stormkit/core/TreeNode.mpp>
+#include <stormkit/core/TreeNode.hpp>
 
 namespace stormkit::core {
     /////////////////////////////////////

@@ -1,0 +1,237 @@
+// Copryright (C) 2022 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+#pragma once
+
+#include <functional>
+
+#include <stormkit/core/CRTP.hpp>
+#include <stormkit/core/Concepts.hpp>
+
+namespace stormkit::core {
+    class NamedTypeBase {};
+
+    template<class T>
+    concept NamedTypeType = std::derived_from<T, NamedTypeBase>;
+
+    template<class T, class Tag, template<typename> class... Skills>
+    class NamedType: public Skills<NamedType<T, Tag, Skills...>>... {
+      public:
+        using UnderlyingType = std::remove_cvref_t<T>;
+        using Ref            = NamedType<T &, Tag, Skills...>;
+
+        constexpr NamedType() noexcept(std::is_nothrow_default_constructible_v<UnderlyingType>);
+        constexpr ~NamedType() noexcept(std::is_nothrow_destructible_v<UnderlyingType>);
+
+        constexpr NamedType(const NamedType &) noexcept(
+            std::is_nothrow_copy_constructible_v<UnderlyingType>);
+
+        constexpr auto
+            operator=(const NamedType &) noexcept(std::is_nothrow_copy_assignable_v<UnderlyingType>)
+                -> NamedType &;
+
+        constexpr NamedType(NamedType &&) noexcept(
+            std::is_nothrow_move_constructible_v<UnderlyingType>);
+
+        constexpr auto
+            operator=(NamedType &&) noexcept(std::is_nothrow_move_assignable_v<UnderlyingType>)
+                -> NamedType &;
+
+        template<IsNot<NamedType<T, Tag, Skills...>>... Args>
+        constexpr explicit(sizeof...(Args) == 1) NamedType(Args &&...args) noexcept(
+            std::is_nothrow_constructible_v<UnderlyingType, Args...>)
+            : m_value { std::forward<Args>(args)... } {}
+
+        constexpr auto get() noexcept -> std::remove_reference_t<UnderlyingType> &;
+
+        constexpr auto get() const noexcept -> const std::remove_reference_t<UnderlyingType> &;
+
+        constexpr operator Ref();
+
+      private:
+        UnderlyingType m_value;
+    };
+
+    template<typename T, class... Args>
+    constexpr auto makeNamed(Args &&...args) noexcept -> T;
+
+    template<class T>
+    struct PreIncrementable: CRTP<T, PreIncrementable> {
+        constexpr auto operator++() -> T &;
+    };
+
+    template<class T>
+    struct PostIncrementable: CRTP<T, PostIncrementable> {
+        constexpr auto operator++(int) -> T;
+    };
+
+    template<class T>
+    struct PreDecrementable: CRTP<T, PreDecrementable> {
+        constexpr auto operator--() -> T;
+    };
+
+    template<class T>
+    struct PostDecrementable: CRTP<T, PostDecrementable> {
+        constexpr auto operator--(int) -> T;
+    };
+
+    template<class T>
+    struct BinaryAddable: CRTP<T, BinaryAddable> {
+        [[nodiscard]] constexpr auto operator+(T const &other) const -> T;
+        constexpr auto operator+=(T const &other) -> T &;
+    };
+
+    template<class T>
+    struct UnaryAddable: CRTP<T, UnaryAddable> {
+        [[nodiscard]] constexpr auto operator+() const -> T;
+    };
+
+    template<class T>
+    struct Addable: BinaryAddable<T>, UnaryAddable<T> {
+        using BinaryAddable<T>::operator+;
+        using UnaryAddable<T>::operator+;
+    };
+
+    template<class T>
+    struct BinarySubtractable: CRTP<T, BinarySubtractable> {
+        [[nodiscard]] constexpr auto operator-(T const &other) const -> T;
+        constexpr auto operator-=(T const &other) -> T &;
+    };
+
+    template<class T>
+    struct UnarySubtractable: CRTP<T, UnarySubtractable> {
+        [[nodiscard]] constexpr auto operator-() const -> T;
+    };
+
+    template<class T>
+    struct Subtractable: BinarySubtractable<T>, UnarySubtractable<T> {
+        using UnarySubtractable<T>::operator-;
+        using BinarySubtractable<T>::operator-;
+    };
+
+    template<class T>
+    struct Multiplicable: CRTP<T, Multiplicable> {
+        [[nodiscard]] constexpr auto operator*(T const &other) const -> T;
+        constexpr auto operator*=(T const &other) -> T &;
+    };
+
+    template<class T>
+    struct Divisible: CRTP<T, Divisible> {
+        [[nodiscard]] constexpr auto operator/(T const &other) const -> T;
+        constexpr auto operator/=(T const &other) -> T &;
+    };
+
+    template<class T>
+    struct Modulable: CRTP<T, Modulable> {
+        [[nodiscard]] constexpr auto operator%(T const &other) const -> T;
+        constexpr auto operator%=(T const &other) -> T &;
+    };
+
+    template<class T>
+    struct BitWiseInvertable: CRTP<T, BitWiseInvertable> {
+        [[nodiscard]] constexpr auto operator~() const -> T;
+    };
+
+    template<class T>
+    struct BitWiseAndable: CRTP<T, BitWiseAndable> {
+        [[nodiscard]] constexpr auto operator&(T const &other) -> T const;
+        constexpr auto operator&=(T const &other) -> T &;
+    };
+
+    template<class T>
+    struct BitWiseOrable: CRTP<T, BitWiseOrable> {
+        [[nodiscard]] constexpr auto operator|(T const &other) const -> T;
+        constexpr auto operator|=(T const &other) -> T &;
+    };
+
+    template<class T>
+    struct BitWiseXorable: CRTP<T, BitWiseXorable> {
+        [[nodiscard]] constexpr auto operator^(T const &other) const -> T;
+        constexpr auto operator^=(T const &other) -> T &;
+    };
+
+    template<class T>
+    struct BitWiseLeftShiftable: CRTP<T, BitWiseLeftShiftable> {
+        [[nodiscard]] constexpr auto operator<<(T const &other) const -> T;
+        constexpr auto operator<<=(T const &other) -> T &;
+    };
+
+    template<class T>
+    struct BitWiseRightShiftable: CRTP<T, BitWiseRightShiftable> {
+        [[nodiscard]] constexpr auto operator>>(T const &other) const -> T;
+        constexpr auto operator>>=(T const &other) -> T &;
+    };
+
+    template<class T>
+    struct Comparable: CRTP<T, Comparable> {
+        [[nodiscard]] constexpr auto operator<=>(const T &other) const noexcept
+            -> std::strong_ordering;
+    };
+
+    template<class T>
+    struct Dereferencable;
+
+    template<class T, class Parameter, template<class> class... Skills>
+    struct Dereferencable<NamedType<T, Parameter, Skills...>>
+        : CRTP<NamedType<T, Parameter, Skills...>, Dereferencable> {
+        [[nodiscard]] constexpr auto operator*() & -> std::remove_reference_t<T> &;
+        [[nodiscard]] constexpr auto operator*() const & -> const std::remove_reference_t<T> &;
+    };
+
+    /*template<class Destination>
+    struct ImplicitlyConvertibleTo {
+        template<class T>
+        struct templ: CRTP<T, templ> {
+            [[nodiscard]] constexpr operator Destination() const;
+        };
+    };*/
+
+    template<class T>
+    struct FunctionCallable;
+
+    template<class T, class Parameter, template<class> class... Skills>
+    struct FunctionCallable<NamedType<T, Parameter, Skills...>>
+        : CRTP<NamedType<T, Parameter, Skills...>, FunctionCallable> {
+        [[nodiscard]] constexpr operator std::remove_reference_t<T> &();
+        [[nodiscard]] constexpr operator const std::remove_reference_t<T> &() const;
+    };
+
+    template<class T>
+    struct MethodCallable;
+
+    template<class T, class Parameter, template<class> class... Skills>
+    struct MethodCallable<NamedType<T, Parameter, Skills...>>
+        : CRTP<NamedType<T, Parameter, Skills...>, MethodCallable> {
+        [[nodiscard]] constexpr auto operator->() const -> const std::remove_reference_t<T> *;
+        [[nodiscard]] constexpr auto operator->() -> std::remove_reference_t<T> *;
+    };
+
+    template<class NamedType_>
+    struct Callable: FunctionCallable<NamedType_>, MethodCallable<NamedType_> {};
+
+    template<class T>
+    struct ArithmeticLike: PreIncrementable<T>,
+                           PostIncrementable<T>,
+                           PreDecrementable<T>,
+                           PostDecrementable<T>,
+                           Addable<T>,
+                           Subtractable<T>,
+                           Multiplicable<T>,
+                           Divisible<T>,
+                           Modulable<T>,
+                           BitWiseInvertable<T>,
+                           BitWiseAndable<T>,
+                           BitWiseOrable<T>,
+                           BitWiseXorable<T>,
+                           BitWiseLeftShiftable<T>,
+                           BitWiseRightShiftable<T>,
+                           Comparable<T> {};
+} // namespace stormkit::core
+
+template<stormkit::core::NamedTypeType T>
+struct std::hash<T> {
+    auto operator()(const T &x) const noexcept -> std::uint64_t;
+};
+
+#include "NamedType.inl"

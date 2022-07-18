@@ -1,7 +1,7 @@
 
-#include <stormkit/core/Numerics.mpp>
-#include <stormkit/core/ThreadPool.mpp>
-#include <stormkit/core/ThreadUtils.mpp>
+#include <stormkit/core/Numerics.hpp>
+#include <stormkit/core/ThreadPool.hpp>
+#include <stormkit/core/ThreadUtils.hpp>
 
 namespace stormkit::core {
     ////////////////////////////////////////

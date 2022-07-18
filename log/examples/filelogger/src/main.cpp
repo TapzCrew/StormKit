@@ -2,13 +2,13 @@
 import stormkit.log.filelogger;
 import stormkit.log.loghandler;
 #else
-    #include <stormkit/core/Format.mpp>
-    #include <stormkit/core/Memory.mpp>
-    #include <stormkit/core/Types.mpp>
+    #include <stormkit/core/Format.hpp>
+    #include <stormkit/core/Memory.hpp>
+    #include <stormkit/core/Types.hpp>
 
-    #include <stormkit/log/FileLogger.mpp>
-    #include <stormkit/log/LogHandler.mpp>
-    #include <stormkit/log/Module.mpp>
+    #include <stormkit/log/FileLogger.hpp>
+    #include <stormkit/log/LogHandler.hpp>
+    #include <stormkit/log/Module.hpp>
 #endif
 
 #include <stormkit/core/FormatMacro.hpp>

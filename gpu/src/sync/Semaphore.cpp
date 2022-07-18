@@ -2,9 +2,9 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#include <stormkit/gpu/core/Device.mpp>
+#include <stormkit/gpu/core/Device.hpp>
 
-#include <stormkit/gpu/sync/Semaphore.mpp>
+#include <stormkit/gpu/sync/Semaphore.hpp>
 
 namespace stormkit::gpu {
     /////////////////////////////////////

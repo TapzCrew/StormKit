@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "Severity.mpp"
+#include "Severity.hpp"
 
 namespace stormkit::log {
     namespace details {

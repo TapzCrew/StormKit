@@ -2,10 +2,10 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#include <stormkit/core/Format.mpp>
-#include <stormkit/core/Strings.mpp>
+#include <stormkit/core/Format.hpp>
+#include <stormkit/core/Strings.hpp>
 
-#include <stormkit/log/FileLogger.mpp>
+#include <stormkit/log/FileLogger.hpp>
 
 using namespace std::literals;
 

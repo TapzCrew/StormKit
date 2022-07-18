@@ -1,4 +1,4 @@
-#include <stormkit/gpu/pipeline/VertexInputAttributeDescription.mpp>
+#include <stormkit/gpu/pipeline/VertexInputAttributeDescription.hpp>
 
 using namespace stormkit;
 

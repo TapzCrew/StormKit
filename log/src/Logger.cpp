@@ -2,7 +2,7 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#include <stormkit/log/Logger.mpp>
+#include <stormkit/log/Logger.hpp>
 
 namespace stormkit::log {
 #ifdef STORMKIT_BUILD_DEBUG

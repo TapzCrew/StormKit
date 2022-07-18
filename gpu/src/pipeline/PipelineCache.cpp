@@ -2,16 +2,16 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#include <stormkit/core/Fstream.mpp>
+#include <stormkit/core/Fstream.hpp>
 
-#include <stormkit/gpu/core/Device.mpp>
-#include <stormkit/gpu/core/PhysicalDevice.mpp>
+#include <stormkit/gpu/core/Device.hpp>
+#include <stormkit/gpu/core/PhysicalDevice.hpp>
 
-#include <stormkit/gpu/pipeline/PipelineCache.mpp>
-#include <stormkit/gpu/pipeline/RenderPass.mpp>
+#include <stormkit/gpu/pipeline/PipelineCache.hpp>
+#include <stormkit/gpu/pipeline/RenderPass.hpp>
 
-#include "../Log.mpp"
-#include "stormkit/core/Types.mpp"
+#include "../Log.hpp"
+#include "stormkit/core/Types.hpp"
 
 namespace stormkit::gpu {
 

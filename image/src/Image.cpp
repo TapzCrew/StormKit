@@ -4,22 +4,22 @@
 
 #include <string>
 
-#include <stormkit/core/Coroutines.mpp>
-#include <stormkit/core/Format.mpp>
-#include <stormkit/core/Fstream.mpp>
-#include <stormkit/core/Numerics.mpp>
-#include <stormkit/core/Strings.mpp>
-#include <stormkit/core/Types.mpp>
+#include <stormkit/core/Coroutines.hpp>
+#include <stormkit/core/Format.hpp>
+#include <stormkit/core/Fstream.hpp>
+#include <stormkit/core/Numerics.hpp>
+#include <stormkit/core/Strings.hpp>
+#include <stormkit/core/Types.hpp>
 
-#include <stormkit/image/Image.mpp>
+#include <stormkit/image/Image.hpp>
 
-#include "details/HDRImage.mpp"
-#include "details/JPEGImage.mpp"
-#include "details/KTXImage.mpp"
-#include "details/PNGImage.mpp"
-#include "details/PPMImage.mpp"
-#include "details/QOIImage.mpp"
-#include "details/TARGAImage.mpp"
+#include "details/HDRImage.hpp"
+#include "details/JPEGImage.hpp"
+#include "details/KTXImage.hpp"
+#include "details/PNGImage.hpp"
+#include "details/PPMImage.hpp"
+#include "details/QOIImage.hpp"
+#include "details/TARGAImage.hpp"
 
 namespace stormkit::image {
     namespace details {

@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "stormkit/core/Memory.mpp"
+#include "stormkit/core/Memory.hpp"
 namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////

@@ -3,8 +3,8 @@
 // found in the top-level of this distribution
 
 
-#include <stormkit/entities/EntityManager.mpp>
-#include <stormkit/entities/System.mpp>
+#include <stormkit/entities/EntityManager.hpp>
+#include <stormkit/entities/System.hpp>
 
 namespace stormkit::entities {
     /////////////////////////////////////

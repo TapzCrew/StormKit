@@ -7,11 +7,11 @@
 #include <iostream>
 #include <string_view>
 
-#include <stormkit/core/Format.mpp>
-#include <stormkit/core/Strings.mpp>
+#include <stormkit/core/Format.hpp>
+#include <stormkit/core/Strings.hpp>
 
-#include "LogColorizer.mpp"
-#include <stormkit/log/ConsoleLogger.mpp>
+#include "LogColorizer.hpp"
+#include <stormkit/log/ConsoleLogger.hpp>
 
 using namespace std::literals;
 

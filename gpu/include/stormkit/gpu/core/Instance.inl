@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "Instance.mpp"
+#include "Instance.hpp"
 
 namespace stormkit::gpu {
     /////////////////////////////////////

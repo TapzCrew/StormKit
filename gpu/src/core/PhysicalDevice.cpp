@@ -4,9 +4,9 @@
 
 #include <unordered_set>
 
-#include <stormkit/gpu/core/Device.mpp>
-#include <stormkit/gpu/core/PhysicalDevice.mpp>
-#include <stormkit/gpu/core/WindowSurface.mpp>
+#include <stormkit/gpu/core/Device.hpp>
+#include <stormkit/gpu/core/PhysicalDevice.hpp>
+#include <stormkit/gpu/core/WindowSurface.hpp>
 
 namespace stormkit::gpu {
     std::string_view vendorNameByID(core::UInt64 ID) {

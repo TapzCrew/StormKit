@@ -1,0 +1,69 @@
+// Copyright (C) 2022 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+#pragma once
+
+#include <stormkit/core/AssertMacro.hpp>
+#include <stormkit/core/MemoryMacro.hpp>
+
+#include <vector>
+
+#include <stormkit/core/Types.hpp>
+
+namespace stormkit::core {
+    template<class T>
+    class RingBuffer {
+      public:
+        using ValueType = T;
+        using SizeType  = USize;
+
+        using value_type = ValueType;
+        using size_type  = SizeType;
+
+        RingBuffer(SizeType capacity);
+
+        RingBuffer(const RingBuffer &copy);
+        auto operator=(const RingBuffer &copy) -> RingBuffer &;
+
+        RingBuffer(RingBuffer &&moved) noexcept;
+        auto operator=(RingBuffer &&moved) noexcept -> RingBuffer &;
+
+        ~RingBuffer();
+
+        auto clear() noexcept -> void;
+        auto empty() const noexcept -> bool;
+        auto full() const noexcept -> bool;
+
+        auto size() const noexcept -> SizeType;
+        auto capacity() const noexcept -> SizeType;
+
+        auto push(ValueType value) -> bool;
+
+        template<typename... Args>
+        auto emplace(Args &&...values) noexcept(
+            std::is_nothrow_constructible_v<ValueType, Args &&...>) -> void;
+
+        auto next() noexcept -> void;
+
+        auto pop() noexcept -> void;
+
+        [[nodiscard]] auto get() noexcept -> ValueType &;
+        [[nodiscard]] auto get() const noexcept -> const ValueType &;
+        [[nodiscard]] auto data() const noexcept -> std::span<const ValueType>;
+
+      private:
+        [[nodiscard]] auto getPtr(SizeType pos) noexcept -> ValueType *;
+        [[nodiscard]] auto getPtr(SizeType pos) const noexcept -> const ValueType *;
+
+        SizeType m_capacity = 0;
+        SizeType m_count    = 0;
+
+        ByteArray m_buffer;
+
+        SizeType m_write = 0;
+        SizeType m_read  = 0;
+    };
+} // namespace stormkit::core
+
+#include "RingBuffer.inl"

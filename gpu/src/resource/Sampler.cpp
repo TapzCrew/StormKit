@@ -2,8 +2,8 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#include <stormkit/gpu/core/Device.mpp>
-#include <stormkit/gpu/resource/Sampler.mpp>
+#include <stormkit/gpu/core/Device.hpp>
+#include <stormkit/gpu/resource/Sampler.hpp>
 
 namespace stormkit::gpu {
     /////////////////////////////////////

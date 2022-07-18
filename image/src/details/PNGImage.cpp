@@ -4,9 +4,9 @@
 
 #include <ranges>
 
-#include <stormkit/core/Fstream.mpp>
+#include <stormkit/core/Fstream.hpp>
 
-#include "PNGImage.mpp"
+#include "PNGImage.hpp"
 
 #include <csetjmp>
 

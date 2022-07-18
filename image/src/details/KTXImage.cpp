@@ -4,11 +4,11 @@
 
 #include <ranges>
 
-#include <stormkit/core/Fstream.mpp>
+#include <stormkit/core/Fstream.hpp>
 
 #include <gli/gli.hpp>
 
-#include "KTXImage.mpp"
+#include "KTXImage.hpp"
 
 #include <csetjmp>
 #include <cstring>

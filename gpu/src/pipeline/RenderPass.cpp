@@ -2,10 +2,10 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#include <stormkit/gpu/core/Device.mpp>
+#include <stormkit/gpu/core/Device.hpp>
 
-#include <stormkit/gpu/pipeline/Framebuffer.mpp>
-#include <stormkit/gpu/pipeline/RenderPass.mpp>
+#include <stormkit/gpu/pipeline/Framebuffer.hpp>
+#include <stormkit/gpu/pipeline/RenderPass.hpp>
 
 namespace stormkit::gpu {
     /////////////////////////////////////

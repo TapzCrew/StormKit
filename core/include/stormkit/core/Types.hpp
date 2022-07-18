@@ -1,0 +1,174 @@
+
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+#pragma once
+
+#include <cstddef>
+#include <cstdint>
+#include <stormkit/core/PlatformMacro.hpp>
+
+#include <stormkit/core/FormatMacro.hpp>
+#include <stormkit/core/MemoryMacro.hpp>
+
+#include <array>
+#include <chrono>
+#include <compare>
+#include <fstream>
+#include <limits>
+#include <span>
+#include <variant>
+#include <vector>
+
+#include <stormkit/core/AsCast.hpp>
+#include <stormkit/core/Concepts.hpp>
+#include <stormkit/core/Format.hpp>
+
+#undef INVALID_HANDLE_VALUE
+#undef INVALID_HANDLE
+#undef Handle
+#undef handle
+
+namespace stormkit::core {
+    /// \group uint-types Unsigned types
+    /// Unsigned integer type with width of exactly 8, 16, 32 and 64 bits respectively.
+    /// \unique_name UInt8
+    using UInt8 = std::uint8_t;
+
+    /// \group uint-types
+    /// \unique_name UInt16
+    using UInt16 = std::uint16_t;
+
+    /// \group uint-types
+    /// \unique_name UInt32
+    using UInt32 = std::uint32_t;
+
+    /// \group uint-types
+    /// \unique_name UInt64
+    using UInt64 = std::uint64_t;
+
+    /// \group int-types Signed types
+    /// Signed integer type with width of exactly 8, 16, 32 and 64 bits respectively.
+    /// \unique_name Int8
+    using Int8 = std::int8_t;
+
+    /// \group int-types
+    /// \unique_name Int16
+    using Int16 = std::int16_t;
+
+    /// \group int-types
+    /// \unique_name Int32
+    using Int32 = std::int32_t;
+
+    /// \group int-types
+    /// \unique_name Int64
+    using Int64 = std::int64_t;
+
+    /// \brief `Size` is a type that can hold the maximum size of an array.
+    /// \unique_name Size
+    using USize = std::size_t;
+
+    /// \brief `Size` is a type that can hold the maximum size of an array.
+    /// \unique_name Size
+    using Size = std::ptrdiff_t;
+
+    /// \brief `Hash32` is a type that old a 32 bit hash
+    /// \unique_name Hash32
+    using Hash32 = UInt32;
+
+    /// \brief `Hash64` is a type that old a 64 bit hash
+    /// \unique_name Hash64
+    using Hash64 = UInt64;
+
+    /// \brief `Byte` is a type that implements the concept of byte.
+    ///
+    /// It's not an arithmeric type, a byte is only a collection of bits and the only operators
+    /// defined for it are the bitwises ones.
+    /// \unique_name Byte
+    using Byte      = std::byte;
+    using ByteArray = std::vector<Byte>;
+    template<std::size_t N>
+    using ByteStaticArray = std::array<Byte, N>;
+    using ByteSpan        = std::span<Byte>;
+    using ByteConstSpan   = std::span<const Byte>;
+
+    using Secondf = std::chrono::duration<float, std::chrono::seconds::period>;
+
+    /// \brief `Handle` is a type wich represent an ID of an object
+    ///
+    /// This type is meant to be specialized for a type of object `T` and the type ID `_ID`
+    /// \unique_name Handle
+    template<typename T, std::integral _ID>
+    struct STORMKIT_PUBLIC Handle {
+        using ID = _ID;
+
+        static constexpr auto INVALID_HANDLE_VALUE = std::numeric_limits<ID>::max();
+
+        [[nodiscard]] constexpr auto operator<=>(const Handle<T, ID> &) const noexcept
+            -> std::strong_ordering = default;
+
+        template<std::derived_from<T> U>
+        constexpr operator Handle<U, ID>() const noexcept;
+
+        constexpr auto &operator++() noexcept;
+
+        constexpr auto operator++(int) noexcept;
+
+        constexpr auto &operator--() noexcept;
+
+        constexpr auto operator--(int) noexcept;
+
+        constexpr operator ID() const noexcept;
+
+        [[nodiscard]] static constexpr auto invalidHandle() noexcept -> Handle;
+
+        ID id = INVALID_HANDLE_VALUE;
+    };
+
+    template<typename T>
+    using Handle32 = Handle<T, UInt32>;
+    template<typename T>
+    using Handle64 = Handle<T, UInt64>;
+
+    template<ByteType... T>
+    constexpr auto makeStaticByteArray(T... bytes) noexcept;
+
+    template<NonByteType... T>
+    constexpr auto makeStaticByteArray(T... bytes) noexcept;
+
+    template<std::ranges::range T>
+    constexpr auto toByteSpan(T &container) -> core::ByteSpan;
+
+    template<std::ranges::range T>
+    constexpr auto toConstByteSpan(const T &container) -> core::ByteConstSpan;
+
+    template<PointerType Ptr>
+    constexpr auto toByteSpan(Ptr ptr, USize size) -> core::ByteSpan;
+
+    template<PointerType Ptr>
+    constexpr auto toConstByteSpan(const Ptr ptr, USize size) -> core::ByteConstSpan;
+
+    template<NonPointerType T>
+    requires(!std::ranges::range<T>) constexpr auto toByteSpan(T &value) -> core::ByteSpan;
+
+    template<NonPointerType T>
+    requires(!std::ranges::range<T>) constexpr auto toConstByteSpan(const T &value)
+        -> core::ByteConstSpan;
+
+    namespace literals {
+        [[nodiscard]] constexpr auto operator"" _b(unsigned long long int value) noexcept -> Byte;
+    }
+} // namespace stormkit::core
+
+CUSTOM_FORMAT(stormkit::core::Secondf, std::to_string(data.count()));
+
+CUSTOM_FORMAT(stormkit::core::Byte, std::to_string(stormkit::core::as<std::uint16_t>(data)))
+
+template<typename T, std::integral _ID>
+struct std::hash<stormkit::core::Handle<T, _ID>> {
+    [[nodiscard]] constexpr auto
+        operator()(const stormkit::core::Handle<T, _ID> &handle) const noexcept
+        -> stormkit::core::Hash64;
+};
+
+#include "Types.inl"

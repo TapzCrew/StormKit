@@ -22,6 +22,7 @@ target("model_viewer")
     add_frameworks("QtCore",
                    "QtGui",
                    "QtQml",
+                   "QtQmlIntegration",
                    "QtQuick",
                    "QtQuickControls2")
     add_packages("nzsl")

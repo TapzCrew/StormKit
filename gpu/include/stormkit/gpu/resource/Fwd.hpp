@@ -12,7 +12,7 @@
 #include <vector>
 
 
-#include <stormkit/core/Concepts.mpp>
+#include <stormkit/core/Concepts.hpp>
 #include <stormkit/core/MemoryMacro.hpp>
 
 namespace stormkit::gpu {

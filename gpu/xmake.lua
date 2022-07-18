@@ -11,8 +11,8 @@ target("stormkit-gpu")
     add_headerfiles("src/**.hpp")
     add_files("src/**.cpp")
 
-    add_headerfiles("include/(stormkit/**.mpp)")
-    add_headerfiles("src/**.mpp")
+    add_headerfiles("include/(stormkit/**.hpp)")
+    add_headerfiles("src/**.hpp")
 
     add_deps("stormkit-core", "stormkit-image", { public = true })
     add_deps("stormkit-log")

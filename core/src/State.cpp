@@ -1,6 +1,6 @@
 
-#include <stormkit/core/State.mpp>
-#include <stormkit/core/StateManager.mpp>
+#include <stormkit/core/State.hpp>
+#include <stormkit/core/StateManager.hpp>
 
 namespace stormkit::core {
     ////////////////////////////////////////

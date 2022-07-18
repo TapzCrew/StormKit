@@ -1,4 +1,4 @@
-#include <stormkit/gpu/pipeline/RenderPassDescription.mpp>
+#include <stormkit/gpu/pipeline/RenderPassDescription.hpp>
 
 namespace stormkit::gpu {
 #define CHECK(x) \

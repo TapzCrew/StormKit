@@ -2,19 +2,19 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#include <stormkit/core/Coroutines.mpp>
+#include <stormkit/core/Coroutines.hpp>
 
-#include <stormkit/gpu/core/CommandBuffer.mpp>
-#include <stormkit/gpu/core/Device.mpp>
-#include <stormkit/gpu/core/PhysicalDevice.mpp>
-#include <stormkit/gpu/core/Queue.mpp>
+#include <stormkit/gpu/core/CommandBuffer.hpp>
+#include <stormkit/gpu/core/Device.hpp>
+#include <stormkit/gpu/core/PhysicalDevice.hpp>
+#include <stormkit/gpu/core/Queue.hpp>
 
-#include <stormkit/gpu/resource/Buffer.mpp>
-#include <stormkit/gpu/resource/Image.mpp>
+#include <stormkit/gpu/resource/Buffer.hpp>
+#include <stormkit/gpu/resource/Image.hpp>
 
-#include <stormkit/gpu/sync/Fence.mpp>
+#include <stormkit/gpu/sync/Fence.hpp>
 
-#include <stormkit/image/Image.mpp>
+#include <stormkit/image/Image.hpp>
 
 #include "ConvertFormatShaders.hpp"
 

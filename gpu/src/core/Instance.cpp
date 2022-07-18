@@ -5,15 +5,15 @@
 #include <map>
 #include <unordered_set>
 
-#include <stormkit/core/Math.mpp>
+#include <stormkit/core/Math.hpp>
 
-#include <stormkit/log/LogHandler.mpp>
+#include <stormkit/log/LogHandler.hpp>
 
-#include <stormkit/gpu/core/Instance.mpp>
-#include <stormkit/gpu/core/OffscreenSurface.mpp>
-#include <stormkit/gpu/core/PhysicalDevice.mpp>
-#include <stormkit/gpu/core/PhysicalDeviceInfo.mpp>
-#include <stormkit/gpu/core/WindowSurface.mpp>
+#include <stormkit/gpu/core/Instance.hpp>
+#include <stormkit/gpu/core/OffscreenSurface.hpp>
+#include <stormkit/gpu/core/PhysicalDevice.hpp>
+#include <stormkit/gpu/core/PhysicalDeviceInfo.hpp>
+#include <stormkit/gpu/core/WindowSurface.hpp>
 
 #include <stormkit/log/LogMacro.hpp>
 

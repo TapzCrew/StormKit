@@ -2,9 +2,9 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#include <stormkit/core/Fstream.mpp>
+#include <stormkit/core/Fstream.hpp>
 
-#include "HDRImage.mpp"
+#include "HDRImage.hpp"
 
 namespace stormkit::image::details {
     template<class E>
