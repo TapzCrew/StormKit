@@ -21,7 +21,12 @@ MicaApplicationWindow {
 
     titleBarExpanded: true
 
-    titlebar: RowLayout {
+    titleBar: Row {
+        spacing: 6
+
+        leftPadding: 4
+        topPadding: 4
+
         ToolButton {
             font.family: WinUI3Style.iconFont
             text: String.fromCodePoint(0xe8e5)
@@ -33,17 +38,14 @@ MicaApplicationWindow {
 
         Label {
             text: window.title
+
             font.pixelSize: 12
             font.weight: 450
             font.family: "Segoe UI Semibold"
 
-            Layout.leftMargin: 6
-
-            Layout.alignment: Qt.AlignVCenter
+            anchors.verticalCenter: parent.verticalCenter
         }
     }
-
-    enableSideMenu: false
 
     WindowContent {
         id: window_content

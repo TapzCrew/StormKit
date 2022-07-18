@@ -20,10 +20,24 @@ Item {
             ColumnLayout {
                 anchors.fill: parent
 
+                CheckBox {
+                    text: "Wireframe"
+
+                    checked: false
+                }
+
+                CheckBox {
+                    text: "Rotation"
+
+                    checked: false
+                }
+
                 Button {
                     text: "Test"
+                }
 
-                    Layout.fillWidth: true
+                Item {
+                    Layout.fillHeight: true
                 }
             }
         }

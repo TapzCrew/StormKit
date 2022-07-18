@@ -1,7 +1,9 @@
 #pragma once
 
 #include <QtQuick/QQuickItem>
+
 #include <stormkit/engine/Engine.mpp>
+#include <stormkit/engine/Fwd.hpp>
 
 class StormKitNode;
 class StormKitView: public QQuickItem {
@@ -14,7 +16,7 @@ class StormKitView: public QQuickItem {
 
   protected:
     auto updatePaintNode(QSGNode *, UpdatePaintNodeData *) -> QSGNode * override;
-    auto geometryChange(const QRectF &newGeometry, const QRectF &oldGeometry) -> void override;
+    auto geometryChange(const QRectF& newGeometry, const QRectF& oldGeometry) -> void override;
 
   private Q_SLOTS:
     auto invalidateSceneGraph() -> void;
