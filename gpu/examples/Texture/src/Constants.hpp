@@ -10,16 +10,16 @@
 #include <array>
 
 /////////// - StormKit::Log - ///////////
-#include <stormkit/core/Memory.mpp>
+#include <stormkit/core/Memory.hpp>
 
 /////////// - StormKit::Log - ///////////
-#include <stormkit/log/LogHandler.mpp>
+#include <stormkit/log/Logger.hpp>
 
 /////////// - StormKit::Render - ///////////
-#include <stormkit/gpu/core/Types.mpp>
+#include <stormkit/gpu/core/Types.hpp>
 
-#include <stormkit/gpu/pipeline/VertexBindingDescription.mpp>
-#include <stormkit/gpu/pipeline/VertexInputAttributeDescription.mpp>
+#include <stormkit/gpu/pipeline/VertexBindingDescription.hpp>
+#include <stormkit/gpu/pipeline/VertexInputAttributeDescription.hpp>
 
 struct Vertex {
     stormkit::core::Vector2f position;

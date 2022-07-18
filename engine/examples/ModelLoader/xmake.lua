@@ -1,6 +1,6 @@
 target("model_loader")
     set_kind("binary")
-    set_languages("cxxlatest", "clatest")
+    set_languages("cxx20", "clatest")
     add_rules("utils.nzsl2spv")
 
     if is_mode("debug") then
@@ -8,7 +8,7 @@ target("model_loader")
     end
 
     add_files("src/*.cpp")
-    add_headerfiles("src/*.mpp")
+    add_headerfiles("src/*.hpp")
 
     if is_plat("windows") then
         add_files("win32/*.manifest")

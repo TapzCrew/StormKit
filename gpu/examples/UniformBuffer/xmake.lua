@@ -1,6 +1,6 @@
 target("uniform-buffer")
     set_kind("binary")
-    set_languages("cxxlatest", "clatest")
+    set_languages("cxx20", "clatest")
     add_rules("utils.nzsl2spv")
 
     if is_mode("debug") then
@@ -8,7 +8,7 @@ target("uniform-buffer")
     end
 
     add_files("src/*.cpp")
-    add_headerfiles("src/*.mpp")
+    add_headerfiles("src/*.hpp")
     add_files("shaders/*.nzsl")
     
 

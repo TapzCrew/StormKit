@@ -10,10 +10,10 @@
 
 #include <string_view>
 
-#include <stormkit/core/AsCast.mpp>
-#include <stormkit/core/Format.mpp>
-#include <stormkit/core/FrozenMap.mpp>
-#include <stormkit/core/Types.mpp>
+#include <stormkit/core/AsCast.hpp>
+#include <stormkit/core/Format.hpp>
+#include <stormkit/core/FrozenMap.hpp>
+#include <stormkit/core/Types.hpp>
 
 namespace stormkit::wsi {
     enum class Key : core::Int8 {

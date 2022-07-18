@@ -6,8 +6,8 @@
 
 #include <version>
 
-//#if defined(__cpp_lib_format)
-#if __has_include(<format>)
+// #if defined(__cpp_lib_format)
+#if defined(__cpp_lib_format) && __cpp_lib_format >= 202110L
     #define STORMKIT_HAS_STL_FORMAT
 #elif __has_include(<fmt/format.h>)
     #define STORMKIT_HAS_FMT_FORMAT
@@ -35,7 +35,9 @@ namespace stormkit::core {
     using std::vformat;
     using std::vformat_to;
 
-    constexpr auto runtime(std::string_view str) { return str; }
+    constexpr auto runtime(std::string_view str) {
+        return str;
+    }
 } // namespace stormkit::core
 
 template<stormkit::core::EnumerationType Enum>
@@ -48,8 +50,8 @@ struct std::formatter<Enum>: std::formatter<std::underlying_type_t<Enum>> {
 };
 
 template<std::ranges::range R>
-requires(!stormkit::core::StringLikeType<R>) struct std::formatter<R>
-    : std::formatter<typename R::value_type> {
+    requires(!stormkit::core::StringLikeType<R>)
+struct std::formatter<R>: std::formatter<typename R::value_type> {
     auto format(const R& range, format_context& ctx) {
         auto out = ctx.out();
 

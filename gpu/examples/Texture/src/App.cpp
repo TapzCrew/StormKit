@@ -1,23 +1,23 @@
-#include "App.mpp"
-#include "Constants.mpp"
+#include "App.hpp"
+#include "Constants.hpp"
 
-#include <stormkit/core/Configure.mpp>
+#include <stormkit/core/Configure.hpp>
 
-#include <stormkit/log/LogHandler.mpp>
+#include <stormkit/log/Logger.hpp>
 
-#include <stormkit/wsi/Event.mpp>
-#include <stormkit/wsi/EventHandler.mpp>
-#include <stormkit/wsi/Monitor.mpp>
-#include <stormkit/wsi/Window.mpp>
+#include <stormkit/wsi/Event.hpp>
+#include <stormkit/wsi/EventHandler.hpp>
+#include <stormkit/wsi/Monitor.hpp>
+#include <stormkit/wsi/Window.hpp>
 
-#include <stormkit/image/Image.mpp>
+#include <stormkit/image/Image.hpp>
 
-#include <stormkit/gpu/core/Device.mpp>
-#include <stormkit/gpu/core/Instance.mpp>
-#include <stormkit/gpu/core/PhysicalDevice.mpp>
-#include <stormkit/gpu/core/PhysicalDeviceInfo.mpp>
-#include <stormkit/gpu/core/Queue.mpp>
-#include <stormkit/gpu/core/WindowSurface.mpp>
+#include <stormkit/gpu/core/Device.hpp>
+#include <stormkit/gpu/core/Instance.hpp>
+#include <stormkit/gpu/core/PhysicalDevice.hpp>
+#include <stormkit/gpu/core/PhysicalDeviceInfo.hpp>
+#include <stormkit/gpu/core/Queue.hpp>
+#include <stormkit/gpu/core/WindowSurface.hpp>
 
 static constexpr auto TEXTURE_DATA = std::array {
 #include <texture.png.hpp>

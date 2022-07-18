@@ -2,9 +2,9 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#include <stormkit/engine/render/core/ShaderCache.mpp>
+#include <stormkit/engine/render/core/ShaderCache.hpp>
 
-#include <stormkit/gpu/core/Device.mpp>
+#include <stormkit/gpu/core/Device.hpp>
 
 namespace stormkit::engine {
     /////////////////////////////////////

@@ -1,6 +1,6 @@
 target("event_handler")
     set_kind("binary")
-    set_languages("cxxlatest", "clatest")
+    set_languages("cxx20", "clatest")
     add_files("src/main.cpp")
 
     if is_plat("windows") then

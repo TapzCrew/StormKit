@@ -2,27 +2,27 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#include "stormkit/core/ThreadPool.mpp"
-#include "stormkit/gpu/resource/Buffer.mpp"
+#include "stormkit/core/ThreadPool.hpp"
+#include "stormkit/gpu/resource/Buffer.hpp"
 #include <algorithm>
 #include <array>
 #include <functional>
 #include <iterator>
 #include <mutex>
-#include <stormkit/core/Memory.mpp>
-#include <stormkit/core/Types.mpp>
-#include <stormkit/engine/render/core/RenderQueue.mpp>
-#include <stormkit/log/LogHandler.mpp>
+#include <stormkit/core/Memory.hpp>
+#include <stormkit/core/Types.hpp>
+#include <stormkit/engine/render/core/RenderQueue.hpp>
+#include <stormkit/log/Logger.hpp>
 #include <stormkit/log/LogMacro.hpp>
 
-#include <stormkit/core/Numerics.mpp>
+#include <stormkit/core/Numerics.hpp>
 
-#include <stormkit/gpu/core/Device.mpp>
+#include <stormkit/gpu/core/Device.hpp>
 
-#include <stormkit/engine/Engine.mpp>
-#include <stormkit/engine/render/Renderer.mpp>
+#include <stormkit/engine/Engine.hpp>
+#include <stormkit/engine/render/Renderer.hpp>
 
-#include <stormkit/engine/render/MeshComponent.mpp>
+#include <stormkit/engine/render/MeshComponent.hpp>
 #include <utility>
 
 using namespace stormkit::core::literals;

@@ -1,9 +1,9 @@
 #include "StormKitView.hpp"
 #include "StormKitNode.hpp"
 
-#include <stormkit/core/Math.mpp>
+#include <stormkit/core/Math.hpp>
 
-#include <stormkit/engine/Engine.mpp>
+#include <stormkit/engine/Engine.hpp>
 
 using namespace stormkit;
 

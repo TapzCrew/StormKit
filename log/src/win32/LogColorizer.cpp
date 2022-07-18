@@ -2,9 +2,9 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#include <stormkit/core/Types.mpp>
+#include <stormkit/core/Types.hpp>
 
-#include "../LogColorizer.mpp"
+#include "../LogColorizer.hpp"
 
 #include <windows.h>
 

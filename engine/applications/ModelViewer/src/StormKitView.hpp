@@ -2,7 +2,7 @@
 
 #include <QtQuick/QQuickItem>
 
-#include <stormkit/engine/Engine.mpp>
+#include <stormkit/engine/Engine.hpp>
 #include <stormkit/engine/Fwd.hpp>
 
 class StormKitNode;

@@ -5,10 +5,10 @@
 #pragma once
 
 
-#include <stormkit/core/Concepts.mpp>
-#include <stormkit/core/Types.mpp>
+#include <stormkit/core/Concepts.hpp>
+#include <stormkit/core/Types.hpp>
 
-#include <stormkit/gpu/core/Types.mpp>
+#include <stormkit/gpu/core/Types.hpp>
 
 #include <stormkit/engine/render/framegraph/Fwd.hpp>
 

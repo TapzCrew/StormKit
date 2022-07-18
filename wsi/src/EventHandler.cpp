@@ -2,8 +2,8 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#include <stormkit/wsi/EventHandler.mpp>
-#include <stormkit/wsi/Window.mpp>
+#include <stormkit/wsi/EventHandler.hpp>
+#include <stormkit/wsi/Window.hpp>
 
 namespace stormkit::wsi {
     /////////////////////////////////////

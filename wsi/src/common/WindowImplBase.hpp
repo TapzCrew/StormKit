@@ -6,14 +6,14 @@
 
 #include <queue>
 
-#include <stormkit/core/Math.mpp>
-#include <stormkit/core/Types.mpp>
+#include <stormkit/core/Math.hpp>
+#include <stormkit/core/Types.hpp>
 
-#include <stormkit/wsi/Event.mpp>
+#include <stormkit/wsi/Event.hpp>
 #include <stormkit/wsi/Fwd.hpp>
-#include <stormkit/wsi/Key.mpp>
-#include <stormkit/wsi/Monitor.mpp>
-#include <stormkit/wsi/MouseButton.mpp>
+#include <stormkit/wsi/Key.hpp>
+#include <stormkit/wsi/Monitor.hpp>
+#include <stormkit/wsi/MouseButton.hpp>
 
 namespace stormkit::wsi::details {
     class WindowImplBase {

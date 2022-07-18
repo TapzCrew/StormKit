@@ -2,7 +2,7 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#include <stormkit/engine/render/framegraph/GraphTaskBuilder.mpp>
+#include <stormkit/engine/render/framegraph/GraphTaskBuilder.hpp>
 
 namespace stormkit::engine {
     /////////////////////////////////////

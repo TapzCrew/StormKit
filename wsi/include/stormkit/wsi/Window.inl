@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "Window.mpp"
+#include "Window.hpp"
 
 namespace stormkit::wsi {
 } // namespace stormkit::wsi

@@ -21,7 +21,9 @@ namespace stormkit::log {
         explicit ConsoleLogger(LogClock::time_point start) noexcept;
         ConsoleLogger(LogClock::time_point start, Severity log_level) noexcept;
 
-        auto write(Severity severity, const Module &module, const char *string) -> void override;
+        ~ConsoleLogger() override;
+
+        auto write(Severity severity, const Module& module, const char *string) -> void override;
         auto flush() noexcept -> void override;
     };
     DECLARE_PTR_AND_REF(ConsoleLogger)

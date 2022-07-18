@@ -6,7 +6,7 @@
 
 #include <windows.h>
 
-#include <stormkit/wsi/Key.mpp>
+#include <stormkit/wsi/Key.hpp>
 
 namespace stormkit::wsi::details::win32 {
     auto win32KeyToStormKitKey(WPARAM key, LPARAM flags) noexcept -> Key;

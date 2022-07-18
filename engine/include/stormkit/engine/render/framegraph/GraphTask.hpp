@@ -5,12 +5,12 @@
 #pragma once
 
 
-#include <stormkit/core/Types.mpp>
+#include <stormkit/core/Types.hpp>
 
 #include <stormkit/gpu/Fwd.hpp>
 
 #include <stormkit/engine/render/framegraph/Fwd.hpp>
-#include <stormkit/engine/render/framegraph/GraphResource.mpp>
+#include <stormkit/engine/render/framegraph/GraphResource.hpp>
 
 namespace stormkit::engine {
     class STORMKIT_PUBLIC GraphTaskBase {

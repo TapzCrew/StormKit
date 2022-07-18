@@ -3,7 +3,7 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#include <stormkit/engine/render/framegraph/GraphResource.mpp>
+#include <stormkit/engine/render/framegraph/GraphResource.hpp>
 
 namespace stormkit::engine {
     /////////////////////////////////////

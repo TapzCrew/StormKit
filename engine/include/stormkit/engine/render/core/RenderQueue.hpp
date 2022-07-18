@@ -6,16 +6,16 @@
 
 #include <stormkit/core/PlatformMacro.hpp>
 
-#include <stormkit/core/Types.mpp>
+#include <stormkit/core/Types.hpp>
 
 #include <stormkit/gpu/Fwd.hpp>
 
-#include <stormkit/gpu/resource/Buffer.mpp>
-#include <stormkit/gpu/resource/ImageView.mpp>
+#include <stormkit/gpu/resource/Buffer.hpp>
+#include <stormkit/gpu/resource/ImageView.hpp>
 
-#include <stormkit/engine/EngineObject.mpp>
+#include <stormkit/engine/EngineObject.hpp>
 #include <stormkit/engine/Fwd.hpp>
-#include <stormkit/engine/render/core/ShaderInputBuffer.mpp>
+#include <stormkit/engine/render/core/ShaderInputBuffer.hpp>
 
 namespace stormkit::engine {
     class STORMKIT_PUBLIC RenderQueue: public EngineObject {

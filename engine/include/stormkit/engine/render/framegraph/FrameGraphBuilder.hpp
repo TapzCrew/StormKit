@@ -10,21 +10,21 @@
 
 #include <future>
 
-#include <stormkit/core/Format.mpp>
-#include <stormkit/core/Memory.mpp>
-#include <stormkit/core/Types.mpp>
+#include <stormkit/core/Format.hpp>
+#include <stormkit/core/Memory.hpp>
+#include <stormkit/core/Types.hpp>
 
 #include <stormkit/gpu/Fwd.hpp>
-#include <stormkit/gpu/pipeline/RenderPassDescription.mpp>
-#include <stormkit/gpu/resource/Buffer.mpp>
-#include <stormkit/gpu/resource/Image.mpp>
+#include <stormkit/gpu/pipeline/RenderPassDescription.hpp>
+#include <stormkit/gpu/resource/Buffer.hpp>
+#include <stormkit/gpu/resource/Image.hpp>
 
-#include <stormkit/gpu/pipeline/RenderPassDescription.mpp>
+#include <stormkit/gpu/pipeline/RenderPassDescription.hpp>
 
-#include <stormkit/engine/EngineObject.mpp>
+#include <stormkit/engine/EngineObject.hpp>
 #include <stormkit/engine/Fwd.hpp>
-#include <stormkit/engine/render/framegraph/BakedFrameGraph.mpp>
-#include <stormkit/engine/render/framegraph/GraphTask.mpp>
+#include <stormkit/engine/render/framegraph/BakedFrameGraph.hpp>
+#include <stormkit/engine/render/framegraph/GraphTask.hpp>
 
 namespace stormkit::engine {
     class STORMKIT_PUBLIC FrameGraphBuilder: public EngineObject {

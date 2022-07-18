@@ -4,21 +4,21 @@
 
 #pragma once
 
-#include <stormkit/core/Types.mpp>
+#include <stormkit/core/Types.hpp>
 
 #include <stormkit/entities/Fwd.hpp>
 
 #include <stormkit/wsi/Fwd.hpp>
 
 #include <stormkit/gpu/Fwd.hpp>
-#include <stormkit/gpu/core/CommandBuffer.mpp>
-#include <stormkit/gpu/core/Surface.mpp>
+#include <stormkit/gpu/core/CommandBuffer.hpp>
+#include <stormkit/gpu/core/Surface.hpp>
 
-#include <stormkit/gpu/resource/ImageView.mpp>
+#include <stormkit/gpu/resource/ImageView.hpp>
 
-#include <stormkit/engine/EngineObject.mpp>
+#include <stormkit/engine/EngineObject.hpp>
 #include <stormkit/engine/Fwd.hpp>
-#include <stormkit/engine/render/framegraph/GraphResource.mpp>
+#include <stormkit/engine/render/framegraph/GraphResource.hpp>
 
 namespace stormkit::engine {
     class STORMKIT_PUBLIC Renderer: public EngineObject {

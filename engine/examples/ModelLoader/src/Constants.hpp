@@ -9,16 +9,16 @@
 
 #include <array>
 
-#include <stormkit/core/Memory.mpp>
+#include <stormkit/core/Memory.hpp>
 
-#include <stormkit/log/LogHandler.mpp>
+#include <stormkit/log/Logger.hpp>
 
-#include <stormkit/gpu/core/Types.mpp>
+#include <stormkit/gpu/core/Types.hpp>
 
-#include <stormkit/gpu/pipeline/VertexBindingDescription.mpp>
-#include <stormkit/gpu/pipeline/VertexInputAttributeDescription.mpp>
+#include <stormkit/gpu/pipeline/VertexBindingDescription.hpp>
+#include <stormkit/gpu/pipeline/VertexInputAttributeDescription.hpp>
 
-#include <stormkit/engine/render/core/VertexArray.mpp>
+#include <stormkit/engine/render/core/VertexArray.hpp>
 
 static constexpr auto WINDOW_TITLE = "StormKit Model Loading Example";
 

@@ -15,14 +15,14 @@
 #include <string_view>
 #include <vector>
 
-#include <stormkit/core/Flags.mpp>
-#include <stormkit/core/Math.mpp>
-#include <stormkit/core/Pimpl.mpp>
-#include <stormkit/core/Types.mpp>
+#include <stormkit/core/Flags.hpp>
+#include <stormkit/core/Math.hpp>
+#include <stormkit/core/Pimpl.hpp>
+#include <stormkit/core/Types.hpp>
 
-#include <stormkit/wsi/Event.mpp>
-#include <stormkit/wsi/Monitor.mpp>
-#include <stormkit/wsi/WindowStyle.mpp>
+#include <stormkit/wsi/Event.hpp>
+#include <stormkit/wsi/Monitor.hpp>
+#include <stormkit/wsi/WindowStyle.hpp>
 
 namespace stormkit::wsi {
     namespace details {

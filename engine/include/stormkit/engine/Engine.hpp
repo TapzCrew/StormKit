@@ -4,17 +4,17 @@
 
 #pragma once
 
-#include <stormkit/core/ThreadPool.mpp>
-#include <stormkit/core/Types.mpp>
+#include <stormkit/core/ThreadPool.hpp>
+#include <stormkit/core/Types.hpp>
 
-#include <stormkit/wsi/EventHandler.mpp>
+#include <stormkit/wsi/EventHandler.hpp>
 #include <stormkit/wsi/Fwd.hpp>
 
-#include <stormkit/entities/EntityManager.mpp>
+#include <stormkit/entities/EntityManager.hpp>
 
 #include <stormkit/engine/Fwd.hpp>
 
-#include <stormkit/gpu/core/Surface.mpp>
+#include <stormkit/gpu/core/Surface.hpp>
 
 namespace stormkit::engine {
     class STORMKIT_PUBLIC Engine {

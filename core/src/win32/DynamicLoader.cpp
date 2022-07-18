@@ -4,9 +4,9 @@
 
 #include <stdexcept>
 
-#include <stormkit/core/DynamicLoader.mpp>
-#include <stormkit/core/Format.mpp>
-#include <stormkit/core/Strings.mpp>
+#include <stormkit/core/DynamicLoader.hpp>
+#include <stormkit/core/Format.hpp>
+#include <stormkit/core/Strings.hpp>
 
 
 #include <windows.h>

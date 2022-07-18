@@ -7,8 +7,8 @@
 #include <stormkit/core/FlagsMacro.hpp>
 #include <stormkit/core/FormatMacro.hpp>
 
-#include <stormkit/core/Format.mpp>
-#include <stormkit/core/Math.mpp>
+#include <stormkit/core/Format.hpp>
+#include <stormkit/core/Math.hpp>
 
 namespace stormkit::wsi {
     struct Monitor {

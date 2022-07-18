@@ -2,14 +2,14 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#include <stormkit/wsi/Window.mpp>
+#include <stormkit/wsi/Window.hpp>
 
-#include "Log.mpp"
+#include "Log.hpp"
 
 #if defined(STORMKIT_OS_WINDOWS)
-    #include "win32/WindowImpl.mpp"
+    #include "win32/WindowImpl.hpp"
 #elif defined(STORMKIT_OS_LINUX)
-    #include "linux/WindowImpl.mpp"
+    #include "linux/WindowImpl.hpp"
 #endif
 
 #include <stormkit/core/AssertMacro.hpp>

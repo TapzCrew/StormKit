@@ -1,21 +1,20 @@
-#include <stormkit/core/Memory.mpp>
+#include <stormkit/core/Memory.hpp>
 
-#include <stormkit/log/LogHandler.mpp>
+#include <stormkit/log/ConsoleLogger.hpp>
+#include <stormkit/log/Logger.hpp>
 
 #include <stormkit/main/MainMacro.hpp>
 
-#include "App.mpp"
-
-#include <stormkit/core/Ranges.mpp>
+#include "App.hpp"
 
 ////////////////////////////////////////
 ////////////////////////////////////////
-auto main([[maybe_unused]] const int argc, [[maybe_unused]] const char **argv) -> int {
+auto main(const int argc, const char **argv) -> int {
     using namespace stormkit;
 
     core::setupSignalHandler();
 
-    log::LogHandler::setupDefaultLogger();
+    auto logger = log::Logger::createLoggerInstance<log::ConsoleLogger>();
 
     auto app = App {};
     return app.run(argc, argv);

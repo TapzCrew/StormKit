@@ -1,17 +1,17 @@
 target("stormkit-entities")
     set_kind("$(kind)")
-    set_languages("cxxlatest", "clatest")
+    set_languages("cxx20", "clatest")
 
+    add_defines("STORMKIT_BUILD")
     if is_mode("debug") then
+        add_defines("STORMKIT_BUILD_DEBUG")
         set_suffixname("-d")
     end
 
     add_headerfiles("include/(stormkit/**.hpp)")
     add_headerfiles("include/(stormkit/**.inl)")
-    add_files("src/**.cpp")
-
-    add_headerfiles("include/(stormkit/**.hpp)")
     add_headerfiles("src/**.hpp")
+    add_files("src/**.cpp")
 
     add_deps("stormkit-core", { public = true })
     add_includedirs("include", { public = true })

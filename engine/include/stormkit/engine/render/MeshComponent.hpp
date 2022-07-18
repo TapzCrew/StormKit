@@ -5,13 +5,13 @@
 #pragma once
 
 
-#include <stormkit/core/Math.mpp>
+#include <stormkit/core/Math.hpp>
 
 
-#include <stormkit/entities/Component.mpp>
+#include <stormkit/entities/Component.hpp>
 
 
-#include <stormkit/engine/render/core/VertexArray.mpp>
+#include <stormkit/engine/render/core/VertexArray.hpp>
 
 namespace stormkit::engine {
     using IndexArray = std::vector<core::UInt32>;

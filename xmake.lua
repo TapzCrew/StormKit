@@ -187,11 +187,6 @@ package("StormKit")
     set_fpmodels("fast")
     set_warnings("allextra", "error")
 
-    add_defines("STORMKIT_BUILD")
-    if is_mode("debug") then
-        add_defines("STORMKIT_BUILD_DEBUG")
-    end
-
     add_vectorexts("mms", "neon", "avx", "avx2", "sse", "sse2", "sse3", "sse4")
 
     -- core deps

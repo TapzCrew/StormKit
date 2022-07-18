@@ -1,9 +1,11 @@
 target("stormkit-engine")
     set_kind("$(kind)")
-    set_languages("cxxlatest", "clatest")
+    set_languages("cxx20", "clatest")
     add_rules("utils.nzsl2spv")
 
+    add_defines("STORMKIT_BUILD")
     if is_mode("debug") then
+        add_defines("STORMKIT_BUILD_DEBUG")
         set_suffixname("-d")
     end
 
@@ -12,9 +14,6 @@ target("stormkit-engine")
     add_headerfiles("src/**.hpp")
     add_files("src/**.cpp")
     add_files("src/**.nzsl")
-
-    add_headerfiles("include/(stormkit/**.mpp)")
-    add_headerfiles("src/**.mpp")
 
     add_deps("stormkit-core", "stormkit-image", "stormkit-gpu", "stormkit-entities", { public = true })
     add_deps("stormkit-log")

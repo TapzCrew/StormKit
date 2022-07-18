@@ -4,8 +4,9 @@
 
 #pragma once
 
-//#if defined(__cpp_lib_format) && __cpp_lib_format >= 202110L
-#if __has_include(<format>)
+#include <version>
+
+#if defined(__cpp_lib_format) && __cpp_lib_format >= 202110L
     #define STORMKIT_HAS_STL_FORMAT
 #elif __has_include(<fmt/format.h>)
     #define STORMKIT_HAS_FMT_FORMAT

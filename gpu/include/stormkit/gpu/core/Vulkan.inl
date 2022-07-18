@@ -77,7 +77,7 @@ namespace stormkit::gpu {
 
         const auto m = "Vulkan"_module;
 
-        log::LogHandler::flog(m,
+        log::Logger::flog(m,
                               "\"{}\" failed, return code: {}\n\tat {} in function {} at line {}",
                               str_line,
                               vkResultToString(result),

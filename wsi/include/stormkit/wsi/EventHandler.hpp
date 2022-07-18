@@ -14,13 +14,13 @@
 #include <span>
 #include <vector>
 
-#include <stormkit/core/HashMap.mpp>
-#include <stormkit/core/Memory.mpp>
+#include <stormkit/core/HashMap.hpp>
+#include <stormkit/core/Memory.hpp>
 
-#include <stormkit/wsi/Event.mpp>
+#include <stormkit/wsi/Event.hpp>
 #include <stormkit/wsi/Fwd.hpp>
-#include <stormkit/wsi/Key.mpp>
-#include <stormkit/wsi/MouseButton.mpp>
+#include <stormkit/wsi/Key.hpp>
+#include <stormkit/wsi/MouseButton.hpp>
 
 namespace stormkit::wsi {
     class STORMKIT_PUBLIC EventHandler {

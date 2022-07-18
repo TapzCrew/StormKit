@@ -6,11 +6,11 @@
 
 #include <variant>
 
-#include <stormkit/core/Math.mpp>
-#include <stormkit/core/Types.mpp>
+#include <stormkit/core/Math.hpp>
+#include <stormkit/core/Types.hpp>
 
-#include <stormkit/wsi/Key.mpp>
-#include <stormkit/wsi/MouseButton.mpp>
+#include <stormkit/wsi/Key.hpp>
+#include <stormkit/wsi/MouseButton.hpp>
 
 #undef None
 

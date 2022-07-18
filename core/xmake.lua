@@ -18,23 +18,24 @@ target("stormkit-core")
     end)
 
     set_kind("$(kind)")
-    set_languages("cxxlatest", "clatest")
+    set_languages("cxx20", "clatest")
 
+    add_defines("STORMKIT_BUILD")
     if is_mode("debug") then
+        add_defines("STORMKIT_BUILD_DEBUG")
         set_suffixname("-d")
     end
 
     add_headerfiles("include/(stormkit/**.inl)")
     add_headerfiles("include/(stormkit/**.hpp)")
-    add_headerfiles("include(stormkit/**.h)")
+    add_headerfiles("include/(stormkit/**.h)")
+    add_headerfiles("src/**.hpp")
 
     add_files("src/*.cpp")
 
     if is_plat("linux") or is_plat("macosx") then       add_files("src/posix/*.cpp")
     elseif is_plat("windows") then add_files("src/win32/*.cpp") end
 
-    add_headerfiles("include/(stormkit/**.hpp)")
-    add_headerfiles("src/**.hpp")
 
     add_packages("glm", "robin-hood-hashing", "frozen", "backward-cpp", { public = true })
 

@@ -2,29 +2,29 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#include <stormkit/core/ThreadUtils.mpp>
+#include <stormkit/core/ThreadUtils.hpp>
 
-#include <stormkit/log/LogHandler.mpp>
+#include <stormkit/log/Logger.hpp>
 #include <stormkit/log/LogMacro.hpp>
 
-#include <stormkit/entities/EntityManager.mpp>
-#include <stormkit/entities/System.mpp>
+#include <stormkit/entities/EntityManager.hpp>
+#include <stormkit/entities/System.hpp>
 
-#include <stormkit/engine/Engine.mpp>
-#include <stormkit/engine/render/Renderer.mpp>
-#include <stormkit/engine/render/core/RenderQueue.mpp>
-#include <stormkit/engine/render/core/ShaderCache.mpp>
-#include <stormkit/engine/render/framegraph/BakedFrameGraph.mpp>
-#include <stormkit/engine/render/framegraph/FrameGraphBuilder.mpp>
+#include <stormkit/engine/Engine.hpp>
+#include <stormkit/engine/render/Renderer.hpp>
+#include <stormkit/engine/render/core/RenderQueue.hpp>
+#include <stormkit/engine/render/core/ShaderCache.hpp>
+#include <stormkit/engine/render/framegraph/BakedFrameGraph.hpp>
+#include <stormkit/engine/render/framegraph/FrameGraphBuilder.hpp>
 
-#include <stormkit/gpu/core/Device.mpp>
-#include <stormkit/gpu/core/Instance.mpp>
-#include <stormkit/gpu/core/OffscreenSurface.mpp>
-#include <stormkit/gpu/core/PhysicalDevice.mpp>
-#include <stormkit/gpu/core/PhysicalDeviceInfo.mpp>
-#include <stormkit/gpu/core/Queue.mpp>
-#include <stormkit/gpu/core/WindowSurface.mpp>
-#include <stormkit/gpu/pipeline/PipelineCache.mpp>
+#include <stormkit/gpu/core/Device.hpp>
+#include <stormkit/gpu/core/Instance.hpp>
+#include <stormkit/gpu/core/OffscreenSurface.hpp>
+#include <stormkit/gpu/core/PhysicalDevice.hpp>
+#include <stormkit/gpu/core/PhysicalDeviceInfo.hpp>
+#include <stormkit/gpu/core/Queue.hpp>
+#include <stormkit/gpu/core/WindowSurface.hpp>
+#include <stormkit/gpu/pipeline/PipelineCache.hpp>
 
 namespace stormkit::engine {
     NAMED_LOGGER(renderer_logger, "StormKit.Renderer.Renderer");

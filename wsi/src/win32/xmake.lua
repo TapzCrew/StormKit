@@ -1,15 +1,16 @@
 target("stormkit-wsi-win32")
     set_kind("static")
-    set_languages("cxxlatest", "clatest")
+    set_languages("cxx20", "clatest")
 
+    add_defines("STORMKIT_BUILD")
     if is_mode("debug") then
+        add_defines("STORMKIT_BUILD_DEBUG")
         set_suffixname("-d")
     end
 
+    add_headerfiles("*.hpp")
     add_headerfiles("*.inl")
     add_files("*.cpp")
-
-    add_headerfiles("*.mpp")
 
     add_includedirs("../../include/")
     add_deps("stormkit-core", "stormkit-log", { public = true })

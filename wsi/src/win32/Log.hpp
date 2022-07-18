@@ -6,7 +6,7 @@
 
 #include <stormkit/log/LogMacro.hpp>
 
-#include <stormkit/log/LogHandler.mpp>
+#include <stormkit/log/Logger.hpp>
 
 namespace stormkit::wsi::details::win32 {
     LOGGER("StormKit.Window.Win32Backend")

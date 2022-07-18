@@ -14,15 +14,19 @@
 namespace stormkit::log {
     struct Module {
         template<typename... Args>
-        auto dlog(Args &&...args) const -> void;
+        auto dlog(Args&&...args) const -> void;
+
         template<typename... Args>
-        auto ilog(Args &&...args) const -> void;
+        auto ilog(Args&&...args) const -> void;
+
         template<typename... Args>
-        auto wlog(Args &&...args) const -> void;
+        auto wlog(Args&&...args) const -> void;
+
         template<typename... Args>
-        auto elog(Args &&...args) const -> void;
+        auto elog(Args&&...args) const -> void;
+
         template<typename... Args>
-        auto flog(Args &&...args) const -> void;
+        auto flog(Args&&...args) const -> void;
 
         std::string name;
     };

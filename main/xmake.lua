@@ -1,8 +1,10 @@
 target("stormkit-main")
     set_kind("static")
-    set_languages("cxxlatest", "clatest")
+    set_languages("cxx20", "clatest")
 
+    add_defines("STORMKIT_BUILD")
     if is_mode("debug") then
+        add_defines("STORMKIT_BUILD_DEBUG")
         set_suffixname("-d")
     end
 

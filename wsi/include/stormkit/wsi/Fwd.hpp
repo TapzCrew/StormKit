@@ -13,7 +13,7 @@
 
 
 #include <stormkit/core/MemoryMacro.hpp>
-#include <stormkit/core/Types.mpp>
+#include <stormkit/core/Types.hpp>
 
 namespace stormkit::wsi {
     enum class EventType : core::UInt8;

@@ -2,11 +2,11 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#include <stormkit/engine/Engine.mpp>
-#include <stormkit/engine/render/Renderer.mpp>
-#include <stormkit/engine/render/core/BlockBuffer.mpp>
+#include <stormkit/engine/Engine.hpp>
+#include <stormkit/engine/render/Renderer.hpp>
+#include <stormkit/engine/render/core/BlockBuffer.hpp>
 
-#include <stormkit/gpu/core/Device.mpp>
+#include <stormkit/gpu/core/Device.hpp>
 
 namespace stormkit::engine {
 

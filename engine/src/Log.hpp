@@ -7,7 +7,7 @@
 #include <stormkit/log/LogMacro.hpp>
 
 
-#include <stormkit/log/LogHandler.mpp>
+#include <stormkit/log/Logger.hpp>
 
 namespace stormkit::engine {
     LOGGER("StormKit.Engine");

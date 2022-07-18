@@ -6,7 +6,7 @@
 
 #include <stormkit/log/LogMacro.hpp>
 
-#include <stormkit/log/LogHandler.hpp>
+#include <stormkit/log/Logger.hpp>
 
 namespace stormkit::gpu {
     LOGGER("StormKit.GPU");

@@ -8,8 +8,8 @@
 
 #undef DELETE
 
-#include <stormkit/core/Flags.mpp>
-#include <stormkit/core/Types.mpp>
+#include <stormkit/core/Flags.hpp>
+#include <stormkit/core/Types.hpp>
 
 namespace stormkit::wsi {
     enum class WindowStyle : core::UInt8 {

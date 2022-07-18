@@ -12,19 +12,20 @@ import stormkit.wsi.videosettings;
 import stormkit.wsi.eventhandler;
 import stormkit.wsi.key;
 #else
-    #include <stormkit/core/AsCast.mpp>
-    #include <stormkit/core/Math.mpp>
-    #include <stormkit/core/Memory.mpp>
-    #include <stormkit/core/Types.mpp>
+    #include <stormkit/core/AsCast.hpp>
+    #include <stormkit/core/Math.hpp>
+    #include <stormkit/core/Memory.hpp>
+    #include <stormkit/core/Types.hpp>
 
-    #include <stormkit/log/LogHandler.mpp>
+    #include <stormkit/log/ConsoleLogger.hpp>
+    #include <stormkit/log/Logger.hpp>
 
-    #include <stormkit/wsi/Event.mpp>
-    #include <stormkit/wsi/EventHandler.mpp>
-    #include <stormkit/wsi/Key.mpp>
-    #include <stormkit/wsi/Monitor.mpp>
-    #include <stormkit/wsi/Window.mpp>
-    #include <stormkit/wsi/WindowStyle.mpp>
+    #include <stormkit/wsi/Event.hpp>
+    #include <stormkit/wsi/EventHandler.hpp>
+    #include <stormkit/wsi/Key.hpp>
+    #include <stormkit/wsi/Monitor.hpp>
+    #include <stormkit/wsi/Window.hpp>
+    #include <stormkit/wsi/WindowStyle.hpp>
 #endif
 
 #include <stormkit/main/MainMacro.hpp>
@@ -42,7 +43,7 @@ auto main([[maybe_unused]] const int argc, [[maybe_unused]] const char **argv) -
 
     core::setupSignalHandler();
 
-    log::LogHandler::setupDefaultLogger();
+    auto logger = log::Logger::createLoggerInstance<log::ConsoleLogger>();
 
     event_handler_logger.ilog("--- Monitors ---");
     event_handler_logger.ilog("{}", wsi::Window::getMonitorSettings());
@@ -54,45 +55,45 @@ auto main([[maybe_unused]] const int argc, [[maybe_unused]] const char **argv) -
 
     auto event_handler = wsi::EventHandler { window };
     event_handler.addCallback(wsi::EventType::Closed,
-                              [&]([[maybe_unused]] const wsi::Event &event) { window.close(); });
-    event_handler.addCallback(wsi::EventType::Resized, [](const wsi::Event &event) {
-        const auto &event_data = core::as<wsi::ResizedEventData>(event.data);
+                              [&]([[maybe_unused]] const wsi::Event& event) { window.close(); });
+    event_handler.addCallback(wsi::EventType::Resized, [](const wsi::Event& event) {
+        const auto& event_data = core::as<wsi::ResizedEventData>(event.data);
         event_handler_logger.ilog("Resize event: {}", event_data.extent);
     });
-    event_handler.addCallback(wsi::EventType::MouseMoved, [](const wsi::Event &event) {
-        const auto &event_data = core::as<wsi::MouseMovedEventData>(event.data);
+    event_handler.addCallback(wsi::EventType::MouseMoved, [](const wsi::Event& event) {
+        const auto& event_data = core::as<wsi::MouseMovedEventData>(event.data);
         event_handler_logger.ilog("Mouse move event: {}", event_data.position);
     });
-    event_handler.addCallback(wsi::EventType::MouseButtonPushed, [](const wsi::Event &event) {
-        const auto &event_data = core::as<wsi::MouseButtonPushedEventData>(event.data);
+    event_handler.addCallback(wsi::EventType::MouseButtonPushed, [](const wsi::Event& event) {
+        const auto& event_data = core::as<wsi::MouseButtonPushedEventData>(event.data);
         event_handler_logger.ilog("Mouse button push event: {} {}",
                                   event_data.button,
                                   event_data.position);
     });
-    event_handler.addCallback(wsi::EventType::MouseButtonReleased, [](const wsi::Event &event) {
-        const auto &event_data = core::as<wsi::MouseButtonReleasedEventData>(event.data);
+    event_handler.addCallback(wsi::EventType::MouseButtonReleased, [](const wsi::Event& event) {
+        const auto& event_data = core::as<wsi::MouseButtonReleasedEventData>(event.data);
         event_handler_logger.ilog("Mouse button release event: {} {}",
                                   event_data.button,
                                   event_data.position);
     });
     event_handler.addCallback(wsi::EventType::MouseEntered,
-                              []([[maybe_unused]] const wsi::Event &event) {
+                              []([[maybe_unused]] const wsi::Event& event) {
                                   event_handler_logger.ilog("Mouse Entered event");
                               });
     event_handler.addCallback(wsi::EventType::MouseExited,
-                              []([[maybe_unused]] const wsi::Event &event) {
+                              []([[maybe_unused]] const wsi::Event& event) {
                                   event_handler_logger.ilog("Mouse Exited event");
                               });
     event_handler.addCallback(wsi::EventType::LostFocus,
-                              []([[maybe_unused]] const wsi::Event &event) {
+                              []([[maybe_unused]] const wsi::Event& event) {
                                   event_handler_logger.ilog("Lost focus event");
                               });
     event_handler.addCallback(wsi::EventType::GainedFocus,
-                              []([[maybe_unused]] const wsi::Event &event) {
+                              []([[maybe_unused]] const wsi::Event& event) {
                                   event_handler_logger.ilog("Gained focus event");
                               });
-    event_handler.addCallback(wsi::EventType::KeyPressed, [&](const wsi::Event &event) {
-        const auto &event_data = core::as<wsi::KeyPressedEventData>(event.data);
+    event_handler.addCallback(wsi::EventType::KeyPressed, [&](const wsi::Event& event) {
+        const auto& event_data = core::as<wsi::KeyPressedEventData>(event.data);
 
         if (event_data.key == wsi::Key::Escape) {
             window.close();
@@ -102,8 +103,8 @@ auto main([[maybe_unused]] const int argc, [[maybe_unused]] const char **argv) -
 
         event_handler_logger.ilog("Key pressed: {}", event_data.key);
     });
-    event_handler.addCallback(wsi::EventType::KeyReleased, [](const wsi::Event &event) {
-        const auto &event_data = core::as<wsi::KeyReleasedEventData>(event.data);
+    event_handler.addCallback(wsi::EventType::KeyReleased, [](const wsi::Event& event) {
+        const auto& event_data = core::as<wsi::KeyReleasedEventData>(event.data);
 
         event_handler_logger.ilog("Key release: {}", event_data.key);
     });

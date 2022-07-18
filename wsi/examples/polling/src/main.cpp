@@ -11,18 +11,19 @@ import stormkit.wsi.windowstyle;
 import stormkit.wsi.videosettings;
 import stormkit.wsi.key;
 #else
-    #include <stormkit/core/AsCast.mpp>
-    #include <stormkit/core/Math.mpp>
-    #include <stormkit/core/Memory.mpp>
-    #include <stormkit/core/Types.mpp>
+    #include <stormkit/core/AsCast.hpp>
+    #include <stormkit/core/Math.hpp>
+    #include <stormkit/core/Memory.hpp>
+    #include <stormkit/core/Types.hpp>
 
-    #include <stormkit/log/LogHandler.mpp>
+    #include <stormkit/log/ConsoleLogger.hpp>
+    #include <stormkit/log/Logger.hpp>
 
-    #include <stormkit/wsi/Event.mpp>
-    #include <stormkit/wsi/Key.mpp>
-    #include <stormkit/wsi/Monitor.mpp>
-    #include <stormkit/wsi/Window.mpp>
-    #include <stormkit/wsi/WindowStyle.mpp>
+    #include <stormkit/wsi/Event.hpp>
+    #include <stormkit/wsi/Key.hpp>
+    #include <stormkit/wsi/Monitor.hpp>
+    #include <stormkit/wsi/Window.hpp>
+    #include <stormkit/wsi/WindowStyle.hpp>
 #endif
 
 #include <stormkit/main/MainMacro.hpp>
@@ -40,7 +41,7 @@ auto main([[maybe_unused]] const int argc, [[maybe_unused]] const char **argv) -
 
     core::setupSignalHandler();
 
-    log::LogHandler::setupDefaultLogger();
+    auto logger = log::Logger::createLoggerInstance<log::ConsoleLogger>();
 
     ilog("--- Monitors ---");
     ilog("{}", wsi::Window::getMonitorSettings());
@@ -55,22 +56,22 @@ auto main([[maybe_unused]] const int argc, [[maybe_unused]] const char **argv) -
             switch (event.type) {
                 case wsi::EventType::Closed: window.close(); break;
                 case wsi::EventType::Resized: {
-                    const auto &event_data = core::as<wsi::ResizedEventData>(event.data);
+                    const auto& event_data = core::as<wsi::ResizedEventData>(event.data);
                     ilog("Resize event: {}", event_data.extent);
                     break;
                 }
                 case wsi::EventType::MouseMoved: {
-                    const auto &event_data = core::as<wsi::MouseMovedEventData>(event.data);
+                    const auto& event_data = core::as<wsi::MouseMovedEventData>(event.data);
                     ilog("Mouse move event: {}", event_data.position);
                     break;
                 }
                 case wsi::EventType::MouseButtonPushed: {
-                    const auto &event_data = core::as<wsi::MouseButtonPushedEventData>(event.data);
+                    const auto& event_data = core::as<wsi::MouseButtonPushedEventData>(event.data);
                     ilog("Mouse button push event: {} {}", event_data.button, event_data.position);
                     break;
                 }
                 case wsi::EventType::MouseButtonReleased: {
-                    const auto &event_data =
+                    const auto& event_data =
                         core::as<wsi::MouseButtonReleasedEventData>(event.data);
                     ilog("Mouse button release event: {} {}",
                          event_data.button,
@@ -94,7 +95,7 @@ auto main([[maybe_unused]] const int argc, [[maybe_unused]] const char **argv) -
                     break;
                 }
                 case wsi::EventType::KeyPressed: {
-                    const auto &event_data = core::as<wsi::KeyPressedEventData>(event.data);
+                    const auto& event_data = core::as<wsi::KeyPressedEventData>(event.data);
 
                     if (event_data.key == wsi::Key::Escape) {
                         window.close();
@@ -106,7 +107,7 @@ auto main([[maybe_unused]] const int argc, [[maybe_unused]] const char **argv) -
                     break;
                 }
                 case wsi::EventType::KeyReleased: {
-                    const auto &event_data = core::as<wsi::KeyReleasedEventData>(event.data);
+                    const auto& event_data = core::as<wsi::KeyReleasedEventData>(event.data);
 
                     ilog("Key release: {}", event_data.key);
                     break;

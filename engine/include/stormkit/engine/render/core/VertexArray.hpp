@@ -5,17 +5,17 @@
 #pragma once
 
 
-#include <stormkit/core/Types.mpp>
+#include <stormkit/core/Types.hpp>
 
 
 #include <stormkit/wsi/Fwd.hpp>
 
 
 #include <stormkit/gpu/Fwd.hpp>
-#include <stormkit/gpu/pipeline/VertexBindingDescription.mpp>
-#include <stormkit/gpu/pipeline/VertexInputAttributeDescription.mpp>
+#include <stormkit/gpu/pipeline/VertexBindingDescription.hpp>
+#include <stormkit/gpu/pipeline/VertexInputAttributeDescription.hpp>
 
-#include <stormkit/gpu/resource/ImageView.mpp>
+#include <stormkit/gpu/resource/ImageView.hpp>
 
 
 #include <stormkit/engine/Fwd.hpp>

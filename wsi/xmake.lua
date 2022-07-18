@@ -1,21 +1,19 @@
 target("stormkit-wsi")
     set_kind("$(kind)")
-    set_languages("cxxlatest", "clatest")
+    set_languages("cxx20", "clatest")
 
+    add_defines("STORMKIT_BUILD")
     if is_mode("debug") then
+        add_defines("STORMKIT_BUILD_DEBUG")
         set_suffixname("-d")
     end
 
     add_headerfiles("include/(stormkit/**.hpp)")
     add_headerfiles("include/(stormkit/**.inl)")
-    add_headerfiles("src/*.hpp")
     add_headerfiles("src/common/**.hpp")
     add_headerfiles("src/common/**.inl")
+    add_headerfiles("src/*.hpp")
     add_files("src/*.cpp")
-
-    add_headerfiles("src/common/**.mpp")
-    add_headerfiles("src/*.mpp")
-    add_headerfiles("include/(stormkit/**.mpp)")
 
     if is_plat("windows") then
         includes("src/win32/xmake.lua")

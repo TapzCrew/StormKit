@@ -6,17 +6,17 @@
 
 #include <stormkit/core/PlatformMacro.hpp>
 
-#include <stormkit/core/Types.mpp>
+#include <stormkit/core/Types.hpp>
 
 #include <stormkit/gpu/Fwd.hpp>
 
-#include <stormkit/gpu/resource/Buffer.mpp>
+#include <stormkit/gpu/resource/Buffer.hpp>
 
-#include <stormkit/engine/Engine.mpp>
-#include <stormkit/engine/EngineObject.mpp>
+#include <stormkit/engine/Engine.hpp>
+#include <stormkit/engine/EngineObject.hpp>
 #include <stormkit/engine/Fwd.hpp>
 
-#include <stormkit/engine/render/core/BlockBuffer.mpp>
+#include <stormkit/engine/render/core/BlockBuffer.hpp>
 
 namespace stormkit::engine {
     template<core::USize ComponentCount>

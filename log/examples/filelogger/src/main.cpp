@@ -7,7 +7,7 @@ import stormkit.log.loghandler;
     #include <stormkit/core/Types.hpp>
 
     #include <stormkit/log/FileLogger.hpp>
-    #include <stormkit/log/LogHandler.hpp>
+    #include <stormkit/log/Logger.hpp>
     #include <stormkit/log/Module.hpp>
 #endif
 
@@ -40,22 +40,23 @@ auto main([[maybe_unused]] const int argc, [[maybe_unused]] const char **argv) -
 
     core::setupSignalHandler();
 
-    log::LogHandler::setupLogger<log::FileLogger>(std::filesystem::path { "log/" });
+    auto logger =
+        log::Logger::createLoggerInstance<log::FileLogger>(std::filesystem::path { "log/" });
 
-    log::LogHandler::ilog("This is an information");
-    log::LogHandler::dlog("This is a debug information");
-    log::LogHandler::wlog("This is a warning");
-    log::LogHandler::elog("This is an error");
-    log::LogHandler::flog("This is a fatal error");
+    log::Logger::ilog("This is an information");
+    log::Logger::dlog("This is a debug information");
+    log::Logger::wlog("This is a warning");
+    log::Logger::elog("This is an error");
+    log::Logger::flog("This is a fatal error");
 
     const auto integer = 5u;
     const auto real    = 8.5f;
-    log::LogHandler::ilog("you can format your string like this {}, {}", integer, real);
+    log::Logger::ilog("you can format your string like this {}, {}", integer, real);
 
-    log::LogHandler::ilog("Foo"_module, "you can specify a module");
+    log::Logger::ilog("Foo"_module, "you can specify a module");
 
     const auto foo = Foo {};
-    log::LogHandler::ilog("you can format complexes structures\n{}", foo);
+    log::Logger::ilog("you can format complexes structures\n{}", foo);
 
     return EXIT_SUCCESS;
 }

@@ -5,9 +5,9 @@
 #pragma once
 
 
-#include <stormkit/core/Types.mpp>
+#include <stormkit/core/Types.hpp>
 
-#include <stormkit/engine/render/framegraph/FrameGraphBuilder.mpp>
+#include <stormkit/engine/render/framegraph/FrameGraphBuilder.hpp>
 #include <stormkit/engine/render/framegraph/Fwd.hpp>
 
 namespace stormkit::engine {

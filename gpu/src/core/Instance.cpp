@@ -7,7 +7,7 @@
 
 #include <stormkit/core/Math.hpp>
 
-#include <stormkit/log/LogHandler.hpp>
+#include <stormkit/log/Logger.hpp>
 
 #include <stormkit/gpu/core/Instance.hpp>
 #include <stormkit/gpu/core/OffscreenSurface.hpp>

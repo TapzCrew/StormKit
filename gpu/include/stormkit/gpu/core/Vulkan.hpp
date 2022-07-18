@@ -31,7 +31,7 @@
 
 #define VK_NO_PROTOTYPES
 #define VMA_DYNAMIC_VULKAN_FUNCTIONS 0
-#define VMA_STATIC_VULKAN_FUNCTIONS 0
+#define VMA_STATIC_VULKAN_FUNCTIONS  0
 
 #ifdef module
     #undef module
@@ -58,9 +58,10 @@
 #include <stormkit/core/Concepts.hpp>
 #include <stormkit/core/Configure.hpp>
 #include <stormkit/core/Math.hpp>
+#include <stormkit/core/Strings.hpp>
 #include <stormkit/core/Types.hpp>
 
-#include <stormkit/log/LogHandler.hpp>
+#include <stormkit/log/Logger.hpp>
 
 namespace stormkit::gpu {
     template<std::integral T>
@@ -133,24 +134,22 @@ namespace stormkit::gpu {
 
     constexpr auto vkResultToString(VkResult error) -> std::string_view;
 
-    inline auto computeMipLevel(const core::ExtentU &extent) noexcept -> core::UInt32;
+    inline auto computeMipLevel(const core::ExtentU& extent) noexcept -> core::UInt32;
 
     template<typename T>
-    concept VulkanObject = requires(const T &t) {
-        t.vkHandle();
-    };
+    concept VulkanObject = requires(const T& t) { t.vkHandle(); };
 
     template<core::NonPointerType T>
-    requires VulkanObject<T>
-    constexpr auto getHandle(const T &t) noexcept;
+        requires VulkanObject<T>
+    constexpr auto getHandle(const T& t) noexcept;
 
     template<core::RawPointerType T>
-    requires VulkanObject<std::remove_pointer_t<T>>
+        requires VulkanObject<std::remove_pointer_t<T>>
     constexpr auto getHandle(T t) noexcept;
 
     template<core::SmartPointerType T>
-    requires VulkanObject<typename T::element_type>
-    constexpr auto getHandle(const T &t) noexcept;
+        requires VulkanObject<typename T::element_type>
+    constexpr auto getHandle(const T& t) noexcept;
 
 } // namespace stormkit::gpu
 

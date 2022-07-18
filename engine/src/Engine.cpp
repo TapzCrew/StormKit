@@ -2,17 +2,17 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#include <stormkit/core/ThreadUtils.mpp>
+#include <stormkit/core/ThreadUtils.hpp>
 
-#include <stormkit/engine/Engine.mpp>
-#include <stormkit/engine/render/Renderer.mpp>
+#include <stormkit/engine/Engine.hpp>
+#include <stormkit/engine/render/Renderer.hpp>
 
-#include <stormkit/wsi/Event.mpp>
-#include <stormkit/wsi/EventHandler.mpp>
-#include <stormkit/wsi/Monitor.mpp>
-#include <stormkit/wsi/Window.mpp>
+#include <stormkit/wsi/Event.hpp>
+#include <stormkit/wsi/EventHandler.hpp>
+#include <stormkit/wsi/Monitor.hpp>
+#include <stormkit/wsi/Window.hpp>
 
-#include "Log.mpp"
+#include "Log.hpp"
 
 namespace stormkit::engine {
     /////////////////////////////////////

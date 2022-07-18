@@ -1,5 +1,5 @@
 
-#include <stormkit/core/ThreadUtils.mpp>
+#include <stormkit/core/ThreadUtils.hpp>
 
 #include <windows.h>
 

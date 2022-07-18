@@ -11,6 +11,7 @@
 #include <stormkit/core/Strings.hpp>
 
 #include "LogColorizer.hpp"
+
 #include <stormkit/log/ConsoleLogger.hpp>
 
 using namespace std::literals;
@@ -19,16 +20,22 @@ namespace stormkit::log {
     ////////////////////////////////////////
     ////////////////////////////////////////
     ConsoleLogger::ConsoleLogger(LogClock::time_point start) noexcept
-        : Logger { std::move(start) } {}
+        : Logger { std::move(start) } {
+    }
 
     ////////////////////////////////////////
     ////////////////////////////////////////
     ConsoleLogger::ConsoleLogger(LogClock::time_point start, Severity log_level) noexcept
-        : Logger { std::move(start), log_level } {}
+        : Logger { std::move(start), log_level } {
+    }
 
     ////////////////////////////////////////
     ////////////////////////////////////////
-    auto ConsoleLogger::write(Severity severity, const Module &m, const char *string) -> void {
+    ConsoleLogger::~ConsoleLogger() = default;
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    auto ConsoleLogger::write(Severity severity, const Module& m, const char *string) -> void {
         const auto now  = LogClock::now();
         const auto time = std::chrono::duration_cast<core::Secondf>(now - m_start_time);
 
@@ -42,7 +49,7 @@ namespace stormkit::log {
         }();
 
         const auto to_stderr = severity == Severity::Error || severity == Severity::Fatal;
-        auto &output         = (to_stderr) ? std::cerr : std::cout;
+        auto& output         = (to_stderr) ? std::cerr : std::cout;
 
         // not yet
         /*
@@ -62,5 +69,7 @@ namespace stormkit::log {
 
     ////////////////////////////////////////
     ////////////////////////////////////////
-    auto ConsoleLogger::flush() noexcept -> void { std::cout.flush(); }
+    auto ConsoleLogger::flush() noexcept -> void {
+        std::cout.flush();
+    }
 } // namespace stormkit::log

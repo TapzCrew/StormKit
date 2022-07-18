@@ -1,19 +1,19 @@
-#include "App.mpp"
-#include "Constants.mpp"
+#include "App.hpp"
+#include "Constants.hpp"
 
-#include <stormkit/core/Configure.mpp>
+#include <stormkit/core/Configure.hpp>
 
-#include <stormkit/log/LogHandler.mpp>
+#include <stormkit/log/Logger.hpp>
 
-#include <stormkit/wsi/Window.mpp>
+#include <stormkit/wsi/Window.hpp>
 
-#include <stormkit/engine/Engine.mpp>
-#include <stormkit/engine/render/ForwardTasks.mpp>
-#include <stormkit/engine/render/MeshComponent.mpp>
-#include <stormkit/engine/render/Renderer.mpp>
-#include <stormkit/engine/render/framegraph/FrameGraphBuilder.mpp>
-#include <stormkit/engine/render/framegraph/GraphResource.mpp>
-#include <stormkit/engine/render/framegraph/GraphTaskBuilder.mpp>
+#include <stormkit/engine/Engine.hpp>
+#include <stormkit/engine/render/ForwardTasks.hpp>
+#include <stormkit/engine/render/MeshComponent.hpp>
+#include <stormkit/engine/render/Renderer.hpp>
+#include <stormkit/engine/render/framegraph/FrameGraphBuilder.hpp>
+#include <stormkit/engine/render/framegraph/GraphResource.hpp>
+#include <stormkit/engine/render/framegraph/GraphTaskBuilder.hpp>
 
 using namespace stormkit;
 

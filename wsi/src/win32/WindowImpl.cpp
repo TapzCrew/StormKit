@@ -4,9 +4,9 @@
 
 #include <locale>
 
-#include "Log.mpp"
-#include "Utils.mpp"
-#include "WindowImpl.mpp"
+#include "Log.hpp"
+#include "Utils.hpp"
+#include "WindowImpl.hpp"
 
 #include <shellscalingapi.h>
 #include <winuser.h>

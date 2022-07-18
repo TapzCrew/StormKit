@@ -1,12 +1,12 @@
 #pragma once
 
-#include <stormkit/core/App.mpp>
+#include <stormkit/core/App.hpp>
 
 #include <stormkit/wsi/Fwd.hpp>
 
 #include <stormkit/engine/Fwd.hpp>
 
-#include <stormkit/entities/Entity.mpp>
+#include <stormkit/entities/Entity.hpp>
 #include <stormkit/entities/Fwd.hpp>
 
 class App: public stormkit::core::App {

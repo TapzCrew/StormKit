@@ -1,20 +1,20 @@
 #pragma once
 
-#include <stormkit/core/App.mpp>
+#include <stormkit/core/App.hpp>
 
 #include <stormkit/wsi/Fwd.hpp>
 
-#include <stormkit/gpu/core/CommandBuffer.mpp>
+#include <stormkit/gpu/core/CommandBuffer.hpp>
 #include <stormkit/gpu/core/Fwd.hpp>
 
-#include <stormkit/gpu/pipeline/DescriptorSet.mpp>
-#include <stormkit/gpu/pipeline/Framebuffer.mpp>
+#include <stormkit/gpu/pipeline/DescriptorSet.hpp>
+#include <stormkit/gpu/pipeline/Framebuffer.hpp>
 #include <stormkit/gpu/pipeline/Fwd.hpp>
 
-#include <stormkit/gpu/resource/Buffer.mpp>
+#include <stormkit/gpu/resource/Buffer.hpp>
 #include <stormkit/gpu/resource/Fwd.hpp>
 
-#include "Constants.mpp"
+#include "Constants.hpp"
 
 class App: public stormkit::core::App {
   public:

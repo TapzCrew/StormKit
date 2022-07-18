@@ -24,15 +24,15 @@ namespace stormkit::log {
       public:
         FileLogger(LogClock::time_point start, std::filesystem::path path);
         FileLogger(LogClock::time_point start, std::filesystem::path path, Severity log_level);
-        ~FileLogger();
+        ~FileLogger() override;
 
-        FileLogger(const FileLogger &) = delete;
-        auto operator=(const FileLogger &) -> FileLogger & = delete;
+        FileLogger(const FileLogger&)                    = delete;
+        auto operator=(const FileLogger&) -> FileLogger& = delete;
 
-        FileLogger(FileLogger &&);
-        auto operator=(FileLogger &&) -> FileLogger &;
+        FileLogger(FileLogger&&);
+        auto operator=(FileLogger&&) -> FileLogger&;
 
-        auto write(Severity severity, const Module &module, const char *string) -> void override;
+        auto write(Severity severity, const Module& module, const char *string) -> void override;
         auto flush() -> void override;
 
       private:

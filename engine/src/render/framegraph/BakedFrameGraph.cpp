@@ -2,19 +2,19 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#include <stormkit/engine/Engine.mpp>
-#include <stormkit/engine/render/Renderer.mpp>
-#include <stormkit/engine/render/framegraph/BakedFrameGraph.mpp>
+#include <stormkit/engine/Engine.hpp>
+#include <stormkit/engine/render/Renderer.hpp>
+#include <stormkit/engine/render/framegraph/BakedFrameGraph.hpp>
 
-#include <stormkit/gpu/core/CommandBuffer.mpp>
-#include <stormkit/gpu/core/Device.mpp>
-#include <stormkit/gpu/core/Queue.mpp>
-#include <stormkit/gpu/pipeline/Framebuffer.mpp>
-#include <stormkit/gpu/pipeline/RenderPass.mpp>
-#include <stormkit/gpu/resource/Buffer.mpp>
-#include <stormkit/gpu/resource/Image.mpp>
-#include <stormkit/gpu/resource/ImageView.mpp>
-#include <stormkit/gpu/sync/Semaphore.mpp>
+#include <stormkit/gpu/core/CommandBuffer.hpp>
+#include <stormkit/gpu/core/Device.hpp>
+#include <stormkit/gpu/core/Queue.hpp>
+#include <stormkit/gpu/pipeline/Framebuffer.hpp>
+#include <stormkit/gpu/pipeline/RenderPass.hpp>
+#include <stormkit/gpu/resource/Buffer.hpp>
+#include <stormkit/gpu/resource/Image.hpp>
+#include <stormkit/gpu/resource/ImageView.hpp>
+#include <stormkit/gpu/sync/Semaphore.hpp>
 
 namespace stormkit::engine {
     /////////////////////////////////////

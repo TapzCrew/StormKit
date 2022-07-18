@@ -10,15 +10,15 @@
 #include <span>
 #include <string_view>
 
-#include <stormkit/core/HashMap.mpp>
-#include <stormkit/core/Memory.mpp>
-#include <stormkit/core/Strings.mpp>
-#include <stormkit/core/Types.mpp>
+#include <stormkit/core/HashMap.hpp>
+#include <stormkit/core/Memory.hpp>
+#include <stormkit/core/Strings.hpp>
+#include <stormkit/core/Types.hpp>
 
 #include <stormkit/gpu/Fwd.hpp>
-#include <stormkit/gpu/core/Types.mpp>
+#include <stormkit/gpu/core/Types.hpp>
 
-#include <stormkit/gpu/resource/Shader.mpp>
+#include <stormkit/gpu/resource/Shader.hpp>
 
 namespace stormkit::engine {
     class ShaderCache {

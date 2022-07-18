@@ -15,7 +15,7 @@ auto main(int argc, char *argv[]) -> int {
     auto engine = QQmlApplicationEngine {};
     engine.addImportPath("qrc:///");
 
-    // QQuickWindow::setGraphicsApi(QSGRendererInterface::Vulkan);
+    QQuickWindow::setGraphicsApi(QSGRendererInterface::Vulkan);
 
 #ifdef Q_OS_WINDOWS
     app.setWindowIcon(QIcon { QStringLiteral("qrc:/assets/glTF.ico") });

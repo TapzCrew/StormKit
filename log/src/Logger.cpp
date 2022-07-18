@@ -12,17 +12,26 @@ namespace stormkit::log {
     constexpr auto DEFAULT_SEVERITY = Severity::Info | Severity::Error | Severity::Fatal;
 #endif
 
+    Logger *Logger::m_logger = nullptr;
+
     /////////////////////////////////////
     /////////////////////////////////////
     Logger::Logger(LogClock::time_point start_time) noexcept
-        : Logger { std::move(start_time), DEFAULT_SEVERITY } {}
+        : Logger { std::move(start_time), DEFAULT_SEVERITY } {
+        STORMKIT_EXPECTS(!m_logger);
+
+        m_logger = this;
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
     Logger::Logger(LogClock::time_point start_time, Severity log_level) noexcept
-        : m_start_time { std::move(start_time) }, m_log_level { log_level } {}
+        : m_start_time { std::move(start_time) }, m_log_level { log_level } {
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    Logger::~Logger() = default;
+    Logger::~Logger() {
+        m_logger = nullptr;
+    }
 } // namespace stormkit::log

@@ -1,6 +1,6 @@
 target("texture")
     set_kind("binary")
-    set_languages("cxxlatest", "clatest")
+    set_languages("cxx20", "clatest")
     add_rules("utils.nzsl2spv")
     add_rules("embed_resources")
 
@@ -9,7 +9,7 @@ target("texture")
     end
 
     add_files("src/*.cpp")
-    add_headerfiles("src/*.mpp")
+    add_headerfiles("src/*.hpp")
     add_files("shaders/*.nzsl")
 
     if is_plat("windows") then

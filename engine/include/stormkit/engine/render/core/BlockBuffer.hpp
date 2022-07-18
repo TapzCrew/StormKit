@@ -6,13 +6,13 @@
 
 #include <stormkit/core/PlatformMacro.hpp>
 
-#include <stormkit/core/Types.mpp>
+#include <stormkit/core/Types.hpp>
 
 #include <stormkit/gpu/Fwd.hpp>
 
-#include <stormkit/gpu/resource/Buffer.mpp>
+#include <stormkit/gpu/resource/Buffer.hpp>
 
-#include <stormkit/engine/EngineObject.mpp>
+#include <stormkit/engine/EngineObject.hpp>
 #include <stormkit/engine/Fwd.hpp>
 
 namespace stormkit::engine {
