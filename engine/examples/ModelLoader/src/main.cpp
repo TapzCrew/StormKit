@@ -14,8 +14,6 @@ auto main(const int argc, const char **argv) -> int {
 
     core::setupSignalHandler();
 
-    auto logger = log::Logger::createLoggerInstance<log::ConsoleLogger>();
-
     auto app = App {};
     return app.run(argc, argv);
 }

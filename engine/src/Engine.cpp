@@ -12,12 +12,16 @@
 #include <stormkit/wsi/Monitor.hpp>
 #include <stormkit/wsi/Window.hpp>
 
+#include <stormkit/log/ConsoleLogger.hpp>
+
 #include "Log.hpp"
 
 namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
-    Engine::Engine(wsi::Window &window) : m_window { &window } {
+    Engine::Engine(wsi::Window& window) : m_window { &window } {
+        m_logger = log::Logger::allocateLoggerInstance<log::ConsoleLogger>();
+
         m_event_handler = std::make_unique<wsi::EventHandler>(*m_window);
 
         core::setCurrentThreadName("StormKit:MainThread");
@@ -27,13 +31,13 @@ namespace stormkit::engine {
         ilog("---------------- success");
 
         m_event_handler->addCallback(wsi::EventType::Closed,
-                                     [this]([[maybe_unused]] const wsi::Event &event) {
+                                     [this]([[maybe_unused]] const wsi::Event& event) {
                                          m_window->close();
                                      });
-        m_event_handler->addCallback(wsi::EventType::KeyReleased, [&](const wsi::Event &event) {
+        m_event_handler->addCallback(wsi::EventType::KeyReleased, [&](const wsi::Event& event) {
             const auto size = wsi::Window::getPrimaryMonitorSettings().sizes.back();
 
-            const auto &event_data = core::as<wsi::KeyReleasedEventData>(event.data);
+            const auto& event_data = core::as<wsi::KeyReleasedEventData>(event.data);
             if (event_data.key == wsi::Key::Escape) [[unlikely]] { m_window->close(); }
             if (event_data.key == wsi::Key::F11) {
                 if (m_fullscreen_enabled) {
@@ -48,7 +52,9 @@ namespace stormkit::engine {
         });
     }
 
-    Engine::Engine(const core::ExtentU &extent, gpu::Surface::Buffering buffering) {
+    Engine::Engine(const core::ExtentU& extent, gpu::Surface::Buffering buffering) {
+        m_logger = log::Logger::allocateLoggerInstance<log::ConsoleLogger>();
+
         core::setCurrentThreadName("StormKit:MainThread");
 
         ilog("Initialization of Renderer");
@@ -80,15 +86,15 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    Engine::~Engine() {}
+    Engine::~Engine() = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
-    Engine::Engine(Engine &&other) noexcept = default;
+    Engine::Engine(Engine&& other) noexcept = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto Engine::operator=(Engine &&other) noexcept -> Engine & = default;
+    auto Engine::operator=(Engine&& other) noexcept -> Engine& = default;
 
     /////////////////////////////////////
     /////////////////////////////////////

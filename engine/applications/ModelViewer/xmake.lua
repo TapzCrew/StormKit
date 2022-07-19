@@ -9,6 +9,7 @@ target("model_viewer")
 
     add_headerfiles("src/*.hpp")
     add_files("src/*.cpp")
+    add_files("src/*.hpp")
     add_files("*.qrc")
 
     if is_plat("windows") then

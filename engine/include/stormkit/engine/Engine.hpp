@@ -19,27 +19,27 @@
 namespace stormkit::engine {
     class STORMKIT_PUBLIC Engine {
       public:
-        explicit Engine(wsi::Window &window);
-        explicit Engine(const core::ExtentU &extent,
+        explicit Engine(wsi::Window& window);
+        explicit Engine(const core::ExtentU& extent,
                         gpu::Surface::Buffering buffering = gpu::Surface::Buffering::Triple);
 
         ~Engine();
 
-        Engine(const Engine &) = delete;
-        auto operator=(const Engine &) -> Engine & = delete;
+        Engine(const Engine&)                    = delete;
+        auto operator=(const Engine&) -> Engine& = delete;
 
-        Engine(Engine &&) noexcept;
-        auto operator=(Engine &&) noexcept -> Engine &;
+        Engine(Engine&&) noexcept;
+        auto operator=(Engine&&) noexcept -> Engine&;
 
-        auto world() noexcept -> entities::EntityManager &;
-        auto world() const noexcept -> const entities::EntityManager &;
+        auto world() noexcept -> entities::EntityManager&;
+        auto world() const noexcept -> const entities::EntityManager&;
 
-        auto window() const noexcept -> wsi::Window &;
+        auto window() const noexcept -> wsi::Window&;
 
-        auto threadPool() noexcept -> core::ThreadPool &;
-        auto threadPool() const noexcept -> const core::ThreadPool &;
+        auto threadPool() noexcept -> core::ThreadPool&;
+        auto threadPool() const noexcept -> const core::ThreadPool&;
 
-        auto renderer() noexcept -> Renderer &;
+        auto renderer() noexcept -> Renderer&;
 
         auto run(const int argc, const char **argv) -> stormkit::core::Int32;
 
@@ -52,6 +52,8 @@ namespace stormkit::engine {
         RendererOwnedPtr m_renderer;
 
         entities::EntityManager m_world;
+
+        log::LoggerOwnedPtr m_logger;
 
         bool m_fullscreen_enabled = false;
     };
