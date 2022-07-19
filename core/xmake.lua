@@ -26,6 +26,9 @@ target("stormkit-core")
         set_suffixname("-d")
     end
 
+    if is_kind("static") then
+       add_defines("STORMKIT_STATIC", { public = true })
+    end
     add_headerfiles("include/(stormkit/**.inl)")
     add_headerfiles("include/(stormkit/**.hpp)")
     add_headerfiles("include/(stormkit/**.h)")

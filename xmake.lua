@@ -184,6 +184,7 @@ package("StormKit")
        set_symbols("debug", "hidden")
     end
 
+
     set_fpmodels("fast")
     set_warnings("allextra", "error")
 
