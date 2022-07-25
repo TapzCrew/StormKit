@@ -13,8 +13,6 @@ import stormkit.log.loghandler;
 
 #include <stormkit/core/FormatMacro.hpp>
 
-#include <stormkit/main/MainMacro.hpp>
-
 #include <cstdlib>
 
 struct Bar {

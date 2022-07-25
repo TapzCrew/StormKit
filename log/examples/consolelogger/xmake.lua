@@ -7,7 +7,7 @@ target("consolelogger")
         set_suffixname("-d")
     end
 
-    add_deps("stormkit-core", "stormkit-main", "stormkit-log")
+    add_deps("stormkit-core", "stormkit-log")
 
     add_includedirs("$(buildir)/include")
 
