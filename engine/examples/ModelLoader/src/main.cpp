@@ -1,8 +1,5 @@
 #include <stormkit/core/Memory.hpp>
 
-#include <stormkit/log/ConsoleLogger.hpp>
-#include <stormkit/log/Logger.hpp>
-
 #include <stormkit/main/MainMacro.hpp>
 
 #include "App.hpp"
