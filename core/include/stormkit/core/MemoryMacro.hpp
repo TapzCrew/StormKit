@@ -13,9 +13,11 @@
     #define STORMKIT_EBCO
 #endif
 
+#define SINGLE_ARG(...) __VA_ARGS__
+
 #define ALLOCATE_HELPERS(T)                                      \
     template<typename... Args>                                   \
-    [[nodiscard]] static inline auto allocate(Args &&...args) {  \
+    [[nodiscard]] static inline auto allocate(Args&&...args) {   \
         return std::make_unique<T>(std::forward<Args>(args)...); \
     }
 
@@ -59,11 +61,11 @@
 #define PADDING(size) stormkit::core::Byte private____padding[size];
 
 #if defined(STORMKIT_COMPILER_MSVC)
-    #define BEGIN_PACKED_STRUCT_A ___pragma(pack(push, 1))
+    #define BEGIN_PACKED_STRUCT_A  ___pragma(pack(push, 1))
     #define BEGIN_PACKED_STRUCT(x) BEGIN_PACKED_STRUCT_A struct x
-    #define END_PACKET_STRUCT ___pragma(pack(pop))
+    #define END_PACKET_STRUCT      ___pragma(pack(pop))
 #elif defined(STORMKIT_COMPILER_CLANG) || defined(STORMKIT_COMPILER_GCC)
-    #define BEGIN_PACKED_STRUCT_A __attribute__((__packed__))
+    #define BEGIN_PACKED_STRUCT_A     __attribute__((__packed__))
     #define BEGIN_PACKED_STRUCT(type) struct BEGIN_PACKED_STRUCT_A type
     #define END_PACKED_STRUCT
 #else
@@ -84,21 +86,21 @@
 #define STORMKIT_RAII_CAPSULE_OPAQUE(name, x, _constructor, _deleter, release_value) \
     struct name##Scoped {                                                            \
         template<typename... Args>                                                   \
-        name##Scoped(Args &&...args) noexcept {                                      \
+        name##Scoped(Args&&...args) noexcept {                                       \
             m_handle = _constructor(std::forward<Args>(args)...);                    \
         }                                                                            \
         explicit name##Scoped(x v) noexcept { m_handle = v; }                        \
         ~name##Scoped() noexcept { destroy(); }                                      \
-        name##Scoped(name##Scoped &other) = delete;                                  \
-        auto operator=(name##Scoped &other) -> name##Scoped & = delete;              \
-        name##Scoped(name##Scoped &&other) noexcept { m_handle = other.release(); }  \
-        auto operator=(name##Scoped &&other) noexcept -> name##Scoped & {            \
+        name##Scoped(name##Scoped& other)                    = delete;               \
+        auto operator=(name##Scoped& other) -> name##Scoped& = delete;               \
+        name##Scoped(name##Scoped&& other) noexcept { m_handle = other.release(); }  \
+        auto operator=(name##Scoped&& other) noexcept -> name##Scoped& {             \
             m_handle = other.release();                                              \
             return *this;                                                            \
         }                                                                            \
         operator x() noexcept { return m_handle; }                                   \
         operator const x() const noexcept { return m_handle; }                       \
-        auto handle() noexcept -> x & { return m_handle; }                           \
+        auto handle() noexcept -> x& { return m_handle; }                            \
         auto handle() const noexcept -> x { return m_handle; }                       \
         auto release() noexcept -> x {                                               \
             auto tmp = std::exchange(m_handle, release_value);                       \
@@ -127,7 +129,7 @@
     };                                                                    \
     using name##Scoped = std::unique_ptr<x, name##Deleter>;
 
-#define STORMKIT_FORWARD(x) static_cast<decltype(x) &&>(x);
+#define STORMKIT_FORWARD(x) static_cast<decltype(x)&&>(x);
 #define STORMKIT_RETURNS(expr) \
     noexcept(noexcept(expr))->decltype(expr) { return expr; }
-#define STORMKIT_OVERLOADS_OF(name) [&](auto &&...args) STORMKIT_RETURNS(name(FWD(args)...))
+#define STORMKIT_OVERLOADS_OF(name) [&](auto&&...args) STORMKIT_RETURNS(name(FWD(args)...))

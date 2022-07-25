@@ -273,6 +273,21 @@ namespace stormkit::core {
     auto setupSignalHandler() noexcept -> void;
 
     [[nodiscard]] constexpr auto hton(auto value) noexcept -> decltype(auto);
+
+    template<typename T>
+    struct ValueReseter {
+        ~ValueReseter() {
+            if (reset) value = T {};
+        }
+
+        T& value;
+        bool reset = true;
+    };
+
+    template<typename T>
+    [[nodiscard]] constexpr auto makeValueReseter(T& value) {
+        return ValueReseter<T> { value };
+    };
 } // namespace stormkit::core
 
 #include "Memory.inl"
