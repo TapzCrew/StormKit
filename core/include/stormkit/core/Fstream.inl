@@ -5,8 +5,17 @@
 #pragma once
 
 namespace stormkit::core {
-    inline auto read(std::istream& stream, std::streamsize size) noexcept -> core::ByteArray {
-        auto output = core::ByteArray { core::as<core::USize>(size) };
+    inline auto read(std::istream& stream, core::USize size) noexcept -> core::ByteArray {
+        auto output = core::ByteArray { size };
+
+        read(stream, output);
+
+        return output;
+    }
+
+    template<core::USize size>
+    inline auto read(std::istream& stream) noexcept -> core::ByteStaticArray<size> {
+        auto output = core::ByteStaticArray<size> {};
 
         read(stream, output);
 

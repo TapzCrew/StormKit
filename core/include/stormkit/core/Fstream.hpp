@@ -10,7 +10,11 @@
 #include <stormkit/core/Types.hpp>
 
 namespace stormkit::core {
-    [[nodiscard]] auto read(std::istream& stream, std::streamsize size) noexcept -> core::ByteArray;
+    [[nodiscard]] auto read(std::istream& stream, core::USize size) noexcept -> core::ByteArray;
+
+    template<core::USize size>
+    [[nodiscard]] auto read(std::istream& stream) noexcept -> core::ByteStaticArray<size>;
+
     auto read(std::istream& stream, core::ByteSpan output) noexcept -> void;
 
     auto write(std::ostream& stream, core::ByteConstSpan data) noexcept -> void;
