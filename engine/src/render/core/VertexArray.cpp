@@ -2,13 +2,17 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#include <stormkit/engine/render/core/VertexArray.hpp>
+module;
+
+#include <stormkit/core/Numerics.hpp>
+#include <stormkit/core/Types.hpp>
+
+module StormKit.Engine.Render.Core.VertexArray;
 
 namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
-    VertexArray::VertexArray() {
-    }
+    VertexArray::VertexArray() = default;
 
     /////////////////////////////////////
     /////////////////////////////////////

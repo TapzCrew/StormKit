@@ -2,11 +2,18 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#pragma once
+module;
+
+#include <iterator>
+#include <memory>
+#include <optional>
+#include <ranges>
+#include <vector>
 
 #include <list>
 
 #include <stormkit/core/PlatformMacro.hpp>
+#include <stormkit/core/MemoryMacro.hpp>
 
 #include <stormkit/core/Types.hpp>
 
@@ -14,11 +21,13 @@
 
 #include <stormkit/gpu/resource/Buffer.hpp>
 
-#include <stormkit/engine/EngineObject.hpp>
-#include <stormkit/engine/Fwd.hpp>
+export module StormKit.Engine.Render.Core.BlockBuffer;
 
-namespace stormkit::engine {
-    class STORMKIT_PUBLIC BlockBuffer: public EngineObject {
+import StormKit.Engine;
+import StormKit.Engine.EngineObject;
+
+export namespace stormkit::engine {
+    class STORMKIT_EXPORT BlockBuffer: public EngineObject {
       public:
         struct Block {
             using Handle = core::Handle64<Block>;
@@ -61,6 +70,30 @@ namespace stormkit::engine {
 
         core::UInt64 m_next_handle;
     };
+
+    DECLARE_PTR_AND_REF(BlockBuffer);
 } // namespace stormkit::engine
 
-#include "BlockBuffer.inl"
+module :private;
+
+namespace stormkit::engine {
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto BlockBuffer::size() const noexcept -> core::USize { return m_size; }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto BlockBuffer::freeSpace() const noexcept -> core::USize { return m_free_space; }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto BlockBuffer::getBlock(Block::Handle handle) -> const Block & {
+        auto it = std::ranges::find_if(m_blocks, [&](const auto &b) { return b.handle == handle; });
+        STORMKIT_ENSURES(it != std::ranges::cend(m_blocks));
+        return *it;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto BlockBuffer::gpuBuffer() const noexcept -> const gpu::Buffer & { return m_buffer; }
+} // namespace stormkit::engine

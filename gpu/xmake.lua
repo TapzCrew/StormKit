@@ -27,7 +27,7 @@ target("stormkit-gpu")
     add_includedirs("include", { public = true })
     add_includedirs("$(buildir)/include")
 
-    add_options("enable_cxx20_modules", "enable_wsi", "enable_wsi_x11", "enable_wsi_wayland")
+    add_options("enable_cxxlatest_modules", "enable_wsi", "enable_wsi_x11", "enable_wsi_wayland")
 
     set_group("libraries")
 

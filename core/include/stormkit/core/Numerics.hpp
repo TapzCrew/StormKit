@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include <stormkit/core/FormatMacro.hpp>
-
 #include <limits>
 #include <numeric>
 #include <random>

@@ -9,22 +9,48 @@
 #define LOGGER(module)                                \
     NAMED_LOGGER(LOG_MODULE, module)                  \
     template<typename... Args>                        \
-    auto dlog(Args &&...args)->void {                 \
+    auto dlog(Args&&...args)->void {                  \
         LOG_MODULE.dlog(std::forward<Args>(args)...); \
     }                                                 \
     template<typename... Args>                        \
-    auto ilog(Args &&...args)->void {                 \
+    auto ilog(Args&&...args)->void {                  \
         LOG_MODULE.ilog(std::forward<Args>(args)...); \
     }                                                 \
     template<typename... Args>                        \
-    auto wlog(Args &&...args)->void {                 \
+    auto wlog(Args&&...args)->void {                  \
         LOG_MODULE.wlog(std::forward<Args>(args)...); \
     }                                                 \
     template<typename... Args>                        \
-    auto elog(Args &&...args)->void {                 \
+    auto elog(Args&&...args)->void {                  \
         LOG_MODULE.elog(std::forward<Args>(args)...); \
     }                                                 \
     template<typename... Args>                        \
-    auto flog(Args &&...args)->void {                 \
+    auto flog(Args&&...args)->void {                  \
+        LOG_MODULE.flog(std::forward<Args>(args)...); \
+    }
+
+#define IN_MODULE_NAMED_LOGGER(NAME, module) \
+    extern const inline auto NAME = stormkit::log::Module { module };
+
+#define IN_MODULE_LOGGER(module)                      \
+    IN_MODULE_NAMED_LOGGER(LOG_MODULE, module)        \
+    template<typename... Args>                        \
+    auto dlog(Args&&...args)->void {                  \
+        LOG_MODULE.dlog(std::forward<Args>(args)...); \
+    }                                                 \
+    template<typename... Args>                        \
+    auto ilog(Args&&...args)->void {                  \
+        LOG_MODULE.ilog(std::forward<Args>(args)...); \
+    }                                                 \
+    template<typename... Args>                        \
+    auto wlog(Args&&...args)->void {                  \
+        LOG_MODULE.wlog(std::forward<Args>(args)...); \
+    }                                                 \
+    template<typename... Args>                        \
+    auto elog(Args&&...args)->void {                  \
+        LOG_MODULE.elog(std::forward<Args>(args)...); \
+    }                                                 \
+    template<typename... Args>                        \
+    auto flog(Args&&...args)->void {                  \
         LOG_MODULE.flog(std::forward<Args>(args)...); \
     }

@@ -1,6 +1,6 @@
 target("model_viewer")
     add_rules("qt.quickapp")
-    set_languages("cxx20", "clatest")
+    set_languages("cxxlatest", "clatest")
     add_rules("utils.nzsl2spv")
 
     if is_mode("debug") then

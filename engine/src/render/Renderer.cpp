@@ -2,20 +2,15 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
+module;
+
 #include <stormkit/core/ThreadUtils.hpp>
 
-#include <stormkit/log/Logger.hpp>
 #include <stormkit/log/LogMacro.hpp>
+#include <stormkit/log/Logger.hpp>
 
 #include <stormkit/entities/EntityManager.hpp>
 #include <stormkit/entities/System.hpp>
-
-#include <stormkit/engine/Engine.hpp>
-#include <stormkit/engine/render/Renderer.hpp>
-#include <stormkit/engine/render/core/RenderQueue.hpp>
-#include <stormkit/engine/render/core/ShaderCache.hpp>
-#include <stormkit/engine/render/framegraph/BakedFrameGraph.hpp>
-#include <stormkit/engine/render/framegraph/FrameGraphBuilder.hpp>
 
 #include <stormkit/gpu/core/Device.hpp>
 #include <stormkit/gpu/core/Instance.hpp>
@@ -26,6 +21,16 @@
 #include <stormkit/gpu/core/WindowSurface.hpp>
 #include <stormkit/gpu/pipeline/PipelineCache.hpp>
 
+module StormKit.Engine.Render.Renderer;
+
+import StormKit.Engine;
+
+import StormKit.Engine.Render.Core.RenderQueue;
+import StormKit.Engine.Render.Core.ShaderCache;
+
+import StormKit.Engine.Render.FrameGraph.BakedFrameGraph;
+import StormKit.Engine.Render.FrameGraph.FrameGraphBuilder;
+
 namespace stormkit::engine {
     NAMED_LOGGER(renderer_logger, "StormKit.Renderer.Renderer");
 
@@ -34,10 +39,10 @@ namespace stormkit::engine {
         RendererSyncSystem([[maybe_unused]] RenderQueue& queue, entities::EntityManager& manager)
             : System { manager, 0, {} } {}
 
-        RendererSyncSystem(const RendererSyncSystem&) = delete;
+        RendererSyncSystem(const RendererSyncSystem&)                    = delete;
         auto operator=(const RendererSyncSystem&) -> RendererSyncSystem& = delete;
 
-        RendererSyncSystem(RendererSyncSystem&&) noexcept = default;
+        RendererSyncSystem(RendererSyncSystem&&) noexcept                    = default;
         auto operator=(RendererSyncSystem&&) noexcept -> RendererSyncSystem& = default;
 
         auto update([[maybe_unused]] core::Secondf delta) -> void override {};
@@ -175,7 +180,7 @@ namespace stormkit::engine {
         if (other.m_render_thread.joinable()) other.m_render_thread.join();
 
         EngineObject::operator=(std::move(other));
-        m_build_framegraph    = std::exchange(other.m_build_framegraph, {});
+        m_build_framegraph = std::exchange(other.m_build_framegraph, {});
 
         m_instance      = std::move(other.m_instance);
         m_device        = std::move(other.m_device);

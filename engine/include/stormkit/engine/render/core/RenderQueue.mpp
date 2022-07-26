@@ -2,9 +2,16 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#pragma once
+module;
+
+#include <iterator>
+#include <memory>
+#include <optional>
+#include <ranges>
+#include <vector>
 
 #include <stormkit/core/PlatformMacro.hpp>
+#include <stormkit/core/MemoryMacro.hpp>
 
 #include <stormkit/core/Types.hpp>
 
@@ -13,12 +20,16 @@
 #include <stormkit/gpu/resource/Buffer.hpp>
 #include <stormkit/gpu/resource/ImageView.hpp>
 
-#include <stormkit/engine/EngineObject.hpp>
-#include <stormkit/engine/Fwd.hpp>
-#include <stormkit/engine/render/core/ShaderInputBuffer.hpp>
+export module StormKit.Engine.Render.Core.RenderQueue;
 
-namespace stormkit::engine {
-    class STORMKIT_PUBLIC RenderQueue: public EngineObject {
+import StormKit.Engine;
+import StormKit.Engine.EngineObject;
+
+import StormKit.Engine.Render.Core.ShaderInputBuffer;
+import StormKit.Engine.Render.Components;
+
+export namespace stormkit::engine {
+    class STORMKIT_EXPORT RenderQueue: public EngineObject {
       public:
         using StaticMeshInputBuffer      = ShaderInputBuffer<5>;
         using ID                         = core::UInt64;
@@ -79,4 +90,6 @@ namespace stormkit::engine {
         std::vector<gpu::Fence> m_vertex_buffer_fences;
         std::vector<gpu::Buffer> m_vertex_staging_buffers;
     };
+
+    DECLARE_PTR_AND_REF(RenderQueue);
 } // namespace stormkit::engine

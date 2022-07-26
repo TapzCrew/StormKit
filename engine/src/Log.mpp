@@ -2,13 +2,13 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#pragma once
+module;
 
 #include <stormkit/log/LogMacro.hpp>
-
-
 #include <stormkit/log/Logger.hpp>
 
-namespace stormkit::engine {
-    LOGGER("StormKit.Engine");
+export module StormKit.Engine.Private.Log;
+
+export namespace stormkit::engine {
+    IN_MODULE_LOGGER("StormKit.Engine");
 } // namespace stormkit::engine

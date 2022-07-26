@@ -8,7 +8,6 @@
 #include <stormkit/core/Format.hpp>
 #include <stormkit/core/Strings.hpp>
 
-
 #include <windows.h>
 
 using namespace stormkit;
@@ -38,9 +37,10 @@ DynamicLoader::DynamicLoader(std::filesystem::path filepath) : m_filepath { std:
                        nullptr);
 
         auto system_reason = std::string { buffer };
-        throw std::runtime_error {
-            format("Failed to load module \"{}\", reason: {}", m_filepath.string(), system_reason)
-        };
+        throw std::runtime_error { core::format(core::runtime(
+                                                    "Failed to load module \"{}\", reason: {}"),
+                                                m_filepath.string(),
+                                                system_reason) };
     } else
         m_is_loaded = true;
 }
@@ -53,7 +53,7 @@ DynamicLoader::~DynamicLoader() {
 
 /////////////////////////////////////
 /////////////////////////////////////
-DynamicLoader::DynamicLoader(DynamicLoader &&other) noexcept
+DynamicLoader::DynamicLoader(DynamicLoader&& other) noexcept
     : m_impl { std::exchange(other.m_impl, {}) }, m_is_loaded { std::exchange(other.m_is_loaded,
                                                                               false) },
       m_filepath { std::move(other.m_filepath) } {
@@ -61,7 +61,7 @@ DynamicLoader::DynamicLoader(DynamicLoader &&other) noexcept
 
 /////////////////////////////////////
 /////////////////////////////////////
-auto DynamicLoader::operator=(DynamicLoader &&other) noexcept -> DynamicLoader & {
+auto DynamicLoader::operator=(DynamicLoader&& other) noexcept -> DynamicLoader& {
     if (&other == this) [[unlikely]]
         return *this;
 

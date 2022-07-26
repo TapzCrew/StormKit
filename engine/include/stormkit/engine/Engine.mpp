@@ -2,7 +2,16 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#pragma once
+module;
+
+#include <iterator>
+#include <memory>
+#include <optional>
+#include <ranges>
+#include <vector>
+
+#include <stormkit/core/MemoryMacro.hpp>
+#include <stormkit/core/PlatformMacro.hpp>
 
 #include <stormkit/core/ThreadPool.hpp>
 #include <stormkit/core/Types.hpp>
@@ -12,12 +21,15 @@
 
 #include <stormkit/entities/EntityManager.hpp>
 
-#include <stormkit/engine/Fwd.hpp>
-
 #include <stormkit/gpu/core/Surface.hpp>
 
-namespace stormkit::engine {
-    class STORMKIT_PUBLIC Engine {
+export module StormKit.Engine;
+
+export namespace stormkit::engine {
+    class Renderer;
+    DECLARE_PTR_AND_REF(Renderer);
+
+    class STORMKIT_EXPORT Engine {
       public:
         explicit Engine(wsi::Window& window);
         explicit Engine(const core::ExtentU& extent,
@@ -58,6 +70,45 @@ namespace stormkit::engine {
         bool m_fullscreen_enabled = false;
     };
 
+    DECLARE_PTR_AND_REF(Engine);
 } // namespace stormkit::engine
 
-#include "Engine.inl"
+module :private;
+
+namespace stormkit::engine {
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Engine::world() noexcept -> entities::EntityManager& {
+        return m_world;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Engine::world() const noexcept -> const entities::EntityManager& {
+        return m_world;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Engine::window() const noexcept -> wsi::Window& {
+        return *m_window;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Engine::threadPool() noexcept -> core::ThreadPool& {
+        return m_thread_pool;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Engine::threadPool() const noexcept -> const core::ThreadPool& {
+        return m_thread_pool;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Engine::renderer() noexcept -> Renderer& {
+        return *m_renderer;
+    }
+} // namespace stormkit::engine

@@ -2,18 +2,36 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#pragma once
+module;
+
+#include <iterator>
+#include <memory>
+#include <optional>
+#include <ranges>
+#include <vector>
+
+#include <stormkit/core/PlatformMacro.hpp>
+#include <stormkit/core/MemoryMacro.hpp>
 
 #include <stormkit/core/Types.hpp>
 
 #include <stormkit/gpu/Fwd.hpp>
 #include <stormkit/gpu/core/Surface.hpp>
+#include <stormkit/gpu/core/Types.hpp>
+#include <stormkit/gpu/resource/ImageView.hpp>
+#include <stormkit/gpu/resource/Image.hpp>
+#include <stormkit/gpu/resource/Buffer.hpp>
 
-#include <stormkit/engine/EngineObject.hpp>
-#include <stormkit/engine/Fwd.hpp>
+export module StormKit.Engine.Render.FrameGraph.BakedFrameGraph;
 
-namespace stormkit::engine {
-    class STORMKIT_PUBLIC BakedFrameGraph: public EngineObject {
+import StormKit.Engine;
+import StormKit.Engine.EngineObject;
+
+import StormKit.Engine.Render.FrameGraph.GraphID;
+
+export namespace stormkit::engine {
+    class FrameGraphBuilder;
+    class STORMKIT_EXPORT BakedFrameGraph: public EngineObject {
         struct Data {
             struct Task {
                 GraphID id;
@@ -62,6 +80,6 @@ namespace stormkit::engine {
 
         friend class FrameGraphBuilder;
     };
-} // namespace stormkit::engine
 
-#include "BakedFrameGraph.inl"
+    DECLARE_PTR_AND_REF(BakedFrameGraph);
+} // namespace stormkit::engine

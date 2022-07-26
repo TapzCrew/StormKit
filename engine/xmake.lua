@@ -9,8 +9,8 @@ target("stormkit-engine")
         set_suffixname("-d")
     end
 
-    add_headerfiles("include/(stormkit/**.hpp)")
-    add_headerfiles("include/(stormkit/**.inl)")
+    add_modulefiles("include/stormkit/**.mpp")
+    add_modulefiles("src/**.mpp")
     add_headerfiles("src/**.hpp")
     add_files("src/**.cpp")
     add_files("src/**.nzsl")
@@ -21,13 +21,18 @@ target("stormkit-engine")
     add_packages("volk", "vulkan-headers", "vulkan-memory-allocator", { public = true })
     add_packages("nzsl")
 
-    add_includedirs("include", { public = true })
     add_includedirs("$(buildir)/include")
 
     set_group("libraries")
 
+    on_load(function(target)
+        local outputdir = target:extraconf("rules", "utils.nzsl2spv", "outputdir") or path.join(target:autogendir(), "rules", "utils", "nzsl2spv")
+
+        target:add("includedirs", outputdir)
+    end)
+
     before_install(function(target)
-        target:set("headerfiles")
+        target:set("modulefiles")
     end)
 
     on_install(function(target)

@@ -6,10 +6,6 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <stormkit/core/PlatformMacro.hpp>
-
-#include <stormkit/core/FormatMacro.hpp>
-#include <stormkit/core/MemoryMacro.hpp>
 
 #include <array>
 #include <chrono>
@@ -19,6 +15,10 @@
 #include <span>
 #include <variant>
 #include <vector>
+
+#include <stormkit/core/FormatMacro.hpp>
+#include <stormkit/core/MemoryMacro.hpp>
+#include <stormkit/core/PlatformMacro.hpp>
 
 #include <stormkit/core/AsCast.hpp>
 #include <stormkit/core/Concepts.hpp>
@@ -104,17 +104,17 @@ namespace stormkit::core {
 
         static constexpr auto INVALID_HANDLE_VALUE = std::numeric_limits<ID>::max();
 
-        [[nodiscard]] constexpr auto operator<=>(const Handle<T, ID> &) const noexcept
+        [[nodiscard]] constexpr auto operator<=>(const Handle<T, ID>&) const noexcept
             -> std::strong_ordering = default;
 
         template<std::derived_from<T> U>
         constexpr operator Handle<U, ID>() const noexcept;
 
-        constexpr auto &operator++() noexcept;
+        constexpr auto& operator++() noexcept;
 
         constexpr auto operator++(int) noexcept;
 
-        constexpr auto &operator--() noexcept;
+        constexpr auto& operator--() noexcept;
 
         constexpr auto operator--(int) noexcept;
 
@@ -137,10 +137,10 @@ namespace stormkit::core {
     constexpr auto makeStaticByteArray(T... bytes) noexcept;
 
     template<std::ranges::range T>
-    constexpr auto toByteSpan(T &container) -> core::ByteSpan;
+    constexpr auto toByteSpan(T& container) -> core::ByteSpan;
 
     template<std::ranges::range T>
-    constexpr auto toConstByteSpan(const T &container) -> core::ByteConstSpan;
+    constexpr auto toConstByteSpan(const T& container) -> core::ByteConstSpan;
 
     template<PointerType Ptr>
     constexpr auto toByteSpan(Ptr ptr, USize size) -> core::ByteSpan;
@@ -149,11 +149,12 @@ namespace stormkit::core {
     constexpr auto toConstByteSpan(const Ptr ptr, USize size) -> core::ByteConstSpan;
 
     template<NonPointerType T>
-    requires(!std::ranges::range<T>) constexpr auto toByteSpan(T &value) -> core::ByteSpan;
+        requires(!std::ranges::range<T>)
+    constexpr auto toByteSpan(T& value) -> core::ByteSpan;
 
     template<NonPointerType T>
-    requires(!std::ranges::range<T>) constexpr auto toConstByteSpan(const T &value)
-        -> core::ByteConstSpan;
+        requires(!std::ranges::range<T>)
+    constexpr auto toConstByteSpan(const T& value) -> core::ByteConstSpan;
 
     namespace literals {
         [[nodiscard]] constexpr auto operator"" _b(unsigned long long int value) noexcept -> Byte;
@@ -167,7 +168,7 @@ CUSTOM_FORMAT(stormkit::core::Byte, std::to_string(stormkit::core::as<std::uint1
 template<typename T, std::integral _ID>
 struct std::hash<stormkit::core::Handle<T, _ID>> {
     [[nodiscard]] constexpr auto
-        operator()(const stormkit::core::Handle<T, _ID> &handle) const noexcept
+        operator()(const stormkit::core::Handle<T, _ID>& handle) const noexcept
         -> stormkit::core::Hash64;
 };
 

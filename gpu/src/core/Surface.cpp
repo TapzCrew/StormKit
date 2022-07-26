@@ -7,9 +7,9 @@
 namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
-    Surface::Surface(const Instance &instance, Buffering buffering)
+    Surface::Surface(const Instance& instance, Buffering buffering)
         : InstanceObject { instance }, m_buffering { buffering } {
-        onSwapchainFenceSignaled = []([[maybe_unused]] const auto &fence) {};
+        onSwapchainFenceSignaled = []([[maybe_unused]] const auto& fence) {};
     };
 
     /////////////////////////////////////
@@ -18,9 +18,9 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    Surface::Surface(Surface &&) noexcept = default;
+    Surface::Surface(Surface&&) noexcept = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto Surface::operator=(Surface &&) noexcept -> Surface & = default;
+    auto Surface::operator=(Surface&&) noexcept -> Surface& = default;
 } // namespace stormkit::gpu

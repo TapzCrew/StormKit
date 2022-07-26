@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <stormkit/core/Memory.hpp>
+#include <stormkit/core/Types.hpp>
 
 namespace stormkit::engine {
     static constexpr auto SHADER_DATA = core::makeStaticByteArray(

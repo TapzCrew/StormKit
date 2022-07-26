@@ -2,6 +2,8 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
+module;
+
 #include <stack>
 
 #include <stormkit/gpu/core/CommandBuffer.hpp>
@@ -13,13 +15,17 @@
 #include <stormkit/gpu/resource/Image.hpp>
 #include <stormkit/gpu/resource/ImageView.hpp>
 
-#include <stormkit/engine/Engine.hpp>
-#include <stormkit/engine/render/Renderer.hpp>
-#include <stormkit/engine/render/framegraph/BakedFrameGraph.hpp>
-#include <stormkit/engine/render/framegraph/FrameGraphBuilder.hpp>
-#include <stormkit/engine/render/framegraph/GraphTaskBuilder.hpp>
+module StormKit.Engine.Render.FrameGraph.FrameGraphBuilder;
 
-//#define STORMKIT_RENDERER_MULTITHREADED
+import StormKit.Engine;
+
+import StormKit.Engine.Render.Renderer;
+import StormKit.Engine.Render.Core.ShaderCache;
+
+import StormKit.Engine.Render.FrameGraph.BakedFrameGraph;
+import StormKit.Engine.Render.FrameGraph.GraphTaskBuilder;
+
+// #define STORMKIT_RENDERER_MULTITHREADED
 
 #ifdef STORMKIT_RENDERER_MULTITHREADED
     #define LOCK(mutex) auto lock = std::unique_lock { mutex };

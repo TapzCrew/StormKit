@@ -2,28 +2,35 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#include "stormkit/core/ThreadPool.hpp"
-#include "stormkit/gpu/resource/Buffer.hpp"
+module;
+
 #include <algorithm>
 #include <array>
 #include <functional>
 #include <iterator>
 #include <mutex>
+#include <utility>
+#include <vector>
+
 #include <stormkit/core/Memory.hpp>
 #include <stormkit/core/Types.hpp>
-#include <stormkit/engine/render/core/RenderQueue.hpp>
+
 #include <stormkit/log/LogMacro.hpp>
 #include <stormkit/log/Logger.hpp>
 
 #include <stormkit/core/Numerics.hpp>
+#include <stormkit/core/ThreadPool.hpp>
 
+#include <stormkit/gpu/core/CommandBuffer.hpp>
 #include <stormkit/gpu/core/Device.hpp>
+#include <stormkit/gpu/resource/Buffer.hpp>
 
-#include <stormkit/engine/Engine.hpp>
-#include <stormkit/engine/render/Renderer.hpp>
+module StormKit.Engine.Render.Core.RenderQueue;
 
-#include <stormkit/engine/render/MeshComponent.hpp>
-#include <utility>
+import StormKit.Engine;
+
+import StormKit.Engine.Render.Renderer;
+import StormKit.Engine.Render.Components;
 
 using namespace stormkit::core::literals;
 using namespace std::literals;

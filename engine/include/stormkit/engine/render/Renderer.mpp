@@ -1,0 +1,144 @@
+// Copyright (C) 2022 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+module;
+
+#include <iterator>
+#include <memory>
+#include <optional>
+#include <ranges>
+#include <vector>
+
+#include <stormkit/core/MemoryMacro.hpp>
+#include <stormkit/core/PlatformMacro.hpp>
+
+#include <stormkit/core/Types.hpp>
+
+#include <stormkit/entities/Fwd.hpp>
+
+#include <stormkit/wsi/Fwd.hpp>
+
+#include <stormkit/gpu/Fwd.hpp>
+#include <stormkit/gpu/core/CommandBuffer.hpp>
+#include <stormkit/gpu/core/Surface.hpp>
+
+#include <stormkit/gpu/resource/ImageView.hpp>
+
+export module StormKit.Engine.Render.Renderer;
+
+import StormKit.Engine;
+import StormKit.Engine.EngineObject;
+
+import StormKit.Engine.Render.Core.ShaderCache;
+import StormKit.Engine.Render.Core.RenderQueue;
+
+import StormKit.Engine.Render.Tasks;
+
+export namespace stormkit::engine {
+    class STORMKIT_EXPORT Renderer: public EngineObject {
+      public:
+        explicit Renderer(Engine& engine);
+        Renderer(Engine& engine, const core::ExtentU& extent, gpu::Surface::Buffering buffering);
+        ~Renderer();
+
+        Renderer(const Renderer&)                    = delete;
+        auto operator=(const Renderer&) -> Renderer& = delete;
+
+        Renderer(Renderer&&) noexcept;
+        auto operator=(Renderer&&) noexcept -> Renderer&;
+
+        auto setBuildFrameGraphCallback(BuildFrameGraphCallback callback) -> void;
+
+        auto instance() const noexcept -> const gpu::Instance&;
+        auto device() const noexcept -> const gpu::Device&;
+        auto surface() const noexcept -> const gpu::Surface&;
+
+        auto pipelineCache() noexcept -> gpu::PipelineCache&;
+        auto pipelineCache() const noexcept -> const gpu::PipelineCache&;
+
+        auto shaderCache() noexcept -> ShaderCache&;
+        auto shaderCache() const noexcept -> const ShaderCache&;
+
+      private:
+        enum class FrameGraphState {
+            Updated,
+            Old
+        };
+
+        auto threadLoop() -> void;
+        auto rebuildFrameGraph() -> void;
+
+        BuildFrameGraphCallback m_build_framegraph;
+
+        gpu::InstanceOwnedPtr m_instance;
+        gpu::DeviceOwnedPtr m_device;
+        gpu::SurfaceOwnedPtr m_surface;
+
+        std::atomic_bool m_stop_thread = false;
+        std::thread m_render_thread;
+
+        std::atomic_bool m_updated = true;
+        RenderQueueOwnedPtr m_render_queue;
+        FrameGraphBuilderOwnedPtr m_builder;
+
+        gpu::PipelineCacheOwnedPtr m_pipeline_cache;
+        ShaderCacheOwnedPtr m_shader_cache;
+
+        std::vector<BakedFrameGraphOwnedPtr> m_framegraphs;
+        std::vector<FrameGraphState> m_framegraph_states;
+    };
+
+    DECLARE_PTR_AND_REF(Renderer);
+} // namespace stormkit::engine
+
+module :private;
+
+namespace stormkit::engine {
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Renderer::setBuildFrameGraphCallback(BuildFrameGraphCallback callback) -> void {
+        m_build_framegraph = std::move(callback);
+    }
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Renderer::instance() const noexcept -> const gpu::Instance& {
+        return *m_instance;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Renderer::device() const noexcept -> const gpu::Device& {
+        return *m_device;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Renderer::surface() const noexcept -> const gpu::Surface& {
+        return *m_surface;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Renderer::pipelineCache() noexcept -> gpu::PipelineCache& {
+        return *m_pipeline_cache;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Renderer::pipelineCache() const noexcept -> const gpu::PipelineCache& {
+        return *m_pipeline_cache;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Renderer::shaderCache() noexcept -> ShaderCache& {
+        return *m_shader_cache;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Renderer::shaderCache() const noexcept -> const ShaderCache& {
+        return *m_shader_cache;
+    }
+} // namespace stormkit::engine

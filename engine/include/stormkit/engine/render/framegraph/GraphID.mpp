@@ -1,0 +1,16 @@
+// Copyright (C) 2022 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+module;
+
+#include <limits>
+
+#include <stormkit/core/Types.hpp>
+
+export module StormKit.Engine.Render.FrameGraph.GraphID;
+
+export namespace stormkit::engine {
+    using GraphID                    = core::UInt64;
+    extern constexpr auto INVALID_ID = std::numeric_limits<GraphID>::max();
+}

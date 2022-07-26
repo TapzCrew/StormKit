@@ -2,10 +2,10 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#include <stormkit/core/ThreadUtils.hpp>
+module;
 
-#include <stormkit/engine/Engine.hpp>
-#include <stormkit/engine/render/Renderer.hpp>
+#include <stormkit/core/Format.hpp>
+#include <stormkit/core/ThreadUtils.hpp>
 
 #include <stormkit/wsi/Event.hpp>
 #include <stormkit/wsi/EventHandler.hpp>
@@ -14,7 +14,11 @@
 
 #include <stormkit/log/ConsoleLogger.hpp>
 
-#include "Log.hpp"
+module StormKit.Engine;
+
+import StormKit.Engine.Private.Log;
+
+import StormKit.Engine.Render.Renderer;
 
 namespace stormkit::engine {
     /////////////////////////////////////

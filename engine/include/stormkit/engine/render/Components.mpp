@@ -2,18 +2,17 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#pragma once
-
+module;
 
 #include <stormkit/core/Math.hpp>
 
-
 #include <stormkit/entities/Component.hpp>
 
+export module StormKit.Engine.Render.Components;
 
-#include <stormkit/engine/render/core/VertexArray.hpp>
+import StormKit.Engine.Render.Core.VertexArray;
 
-namespace stormkit::engine {
+export namespace stormkit::engine {
     using IndexArray = std::vector<core::UInt32>;
 
     struct SubMesh {

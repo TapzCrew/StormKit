@@ -29,7 +29,12 @@ namespace stormkit::gpu {
       public:
         static constexpr auto DEBUG_TYPE = DebugObjectType::Surface;
 
-        enum class Buffering { Simple, Double, Triple, Swapchain };
+        enum class Buffering {
+            Simple,
+            Double,
+            Triple,
+            Swapchain
+        };
 
         struct Frame {
             core::UInt32 current_frame;
@@ -40,21 +45,21 @@ namespace stormkit::gpu {
             Fence *in_flight;
         };
 
-        Surface(const Instance &instance, Buffering buffering = Buffering::Triple);
-        virtual ~Surface() = 0;
+        Surface(const Instance& instance, Buffering buffering = Buffering::Triple);
+        virtual ~Surface();
 
-        Surface(const Surface &) = delete;
-        auto operator=(const Surface &) -> Surface & = delete;
+        Surface(const Surface&)                    = delete;
+        auto operator=(const Surface&) -> Surface& = delete;
 
-        Surface(Surface &&) noexcept;
-        auto operator=(Surface &&) noexcept -> Surface &;
+        Surface(Surface&&) noexcept;
+        auto operator=(Surface&&) noexcept -> Surface&;
 
-        virtual auto initialize(const Device &device) -> void = 0;
+        virtual auto initialize(const Device& device) -> void = 0;
         virtual auto recreate() -> void                       = 0;
         virtual auto destroy() -> void                        = 0;
 
         virtual auto acquireNextFrame() -> Expected<Frame> = 0;
-        virtual auto present(const Frame &frame) -> void   = 0;
+        virtual auto present(const Frame& frame) -> void   = 0;
 
         [[nodiscard]] auto images() noexcept -> std::span<Image>;
         [[nodiscard]] auto images() const noexcept -> std::span<const Image>;
@@ -65,11 +70,11 @@ namespace stormkit::gpu {
 
         [[nodiscard]] auto needRecreate() const noexcept -> bool;
 
-        [[nodiscard]] auto extent() const noexcept -> const core::ExtentU &;
+        [[nodiscard]] auto extent() const noexcept -> const core::ExtentU&;
 
-        std::function<void(const Fence &fence)> onSwapchainFenceSignaled;
+        std::function<void(const Fence& fence)> onSwapchainFenceSignaled;
 
-        [[nodiscard]] auto device() const noexcept -> const Device &;
+        [[nodiscard]] auto device() const noexcept -> const Device&;
 
       protected:
         const Device *m_device        = nullptr;
