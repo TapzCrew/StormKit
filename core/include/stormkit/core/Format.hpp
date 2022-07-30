@@ -57,9 +57,9 @@ struct std::formatter<R>: std::formatter<typename R::value_type> {
 
         format_to(out, "[\n");
 
-        if (!std::empty(range)) format_to(out, "    {}", range[0]);
+        if (!std::empty(range)) format_to(out, "{:~^4}", range[0]);
 
-        for (auto i = 1; i < std::ranges::size(range); ++i) format_to(out, ",\n    {}", range[i]);
+        for (auto i = 1; i < std::ranges::size(range); ++i) format_to(out, ",\n{:~^4}", range[i]);
 
         return format_to(out, "\n]");
     }
