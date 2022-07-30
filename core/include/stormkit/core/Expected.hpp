@@ -12,8 +12,6 @@ namespace tl {
     unexpected(E e) -> unexpected<E>;
 }
 
-#endif
-
 namespace stormkit::core {
     template<class T, class E>
     using Expected = tl::expected<T, E>;
@@ -28,3 +26,24 @@ namespace stormkit::core {
         return make_unexpected(std::forward<E>(e));
     }
 } // namespace stormkit::core
+#else
+    #include <expected>
+namespace stormkit::core {
+    template<class T, class E>
+    using Expected = std::expected<T, E>;
+
+    template<class E>
+    using Unexpected = std::unexpected<E>;
+
+    template<typename E>
+    auto make_unexpected(E&& e) {
+        return Unexpected<std::remove_cvref_t<E>> { std::forward<E>(e) };
+    }
+
+    template<typename E>
+    auto makeUnexpected(E&& e) {
+        return make_unexpected(std::forward<E>(e));
+    }
+} // namespace stormkit::core
+
+#endif
