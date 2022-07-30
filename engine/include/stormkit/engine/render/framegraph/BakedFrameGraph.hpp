@@ -21,8 +21,8 @@ namespace stormkit::engine {
                 gpu::CommandBufferOwnedPtr commandbuffer;
 
                 std::vector<gpu::ClearValue> clear_values = {};
-                gpu::RenderPassOwnedPtr renderpass        = nullptr;
-                gpu::FramebufferOwnedPtr framebuffer      = nullptr;
+                gpu::RenderPassOwnedPtr renderpass;
+                gpu::FramebufferOwnedPtr framebuffer;
             };
 
             std::vector<Task> tasks;
@@ -32,21 +32,21 @@ namespace stormkit::engine {
         };
 
       public:
-        BakedFrameGraph(Engine &engine,
-                        const FrameGraphBuilder &builder,
-                        Data &&data,
+        BakedFrameGraph(Engine& engine,
+                        const FrameGraphBuilder& builder,
+                        Data&& data,
                         BakedFrameGraph *old = nullptr);
         ~BakedFrameGraph();
 
-        BakedFrameGraph(const BakedFrameGraph &) = delete;
-        auto operator=(const BakedFrameGraph &) -> BakedFrameGraph & = delete;
+        BakedFrameGraph(const BakedFrameGraph&)                    = delete;
+        auto operator=(const BakedFrameGraph&) -> BakedFrameGraph& = delete;
 
-        BakedFrameGraph(BakedFrameGraph &&) noexcept;
-        auto operator=(BakedFrameGraph &&) noexcept -> BakedFrameGraph &;
+        BakedFrameGraph(BakedFrameGraph&&) noexcept;
+        auto operator=(BakedFrameGraph&&) noexcept -> BakedFrameGraph&;
 
-        auto execute(gpu::Surface::Frame &frame) -> void;
+        auto execute(gpu::Surface::Frame& frame) -> void;
 
-        auto setBackbuffer(gpu::Image &backbuffer) -> void;
+        auto setBackbuffer(gpu::Image& backbuffer) -> void;
 
       private:
         const FrameGraphBuilder *m_builder = nullptr;
