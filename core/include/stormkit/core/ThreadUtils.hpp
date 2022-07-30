@@ -6,9 +6,10 @@
 
 #include <stormkit/core/PlatformMacro.hpp>
 
+#include <string_view>
 #include <thread>
 
 namespace stormkit::core {
     STORMKIT_PUBLIC auto setCurrentThreadName(std::string_view name) -> void;
-    STORMKIT_PUBLIC auto setThreadName(std::thread &thread, std::string_view name) -> void;
+    STORMKIT_PUBLIC auto setThreadName(std::thread& thread, std::string_view name) -> void;
 } // namespace stormkit::core
