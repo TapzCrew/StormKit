@@ -1,6 +1,6 @@
 target("model_loader")
     set_kind("binary")
-    set_languages("cxx20", "clatest")
+    set_languages("cxxlatest", "clatest")
     add_rules("utils.nzsl2spv")
 
     if is_mode("debug") then

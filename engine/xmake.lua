@@ -1,6 +1,6 @@
 target("stormkit-engine")
     set_kind("$(kind)")
-    set_languages("cxx20", "clatest")
+    set_languages("cxxlatest", "clatest")
     add_rules("utils.nzsl2spv")
 
     add_defines("STORMKIT_BUILD")

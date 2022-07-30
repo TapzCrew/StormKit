@@ -1,6 +1,6 @@
 target("stormkit-wsi-win32")
     set_kind("static")
-    set_languages("cxx20", "clatest")
+    set_languages("cxxlatest", "clatest")
 
     add_defines("STORMKIT_BUILD")
     if is_mode("debug") then
