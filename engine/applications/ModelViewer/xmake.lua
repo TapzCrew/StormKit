@@ -1,7 +1,7 @@
 target("model_viewer")
     add_rules("qt.quickapp")
     set_languages("cxxlatest", "clatest")
-    add_rules("utils.nzsl2spv")
+    add_rules("stormkit.utils.nzsl2spv")
 
     if is_mode("debug") then
         set_suffixname("-d")

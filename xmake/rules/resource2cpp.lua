@@ -1,5 +1,17 @@
 -- Turns resources into includables headers
-rule("embed_resources")
+rule("stormkit.utils.resource2cpp")
+    on_load(function(target)
+        local outputdir = target:extraconf("rules", "stormkit.utils.resource2cpp", "outputdir") or path.join(target:autogendir(), "rules", "stormkit", "utils", "resource2cpp")
+
+        if not os.isdir(outputdir) then
+            os.mkdir(outputdir)
+        end
+    
+        target:data_set("stormkit.utils.resource2cpp.outputdir", outputdir)
+
+        target:add("includedirs", outputdir)
+    end)
+
 	before_build(function (target, opt)
 		import("core.base.option")
 		if xmake.version():ge("2.5.9") then
@@ -11,7 +23,7 @@ rule("embed_resources")
 		local function GenerateEmbedHeader(filepath, targetpath)
 			local bufferSize = 1024 * 1024
 
-			progress.show(opt.progress, "${color.build.object}embedding %s", filepath)
+			progress.show(opt.progress, "${color.build.object}generating.resource2cpp %s", filepath)
 
 			local resource = assert(io.open(filepath, "rb"))
 			local targetFile = assert(io.open(targetpath, "w+"))
@@ -42,11 +54,11 @@ rule("embed_resources")
 			targetFile:close()
 		end
 
-        local target_dir = target:extraconf("rules", "utils.embed_resources", "outputdir") or path.join(target:autogendir(), "rules", "utils", "embed_resources")
+        local outputdir = target:data("stormkit.utils.resource2cpp.outputdir")
 		for _, sourcebatch in pairs(target:sourcebatches()) do
-			if sourcebatch.rulename == "embed_resources" then
+			if sourcebatch.rulename == "stormkit.utils.resource2cpp" then
 				for _, sourcefile in ipairs(sourcebatch.sourcefiles) do
-					local targetpath = path.join(target_dir, path.filename(sourcefile) .. ".hpp")
+					local targetpath = path.join(outputdir, path.filename(sourcefile) .. ".hpp")
 					if option.get("rebuild") or os.mtime(sourcefile) >= os.mtime(targetpath) then
 						GenerateEmbedHeader(sourcefile, targetpath)
 					end
@@ -54,6 +66,4 @@ rule("embed_resources")
 				end
 			end
 		end
-
-        target:add("includedirs", target_dir)
 	end)
