@@ -9,7 +9,6 @@ module;
 module StormKit.Engine.Render.Core.BlockBuffer;
 
 import StormKit.Engine;
-
 import StormKit.Engine.Render.Renderer;
 
 namespace stormkit::engine {

@@ -10,8 +10,8 @@ module;
 #include <ranges>
 #include <vector>
 
-#include <stormkit/core/PlatformMacro.hpp>
 #include <stormkit/core/MemoryMacro.hpp>
+#include <stormkit/core/PlatformMacro.hpp>
 
 #include <stormkit/core/Types.hpp>
 
@@ -35,26 +35,26 @@ export namespace stormkit::engine {
         using ID                         = core::UInt64;
         static constexpr auto INVALID_ID = std::numeric_limits<ID>::max();
 
-        explicit RenderQueue(Engine &engine);
+        explicit RenderQueue(Engine& engine);
         ~RenderQueue();
 
-        RenderQueue(const RenderQueue &) = delete;
-        auto operator=(const RenderQueue &) -> RenderQueue & = delete;
+        RenderQueue(const RenderQueue&)                    = delete;
+        auto operator=(const RenderQueue&) -> RenderQueue& = delete;
 
-        RenderQueue(RenderQueue &&) noexcept;
-        auto operator=(RenderQueue &&) noexcept -> RenderQueue &;
+        RenderQueue(RenderQueue&&) noexcept;
+        auto operator=(RenderQueue&&) noexcept -> RenderQueue&;
 
-        auto addMesh(const MeshComponent &mesh) -> ID;
+        auto addMesh(const MeshComponent& mesh) -> ID;
         auto removeMesh(ID id) -> void;
 
         auto update() -> void;
-        auto draw(gpu::CommandBuffer &cmb) -> void;
+        auto draw(gpu::CommandBuffer& cmb) -> void;
 
       private:
-        RenderQueue(RenderQueue &&other, std::lock_guard<std::mutex> lock) noexcept;
+        RenderQueue(RenderQueue&& other, std::lock_guard<std::mutex> lock) noexcept;
 
         struct RenderEntry {
-            RenderEntry(ID _id, const MeshComponent &_mesh) noexcept
+            RenderEntry(ID _id, const MeshComponent& _mesh) noexcept
                 : id { _id }, mesh { &_mesh } {}
 
             ID id;

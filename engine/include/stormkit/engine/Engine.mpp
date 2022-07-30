@@ -71,11 +71,7 @@ export namespace stormkit::engine {
     };
 
     DECLARE_PTR_AND_REF(Engine);
-} // namespace stormkit::engine
 
-module :private;
-
-namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     inline auto Engine::world() noexcept -> entities::EntityManager& {

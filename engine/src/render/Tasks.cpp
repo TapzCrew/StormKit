@@ -6,6 +6,7 @@ module;
 
 #include <stormkit/core/Math.hpp>
 
+#include <stormkit/gpu/core/CommandBuffer.hpp>
 #include <stormkit/gpu/core/Device.hpp>
 #include <stormkit/gpu/core/Instance.hpp>
 #include <stormkit/gpu/core/PhysicalDevice.hpp>

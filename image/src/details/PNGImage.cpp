@@ -263,6 +263,5 @@ namespace stormkit::image::details {
         png_destroy_write_struct(&png_ptr, nullptr);
 
         return output;
-        ;
     }
 } // namespace stormkit::image::details

@@ -10,14 +10,13 @@ module;
 export module StormKit.Engine.Render.Tasks;
 
 import StormKit.Engine;
-
 import StormKit.Engine.Render.FrameGraph.FrameGraphBuilder;
 
 export namespace stormkit::engine {
-    using BuildFrameGraphCallback = std::function<void(FrameGraphBuilder &graph_builder)>;
+    using BuildFrameGraphCallback = std::function<void(FrameGraphBuilder& graph_builder)>;
 
     extern constexpr auto FORWARD_PASS_VERTEX_SHADER   = "StormKit:ForwardPass:VertexShader";
     extern constexpr auto FORWARD_PASS_FRAGMENT_SHADER = "StormKit:ForwardPass:FragmentShader";
 
-    STORMKIT_EXPORT auto forwardRenderer(Engine &engine) noexcept -> BuildFrameGraphCallback;
+    STORMKIT_EXPORT auto forwardRenderer(Engine& engine) noexcept -> BuildFrameGraphCallback;
 } // namespace stormkit::engine

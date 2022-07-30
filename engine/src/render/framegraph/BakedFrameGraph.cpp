@@ -7,15 +7,11 @@ module;
 #include <stormkit/gpu/core/CommandBuffer.hpp>
 #include <stormkit/gpu/core/Device.hpp>
 #include <stormkit/gpu/core/Queue.hpp>
-#include <stormkit/gpu/pipeline/Framebuffer.hpp>
-#include <stormkit/gpu/pipeline/RenderPass.hpp>
-#include <stormkit/gpu/resource/Buffer.hpp>
-#include <stormkit/gpu/resource/Image.hpp>
-#include <stormkit/gpu/resource/ImageView.hpp>
 #include <stormkit/gpu/sync/Semaphore.hpp>
 
 module StormKit.Engine.Render.FrameGraph.BakedFrameGraph;
 
+import StormKit.Engine;
 import StormKit.Engine.Render.Renderer;
 
 namespace stormkit::engine {

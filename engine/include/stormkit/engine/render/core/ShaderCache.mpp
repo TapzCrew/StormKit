@@ -5,16 +5,16 @@
 module;
 
 #include <filesystem>
-#include <span>
-#include <string_view>
 #include <iterator>
 #include <memory>
 #include <optional>
 #include <ranges>
+#include <span>
+#include <string_view>
 #include <vector>
 
-#include <stormkit/core/PlatformMacro.hpp>
 #include <stormkit/core/MemoryMacro.hpp>
+#include <stormkit/core/PlatformMacro.hpp>
 
 #include <stormkit/core/HashMap.hpp>
 #include <stormkit/core/Memory.hpp>
@@ -31,27 +31,27 @@ export module StormKit.Engine.Render.Core.ShaderCache;
 export namespace stormkit::engine {
     class STORMKIT_EXPORT ShaderCache {
       public:
-        ShaderCache(const gpu::Device &device);
+        ShaderCache(const gpu::Device& device);
         ~ShaderCache();
 
-        ShaderCache(const ShaderCache &) = delete;
-        auto operator=(const ShaderCache &) -> ShaderCache & = delete;
+        ShaderCache(const ShaderCache&)                    = delete;
+        auto operator=(const ShaderCache&) -> ShaderCache& = delete;
 
-        ShaderCache(ShaderCache &&) noexcept;
-        auto operator=(ShaderCache &&) noexcept -> ShaderCache &;
+        ShaderCache(ShaderCache&&) noexcept;
+        auto operator=(ShaderCache&&) noexcept -> ShaderCache&;
 
         [[nodiscard]] auto has(std::string_view name) const noexcept -> bool;
-        [[nodiscard]] auto get(std::string_view name) const noexcept -> const gpu::Shader &;
+        [[nodiscard]] auto get(std::string_view name) const noexcept -> const gpu::Shader&;
 
         auto load(std::string name, std::filesystem::path filepath, gpu::ShaderStageFlag type)
-            -> const gpu::Shader &;
+            -> const gpu::Shader&;
         auto load(std::string name, core::ByteConstSpan data, gpu::ShaderStageFlag type)
-            -> const gpu::Shader &;
+            -> const gpu::Shader&;
         auto load(std::string name, std::span<const gpu::SpirvID> data, gpu::ShaderStageFlag type)
-            -> const gpu::Shader &;
+            -> const gpu::Shader&;
 
       private:
-        auto insert(std::string name, gpu::Shader &&shader) -> const gpu::Shader &;
+        auto insert(std::string name, gpu::Shader&& shader) -> const gpu::Shader&;
 
         const gpu::Device *m_device = nullptr;
 
@@ -59,21 +59,17 @@ export namespace stormkit::engine {
     };
 
     DECLARE_PTR_AND_REF(ShaderCache);
-} // namespace stormkit::engine
 
-module :private;
-
-namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     inline auto ShaderCache::has(std::string_view name) const noexcept -> bool {
         return std::ranges::any_of(m_shaders,
-                                   [name](const auto &pair) { return pair.first == name; });
+                                   [name](const auto& pair) { return pair.first == name; });
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto ShaderCache::get(std::string_view name) const noexcept -> const gpu::Shader & {
+    inline auto ShaderCache::get(std::string_view name) const noexcept -> const gpu::Shader& {
         STORMKIT_EXPECTS(has(name));
 
         return m_shaders.find(name)->second;

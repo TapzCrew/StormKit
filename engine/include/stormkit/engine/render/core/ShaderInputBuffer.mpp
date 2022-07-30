@@ -32,23 +32,22 @@ export namespace stormkit::engine {
         };
 
         template<core::Is<gpu::Buffer::CreateInfo>... CreateInfos>
-        requires(sizeof...(CreateInfos) ==
-                 ComponentCount) explicit ShaderInputBuffer(Engine &engine,
-                                                            const CreateInfos &...infos);
+            requires(sizeof...(CreateInfos) == ComponentCount)
+        explicit ShaderInputBuffer(Engine& engine, const CreateInfos&...infos);
         ~ShaderInputBuffer();
 
-        ShaderInputBuffer(const ShaderInputBuffer &) = delete;
-        auto operator=(const ShaderInputBuffer &) -> ShaderInputBuffer & = delete;
+        ShaderInputBuffer(const ShaderInputBuffer&)                    = delete;
+        auto operator=(const ShaderInputBuffer&) -> ShaderInputBuffer& = delete;
 
-        ShaderInputBuffer(ShaderInputBuffer &&) noexcept;
-        auto operator=(ShaderInputBuffer &&) noexcept -> ShaderInputBuffer &;
+        ShaderInputBuffer(ShaderInputBuffer&&) noexcept;
+        auto operator=(ShaderInputBuffer&&) noexcept -> ShaderInputBuffer&;
 
         [[nodiscard]] auto allocateBlock(core::USize size,
                                          ComponentHandle component_handle) noexcept -> Allocation;
-        [[nodiscard]] auto getBlock(const Allocation &allocation) noexcept
-            -> const BlockBuffer::Block &;
-        [[nodiscard]] auto getBuffer(const Allocation &allocation) noexcept -> const gpu::Buffer &;
-        auto freeBlock(const Allocation &allocation) noexcept -> void;
+        [[nodiscard]] auto getBlock(const Allocation& allocation) noexcept
+            -> const BlockBuffer::Block&;
+        [[nodiscard]] auto getBuffer(const Allocation& allocation) noexcept -> const gpu::Buffer&;
+        auto freeBlock(const Allocation& allocation) noexcept -> void;
 
         auto defragment() noexcept -> void;
 
@@ -56,18 +55,13 @@ export namespace stormkit::engine {
         std::array<gpu::Buffer::CreateInfo, ComponentCount> m_create_infos;
         std::array<std::vector<BlockBuffer>, ComponentCount> m_components;
     };
-} // namespace stormkit::engine
 
-module :private;
-
-namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     template<core::USize ComponentCount>
     template<core::Is<gpu::Buffer::CreateInfo>... CreateInfos>
-    requires(sizeof...(CreateInfos) == ComponentCount)
-        ShaderInputBuffer<ComponentCount>::ShaderInputBuffer(Engine &engine,
-                                                             const CreateInfos &...infos)
+        requires(sizeof...(CreateInfos) == ComponentCount)
+    ShaderInputBuffer<ComponentCount>::ShaderInputBuffer(Engine& engine, const CreateInfos&...infos)
         : EngineObject { engine }, m_create_infos { infos... } {
         auto i = 0;
         ([&]() { m_components[i++].emplace_back(this->engine(), infos); }(), ...);
@@ -81,14 +75,14 @@ namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     template<core::USize ComponentCount>
-    ShaderInputBuffer<ComponentCount>::ShaderInputBuffer(ShaderInputBuffer &&other) noexcept =
+    ShaderInputBuffer<ComponentCount>::ShaderInputBuffer(ShaderInputBuffer&& other) noexcept =
         default;
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<core::USize ComponentCount>
-    auto ShaderInputBuffer<ComponentCount>::operator=(ShaderInputBuffer &&other) noexcept
-        -> ShaderInputBuffer                      & = default;
+    auto ShaderInputBuffer<ComponentCount>::operator=(ShaderInputBuffer&& other) noexcept
+        -> ShaderInputBuffer& = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
@@ -102,7 +96,7 @@ namespace stormkit::engine {
         auto buffer_handle = BufferHandle::invalidHandle();
 
         auto i = 0u;
-        for (auto &buffer : m_components[component_handle]) {
+        for (auto& buffer : m_components[component_handle]) {
             block_handle  = buffer.requestBlock(size);
             buffer_handle = BufferHandle { i++ };
 
@@ -110,7 +104,7 @@ namespace stormkit::engine {
         }
 
         if (block_handle == BlockBuffer::Block::Handle::invalidHandle()) {
-            auto &buffer =
+            auto& buffer =
                 m_components[component_handle].emplace_back(engine(),
                                                             m_create_infos[component_handle]);
 
@@ -124,8 +118,8 @@ namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     template<core::USize ComponentCount>
-    auto ShaderInputBuffer<ComponentCount>::getBlock(const Allocation &allocation) noexcept
-        -> const BlockBuffer::Block & {
+    auto ShaderInputBuffer<ComponentCount>::getBlock(const Allocation& allocation) noexcept
+        -> const BlockBuffer::Block& {
         STORMKIT_EXPECTS(allocation.component < ComponentCount);
         STORMKIT_EXPECTS(allocation.buffer < std::size(m_components[allocation.component]));
 
@@ -135,8 +129,8 @@ namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     template<core::USize ComponentCount>
-    auto ShaderInputBuffer<ComponentCount>::getBuffer(const Allocation &allocation) noexcept
-        -> const gpu::Buffer & {
+    auto ShaderInputBuffer<ComponentCount>::getBuffer(const Allocation& allocation) noexcept
+        -> const gpu::Buffer& {
         STORMKIT_EXPECTS(allocation.component < ComponentCount);
         STORMKIT_EXPECTS(allocation.buffer < std::size(m_components[allocation.component]));
 
@@ -146,7 +140,7 @@ namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     template<core::USize ComponentCount>
-    auto ShaderInputBuffer<ComponentCount>::freeBlock(const Allocation &allocation) noexcept
+    auto ShaderInputBuffer<ComponentCount>::freeBlock(const Allocation& allocation) noexcept
         -> void {
         STORMKIT_EXPECTS(allocation.component < ComponentCount);
         STORMKIT_EXPECTS(allocation.buffer < std::size(m_components[allocation.component]));
@@ -158,7 +152,7 @@ namespace stormkit::engine {
     /////////////////////////////////////
     template<core::USize ComponentCount>
     auto ShaderInputBuffer<ComponentCount>::defragment() noexcept -> void {
-        for (auto &component : m_components)
-            for (auto &buffer : component) buffer.defragment();
+        for (auto& component : m_components)
+            for (auto& buffer : component) buffer.defragment();
     }
 } // namespace stormkit::engine

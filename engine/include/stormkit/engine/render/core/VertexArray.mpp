@@ -10,8 +10,8 @@ module;
 #include <ranges>
 #include <vector>
 
-#include <stormkit/core/PlatformMacro.hpp>
 #include <stormkit/core/MemoryMacro.hpp>
+#include <stormkit/core/PlatformMacro.hpp>
 
 #include <stormkit/core/Types.hpp>
 
@@ -34,10 +34,10 @@ export namespace stormkit::engine {
     };
 
     struct VertexView {
-        VertexView(core::Vector3f &_position,
-                   core::Vector3f &_normal,
-                   core::Vector3f &_color,
-                   core::Vector2f &_uv)
+        VertexView(core::Vector3f& _position,
+                   core::Vector3f& _normal,
+                   core::Vector3f& _color,
+                   core::Vector2f& _uv)
             : position { &_position }, normal { &_normal }, color { &_color }, uv { &_uv } {}
 
         core::Vector3f *position;
@@ -55,16 +55,16 @@ export namespace stormkit::engine {
         VertexArray(std::span<const Vertex> vertices);
         ~VertexArray();
 
-        VertexArray(const VertexArray &);
-        auto operator=(const VertexArray &) -> VertexArray &;
+        VertexArray(const VertexArray&);
+        auto operator=(const VertexArray&) -> VertexArray&;
 
-        VertexArray(VertexArray &&) noexcept;
-        auto operator=(VertexArray &&) noexcept -> VertexArray &;
+        VertexArray(VertexArray&&) noexcept;
+        auto operator=(VertexArray&&) noexcept -> VertexArray&;
 
         auto resize(core::USize size) -> void;
 
         auto addVertices(std::span<const Vertex> vertices) -> void;
-        auto addVertex(const Vertex &vertex) -> void;
+        auto addVertex(const Vertex& vertex) -> void;
         auto removeVertex(core::USize position) -> void;
         auto removeVertices(core::USize first, core::USize count) -> void;
 
@@ -101,14 +101,12 @@ export namespace stormkit::engine {
     };
 
     DECLARE_PTR_AND_REF(VertexArray);
-} // namespace stormkit::engine
 
-module :private;
-
-namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto VertexArray::data() noexcept -> std::span<VertexView> { return m_vertices; }
+    inline auto VertexArray::data() noexcept -> std::span<VertexView> {
+        return m_vertices;
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
@@ -118,7 +116,9 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto VertexArray::begin() noexcept -> Iterator { return std::begin(m_vertices); }
+    inline auto VertexArray::begin() noexcept -> Iterator {
+        return std::begin(m_vertices);
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
@@ -134,11 +134,15 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto VertexArray::end() noexcept -> Iterator { return std::end(m_vertices); }
+    inline auto VertexArray::end() noexcept -> Iterator {
+        return std::end(m_vertices);
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto VertexArray::end() const noexcept -> ConstIterator { return std::end(m_vertices); }
+    inline auto VertexArray::end() const noexcept -> ConstIterator {
+        return std::end(m_vertices);
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////

@@ -21,19 +21,22 @@ export namespace stormkit::engine {
     class GraphTaskBuilder;
     class STORMKIT_EXPORT GraphTaskBase {
       public:
-        enum class Type { Graphics, Compute };
+        enum class Type {
+            Graphics,
+            Compute
+        };
 
         GraphTaskBase(std::string name, Type type = Type::Graphics, bool cull_imune = false);
         virtual ~GraphTaskBase();
 
-        GraphTaskBase(const GraphTaskBase &) = delete;
-        auto operator=(const GraphTaskBase &) -> GraphTaskBase & = delete;
+        GraphTaskBase(const GraphTaskBase&)                    = delete;
+        auto operator=(const GraphTaskBase&) -> GraphTaskBase& = delete;
 
-        GraphTaskBase(GraphTaskBase &&) noexcept;
-        auto operator=(GraphTaskBase &&) noexcept -> GraphTaskBase &;
+        GraphTaskBase(GraphTaskBase&&) noexcept;
+        auto operator=(GraphTaskBase&&) noexcept -> GraphTaskBase&;
 
         auto id() const noexcept -> GraphID;
-        auto name() const noexcept -> const std::string &;
+        auto name() const noexcept -> const std::string&;
         auto type() const noexcept -> Type;
         auto cullImune() const noexcept -> bool;
         auto refCount() const noexcept -> core::USize;
@@ -45,8 +48,8 @@ export namespace stormkit::engine {
         auto setCullImune(bool imune) noexcept -> void;
 
       protected:
-        virtual auto setup(GraphTaskBuilder &builder) -> void                              = 0;
-        virtual auto execute(gpu::RenderPass *renderpass, gpu::CommandBuffer &cmb) -> void = 0;
+        virtual auto setup(GraphTaskBuilder& builder) -> void                              = 0;
+        virtual auto execute(gpu::RenderPass *renderpass, gpu::CommandBuffer& cmb) -> void = 0;
 
         friend class FrameGraphBuilder; // TODO rework this
 
@@ -69,28 +72,28 @@ export namespace stormkit::engine {
     class STORMKIT_PUBLIC GraphTask: public GraphTaskBase {
       public:
         using TaskData      = T;
-        using SetupCallback = std::function<void(T &, GraphTaskBuilder &)>;
+        using SetupCallback = std::function<void(T&, GraphTaskBuilder&)>;
         using ExecuteCallback =
-            std::function<void(const T &, gpu::RenderPass *, gpu::CommandBuffer &)>;
+            std::function<void(const T&, gpu::RenderPass *, gpu::CommandBuffer&)>;
 
         GraphTask(std::string name,
-                  SetupCallback &&setup,
-                  ExecuteCallback &&execute,
+                  SetupCallback&& setup,
+                  ExecuteCallback&& execute,
                   Type type       = Type::Graphics,
                   bool cull_imune = false);
         ~GraphTask() override;
 
-        GraphTask(const GraphTask &) = delete;
-        auto operator=(const GraphTask &) -> GraphTask & = delete;
+        GraphTask(const GraphTask&)                    = delete;
+        auto operator=(const GraphTask&) -> GraphTask& = delete;
 
-        GraphTask(GraphTask &&) noexcept = default;
-        auto operator=(GraphTask &&) noexcept -> GraphTask & = default;
+        GraphTask(GraphTask&&) noexcept                    = default;
+        auto operator=(GraphTask&&) noexcept -> GraphTask& = default;
 
-        auto data() const noexcept -> const TaskData &;
+        auto data() const noexcept -> const TaskData&;
 
       protected:
-        auto setup(GraphTaskBuilder &builder) -> void override;
-        auto execute(gpu::RenderPass *renderpass, gpu::CommandBuffer &cmb) -> void override;
+        auto setup(GraphTaskBuilder& builder) -> void override;
+        auto execute(gpu::RenderPass *renderpass, gpu::CommandBuffer& cmb) -> void override;
 
       private:
         TaskData m_data;
@@ -98,12 +101,7 @@ export namespace stormkit::engine {
         SetupCallback m_setup;
         ExecuteCallback m_execute;
     };
-} // namespace stormkit::engine
 
-
-module :private;
-
-namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     inline GraphTaskBase::GraphTaskBase(std::string name, Type type, bool cull_imune)
@@ -119,31 +117,42 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline GraphTaskBase::GraphTaskBase(GraphTaskBase &&other) noexcept = default;
+    inline GraphTaskBase::GraphTaskBase(GraphTaskBase&& other) noexcept = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto GraphTaskBase::operator=(GraphTaskBase &&other) noexcept -> GraphTaskBase & = default;
+    inline auto GraphTaskBase::operator=(GraphTaskBase&& other) noexcept
+        -> GraphTaskBase& = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto GraphTaskBase::id() const noexcept -> GraphID { return m_id; }
+    inline auto GraphTaskBase::id() const noexcept -> GraphID {
+        return m_id;
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto GraphTaskBase::name() const noexcept -> const std::string & { return m_name; }
+    inline auto GraphTaskBase::name() const noexcept -> const std::string& {
+        return m_name;
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto GraphTaskBase::type() const noexcept -> Type { return m_type; }
+    inline auto GraphTaskBase::type() const noexcept -> Type {
+        return m_type;
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto GraphTaskBase::cullImune() const noexcept -> bool { return m_cull_imune; }
+    inline auto GraphTaskBase::cullImune() const noexcept -> bool {
+        return m_cull_imune;
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto GraphTaskBase::refCount() const noexcept -> core::USize { return m_ref_count; }
+    inline auto GraphTaskBase::refCount() const noexcept -> core::USize {
+        return m_ref_count;
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
@@ -165,18 +174,21 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto GraphTaskBase::setCullImune(bool imune) noexcept -> void { m_cull_imune = imune; }
+    inline auto GraphTaskBase::setCullImune(bool imune) noexcept -> void {
+        m_cull_imune = imune;
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<typename TaskData>
     GraphTask<TaskData>::GraphTask(std::string name,
-                                   SetupCallback &&setup,
-                                   ExecuteCallback &&execute,
+                                   SetupCallback&& setup,
+                                   ExecuteCallback&& execute,
                                    Type type,
                                    bool cull_imune)
         : GraphTaskBase { std::move(name), type, cull_imune }, m_setup { std::move(setup) },
-          m_execute { std::move(execute) } {}
+          m_execute { std::move(execute) } {
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
@@ -186,21 +198,21 @@ namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     template<typename TaskData>
-    auto GraphTask<TaskData>::data() const noexcept -> const TaskData & {
+    auto GraphTask<TaskData>::data() const noexcept -> const TaskData& {
         return m_data;
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<typename TaskData>
-    auto GraphTask<TaskData>::setup(GraphTaskBuilder &builder) -> void {
+    auto GraphTask<TaskData>::setup(GraphTaskBuilder& builder) -> void {
         m_setup(m_data, builder);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<typename TaskData>
-    auto GraphTask<TaskData>::execute(gpu::RenderPass *renderpass, gpu::CommandBuffer &cmb)
+    auto GraphTask<TaskData>::execute(gpu::RenderPass *renderpass, gpu::CommandBuffer& cmb)
         -> void {
         m_execute(m_data, renderpass, cmb);
     }

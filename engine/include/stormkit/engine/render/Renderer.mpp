@@ -30,10 +30,12 @@ export module StormKit.Engine.Render.Renderer;
 import StormKit.Engine;
 import StormKit.Engine.EngineObject;
 
+import StormKit.Engine.Render.Tasks;
+
 import StormKit.Engine.Render.Core.ShaderCache;
 import StormKit.Engine.Render.Core.RenderQueue;
 
-import StormKit.Engine.Render.Tasks;
+import StormKit.Engine.Render.FrameGraph.FrameGraphBuilder;
 
 export namespace stormkit::engine {
     class STORMKIT_EXPORT Renderer: public EngineObject {
@@ -90,11 +92,7 @@ export namespace stormkit::engine {
     };
 
     DECLARE_PTR_AND_REF(Renderer);
-} // namespace stormkit::engine
 
-module :private;
-
-namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     inline auto Renderer::setBuildFrameGraphCallback(BuildFrameGraphCallback callback) -> void {

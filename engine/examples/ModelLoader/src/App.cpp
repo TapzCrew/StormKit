@@ -1,5 +1,4 @@
-#include "App.hpp"
-#include "Constants.hpp"
+module;
 
 #include <stormkit/core/Configure.hpp>
 
@@ -7,13 +6,19 @@
 
 #include <stormkit/wsi/Window.hpp>
 
-#include <stormkit/engine/Engine.hpp>
-#include <stormkit/engine/render/ForwardTasks.hpp>
-#include <stormkit/engine/render/MeshComponent.hpp>
-#include <stormkit/engine/render/Renderer.hpp>
-#include <stormkit/engine/render/framegraph/FrameGraphBuilder.hpp>
-#include <stormkit/engine/render/framegraph/GraphResource.hpp>
-#include <stormkit/engine/render/framegraph/GraphTaskBuilder.hpp>
+module App;
+
+import Constants;
+
+import StormKit.Engine;
+import StormKit.Engine.Render.Renderer;
+import StormKit.Engine.Render.Tasks;
+import StormKit.Engine.Render.Components;
+import StormKit.Engine.Render.FrameGraph.FrameGraphBuilder;
+import StormKit.Engine.Render.FrameGraph.GraphResource;
+import StormKit.Engine.Render.FrameGraph.GraphTaskBuilder;
+
+import StormKit.Engine.Render.Core.VertexArray;
 
 using namespace stormkit;
 

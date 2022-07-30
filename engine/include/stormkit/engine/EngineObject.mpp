@@ -4,12 +4,12 @@
 
 module;
 
+#include <iostream>
 #include <iterator>
 #include <memory>
 #include <optional>
 #include <ranges>
 #include <vector>
-#include <iostream>
 
 #include <stormkit/core/AssertMacro.hpp>
 #include <stormkit/core/MemoryMacro.hpp>
@@ -24,31 +24,28 @@ import StormKit.Engine;
 export namespace stormkit::engine {
     class STORMKIT_EXPORT EngineObject {
       public:
-        explicit EngineObject(Engine &engine) noexcept;
+        explicit EngineObject(Engine& engine) noexcept;
         ~EngineObject() noexcept;
 
-        EngineObject(const EngineObject &) noexcept;
-        auto operator=(const EngineObject &) noexcept -> EngineObject &;
+        EngineObject(const EngineObject&) noexcept;
+        auto operator=(const EngineObject&) noexcept -> EngineObject&;
 
-        EngineObject(EngineObject &&) noexcept;
-        auto operator=(EngineObject &&) noexcept -> EngineObject &;
+        EngineObject(EngineObject&&) noexcept;
+        auto operator=(EngineObject&&) noexcept -> EngineObject&;
 
-        [[nodiscard]] auto engine() noexcept -> Engine &;
-        [[nodiscard]] auto engine() const noexcept -> const Engine &;
+        [[nodiscard]] auto engine() noexcept -> Engine&;
+        [[nodiscard]] auto engine() const noexcept -> const Engine&;
 
       private:
         Engine *m_engine;
     };
 
     DECLARE_PTR_AND_REF(EngineObject);
-} // namespace stormkit::engine
 
-module :private;
-
-namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
-    inline EngineObject::EngineObject(Engine &engine) noexcept : m_engine { &engine } {}
+    inline EngineObject::EngineObject(Engine& engine) noexcept : m_engine { &engine } {
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
@@ -56,23 +53,23 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline EngineObject::EngineObject(const EngineObject &) noexcept = default;
+    inline EngineObject::EngineObject(const EngineObject&) noexcept = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto EngineObject::operator=(const EngineObject &) noexcept -> EngineObject & = default;
+    inline auto EngineObject::operator=(const EngineObject&) noexcept -> EngineObject& = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline EngineObject::EngineObject(EngineObject &&) noexcept = default;
+    inline EngineObject::EngineObject(EngineObject&&) noexcept = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto EngineObject::operator=(EngineObject &&) noexcept -> EngineObject & = default;
+    inline auto EngineObject::operator=(EngineObject&&) noexcept -> EngineObject& = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto EngineObject::engine() noexcept -> Engine & {
+    inline auto EngineObject::engine() noexcept -> Engine& {
         STORMKIT_EXPECTS(m_engine);
 
         return *m_engine;
@@ -80,7 +77,7 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto EngineObject::engine() const noexcept -> const Engine & {
+    inline auto EngineObject::engine() const noexcept -> const Engine& {
         STORMKIT_EXPECTS(m_engine);
 
         return *m_engine;

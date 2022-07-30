@@ -95,11 +95,7 @@ export namespace stormkit::engine {
 
     using GraphBuffer = GraphResource<BufferDescription>;
     using GraphImage  = GraphResource<ImageDescription>;
-} // namespace stormkit::engine
 
-module :private;
-
-namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     inline GraphResourceBase::GraphResourceBase(std::string name, GraphID creator)
@@ -167,9 +163,7 @@ namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     template<ResourceDescriptionType D>
-    inline GraphResource<D>::GraphResource(std::string name,
-                                           GraphID creator,
-                                           Description&& description)
+    GraphResource<D>::GraphResource(std::string name, GraphID creator, Description&& description)
         : GraphResourceBase { std::move(name), creator }, m_description { std::forward<Description>(
                                                               description) } {
     }
@@ -177,23 +171,22 @@ namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     template<ResourceDescriptionType D>
-    inline GraphResource<D>::~GraphResource() = default;
+    GraphResource<D>::~GraphResource() = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<ResourceDescriptionType D>
-    inline GraphResource<D>::GraphResource(GraphResource&& other) noexcept = default;
+    GraphResource<D>::GraphResource(GraphResource&& other) noexcept = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<ResourceDescriptionType D>
-    inline auto GraphResource<D>::operator=(GraphResource&& other) noexcept
-        -> GraphResource& = default;
+    auto GraphResource<D>::operator=(GraphResource&& other) noexcept -> GraphResource& = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<ResourceDescriptionType D>
-    inline auto GraphResource<D>::description() const noexcept -> const Description& {
+    auto GraphResource<D>::description() const noexcept -> const Description& {
         return m_description;
     }
 } // namespace stormkit::engine

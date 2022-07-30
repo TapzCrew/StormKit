@@ -30,7 +30,7 @@
     }
 
 #define IN_MODULE_NAMED_LOGGER(NAME, module) \
-    extern const inline auto NAME = stormkit::log::Module { module };
+    const inline auto NAME = stormkit::log::Module { module };
 
 #define IN_MODULE_LOGGER(module)                      \
     IN_MODULE_NAMED_LOGGER(LOG_MODULE, module)        \

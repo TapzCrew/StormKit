@@ -38,6 +38,10 @@ import StormKit.Engine.Render.FrameGraph.GraphTask;
 import StormKit.Engine.Render.FrameGraph.GraphResource;
 import StormKit.Engine.Render.FrameGraph.GraphID;
 
+namespace stormkit::engine {
+    class Engine;
+}
+
 export namespace stormkit::engine {
     class STORMKIT_EXPORT FrameGraphBuilder: public EngineObject {
       public:
@@ -153,11 +157,7 @@ export namespace stormkit::engine {
     };
 
     DECLARE_PTR_AND_REF(FrameGraphBuilder);
-} // namespace stormkit::engine
 
-module :private;
-
-namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     template<typename TaskData, typename... Args>

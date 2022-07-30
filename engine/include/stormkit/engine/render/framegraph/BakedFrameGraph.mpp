@@ -10,17 +10,19 @@ module;
 #include <ranges>
 #include <vector>
 
-#include <stormkit/core/PlatformMacro.hpp>
 #include <stormkit/core/MemoryMacro.hpp>
+#include <stormkit/core/PlatformMacro.hpp>
 
 #include <stormkit/core/Types.hpp>
 
 #include <stormkit/gpu/Fwd.hpp>
 #include <stormkit/gpu/core/Surface.hpp>
 #include <stormkit/gpu/core/Types.hpp>
-#include <stormkit/gpu/resource/ImageView.hpp>
-#include <stormkit/gpu/resource/Image.hpp>
+#include <stormkit/gpu/pipeline/Framebuffer.hpp>
+#include <stormkit/gpu/pipeline/RenderPass.hpp>
 #include <stormkit/gpu/resource/Buffer.hpp>
+#include <stormkit/gpu/resource/Image.hpp>
+#include <stormkit/gpu/resource/ImageView.hpp>
 
 export module StormKit.Engine.Render.FrameGraph.BakedFrameGraph;
 
@@ -31,6 +33,7 @@ import StormKit.Engine.Render.FrameGraph.GraphID;
 
 export namespace stormkit::engine {
     class FrameGraphBuilder;
+
     class STORMKIT_EXPORT BakedFrameGraph: public EngineObject {
         struct Data {
             struct Task {
