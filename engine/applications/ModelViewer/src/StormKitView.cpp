@@ -29,9 +29,9 @@ auto StormKitView::updatePaintNode(QSGNode *, UpdatePaintNodeData *) -> QSGNode 
 
 ////////////////////////////////////////
 ////////////////////////////////////////
-auto StormKitView::geometryChange([[maybe_unused]] const QRectF& newGeometry,
+/*auto StormKitView::geometryChange([[maybe_unused]] const QRectF& newGeometry,
                                   [[maybe_unused]] const QRectF& oldGeometry) -> void {
-}
+}*/
 
 ////////////////////////////////////////
 ////////////////////////////////////////

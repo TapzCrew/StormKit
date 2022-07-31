@@ -2,13 +2,8 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#if defined(STORMKIT_CXX20_MODULES)
-module stormkit.wsi.details.x11.utils;
-
-#else
-    /////////// - StormKit::wsi - ///////////
-    #include "Utils.mpp"
-#endif
+/////////// - StormKit::wsi - ///////////
+#include "Utils.hpp"
 
 /////////// - XLib - ///////////
 #include <X11/keysym.h>

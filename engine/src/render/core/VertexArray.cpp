@@ -7,11 +7,14 @@
 namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
-    VertexArray::VertexArray() {}
+    VertexArray::VertexArray() {
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    VertexArray::VertexArray(std::span<const Vertex> vertices) { addVertices(vertices); }
+    VertexArray::VertexArray(std::span<const Vertex> vertices) {
+        addVertices(vertices);
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
@@ -19,19 +22,19 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    VertexArray::VertexArray(const VertexArray &other) = default;
+    VertexArray::VertexArray(const VertexArray& other) = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto VertexArray::operator=(const VertexArray &other) -> VertexArray & = default;
+    auto VertexArray::operator=(const VertexArray& other) -> VertexArray& = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
-    VertexArray::VertexArray(VertexArray &&other) noexcept = default;
+    VertexArray::VertexArray(VertexArray&& other) noexcept = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto VertexArray::operator=(VertexArray &&other) noexcept -> VertexArray & = default;
+    auto VertexArray::operator=(VertexArray&& other) noexcept -> VertexArray& = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
@@ -42,8 +45,6 @@ namespace stormkit::engine {
             const auto vertices = std::vector<Vertex> { diff };
             addVertices(vertices);
         } else {
-            const auto vertex = Vertex {};
-
             m_positions.resize(size);
             m_normals.resize(size);
             m_colors.resize(size);
@@ -68,16 +69,16 @@ namespace stormkit::engine {
         m_uvs.reserve(size);
         m_vertices.reserve(size);
 
-        for (const auto &vertex : vertices) addVertex(vertex);
+        for (const auto& vertex : vertices) addVertex(vertex);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto VertexArray::addVertex(const Vertex &vertex) -> void {
-        auto &position = m_positions.emplace_back(vertex.position);
-        auto &normal   = m_normals.emplace_back(vertex.normal);
-        auto &color    = m_colors.emplace_back(vertex.color);
-        auto &uv       = m_uvs.emplace_back(vertex.uv);
+    auto VertexArray::addVertex(const Vertex& vertex) -> void {
+        auto& position = m_positions.emplace_back(vertex.position);
+        auto& normal   = m_normals.emplace_back(vertex.normal);
+        auto& color    = m_colors.emplace_back(vertex.color);
+        auto& uv       = m_uvs.emplace_back(vertex.uv);
 
         m_vertices.emplace_back(position, normal, color, uv);
 

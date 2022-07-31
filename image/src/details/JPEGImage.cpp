@@ -45,10 +45,10 @@ namespace stormkit::image::details {
     /////////////////////////////////////
     auto loadJPG(core::ByteConstSpan data) noexcept
         -> core::Expected<image::Image, image::Image::Error> {
-        auto image_memory = core::ByteArray {};
-        auto format       = Format {};
-        auto extent       = core::ExtentU {};
-
+        auto image_memory    = core::ByteArray {};
+        volatile auto format = Format {}; // volatile for error: variable ‘format’ might be
+                                          // clobbered by ‘longjmp’ or ‘vfork’ [-Werror=clobbered]
+        auto extent    = core::ExtentU {};
         auto info      = jpeg_decompress_struct {};
         auto error_mgr = jpeg_error_mgr {};
 

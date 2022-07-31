@@ -8,12 +8,14 @@
 namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
-    Sampler::Sampler(Settings settings, const Device &device)
+    Sampler::Sampler(Settings settings, const Device& device)
         : DeviceObject { device }, m_settings { std::move(settings) } {
-        const auto &vk = this->device().table();
+        const auto& vk = this->device().table();
 
         const auto create_info = VkSamplerCreateInfo {
             .sType                   = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
+            .pNext                   = nullptr,
+            .flags                   = {},
             .magFilter               = core::as<VkFilter>(m_settings.mag_filter),
             .minFilter               = core::as<VkFilter>(m_settings.min_filter),
             .mipmapMode              = core::as<VkSamplerMipmapMode>(m_settings.mipmap_mode),
@@ -38,7 +40,7 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     Sampler::~Sampler() {
         if (m_sampler != VK_NULL_HANDLE) [[likely]] {
-            const auto &vk = device().table();
+            const auto& vk = device().table();
 
             vk.vkDestroySampler(device(), m_sampler, nullptr);
         }
@@ -46,19 +48,20 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    Sampler::Sampler(Sampler &&other) noexcept
+    Sampler::Sampler(Sampler&& other) noexcept
         : DeviceObject { std::move(other) }, m_settings { std::exchange(other.m_settings, {}) },
-          m_sampler { std::exchange(other.m_sampler, VK_NULL_HANDLE) } {}
+          m_sampler { std::exchange(other.m_sampler, VK_NULL_HANDLE) } {
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto Sampler::operator=(Sampler &&other) noexcept -> Sampler & {
+    auto Sampler::operator=(Sampler&& other) noexcept -> Sampler& {
         if (&other == this) [[unlikely]]
             return *this;
 
         DeviceObject::operator=(std::move(other));
-        m_settings            = std::exchange(other.m_settings, {});
-        m_sampler             = std::exchange(other.m_sampler, VK_NULL_HANDLE);
+        m_settings = std::exchange(other.m_settings, {});
+        m_sampler  = std::exchange(other.m_sampler, VK_NULL_HANDLE);
 
         return *this;
     }

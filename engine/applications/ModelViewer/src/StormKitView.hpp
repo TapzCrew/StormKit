@@ -16,7 +16,7 @@ class StormKitView: public QQuickItem {
 
   protected:
     auto updatePaintNode(QSGNode *, UpdatePaintNodeData *) -> QSGNode * override;
-    auto geometryChange(const QRectF& newGeometry, const QRectF& oldGeometry) -> void override;
+    // auto geometryChange(const QRectF& newGeometry, const QRectF& oldGeometry) -> void override;
 
   private Q_SLOTS:
     auto invalidateSceneGraph() -> void;

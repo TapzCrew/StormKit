@@ -13,7 +13,7 @@
 #if defined(STORMKIT_BUILD_DEBUG) || defined(STORMKIT_GEN_DOC)
 namespace stormkit::core::details {
     struct AssertFailure {
-        AssertFailure(const char *type, const char *message) {
+        [[noreturn]] AssertFailure(const char *type, const char *message) noexcept {
             std::fprintf(stderr, "%s failure: %s", type, message);
     #ifdef STORMKIT_OS_MACOS
             std::exit(EXIT_FAILURE);
@@ -44,17 +44,15 @@ namespace stormkit::core::details {
                     std::cerr << type " `" #condition "` failed in " << STORMKIT_CURRENT_FILE \
                               << " line " << STORMKIT_CURRENT_LINE << "\n "                   \
                               << STORMKIT_CURRENT_FUNCTION << "\n\t" << message << std::endl; \
-                    stormkit::core::printStacktrace();                                        \
                     std::quick_exit(EXIT_FAILURE);                                            \
                 }                                                                             \
             } while (false)
     #endif
 
-    #define STORMKIT_CONSTEXPR_ASSERT_BASE(condition, type, message)                        \
-        if (std::is_constant_evaluated())                                                   \
-            (!(condition)) ? throw stormkit::core::details::AssertFailure { type, message } \
-                           : void(0);                                                       \
-        else                                                                                \
+    #define STORMKIT_CONSTEXPR_ASSERT_BASE(condition, type, message)             \
+        if constexpr (std::is_constant_evaluated())                              \
+            (!(condition)) ? [] { assert(!#message); }() : static_cast<void>(0); \
+        else                                                                     \
             STORMKIT_ASSERT_BASE(condition, type, message)
 
 /// \brief `STORMKIT_ASSERT` define an assertion, a confition that should be satisfied where it

@@ -17,6 +17,8 @@
 #include <stormkit/gpu/core/Queue.hpp>
 #include <stormkit/gpu/core/WindowSurface.hpp>
 
+#include <atomic>
+
 using namespace stormkit;
 
 ////////////////////////////////////////

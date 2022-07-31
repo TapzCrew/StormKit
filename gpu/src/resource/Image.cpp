@@ -92,18 +92,19 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    Image::Image(const Device &device, const CreateInfo &info, Tag)
+    Image::Image(const Device& device, const CreateInfo& info, Tag)
         : DeviceObject { device }, m_extent { info.extent }, m_format { info.format },
-          m_layers { info.layers }, m_mip_levels { info.mip_levels }, m_type { info.type },
-          m_flags { info.flags }, m_samples { info.samples }, m_usages { info.usages } {
-        m_faces = 1;
+          m_layers { info.layers }, m_faces { 1 }, m_mip_levels { info.mip_levels },
+          m_type { info.type }, m_flags { info.flags }, m_samples { info.samples }, m_usages {
+              info.usages
+          } {
         if (core::checkFlag(m_flags, gpu::ImageCreateFlag::Cube_Compatible)) m_faces = 6u;
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    Image::Image(const Device &device, const CreateInfo &info) : Image { device, info, Tag {} } {
-        const auto &vk = this->device().table();
+    Image::Image(const Device& device, const CreateInfo& info) : Image { device, info, Tag {} } {
+        const auto& vk = this->device().table();
 
         const auto create_info = VkImageCreateInfo {
             .sType         = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
@@ -146,8 +147,8 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    Image::Image(const Device &device,
-                 const core::ExtentU &extent,
+    Image::Image(const Device& device,
+                 const core::ExtentU& extent,
                  gpu::PixelFormat format,
                  VkImage image)
         : Image { device, CreateInfo { extent, format, 1u, 1u }, Tag {} } {
@@ -163,7 +164,7 @@ namespace stormkit::gpu {
                 vmaFreeMemory(device().vmaAllocator(), m_image_memory);
 
             if (m_image != VK_NULL_HANDLE) [[likely]] {
-                const auto &vk = device().table();
+                const auto& vk = device().table();
 
                 vk.vkDestroyImage(device(), m_image, nullptr);
             }
@@ -172,7 +173,7 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    Image::Image(Image &&other) noexcept
+    Image::Image(Image&& other) noexcept
         : DeviceObject { std::move(other) }, m_extent { std::exchange(other.m_extent,
                                                                       { 0, 0, 0 }) },
           m_format { std::exchange(other.m_format, {}) },
@@ -180,39 +181,40 @@ namespace stormkit::gpu {
                                                                                  0) },
           m_mip_levels { std::exchange(other.m_mip_levels, 0) },
           m_type { std::exchange(other.m_type, {}) }, m_flags { std::exchange(other.m_flags, {}) },
-          m_samples { std::exchange(other.m_samples, {}) }, m_usages { std::exchange(other.m_usages,
-                                                                                     {}) },
-          m_image_memory { std::exchange(other.m_image_memory, VK_NULL_HANDLE) },
-          m_image { std::exchange(other.m_image, VK_NULL_HANDLE) }, m_own_image {
+          m_samples { std::exchange(other.m_samples, {}) },
+          m_usages { std::exchange(other.m_usages, {}) }, m_image { std::exchange(other.m_image,
+                                                                                  VK_NULL_HANDLE) },
+          m_image_memory { std::exchange(other.m_image_memory, VK_NULL_HANDLE) }, m_own_image {
               std::exchange(other.m_own_image, true)
-          } {}
+          } {
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto Image::operator=(Image &&other) noexcept -> Image & {
+    auto Image::operator=(Image&& other) noexcept -> Image& {
         if (&other == this) [[unlikely]]
             return *this;
 
         DeviceObject::operator=(std::move(other));
-        m_extent              = std::exchange(other.m_extent, { 0, 0, 0 });
-        m_format              = std::exchange(other.m_format, {});
-        m_layers              = std::exchange(other.m_layers, 0);
-        m_faces               = std::exchange(other.m_faces, 0);
-        m_mip_levels          = std::exchange(other.m_mip_levels, 0);
-        m_type                = std::exchange(other.m_type, {});
-        m_flags               = std::exchange(other.m_flags, {});
-        m_samples             = std::exchange(other.m_samples, {});
-        m_usages              = std::exchange(other.m_usages, {});
-        m_image_memory        = std::exchange(other.m_image_memory, VK_NULL_HANDLE);
-        m_image               = std::exchange(other.m_image, VK_NULL_HANDLE);
-        m_own_image           = std::exchange(other.m_own_image, true);
+        m_extent       = std::exchange(other.m_extent, { 0, 0, 0 });
+        m_format       = std::exchange(other.m_format, {});
+        m_layers       = std::exchange(other.m_layers, 0);
+        m_faces        = std::exchange(other.m_faces, 0);
+        m_mip_levels   = std::exchange(other.m_mip_levels, 0);
+        m_type         = std::exchange(other.m_type, {});
+        m_flags        = std::exchange(other.m_flags, {});
+        m_samples      = std::exchange(other.m_samples, {});
+        m_usages       = std::exchange(other.m_usages, {});
+        m_image_memory = std::exchange(other.m_image_memory, VK_NULL_HANDLE);
+        m_image        = std::exchange(other.m_image, VK_NULL_HANDLE);
+        m_own_image    = std::exchange(other.m_own_image, true);
 
         return *this;
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto Image::loadFromImage(const image::Image &image, bool generate_mips) -> void {
+    auto Image::loadFromImage(const image::Image& image, bool generate_mips) -> void {
         auto staging_buffer = device().createStagingBuffer(image.size());
 
         auto fence = device().createFence();
@@ -231,9 +233,9 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto Image::loadFromImage(const image::Image &image,
-                              CommandBuffer &command_buffer,
-                              Buffer &staging_buffer,
+    auto Image::loadFromImage(const image::Image& image,
+                              CommandBuffer& command_buffer,
+                              Buffer& staging_buffer,
                               core::UInt32 offset,
                               bool generate_mips) -> void {
         STORMKIT_EXPECTS(m_own_image);
@@ -284,8 +286,8 @@ namespace stormkit::gpu {
                                core::UInt32 layers,
                                core::UInt32 faces,
                                core::UInt32 mip_levels,
-                               gpu::CommandBuffer &command_buffer,
-                               gpu::Buffer &buffer,
+                               gpu::CommandBuffer& command_buffer,
+                               gpu::Buffer& buffer,
                                core::UInt32 offset,
                                bool generate_mips) -> void {
         buffer.upload(data);
@@ -365,7 +367,7 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto Image::generateMipmap(CommandBuffer &command_buffer, core::UInt32 mip_levels) -> void {
+    auto Image::generateMipmap(CommandBuffer& command_buffer, core::UInt32 mip_levels) -> void {
         command_buffer.beginDebugRegion("Generate Image mips", core::RGBColorDef::Maroon<float>);
         command_buffer.transitionImageLayout(*this,
                                              ImageLayout::Transfer_Dst_Optimal,
@@ -380,7 +382,7 @@ namespace stormkit::gpu {
                                  ImageSubresourceLayers { .mip_level   = i,
                                                           .layer_count = m_layers * m_faces },
                              .source_offset      = { core::ExtentU {},
-                                                core::ExtentU {
+                                                     core::ExtentU {
                                                     std::max(1u, m_extent.width >> (i - 1u)),
                                                     std::max(1u, m_extent.height >> (i - 1u)),
                                                     std::max(1u, m_extent.depth >> (i - 1u)),

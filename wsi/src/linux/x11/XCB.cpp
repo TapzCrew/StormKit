@@ -2,34 +2,17 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#if defined(STORMKIT_CXX20_MODULES)
-module stormkit.wsi.details.x11.xcb;
+/////////// - STL - ///////////
+#include <iostream>
+#include <memory>
 
-// clang-format off
 /////////// - StormKit::core - ///////////
-import stormkit.core.hashmap;
-import stormkit.core.strings;
+#include <stormkit/core/HashMap.hpp>
+#include <stormkit/core/Strings.hpp>
 
 /////////// - StormKit::wsi - ///////////
-import stormkit.wsi.details.x11.log;
-
-/////////// - STL - ///////////
-import <memory>;
-import <iostream>;
-// clang-format on
-#else
-    /////////// - STL - ///////////
-    #include <iostream>
-    #include <memory>
-
-    /////////// - StormKit::core - ///////////
-    #include <stormkit/core/HashMap.mpp>
-    #include <stormkit/core/Strings.mpp>
-
-    /////////// - StormKit::wsi - ///////////
-    #include "Log.mpp"
-    #include "XCB.mpp"
-#endif
+#include "Log.hpp"
+#include "XCB.hpp"
 
 /////////// - StormKit::core - ///////////
 #include <stormkit/core/AssertMacro.hpp>

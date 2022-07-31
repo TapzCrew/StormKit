@@ -10,14 +10,14 @@
 namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
-    ImageView::ImageView(const Device &device,
-                         const Image &image,
+    ImageView::ImageView(const Device& device,
+                         const Image& image,
                          ImageViewType type,
                          ImageSubresourceRange subresource_range)
         : DeviceObject { device }, m_image { &image }, m_type { type }, m_subresource_range {
               subresource_range
           } {
-        const auto &vk = this->device().table();
+        const auto& vk = this->device().table();
 
         const auto vk_subresource_range = VkImageSubresourceRange {
             .aspectMask     = core::as<VkImageAspectFlags>(m_subresource_range.aspect_mask),
@@ -36,6 +36,8 @@ namespace stormkit::gpu {
 
         const auto create_info = VkImageViewCreateInfo {
             .sType            = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+            .pNext            = nullptr,
+            .flags            = {},
             .image            = *m_image,
             .viewType         = core::as<VkImageViewType>(m_type),
             .format           = core::as<VkFormat>(m_image->format()),
@@ -50,7 +52,7 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     ImageView::~ImageView() {
         if (m_image_view != VK_NULL_HANDLE) [[likely]] {
-            const auto &vk = device().table();
+            const auto& vk = device().table();
 
             vk.vkDestroyImageView(device(), m_image_view, nullptr);
         }
@@ -58,24 +60,25 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    ImageView::ImageView(ImageView &&other) noexcept
+    ImageView::ImageView(ImageView&& other) noexcept
         : DeviceObject { std::move(other) }, m_image { std::exchange(other.m_image, nullptr) },
           m_type { std::exchange(other.m_type, {}) },
           m_subresource_range { std::exchange(other.m_subresource_range, {}) }, m_image_view {
               std::exchange(other.m_image_view, VK_NULL_HANDLE)
-          } {}
+          } {
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto ImageView::operator=(ImageView &&other) noexcept -> ImageView & {
+    auto ImageView::operator=(ImageView&& other) noexcept -> ImageView& {
         if (&other == this) [[unlikely]]
             return *this;
 
         DeviceObject::operator=(std::move(other));
-        m_image               = std::exchange(other.m_image, nullptr);
-        m_type                = std::exchange(other.m_type, {});
-        m_subresource_range   = std::exchange(other.m_subresource_range, {});
-        m_image_view          = std::exchange(other.m_image_view, VK_NULL_HANDLE);
+        m_image             = std::exchange(other.m_image, nullptr);
+        m_type              = std::exchange(other.m_type, {});
+        m_subresource_range = std::exchange(other.m_subresource_range, {});
+        m_image_view        = std::exchange(other.m_image_view, VK_NULL_HANDLE);
 
         return *this;
     }

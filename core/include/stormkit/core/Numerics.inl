@@ -8,44 +8,46 @@ namespace stormkit::core {
     namespace literals {
         /////////////////////////////////////
         /////////////////////////////////////
-        constexpr auto operator""_kb(core::UInt64 x) noexcept -> core::UInt64 {
+        constexpr auto operator""_kb(unsigned long long x) noexcept -> core::UInt64 {
             return 1000ULL * x;
         }
 
         /////////////////////////////////////
         /////////////////////////////////////
-        constexpr auto operator""_mb(core::UInt64 x) noexcept -> core::UInt64 {
+        constexpr auto operator""_mb(unsigned long long x) noexcept -> core::UInt64 {
             return 1000ULL * 1000ULL * x;
         }
 
         /////////////////////////////////////
         /////////////////////////////////////
-        constexpr auto operator""_gb(core::UInt64 x) noexcept -> core::UInt64 {
+        constexpr auto operator""_gb(unsigned long long x) noexcept -> core::UInt64 {
             return 1000ULL * 1000ULL * 1000ULL * x;
         }
 
         /////////////////////////////////////
         /////////////////////////////////////
-        constexpr auto operator""_kib(core::UInt64 x) noexcept -> core::UInt64 {
+        constexpr auto operator""_kib(unsigned long long x) noexcept -> core::UInt64 {
             return 1024ULL * x;
         }
 
         /////////////////////////////////////
         /////////////////////////////////////
-        constexpr auto operator""_mib(core::UInt64 x) noexcept -> core::UInt64 {
+        constexpr auto operator""_mib(unsigned long long x) noexcept -> core::UInt64 {
             return 1024ULL * 1024ULL * x;
         }
 
         /////////////////////////////////////
         /////////////////////////////////////
-        constexpr auto operator""_gib(core::UInt64 x) noexcept -> core::UInt64 {
+        constexpr auto operator""_gib(unsigned long long x) noexcept -> core::UInt64 {
             return 1024ULL * 1000ULL * 1024ULL * x;
         }
     } // namespace literals
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto seed(UInt32 seed) noexcept -> void { details::generator.seed(seed); }
+    inline auto seed(UInt32 seed) noexcept -> void {
+        details::generator.seed(seed);
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
@@ -129,7 +131,7 @@ namespace stormkit::core {
         output.resize(stop - start);
 
         auto i = 0;
-        for (auto &v : output) {
+        for (auto& v : output) {
             v = i * core::as<T>(increment);
             ++i;
         }

@@ -2,14 +2,15 @@ target("stormkit-wsi-linux")
     set_kind("static")
     set_languages("cxxlatest", "clatest")
 
+    add_defines("STORMKIT_BUILD")
+    if is_mode("debug") then
+        add_defines("STORMKIT_BUILD_DEBUG")
+        set_suffixname("-d")
+    end
+
+    add_headerfiles("*.hpp")
     add_headerfiles("*.inl")
     add_files("*.cpp")
-
-    if has_config("enable_cxx20_modules") then
-        add_files("*.mpp")
-    else
-        add_headerfiles("*.mpp")
-    end
 
     add_packages("libxkbcommon", {public = true})
 
@@ -29,5 +30,4 @@ target("stormkit-wsi-linux")
 
     add_cxxflags("-fPIC")
 
-    add_options("enable_cxx20_modules")
     set_group("private-libraries")

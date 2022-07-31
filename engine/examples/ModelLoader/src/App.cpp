@@ -43,7 +43,7 @@ auto App::doInitEngine() -> void {
         std::make_unique<wsi::Window>(WINDOW_TITLE, core::ExtentU { 800u, 600u }, window_style);
 
     m_engine       = std::make_unique<engine::Engine>(*m_window);
-    auto &renderer = m_engine->renderer();
+    auto& renderer = m_engine->renderer();
 
     renderer.setBuildFrameGraphCallback(engine::forwardRenderer(*m_engine));
 }
@@ -51,10 +51,10 @@ auto App::doInitEngine() -> void {
 ////////////////////////////////////////
 ////////////////////////////////////////
 auto App::doInitMesh() -> void {
-    auto &world = m_engine->world();
+    auto& world = m_engine->world();
 
     m_mesh = world.makeEntity();
 
-    auto &mesh_component     = world.addComponent<engine::MeshComponent>(m_mesh);
-    mesh_component.submeshes = { engine::SubMesh { .vertices = { VERTICES } } };
+    auto& mesh_component     = world.addComponent<engine::MeshComponent>(m_mesh);
+    mesh_component.submeshes = { engine::SubMesh { .vertices = { VERTICES }, .indices = {} } };
 }

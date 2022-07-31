@@ -48,17 +48,17 @@ namespace stormkit::core {
     [[nodiscard]] constexpr auto range(T start, T stop, U increment = 1) noexcept -> std::vector<T>;
 
     namespace literals {
-        [[nodiscard]] constexpr auto operator""_kb(core::UInt64 x) noexcept -> core::UInt64;
+        [[nodiscard]] constexpr auto operator""_kb(unsigned long long x) noexcept -> core::UInt64;
 
-        [[nodiscard]] constexpr auto operator""_mb(core::UInt64 x) noexcept -> core::UInt64;
+        [[nodiscard]] constexpr auto operator""_mb(unsigned long long x) noexcept -> core::UInt64;
 
-        [[nodiscard]] constexpr auto operator""_gb(core::UInt64 x) noexcept -> core::UInt64;
+        [[nodiscard]] constexpr auto operator""_gb(unsigned long long x) noexcept -> core::UInt64;
 
-        [[nodiscard]] constexpr auto operator""_kib(core::UInt64 x) noexcept -> core::UInt64;
+        [[nodiscard]] constexpr auto operator""_kib(unsigned long long x) noexcept -> core::UInt64;
 
-        [[nodiscard]] constexpr auto operator""_mib(core::UInt64 x) noexcept -> core::UInt64;
+        [[nodiscard]] constexpr auto operator""_mib(unsigned long long x) noexcept -> core::UInt64;
 
-        [[nodiscard]] constexpr auto operator""_gib(core::UInt64 x) noexcept -> core::UInt64;
+        [[nodiscard]] constexpr auto operator""_gib(unsigned long long x) noexcept -> core::UInt64;
     } // namespace literals
 } // namespace stormkit::core
 

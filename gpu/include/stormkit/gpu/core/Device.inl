@@ -4,11 +4,10 @@
 
 #pragma once
 
-#include "stormkit/core/Memory.hpp"
 namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto Device::waitForFence(const Fence &fence,
+    inline auto Device::waitForFence(const Fence& fence,
                                      std::chrono::milliseconds timeout) const noexcept -> void {
         STORMKIT_EXPECTS(m_device != VK_NULL_HANDLE);
 
@@ -383,7 +382,7 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto Device::graphicsQueue() const noexcept -> const Queue & {
+    inline auto Device::graphicsQueue() const noexcept -> const Queue& {
         STORMKIT_EXPECTS(m_graphics_queue != std::nullopt);
 
         return *m_graphics_queue;
@@ -391,7 +390,7 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto Device::asyncTransfertQueue() const noexcept -> const Queue & {
+    inline auto Device::asyncTransfertQueue() const noexcept -> const Queue& {
         STORMKIT_EXPECTS(m_async_transfert_queue != std::nullopt);
 
         return *m_async_transfert_queue;
@@ -399,7 +398,7 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto Device::asyncComputeQueue() const noexcept -> const Queue & {
+    inline auto Device::asyncComputeQueue() const noexcept -> const Queue& {
         STORMKIT_EXPECTS(m_async_compute_queue != std::nullopt);
 
         return *m_async_compute_queue;
@@ -419,13 +418,15 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto Device::physicalDevice() const noexcept -> const PhysicalDevice & {
+    inline auto Device::physicalDevice() const noexcept -> const PhysicalDevice& {
         return *m_physical_device;
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline Device::operator VkDevice() const noexcept { return vkHandle(); }
+    inline Device::operator VkDevice() const noexcept {
+        return vkHandle();
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
@@ -445,12 +446,14 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto Device::table() const noexcept -> const VolkDeviceTable & { return m_device_table; }
+    inline auto Device::table() const noexcept -> const VolkDeviceTable& {
+        return m_device_table;
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<typename T>
-    auto Device::setObjectName(const T &object, std::string_view name) const -> void {
+    auto Device::setObjectName(const T& object, std::string_view name) const -> void {
         setObjectName(reinterpret_cast<core::UInt64>(object.vkHandle()), T::DEBUG_TYPE, name);
     }
 } // namespace stormkit::gpu

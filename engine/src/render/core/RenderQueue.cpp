@@ -12,8 +12,8 @@
 #include <stormkit/core/Memory.hpp>
 #include <stormkit/core/Types.hpp>
 #include <stormkit/engine/render/core/RenderQueue.hpp>
-#include <stormkit/log/Logger.hpp>
 #include <stormkit/log/LogMacro.hpp>
+#include <stormkit/log/Logger.hpp>
 
 #include <stormkit/core/Numerics.hpp>
 
@@ -59,26 +59,30 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    RenderQueue::RenderQueue(Engine &engine)
+    RenderQueue::RenderQueue(Engine& engine)
         : EngineObject { engine }, m_shader_input { engine,
                                                     VERTEX_CREATE_INFO,
                                                     VERTEX_CREATE_INFO,
                                                     VERTEX_CREATE_INFO,
                                                     VERTEX_CREATE_INFO,
-                                                    INDEX_CREATE_INFO } {}
+                                                    INDEX_CREATE_INFO } {
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    RenderQueue::~RenderQueue() {}
+    RenderQueue::~RenderQueue() {
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    RenderQueue::RenderQueue(RenderQueue &&other) noexcept
-        : RenderQueue(std::move(other), std::lock_guard { other.m_mutex }) {}
+    RenderQueue::RenderQueue(RenderQueue&& other) noexcept
+        : RenderQueue(std::move(other), std::lock_guard { other.m_mutex }) {
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    RenderQueue::RenderQueue(RenderQueue &&other, std::lock_guard<std::mutex> lock) noexcept
+    RenderQueue::RenderQueue(RenderQueue&& other,
+                             [[maybe_unused]] std::lock_guard<std::mutex> lock) noexcept
         : EngineObject { std::move(other) }, m_next_id { std::exchange(other.m_next_id, 0) },
           m_entries { std::move(other.m_entries) },
           m_to_be_added { std::move(other.m_to_be_added) }, m_to_be_removed { std::move(
@@ -86,11 +90,12 @@ namespace stormkit::engine {
           m_shader_input { std::move(other.m_shader_input) }, m_command_buffers { std::move(
                                                                   other.m_command_buffers) },
           m_vertex_buffer_fences { std::move(other.m_vertex_buffer_fences) },
-          m_vertex_staging_buffers { std::move(other.m_vertex_staging_buffers) } {}
+          m_vertex_staging_buffers { std::move(other.m_vertex_staging_buffers) } {
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto RenderQueue::operator=(RenderQueue &&other) noexcept -> RenderQueue & {
+    auto RenderQueue::operator=(RenderQueue&& other) noexcept -> RenderQueue& {
         if (&other == this) [[unlikely]]
             return *this;
 
@@ -99,7 +104,7 @@ namespace stormkit::engine {
 
         std::lock(lock, other_lock);
 
-        EngineObject::operator   =(std::move(other));
+        EngineObject::operator=(std::move(other));
         m_next_id                = std::exchange(other.m_next_id, 0);
         m_entries                = std::move(other.m_entries);
         m_to_be_added            = std::move(other.m_to_be_added);
@@ -112,7 +117,7 @@ namespace stormkit::engine {
         return *this;
     }
 
-    auto RenderQueue::addMesh(const MeshComponent &mesh) -> ID {
+    auto RenderQueue::addMesh(const MeshComponent& mesh) -> ID {
         auto lock = std::lock_guard { m_mutex };
 
         m_to_be_added.emplace_back(m_next_id, mesh);
@@ -128,7 +133,7 @@ namespace stormkit::engine {
 #endif
 
         const auto it =
-            std::ranges::any_of(m_entries, [&](const auto &entry) { return entry.id == id; });
+            std::ranges::any_of(m_entries, [&](const auto& entry) { return entry.id == id; });
 
         if (!it) {
             renderqueue_logger.elog("Trying to remove unknown mesh (ID: {})", id);
@@ -140,21 +145,21 @@ namespace stormkit::engine {
     }
 
     auto RenderQueue::update() -> void {
-        const auto &device = engine().renderer().device();
+        const auto& device = engine().renderer().device();
 
 #ifdef STORMKIT_RENDERER_MULTITHREADED
         auto lock = std::lock_guard { m_mutex };
 
-        auto &thread_pool = m_engine->threadPool();
+        auto& thread_pool = m_engine->threadPool();
 #endif
 
         for (const auto id : m_to_be_removed)
-            const auto _ = std::ranges::remove_if(m_entries, [&](auto &entry) {
+            [[maybe_unused]] const auto _ = std::ranges::remove_if(m_entries, [&](auto& entry) {
                 if (entry.id == id) {
                     entry.id   = INVALID_ID;
                     entry.mesh = nullptr;
 
-                    for (auto &submesh : entry.submeshes) {
+                    for (auto& submesh : entry.submeshes) {
                         if (submesh.positions.block != BlockBuffer::Block::Handle::invalidHandle())
                             [[likely]]
                             m_shader_input.freeBlock(submesh.positions);
@@ -181,17 +186,17 @@ namespace stormkit::engine {
         m_shader_input.defragment();
 
 #ifdef STORMKIT_RENDERER_MULTITHREADED
-        for (auto &future : futures) futures.wait();
+        for (auto& future : futures) futures.wait();
 #endif
 
-        const auto &queue = (device.hasAsyncTransfertQueue()) ? device.asyncTransfertQueue()
+        const auto& queue = (device.hasAsyncTransfertQueue()) ? device.asyncTransfertQueue()
                                                               : device.graphicsQueue();
 
         m_command_buffers = queue.createCommandBuffers(std::size(m_to_be_added));
 
         auto i = 0;
-        for (auto &entry : m_to_be_added) {
-            auto &cmb = m_command_buffers[i++]; // TODO benchmark one big command
+        for (auto& entry : m_to_be_added) {
+            auto& cmb = m_command_buffers[i++]; // TODO benchmark one big command
                                                 // buffer vs multiple command buffer
             device.setObjectName(cmb, "StormKit:CopyVertexData"sv);
 
@@ -200,7 +205,7 @@ namespace stormkit::engine {
 
             entry.submeshes = core::transform(
                 entry.mesh->submeshes,
-                [&](const auto &submesh) -> RenderEntry::SubMesh {
+                [&](const auto& submesh) -> RenderEntry::SubMesh {
                     auto output          = RenderEntry::SubMesh {};
                     output.submesh_index = i++;
 
@@ -225,7 +230,7 @@ namespace stormkit::engine {
                                               std::size(colors) + std::size(uvs) +
                                               std::size(indices);
 
-                    auto &staging_buffer = m_vertex_staging_buffers.emplace_back(
+                    auto& staging_buffer = m_vertex_staging_buffers.emplace_back(
                         device.createStagingBuffer(staging_size));
                     auto staging_data = staging_buffer.map(0u, staging_size);
 
@@ -246,15 +251,15 @@ namespace stormkit::engine {
                     staging_buffer.flush(0, staging_size);
                     staging_buffer.unmap();
 
-                    const auto &positions_block = m_shader_input.getBlock(output.positions);
-                    const auto &normals_block   = m_shader_input.getBlock(output.normals);
-                    const auto &colors_block    = m_shader_input.getBlock(output.colors);
-                    const auto &uvs_block       = m_shader_input.getBlock(output.uvs);
+                    const auto& positions_block = m_shader_input.getBlock(output.positions);
+                    const auto& normals_block   = m_shader_input.getBlock(output.normals);
+                    const auto& colors_block    = m_shader_input.getBlock(output.colors);
+                    const auto& uvs_block       = m_shader_input.getBlock(output.uvs);
 
-                    const auto &positions_buffer = m_shader_input.getBuffer(output.positions);
-                    const auto &normals_buffer   = m_shader_input.getBuffer(output.normals);
-                    const auto &colors_buffer    = m_shader_input.getBuffer(output.colors);
-                    const auto &uvs_buffer       = m_shader_input.getBuffer(output.uvs);
+                    const auto& positions_buffer = m_shader_input.getBuffer(output.positions);
+                    const auto& normals_buffer   = m_shader_input.getBuffer(output.normals);
+                    const auto& colors_buffer    = m_shader_input.getBuffer(output.colors);
+                    const auto& uvs_buffer       = m_shader_input.getBuffer(output.uvs);
 
                     cmb.copyBuffer(staging_buffer,
                                    positions_buffer,
@@ -278,8 +283,8 @@ namespace stormkit::engine {
                                    uvs_block.offset);
 
                     if (!std::empty(indices)) {
-                        const auto &indices_block  = m_shader_input.getBlock(output.indices);
-                        const auto &indices_buffer = m_shader_input.getBuffer(output.indices);
+                        const auto& indices_block  = m_shader_input.getBlock(output.indices);
+                        const auto& indices_buffer = m_shader_input.getBuffer(output.indices);
 
                         cmb.copyBuffer(staging_buffer,
                                        indices_buffer,
@@ -295,11 +300,11 @@ namespace stormkit::engine {
             cmb.endDebugRegion();
             cmb.end();
 
-            auto &fence = m_vertex_buffer_fences.emplace_back(device.createFence());
+            auto& fence = m_vertex_buffer_fences.emplace_back(device.createFence());
             cmb.submit({}, {}, &fence);
         }
 
-        auto first_invalid_entry = std::ranges::find_if(m_entries, [](const auto &entry) {
+        auto first_invalid_entry = std::ranges::find_if(m_entries, [](const auto& entry) {
             return entry.id == INVALID_ID;
         });
 
@@ -322,23 +327,23 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto RenderQueue::draw(gpu::CommandBuffer &cmb) -> void {
+    auto RenderQueue::draw(gpu::CommandBuffer& cmb) -> void {
         if (!std::empty(m_vertex_buffer_fences)) {
-            for (auto &fence : m_vertex_buffer_fences) fence.wait();
+            for (auto& fence : m_vertex_buffer_fences) fence.wait();
 
             m_command_buffers.clear();
             m_vertex_staging_buffers.clear();
             m_vertex_buffer_fences.clear();
         }
 
-        for (const auto &entry : m_entries) {
-            for (const auto &submesh : entry.submeshes) {
-                const auto &_submesh = entry.mesh->submeshes[submesh.submesh_index];
+        for (const auto& entry : m_entries) {
+            for (const auto& submesh : entry.submeshes) {
+                const auto& _submesh = entry.mesh->submeshes[submesh.submesh_index];
 
-                const auto &position_block = m_shader_input.getBlock(submesh.positions);
-                const auto &normal_block   = m_shader_input.getBlock(submesh.normals);
-                const auto &color_block    = m_shader_input.getBlock(submesh.colors);
-                const auto &uv_block       = m_shader_input.getBlock(submesh.uvs);
+                const auto& position_block = m_shader_input.getBlock(submesh.positions);
+                const auto& normal_block   = m_shader_input.getBlock(submesh.normals);
+                const auto& color_block    = m_shader_input.getBlock(submesh.colors);
+                const auto& uv_block       = m_shader_input.getBlock(submesh.uvs);
 
                 auto buffers = core::makeStaticArray(&m_shader_input.getBuffer(submesh.positions),
                                                      &m_shader_input.getBuffer(submesh.normals),
@@ -352,8 +357,8 @@ namespace stormkit::engine {
                 cmb.bindVertexBuffers(buffers, offsets);
 
                 if (submesh.indices.block == BlockBuffer::Block::Handle::invalidHandle()) {
-                    const auto &buffer = m_shader_input.getBuffer(submesh.indices);
-                    const auto &block  = m_shader_input.getBlock(submesh.indices);
+                    const auto& buffer = m_shader_input.getBuffer(submesh.indices);
+                    const auto& block  = m_shader_input.getBlock(submesh.indices);
 
                     cmb.bindIndexBuffer(buffer, block.offset, true);
                     cmb.drawIndexed(core::as<core::UInt32>(std::size(_submesh.indices)));

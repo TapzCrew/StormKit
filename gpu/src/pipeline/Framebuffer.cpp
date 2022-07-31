@@ -12,24 +12,26 @@
 namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
-    Framebuffer::Framebuffer(const RenderPass &render_pass,
-                             const core::ExtentU &extent,
+    Framebuffer::Framebuffer(const RenderPass& render_pass,
+                             const core::ExtentU& extent,
                              std::vector<ImageViewConstRef> attachments)
         : DeviceObject { render_pass.device() }, m_render_pass { &render_pass },
           m_extent { std::move(extent) }, m_attachments { std::move(attachments) } {
-        const auto &vk = this->device().table();
+        const auto& vk = this->device().table();
 
         const auto _attachments = [&] {
             auto v = std::vector<VkImageView> {};
             std::ranges::transform(m_attachments,
                                    std::back_inserter(v),
-                                   [](const auto &a) -> VkImageView { return a.get(); });
+                                   [](const auto& a) -> VkImageView { return a.get(); });
 
             return v;
         }();
 
         const auto create_info =
             VkFramebufferCreateInfo { .sType      = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
+                                      .pNext      = nullptr,
+                                      .flags      = {},
                                       .renderPass = *m_render_pass,
                                       .attachmentCount =
                                           core::as<core::UInt32>(std::size(_attachments)),
@@ -46,7 +48,7 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     Framebuffer::~Framebuffer() {
         if (m_framebuffer != VK_NULL_HANDLE) [[likely]] {
-            const auto &vk = device().table();
+            const auto& vk = device().table();
 
             vk.vkDestroyFramebuffer(device(), m_framebuffer, nullptr);
         }
@@ -54,25 +56,26 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    Framebuffer::Framebuffer(Framebuffer &&other) noexcept
+    Framebuffer::Framebuffer(Framebuffer&& other) noexcept
         : DeviceObject { std::move(other) }, m_render_pass { std::exchange(other.m_render_pass,
                                                                            nullptr) },
           m_extent { std::exchange(other.m_extent, { 0, 0 }) },
           m_attachments { std::exchange(other.m_attachments, {}) }, m_framebuffer {
               std::exchange(other.m_framebuffer, VK_NULL_HANDLE)
-          } {}
+          } {
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto Framebuffer::operator=(Framebuffer &&other) noexcept -> Framebuffer & {
+    auto Framebuffer::operator=(Framebuffer&& other) noexcept -> Framebuffer& {
         if (&other == this) [[unlikely]]
             return *this;
 
         DeviceObject::operator=(std::move(other));
-        m_render_pass         = std::exchange(other.m_render_pass, nullptr);
-        m_extent              = std::exchange(other.m_extent, { 0, 0 });
-        m_attachments         = std::exchange(other.m_attachments, {});
-        m_framebuffer         = std::exchange(other.m_framebuffer, VK_NULL_HANDLE);
+        m_render_pass = std::exchange(other.m_render_pass, nullptr);
+        m_extent      = std::exchange(other.m_extent, { 0, 0 });
+        m_attachments = std::exchange(other.m_attachments, {});
+        m_framebuffer = std::exchange(other.m_framebuffer, VK_NULL_HANDLE);
 
         return *this;
     }

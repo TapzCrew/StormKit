@@ -7,38 +7,50 @@
 namespace stormkit::wsi::details::x11 {
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto WindowImpl::videoSettings() const noexcept -> const VideoSettings & {
-        return m_video_settings;
+    inline auto WindowImpl::title() const noexcept -> const std::string& {
+        return m_title;
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto WindowImpl::title() const noexcept -> std::string_view { return m_title; }
+    inline auto WindowImpl::mouseLocked() const noexcept -> bool {
+        return m_mouse_locked;
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto WindowImpl::mouseLocked() const noexcept -> bool { return m_mouse_locked; }
+    inline auto WindowImpl::mouseHidden() const noexcept -> bool {
+        return m_mouse_hided;
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto WindowImpl::fullscreen() const noexcept -> bool { return m_fullscreen; }
+    inline auto WindowImpl::fullscreen() const noexcept -> bool {
+        return m_fullscreen;
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto WindowImpl::isOpen() const noexcept -> bool { return m_open; }
+    inline auto WindowImpl::isOpen() const noexcept -> bool {
+        return m_open;
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto WindowImpl::visible() const noexcept -> bool { return m_visible; }
+    inline auto WindowImpl::visible() const noexcept -> bool {
+        return m_visible;
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto WindowImpl::xcbHandles() const noexcept -> const Handles & { return m_handles; }
+    inline auto WindowImpl::xcbHandles() const noexcept -> const Handles& {
+        return m_handles;
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto WindowImpl::size() const noexcept -> const core::ExtentU & {
-        return m_video_settings.size;
+    inline auto WindowImpl::extent() const noexcept -> const core::ExtentU& {
+        return m_extent;
     }
 
     /////////////////////////////////////

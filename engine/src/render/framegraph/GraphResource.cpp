@@ -9,7 +9,7 @@ namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     GraphResourceBase::GraphResourceBase(std::string name, GraphID creator)
-        : m_creator { creator }, m_name { std::move(name) } {
+        : m_name { std::move(name) }, m_creator { creator } {
         static GraphID s_next_id = 0;
 
         m_id = s_next_id++;
@@ -21,11 +21,11 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    GraphResourceBase::GraphResourceBase(GraphResourceBase &&other) noexcept = default;
+    GraphResourceBase::GraphResourceBase(GraphResourceBase&& other) noexcept = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto GraphResourceBase::operator=(GraphResourceBase &&other) noexcept
-        -> GraphResourceBase      & = default;
+    auto GraphResourceBase::operator=(GraphResourceBase&& other) noexcept
+        -> GraphResourceBase& = default;
 
 } // namespace stormkit::engine

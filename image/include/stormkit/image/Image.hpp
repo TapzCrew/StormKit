@@ -97,7 +97,10 @@ namespace stormkit::image {
             Unknown    = 255
         };
 
-        enum class CodecArgs : std::uint8_t { Binary = 0, Ascii = 1 };
+        enum class CodecArgs : std::uint8_t {
+            Binary = 0,
+            Ascii  = 1
+        };
 
         struct Error {
             enum class Reason {
@@ -120,21 +123,21 @@ namespace stormkit::image {
             core::UInt32 mip_levels        = 1u;
             Format format                  = Format::Undefined;
 
-            core::ByteArray data;
+            core::ByteArray data = {};
         };
 
         Image() noexcept;
-        explicit Image(ImageData &&data) noexcept;
-        Image(const core::ExtentU &extent, Format format) noexcept;
-        Image(const std::filesystem::path &filepath, Codec codec = Codec::Autodetect) noexcept;
+        explicit Image(ImageData&& data) noexcept;
+        Image(const core::ExtentU& extent, Format format) noexcept;
+        Image(const std::filesystem::path& filepath, Codec codec = Codec::Autodetect) noexcept;
         Image(core::ByteConstSpan data, Codec codec = Codec::Autodetect) noexcept;
         ~Image() noexcept;
 
-        Image(const Image &rhs) noexcept;
-        auto operator=(const Image &rhs) noexcept -> Image &;
+        Image(const Image& rhs) noexcept;
+        auto operator=(const Image& rhs) noexcept -> Image&;
 
-        Image(Image &&rhs) noexcept;
-        auto operator=(Image &&rhs) noexcept -> Image &;
+        Image(Image&& rhs) noexcept;
+        auto operator=(Image&& rhs) noexcept -> Image&;
 
         [[nodiscard]] auto loadFromFile(std::filesystem::path filepath,
                                         Codec codec = Codec::Autodetect) noexcept
@@ -154,7 +157,7 @@ namespace stormkit::image {
         auto create(core::ExtentU extent, Format format) noexcept -> void;
 
         [[nodiscard]] auto toFormat(Format format) const noexcept -> Image;
-        [[nodiscard]] auto scale(const core::ExtentU &scale_to) const noexcept -> Image;
+        [[nodiscard]] auto scale(const core::ExtentU& scale_to) const noexcept -> Image;
         [[nodiscard]] auto flipX() const noexcept -> Image;
         [[nodiscard]] auto flipY() const noexcept -> Image;
         [[nodiscard]] auto flipZ() const noexcept -> Image;
@@ -230,7 +233,7 @@ namespace stormkit::image {
         [[nodiscard]] auto
             cend(core::UInt32 layer, core::UInt32 face, core::UInt32 level) const noexcept;
 
-        [[nodiscard]] auto imageData() const noexcept -> const ImageData &;
+        [[nodiscard]] auto imageData() const noexcept -> const ImageData&;
 
       private:
         ImageData m_data;

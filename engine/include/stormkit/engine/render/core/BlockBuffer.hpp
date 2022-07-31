@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <list>
+
 #include <stormkit/core/PlatformMacro.hpp>
 
 #include <stormkit/core/Types.hpp>
@@ -29,14 +31,14 @@ namespace stormkit::engine {
             Handle handle;
         };
 
-        BlockBuffer(Engine &engine, const gpu::Buffer::CreateInfo &info);
+        BlockBuffer(Engine& engine, const gpu::Buffer::CreateInfo& info);
         ~BlockBuffer();
 
-        BlockBuffer(const BlockBuffer &) = delete;
-        auto operator=(const BlockBuffer &) -> BlockBuffer & = delete;
+        BlockBuffer(const BlockBuffer&)                    = delete;
+        auto operator=(const BlockBuffer&) -> BlockBuffer& = delete;
 
-        BlockBuffer(BlockBuffer &&) noexcept;
-        auto operator=(BlockBuffer &&) noexcept -> BlockBuffer &;
+        BlockBuffer(BlockBuffer&&) noexcept;
+        auto operator=(BlockBuffer&&) noexcept -> BlockBuffer&;
 
         [[nodiscard]] auto size() const noexcept -> core::USize;
         [[nodiscard]] auto freeSpace() const noexcept -> core::USize;
@@ -44,11 +46,11 @@ namespace stormkit::engine {
         [[nodiscard]] auto requestBlock(core::USize size) noexcept -> Block::Handle;
         auto freeBlock(Block::Handle handle) -> void;
 
-        [[nodiscard]] auto getBlock(Block::Handle handle) -> const Block &;
+        [[nodiscard]] auto getBlock(Block::Handle handle) -> const Block&;
 
         auto defragment() noexcept -> void;
 
-        [[nodiscard]] auto gpuBuffer() const noexcept -> const gpu::Buffer &;
+        [[nodiscard]] auto gpuBuffer() const noexcept -> const gpu::Buffer&;
 
       private:
         std::list<Block> m_blocks;

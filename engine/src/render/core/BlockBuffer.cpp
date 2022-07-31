@@ -12,10 +12,10 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    BlockBuffer::BlockBuffer(Engine &engine, const gpu::Buffer::CreateInfo &info)
-        : EngineObject { engine }, m_size { info.size },
-          m_free_space { info.size }, m_buffer { engine.renderer().device().createBuffer(info) },
-          m_next_handle { 1u }, m_blocks { { 0, info.size, true, 0u } } {
+    BlockBuffer::BlockBuffer(Engine& engine, const gpu::Buffer::CreateInfo& info)
+        : EngineObject { engine }, m_blocks { { 0, info.size, true, 0u } },
+          m_buffer { engine.renderer().device().createBuffer(info) }, m_size { info.size },
+          m_free_space { info.size }, m_next_handle { 1u } {
         STORMKIT_EXPECTS(m_size > 0u);
     }
 
@@ -25,11 +25,11 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    BlockBuffer::BlockBuffer(BlockBuffer &&other) noexcept = default;
+    BlockBuffer::BlockBuffer(BlockBuffer&& other) noexcept = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto BlockBuffer::operator=(BlockBuffer &&other) noexcept -> BlockBuffer & = default;
+    auto BlockBuffer::operator=(BlockBuffer&& other) noexcept -> BlockBuffer& = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
@@ -42,7 +42,7 @@ namespace stormkit::engine {
 
         if (auto it =
                 std::ranges::find_if(m_blocks,
-                                     [size](const auto &b) { return b.free && b.size >= size; });
+                                     [size](const auto& b) { return b.free && b.size >= size; });
             it != std::ranges::end(m_blocks)) {
             id       = it->handle;
             it->free = false;
@@ -69,7 +69,7 @@ namespace stormkit::engine {
     auto BlockBuffer::freeBlock(Block::Handle handle) -> void {
         STORMKIT_EXPECTS(handle != Block::Handle::invalidHandle());
         auto it =
-            std::ranges::find_if(m_blocks, [handle](const auto &b) { return b.handle == handle; });
+            std::ranges::find_if(m_blocks, [handle](const auto& b) { return b.handle == handle; });
 
         STORMKIT_ENSURES(it != std::ranges::cend(m_blocks));
 

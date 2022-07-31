@@ -10,16 +10,20 @@
 namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
-    Buffer::Buffer(const Device &device, const CreateInfo &info, bool persistently_mapped)
+    Buffer::Buffer(const Device& device, const CreateInfo& info, bool persistently_mapped)
         : DeviceObject { device }, m_usages { info.usages }, m_size { info.size },
           m_is_persistently_mapped { persistently_mapped } {
-        const auto &vk = this->device().table();
+        const auto& vk = this->device().table();
 
         const auto create_info =
-            VkBufferCreateInfo { .sType       = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
-                                 .size        = m_size,
-                                 .usage       = core::as<VkBufferUsageFlags>(m_usages),
-                                 .sharingMode = VK_SHARING_MODE_EXCLUSIVE };
+            VkBufferCreateInfo { .sType                 = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+                                 .pNext                 = nullptr,
+                                 .flags                 = {},
+                                 .size                  = m_size,
+                                 .usage                 = core::as<VkBufferUsageFlags>(m_usages),
+                                 .sharingMode           = VK_SHARING_MODE_EXCLUSIVE,
+                                 .queueFamilyIndexCount = 0,
+                                 .pQueueFamilyIndices   = nullptr };
 
         CHECK_VK_ERROR(vk.vkCreateBuffer(this->device(), &create_info, nullptr, &m_buffer));
 
@@ -53,7 +57,7 @@ namespace stormkit::gpu {
             vmaFreeMemory(device().vmaAllocator(), m_buffer_memory);
 
         if (m_buffer != VK_NULL_HANDLE) [[likely]] {
-            const auto &vk = device().table();
+            const auto& vk = device().table();
 
             vk.vkDestroyBuffer(device(), m_buffer, nullptr);
         }
@@ -61,22 +65,23 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    Buffer::Buffer(Buffer &&other) noexcept
+    Buffer::Buffer(Buffer&& other) noexcept
         : DeviceObject { std::move(other) }, m_usages { std::exchange(other.m_usages, {}) },
           m_size { std::exchange(other.m_size, 0) },
           m_is_persistently_mapped { std::exchange(other.m_is_persistently_mapped, false) },
           m_mapped_pointer { std::exchange(other.m_mapped_pointer, nullptr) },
           m_buffer { std::exchange(other.m_buffer, VK_NULL_HANDLE) }, m_buffer_memory {
               std::exchange(other.m_buffer_memory, VK_NULL_HANDLE)
-          } {}
+          } {
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto Buffer::operator=(Buffer &&other) noexcept -> Buffer & {
+    auto Buffer::operator=(Buffer&& other) noexcept -> Buffer& {
         if (&other == this) [[unlikely]]
             return *this;
 
-        DeviceObject::operator   =(std::move(other));
+        DeviceObject::operator=(std::move(other));
         m_usages                 = std::exchange(other.m_usages, {});
         m_size                   = std::exchange(other.m_size, 0);
         m_is_persistently_mapped = std::exchange(other.m_is_persistently_mapped, false);
@@ -145,8 +150,8 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     auto Buffer::findMemoryType(core::UInt32 type_filter,
                                 VkMemoryPropertyFlags properties,
-                                const VkPhysicalDeviceMemoryProperties &mem_properties,
-                                [[maybe_unused]] const VkMemoryRequirements &mem_requirements)
+                                const VkPhysicalDeviceMemoryProperties& mem_properties,
+                                [[maybe_unused]] const VkMemoryRequirements& mem_requirements)
         -> core::UInt32 {
         for (auto i : core::range(mem_properties.memoryTypeCount)) {
             if ((type_filter & (1 << i)) &&

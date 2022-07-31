@@ -24,6 +24,7 @@ namespace stormkit::gpu {
 
         const auto create_info = VkDescriptorPoolCreateInfo {
             .sType         = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+            .pNext         = nullptr,
             .flags         = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT,
             .maxSets       = max_sets,
             .poolSizeCount = core::as<core::UInt32>(std::size(_sizes)),
@@ -128,6 +129,7 @@ namespace stormkit::gpu {
 
         const auto allocate_info =
             VkDescriptorSetAllocateInfo { .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+                                          .pNext = nullptr,
                                           .descriptorPool     = m_descriptor_pool,
                                           .descriptorSetCount = core::as<core::UInt32>(count),
                                           .pSetLayouts        = std::data(layouts) };

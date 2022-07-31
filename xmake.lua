@@ -171,6 +171,10 @@ package("StormKit")
         if not has_config("enable_cxx20_modules") then
             add_cxxflags("/experimental:module-")
         end
+    else
+        add_cxxflags("-std=c++2b")
+        add_links("stdc++_libbacktrace")
+        add_cxxflags("-Wno-missing-field-initializers")
     end
 
     if has_config("unity_build") then

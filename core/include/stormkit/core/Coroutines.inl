@@ -61,10 +61,14 @@ namespace stormkit::core {
             GeneratorIterator(GeneratorIterator&&) noexcept;
             auto operator=(GeneratorIterator&&) noexcept -> GeneratorIterator&;
 
-            friend auto operator==(const GeneratorIterator&, GeneratorSentinel) noexcept -> bool;
-            friend auto operator!=(const GeneratorIterator&, GeneratorSentinel) noexcept -> bool;
-            friend auto operator==(GeneratorSentinel, const GeneratorIterator&) noexcept -> bool;
-            friend auto operator!=(GeneratorSentinel, const GeneratorIterator&) noexcept -> bool;
+            template<typename U>
+            friend auto operator==(const GeneratorIterator<U>&, GeneratorSentinel) noexcept -> bool;
+            template<typename U>
+            friend auto operator!=(const GeneratorIterator<U>&, GeneratorSentinel) noexcept -> bool;
+            template<typename U>
+            friend auto operator==(GeneratorSentinel, const GeneratorIterator<U>&) noexcept -> bool;
+            template<typename U>
+            friend auto operator!=(GeneratorSentinel, const GeneratorIterator<U>&) noexcept -> bool;
 
             auto operator++() -> GeneratorIterator&;
 

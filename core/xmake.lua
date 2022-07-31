@@ -39,7 +39,6 @@ target("stormkit-core")
     if is_plat("linux") or is_plat("macosx") then       add_files("src/posix/*.cpp")
     elseif is_plat("windows") then add_files("src/win32/*.cpp") end
 
-
     add_packages("glm", "robin-hood-hashing", "frozen", "backward-cpp", { public = true })
 
     if not is_plat("windows") then

@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "Memory.hpp"
+
 namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
@@ -188,16 +190,17 @@ namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
     template<typename T, typename... Args>
-        requires((core::Is<T, Args> && ...) || (std::convertible_to<T, Args> && ...))
-    constexpr auto makeStaticArray(T&& first, Args&&...args) noexcept {
+    requires((core::Is<T, Args> && ...) ||
+             (std::convertible_to<T, Args> &&
+              ...)) constexpr auto makeStaticArray(T&& first, Args&&...args) noexcept {
         return std::array { std::forward<T>(first), static_cast<T>(std::forward<Args>(args))... };
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<typename T, typename... Args>
-        requires((core::Is<T, Args> && ...) || (std::convertible_to<T, Args> && ...))
-    auto makeArray(T&& first, Args&&...args) {
+    requires((core::Is<T, Args> && ...) ||
+             (std::convertible_to<T, Args> && ...)) auto makeArray(T&& first, Args&&...args) {
         return std::vector { std::forward<T>(first), static_cast<T>(std::forward<Args>(args))... };
     }
 

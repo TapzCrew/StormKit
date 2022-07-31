@@ -2,28 +2,14 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-module;
-
 #pragma once
 
+/////////// - StormKit::log - ///////////
 #include <stormkit/log/LogMacro.hpp>
 
-#if defined(STORMKIT_CXX20_MODULES)
-module stormkit.wsi.details.x11.log;
-
 /////////// - StormKit::log - ///////////
-import stormkit.log.loghandler;
+#include <stormkit/log/Logger.hpp>
 
-export {
-#else
-    /////////// - StormKit::log - ///////////
-    #include <stormkit/log/LogHandler.mpp>
-#endif
-
-    namespace stormkit::wsi::details {
-        LOGGER("StormKit.Wsi.Details");
-    } // namespace stormkit::wsi::details
-
-#if defined(STORMKIT_CXX20_MODULES)
-}
-#endif
+namespace stormkit::wsi::details {
+    LOGGER("StormKit.Wsi.Linux.Details");
+} // namespace stormkit::wsi::details

@@ -28,7 +28,8 @@
 namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
-    FrameGraphBuilder::FrameGraphBuilder(Engine &engine) : EngineObject { engine } {}
+    FrameGraphBuilder::FrameGraphBuilder(Engine& engine) : EngineObject { engine } {
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
@@ -36,12 +37,12 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    FrameGraphBuilder::FrameGraphBuilder(FrameGraphBuilder &&other) noexcept = default;
+    FrameGraphBuilder::FrameGraphBuilder(FrameGraphBuilder&& other) noexcept = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto FrameGraphBuilder::operator=(FrameGraphBuilder &&other) noexcept
-        -> FrameGraphBuilder      & = default;
+    auto FrameGraphBuilder::operator=(FrameGraphBuilder&& other) noexcept
+        -> FrameGraphBuilder& = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
@@ -54,13 +55,13 @@ namespace stormkit::engine {
     /////////////////////////////////////
     auto FrameGraphBuilder::bake() -> void {
 #ifdef STORMKIT_RENDERER_MULTITHREADED
-        auto &thread_pool = engine().threadPool();
+        auto& thread_pool = engine().threadPool();
         m_bake_future     = thread_pool.postTask<void>([this]() {
 #endif
-            for (auto &task : m_tasks)
+            for (auto& task : m_tasks)
                 task->m_ref_count = std::size(task->creates()) + std::size(task->writes());
 
-            for (auto &resource : m_resources)
+            for (auto& resource : m_resources)
                 resource->m_ref_count = std::size(resource->readers());
 
             cullUnreferencedResources();
@@ -96,7 +97,7 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto FrameGraphBuilder::prepareTask(GraphTaskBase &task) noexcept -> void {
+    auto FrameGraphBuilder::prepareTask(GraphTaskBase& task) noexcept -> void {
         auto task_builder = GraphTaskBuilder { task, *this };
         task.setup(task_builder);
     }
@@ -105,7 +106,7 @@ namespace stormkit::engine {
     /////////////////////////////////////
     auto FrameGraphBuilder::cullUnreferencedResources() noexcept -> void {
         auto unreferenced_resources = std::stack<GraphResourceBase *> {};
-        for (auto &resource : m_resources)
+        for (auto& resource : m_resources)
             if (resource->refCount() == 0 && resource->transient())
                 unreferenced_resources.push(resource.get());
 
@@ -113,12 +114,12 @@ namespace stormkit::engine {
             auto resource = unreferenced_resources.top();
             unreferenced_resources.pop();
 
-            auto &creator = getTask(resource->creator());
+            auto& creator = getTask(resource->creator());
             if (creator.refCount() > 0) --creator.m_ref_count;
 
             if (creator.m_ref_count == 0 && !creator.cullImune()) {
                 for (const auto id : creator.reads()) {
-                    auto &read_resource = getResource(id);
+                    auto& read_resource = getResource(id);
 
                     if (read_resource.refCount() > 0) --read_resource.m_ref_count;
 
@@ -128,13 +129,13 @@ namespace stormkit::engine {
             }
 
             for (const auto id : creator.writes()) {
-                auto &writer = getTask(id);
+                auto& writer = getTask(id);
 
                 if (writer.refCount() > 0) --writer.m_ref_count;
 
                 if (writer.refCount() == 0 && !writer.cullImune()) {
                     for (const auto _id : writer.reads()) {
-                        auto &read_resource = getResource(_id);
+                        auto& read_resource = getResource(_id);
 
                         if (read_resource.refCount() > 0) --read_resource.m_ref_count;
 
@@ -152,8 +153,8 @@ namespace stormkit::engine {
         auto layouts              = core::HashMap<GraphID, gpu::ImageLayout> {};
         m_preprocessed_framegraph = core::transformIf(
             m_tasks,
-            [](const auto &task) { return !(task->refCount() == 0 && !task->cullImune()); },
-            [&, this](const auto &task) {
+            [](const auto& task) { return !(task->refCount() == 0 && !task->cullImune()); },
+            [&, this](const auto& task) {
                 return Pass { .id          = task->id(),
                               .description = buildRenderPassPhysicalDescription(*task, layouts),
                               .name        = task->name(),
@@ -164,19 +165,19 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto FrameGraphBuilder::buildImagePhysicalDescriptions(const GraphTaskBase &task) noexcept
+    auto FrameGraphBuilder::buildImagePhysicalDescriptions(const GraphTaskBase& task) noexcept
         -> std::vector<ImageInfo> {
         const auto images = core::transformIf(
             task.creates(),
             [this](const auto resource_id) {
-                const auto &_resource = getResource(resource_id);
+                const auto& _resource = getResource(resource_id);
 
                 return _resource.transient() && core::is<const GraphImage>(_resource);
             },
             [this](const auto resource_id) { return &getResource<ImageDescription>(resource_id); });
 
-        return core::transform(images, [](const auto &resource) {
-            const auto &description = resource->description();
+        return core::transform(images, [](const auto& resource) {
+            const auto& description = resource->description();
 
             auto usages = gpu::ImageUsageFlag::Transfert_Src;
 
@@ -204,12 +205,12 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto FrameGraphBuilder::buildBufferPhysicalDescriptions(const GraphTaskBase &task) noexcept
+    auto FrameGraphBuilder::buildBufferPhysicalDescriptions(const GraphTaskBase& task) noexcept
         -> std::vector<BufferInfo> {
         const auto buffers = core::transformIf(
             task.creates(),
             [this](const auto resource_id) {
-                const auto &_resource = getResource(resource_id);
+                const auto& _resource = getResource(resource_id);
 
                 return _resource.transient() && core::is<const GraphBuffer>(_resource);
             },
@@ -217,8 +218,8 @@ namespace stormkit::engine {
                 return &getResource<BufferDescription>(resource_id);
             });
 
-        return core::transform(buffers, [this](const auto &resource) {
-            const auto &description = resource->description();
+        return core::transform(buffers, [this](const auto& resource) {
+            const auto& description = resource->description();
 
             auto usages = gpu::BufferUsageFlag::Transfert_Src | gpu::BufferUsageFlag::Storage;
 
@@ -234,19 +235,17 @@ namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     auto FrameGraphBuilder::buildRenderPassPhysicalDescription(
-        const GraphTaskBase &task,
-        core::HashMap<GraphID, gpu::ImageLayout> &layouts) noexcept -> gpu::RenderPassDescription {
-        using AttachmentDescriptionPtr = gpu::AttachmentDescription *;
-
+        const GraphTaskBase& task,
+        core::HashMap<GraphID, gpu::ImageLayout>& layouts) noexcept -> gpu::RenderPassDescription {
         // auto depth_stencil = AttachmentDescriptionPtr { nullptr };
         auto output = gpu::RenderPassDescription {};
 
         auto creates = core::copyIf(task.creates(), [this](const auto id) noexcept {
-            const auto &resource = getResource(id);
+            const auto& resource = getResource(id);
             return core::is<GraphImage>(resource);
         });
         auto reads   = core::copyIf(task.reads(), [this](const auto id) noexcept {
-            const auto &resource = getResource(id);
+            const auto  &resource = getResource(id);
             return core::is<GraphImage>(resource);
         });
         auto writes  = core::copyIf(task.writes(), [this](const auto id) noexcept {
@@ -255,8 +254,8 @@ namespace stormkit::engine {
         });
 
         output.attachments = core::transform(creates, [&, this](const auto id) noexcept {
-            const auto &resource    = getResource<ImageDescription>(id);
-            const auto &description = resource.description();
+            const auto& resource    = getResource<ImageDescription>(id);
+            const auto& description = resource.description();
 
             auto attachment_description = gpu::AttachmentDescription {
                 .format = description.format,
@@ -285,8 +284,8 @@ namespace stormkit::engine {
         std::ranges::transform(reads,
                                std::back_inserter(output.attachments),
                                [&, this](const auto id) {
-                                   const auto &resource    = getResource<ImageDescription>(id);
-                                   const auto &description = resource.description();
+                                   const auto& resource    = getResource<ImageDescription>(id);
+                                   const auto& description = resource.description();
 
                                    auto attachment_description = gpu::AttachmentDescription {
                                        .format = description.format,
@@ -330,8 +329,8 @@ namespace stormkit::engine {
         std::ranges::transform(writes,
                                std::back_inserter(output.attachments),
                                [&, this](const auto id) {
-                                   const auto &resource    = getResource<ImageDescription>(id);
-                                   const auto &description = resource.description();
+                                   const auto& resource    = getResource<ImageDescription>(id);
+                                   const auto& description = resource.description();
 
                                    auto attachment_description = gpu::AttachmentDescription {
                                        .format = description.format,
@@ -365,7 +364,7 @@ namespace stormkit::engine {
                                              ? gpu::PipelineBindPoint::Graphics
                                              : gpu::PipelineBindPoint::Compute,
                            .attachment_refs =
-                               core::transform(output.attachments, [&i](const auto &attachment) {
+                               core::transform(output.attachments, [&i](const auto& attachment) {
                                    return gpu::Subpass::Ref { .attachment_id = i++,
                                                               .layout =
                                                                   attachment.destination_layout };
@@ -380,22 +379,22 @@ namespace stormkit::engine {
 
         auto output = Data {};
 
-        const auto &device   = engine().renderer().device();
-        auto &graphics_queue = device.graphicsQueue();
-        auto &compute_queue  = graphics_queue;
+        const auto& device   = engine().renderer().device();
+        auto& graphics_queue = device.graphicsQueue();
+        auto& compute_queue  = graphics_queue;
 
 #ifdef STORMKIT_RENDERER_MULTITHREADED
-        auto &thread_pool = engine().threadPool();
+        auto& thread_pool = engine().threadPool();
 
         auto buffer_mutex         = std::mutex {};
         auto image_mutex          = std::mutex {};
         auto graphics_queue_mutex = std::mutex {};
-        auto &compute_queue_mutex = graphics_queue_mutex;
+        auto& compute_queue_mutex = graphics_queue_mutex;
 
-    #define LOCK_BUFFER LOCK(buffer_mutex)
-    #define LOCK_IMAGE LOCK(image_mutex)
+    #define LOCK_BUFFER         LOCK(buffer_mutex)
+    #define LOCK_IMAGE          LOCK(image_mutex)
     #define LOCK_GRAPHICS_QUEUE LOCK(graphics_queue_mutex)
-    #define LOCK_COMPUTE_QUEUE LOCK(compute_queue_mutex)
+    #define LOCK_COMPUTE_QUEUE  LOCK(compute_queue_mutex)
 
         auto future = core::parallelTransform(
             thread_pool,
@@ -409,28 +408,28 @@ namespace stormkit::engine {
         output.tasks = core::transform(
 #endif
             m_preprocessed_framegraph,
-            [&](const auto &pass) {
+            [&](const auto& pass) {
                 auto task = Data::Task {};
                 task.id   = pass.id;
 
-                for (const auto &info : pass.buffers) {
+                for (const auto& info : pass.buffers) {
                     LOCK_BUFFER
-                    auto &buffer =
+                    auto& buffer =
                         output.buffers.emplace_back(device.createBuffer(info.create_info));
                     device.setObjectName(buffer, core::format("FrameGraph:{}", info.name));
                 }
 
                 auto extent      = core::ExtentU {};
                 auto attachments = std::vector<gpu::ImageViewConstRef> {};
-                for (const auto &info : pass.images) {
+                for (const auto& info : pass.images) {
                     LOCK_BUFFER
 
                     extent.width  = std::max(info.create_info.extent.width, extent.width);
                     extent.height = std::max(info.create_info.extent.height, extent.height);
 
-                    auto &image = output.images.emplace_back(device.createImage(info.create_info));
+                    auto& image = output.images.emplace_back(device.createImage(info.create_info));
                     device.setObjectName(image, core::format("FrameGraph:{}", info.name));
-                    auto &image_view = output.image_views.emplace_back(image.createView());
+                    auto& image_view = output.image_views.emplace_back(image.createView());
                     device.setObjectName(image_view, core::format("FrameGraph:{}View", info.name));
 
                     attachments.emplace_back(std::cref(image_view));
@@ -462,7 +461,7 @@ namespace stormkit::engine {
                 device.setObjectName(*task.commandbuffer,
                                      core::format("FrameGraph:{}:CommandBuffer", pass.name));
 
-                auto &graph_task = getTask(pass.id);
+                auto& graph_task = getTask(pass.id);
 
                 task.commandbuffer->begin(false,
                                           gpu::InheritanceInfo { task.renderpass.get(),

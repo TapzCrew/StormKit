@@ -2,18 +2,14 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#if defined(STORMKIT_CXX20_MODULES)
-module stormkitwindow - details.wayland.callbacks;
+/////////// - StormKit::core - ///////////
+#include <stormkit/core/Math.hpp>
+#include <stormkit/core/Types.hpp>
 
 /////////// - StormKit::wsi - ///////////
-import stormkit.wsi.details.wayland.log;
-import stormkit.wsi.details.wayland.windowimpl;
-#else
-    /////////// - StormKit::wsi - ///////////
-    #include "Callbacks.mpp"
-    #include "Log.mpp"
-    #include "WindowImpl.mpp"
-#endif
+#include "Callbacks.hpp"
+#include "Log.hpp"
+#include "WindowImpl.hpp"
 
 namespace stormkit::wsi::details::wayland {
     /////////////////////////////////////
@@ -170,10 +166,12 @@ namespace stormkit::wsi::details::wayland {
                                    core::Int32 delay) noexcept -> void;
 
     static const auto stormkit_output_listener =
-        wl_output_listener { .geometry = outputGeometryHandler,
-                             .mode     = outputModeHandler,
-                             .done     = outputDoneHandler,
-                             .scale    = outputScaleHandler };
+        wl_output_listener { .geometry    = outputGeometryHandler,
+                             .mode        = outputModeHandler,
+                             .done        = outputDoneHandler,
+                             .scale       = outputScaleHandler,
+                             .name        = nullptr,
+                             .description = nullptr };
 
     static const auto stormkit_seat_listener =
         wl_seat_listener { .capabilities = seatCapabilitiesHandler, .name = seatNameHandler };
@@ -187,7 +185,8 @@ namespace stormkit::wsi::details::wayland {
                               .frame         = pointerFrameHandler,
                               .axis_source   = pointerAxisSourceHandler,
                               .axis_stop     = pointerAxisStopHandler,
-                              .axis_discrete = pointerAxisDiscreteHandler };
+                              .axis_discrete = pointerAxisDiscreteHandler,
+                              .axis_value120 = nullptr };
 
     static const auto stormkit_keyboard_listener =
         wl_keyboard_listener { .keymap      = keyboardKeymapHandler,
@@ -206,7 +205,7 @@ namespace stormkit::wsi::details::wayland {
                          core::UInt32 id,
                          const char *interface,
                          core::UInt32 version) noexcept -> void {
-        auto &globals = *static_cast<Globals *>(data);
+        auto& globals = *static_cast<Globals *>(data);
 
 #define BIND(n, t, v) n.reset(static_cast<t *>(wl_registry_bind(registry, id, &t##_interface, v)));
 
@@ -219,7 +218,7 @@ namespace stormkit::wsi::details::wayland {
         if (interface_name == wl_compositor_interface.name)
             BIND(globals.compositor, wl_compositor, 3)
         else if (interface_name == wl_output_interface.name) {
-            auto &output = globals.outputs.emplace_back(
+            auto& output = globals.outputs.emplace_back(
                 static_cast<wl_output *>(wl_registry_bind(registry, id, &wl_output_interface, 2)));
             wl_output_add_listener(output.get(), &stormkit_output_listener, &globals);
         } else if (interface_name == xdg_wm_base_interface.name)
@@ -250,49 +249,51 @@ namespace stormkit::wsi::details::wayland {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto outputGeometryHandler([[maybe_unused]] void *data,
+    auto outputGeometryHandler(void *data,
                                [[maybe_unused]] wl_output *output,
-                               core::Int32 x,
-                               core::Int32 y,
-                               core::Int32 pwidth,
-                               core::Int32 pheight,
+                               [[maybe_unused]] core::Int32 x,
+                               [[maybe_unused]] core::Int32 y,
+                               [[maybe_unused]] core::Int32 pwidth,
+                               [[maybe_unused]] core::Int32 pheight,
                                [[maybe_unused]] core::Int32 subpixels,
                                const char *make,
                                const char *model,
                                [[maybe_unused]] core::Int32 transform) noexcept -> void {
-        dlog("Screen found! {} {} with size of {}x{}mm at {} {}",
-             make,
-             model,
-             pwidth,
-             pheight,
-             x,
-             y);
+        auto& globals = *static_cast<Globals *>(data);
+        auto& monitor = globals.monitors[output];
+
+        monitor.name = core::format("{} {}", make, model);
+
+        for (auto& [_, m] : globals.monitors) { m.flags = Monitor::Flags::None; }
+
+        if (&monitor == &globals.monitors.begin()->second) monitor.flags = Monitor::Flags::Primary;
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     auto outputModeHandler(void *data,
                            [[maybe_unused]] wl_output *wl_output,
-                           core::UInt32 flags,
+                           [[maybe_unused]] core::UInt32 flags,
                            core::Int32 width,
                            core::Int32 height,
-                           core::Int32 refresh) noexcept -> void {
-        auto &globals = *static_cast<Globals *>(data);
-        globals.video_settings.emplace_back(VideoSettings {
-            .size = { core::as<core::UInt32>(width), core::as<core::UInt32>(height) } });
+                           [[maybe_unused]] core::Int32 refresh) noexcept -> void {
+        auto& globals = *static_cast<Globals *>(data);
+        auto& monitor = globals.monitors[wl_output];
+
+        monitor.extents.emplace_back(core::as<core::UInt32>(width), core::as<core::UInt32>(height));
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     auto outputDoneHandler([[maybe_unused]] void *data,
-                           [[maybe_unused]] wl_output *wl_output) noexcept -> void {}
+                           [[maybe_unused]] wl_output *wl_output) noexcept -> void {
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto outputScaleHandler(void *data,
+    auto outputScaleHandler([[maybe_unused]] void *data,
                             [[maybe_unused]] wl_output *wl_output,
                             [[maybe_unused]] core::Int32 factor) noexcept -> void {
-        if (data == nullptr) return;
     }
 
     /////////////////////////////////////
@@ -306,7 +307,8 @@ namespace stormkit::wsi::details::wayland {
     /////////////////////////////////////
     auto surfaceLeaveHandler([[maybe_unused]] void *data,
                              [[maybe_unused]] wl_surface *surface,
-                             [[maybe_unused]] wl_output *output) noexcept -> void {}
+                             [[maybe_unused]] wl_output *output) noexcept -> void {
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
@@ -365,18 +367,19 @@ namespace stormkit::wsi::details::wayland {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto seatCapabilitiesHandler(void *data, wl_seat *seat, core::UInt32 capabilities) noexcept
-        -> void {
-        auto &globals = *static_cast<Globals *>(data);
+    auto seatCapabilitiesHandler(void *data,
+                                 [[maybe_unused]] wl_seat *seat,
+                                 core::UInt32 capabilities) noexcept -> void {
+        auto& globals = *static_cast<Globals *>(data);
 
         if ((capabilities & WL_SEAT_CAPABILITY_KEYBOARD) > 0) {
-            auto &keyboard =
+            auto& keyboard =
                 globals.keyboards.emplace_back(wl_seat_get_keyboard(globals.seat.get()));
             wl_keyboard_add_listener(keyboard.get(), &stormkit_keyboard_listener, nullptr);
         }
 
         if ((capabilities & WL_SEAT_CAPABILITY_POINTER) > 0) {
-            auto &pointer = globals.pointers.emplace_back(wl_seat_get_pointer(globals.seat.get()));
+            auto& pointer = globals.pointers.emplace_back(wl_seat_get_pointer(globals.seat.get()));
             wl_pointer_add_listener(pointer.get(), &stormkit_pointer_listener, nullptr);
         }
 
@@ -388,8 +391,9 @@ namespace stormkit::wsi::details::wayland {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto seatNameHandler([[maybe_unused]] void *data, wl_seat *seat, const char *name) noexcept
-        -> void {
+    auto seatNameHandler([[maybe_unused]] void *data,
+                         [[maybe_unused]] wl_seat *seat,
+                         const char *name) noexcept -> void {
         dlog("WL Seat found! {}", name);
     }
 
@@ -452,32 +456,37 @@ namespace stormkit::wsi::details::wayland {
                             [[maybe_unused]] wl_pointer *pointer,
                             [[maybe_unused]] core::UInt32 time,
                             [[maybe_unused]] core::UInt32 axis,
-                            [[maybe_unused]] wl_fixed_t value) noexcept -> void {}
+                            [[maybe_unused]] wl_fixed_t value) noexcept -> void {
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
     auto pointerFrameHandler([[maybe_unused]] void *data,
-                             [[maybe_unused]] wl_pointer *pointer) noexcept -> void {}
+                             [[maybe_unused]] wl_pointer *pointer) noexcept -> void {
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
     auto pointerAxisSourceHandler([[maybe_unused]] void *data,
                                   [[maybe_unused]] wl_pointer *pointer,
-                                  [[maybe_unused]] core::UInt32 axis_source) noexcept -> void {}
+                                  [[maybe_unused]] core::UInt32 axis_source) noexcept -> void {
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
     auto pointerAxisStopHandler([[maybe_unused]] void *data,
                                 [[maybe_unused]] wl_pointer *pointer,
                                 [[maybe_unused]] core::UInt32 time,
-                                [[maybe_unused]] core::UInt32 axis) noexcept -> void {}
+                                [[maybe_unused]] core::UInt32 axis) noexcept -> void {
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
     auto pointerAxisDiscreteHandler([[maybe_unused]] void *data,
                                     [[maybe_unused]] wl_pointer *pointer,
                                     [[maybe_unused]] core::UInt32 axis,
-                                    [[maybe_unused]] core::Int32 discrete) noexcept -> void {}
+                                    [[maybe_unused]] core::Int32 discrete) noexcept -> void {
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
@@ -583,11 +592,13 @@ namespace stormkit::wsi::details::wayland {
     /////////////////////////////////////
     auto lockedPointerLockedHandler([[maybe_unused]] void *data,
                                     [[maybe_unused]] zwp_locked_pointer_v1 *locked_pointer) noexcept
-        -> void {}
+        -> void {
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
     auto lockedPointerUnlockedHandler(
         [[maybe_unused]] void *data,
-        [[maybe_unused]] zwp_locked_pointer_v1 *locked_pointer) noexcept -> void {}
+        [[maybe_unused]] zwp_locked_pointer_v1 *locked_pointer) noexcept -> void {
+    }
 } // namespace stormkit::wsi::details::wayland

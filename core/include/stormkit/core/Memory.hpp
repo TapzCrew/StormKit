@@ -10,7 +10,7 @@
 #include <algorithm>
 #include <array>
 
-#if defined(__cpp_lib_stacktrace) || __has_include(<stacktrace>)
+#if defined(__cpp_lib_stacktrace) && __cpp_lib_stacktrace >= 202011L
     #define STORMKIT_HAS_STD_STACKTRACE
     #include <iostream>
     #include <stacktrace>
@@ -32,6 +32,7 @@
 #include <memory>
 #include <optional>
 #include <ranges>
+#include <utility>
 #include <vector>
 
 #include <stormkit/core/Concepts.hpp>
@@ -215,8 +216,9 @@ namespace stormkit::core {
     /// \requires all values need to be the same type as / convertible to `T`
     /// \return A static array of T
     template<typename T, typename... Args>
-        requires((core::Is<T, Args> && ...) || (std::convertible_to<T, Args> && ...))
-    constexpr auto makeStaticArray(T&& first, Args&&...args) noexcept;
+    requires((core::Is<T, Args> && ...) ||
+             (std::convertible_to<T, Args> &&
+              ...)) constexpr auto makeStaticArray(T&& first, Args&&...args) noexcept;
 
     /// \brief Create a dynamic array of `T`
     /// \param first The first value, the array will be an array of this type
@@ -224,8 +226,8 @@ namespace stormkit::core {
     /// \requires all values need to be the same type as `T`
     /// \return A dynamic array of T
     template<typename T, typename... Args>
-        requires((core::Is<T, Args> && ...) || (std::convertible_to<T, Args> && ...))
-    auto makeArray(T&& first, Args&&...args);
+    requires((core::Is<T, Args> && ...) ||
+             (std::convertible_to<T, Args> && ...)) auto makeArray(T&& first, Args&&...args);
 
     /// \brief Utility to defer allocation on stack of a class member
     template<typename T>

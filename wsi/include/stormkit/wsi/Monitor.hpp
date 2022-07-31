@@ -7,6 +7,7 @@
 #include <stormkit/core/FlagsMacro.hpp>
 #include <stormkit/core/FormatMacro.hpp>
 
+#include <stormkit/core/Flags.hpp>
 #include <stormkit/core/Format.hpp>
 #include <stormkit/core/Math.hpp>
 

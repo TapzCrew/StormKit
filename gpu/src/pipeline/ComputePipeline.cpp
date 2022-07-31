@@ -11,8 +11,9 @@
 namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
-    ComputePipeline::ComputePipeline(const Device &device, const PipelineCache *cache) noexcept
-        : AbstractPipeline { device, cache } {}
+    ComputePipeline::ComputePipeline(const Device& device, const PipelineCache *cache) noexcept
+        : AbstractPipeline { device, cache } {
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
@@ -20,12 +21,13 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    ComputePipeline::ComputePipeline(ComputePipeline &&other) noexcept
-        : AbstractPipeline { std::move(other) }, m_state { std::exchange(other.m_state, {}) } {}
+    ComputePipeline::ComputePipeline(ComputePipeline&& other) noexcept
+        : AbstractPipeline { std::move(other) }, m_state { std::exchange(other.m_state, {}) } {
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto ComputePipeline::operator=(ComputePipeline &&other) noexcept -> ComputePipeline & {
+    auto ComputePipeline::operator=(ComputePipeline&& other) noexcept -> ComputePipeline& {
         if (&other == this) [[unlikely]]
             return *this;
 
@@ -41,20 +43,23 @@ namespace stormkit::gpu {
     auto ComputePipeline::bake() -> void {
         STORMKIT_EXPECTS(m_is_baked == false);
 
-        const auto &vk = device().table();
+        const auto& vk = device().table();
 
         const auto vk_shader = VkPipelineShaderStageCreateInfo {
             .sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+            .pNext  = nullptr,
+            .flags  = {},
             .stage  = core::as<VkShaderStageFlagBits>(m_state.shader_state.shader->type()),
             .module = *m_state.shader_state.shader,
-            .pName  = "main"
+            .pName  = "main",
+            .pSpecializationInfo = nullptr
         };
 
         const auto set_layout = core::transform(m_state.layout.descriptor_set_layouts,
                                                 getHandle<const DescriptorSetLayout *>);
 
         const auto push_constant_ranges =
-            core::transform(m_state.layout.push_constant_ranges, [](const auto &r) {
+            core::transform(m_state.layout.push_constant_ranges, [](const auto& r) {
                 return VkPushConstantRange {
                     .stageFlags = core::as<VkQueueFlags>(r.stages),
                     .offset     = r.offset,
@@ -64,6 +69,8 @@ namespace stormkit::gpu {
 
         const auto pipeline_layout_create_info = VkPipelineLayoutCreateInfo {
             .sType                  = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
+            .pNext                  = nullptr,
+            .flags                  = {},
             .setLayoutCount         = core::as<core::UInt32>(std::size(set_layout)),
             .pSetLayouts            = std::data(set_layout),
             .pushConstantRangeCount = core::as<core::UInt32>(std::size(push_constant_ranges)),
@@ -77,6 +84,8 @@ namespace stormkit::gpu {
 
         const auto create_info =
             VkComputePipelineCreateInfo { .sType  = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
+                                          .pNext  = nullptr,
+                                          .flags  = {},
                                           .stage  = vk_shader,
                                           .layout = m_pipeline_layout,
                                           .basePipelineHandle = VK_NULL_HANDLE,

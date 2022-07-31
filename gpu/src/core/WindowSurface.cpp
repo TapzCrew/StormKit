@@ -94,9 +94,9 @@ namespace stormkit::gpu {
         } else {
             make_xcb_surface();
         }
-        #elif STORMKIT_ENABLE_WAYLAND
+        #elif STORMKIT_WSI_BUILD_WAYLAND
         make_wayland_surface();
-        #elif STORMKIT_ENABLE_XCB
+        #elif STORMKIT_WSI_BUILD_X11
         make_xcb_surface();
         #endif
 

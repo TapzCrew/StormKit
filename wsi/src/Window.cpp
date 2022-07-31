@@ -9,8 +9,7 @@
 #if defined(STORMKIT_OS_WINDOWS)
     #include "win32/WindowImpl.hpp"
 #elif defined(STORMKIT_OS_LINUX)
-    #include "linux/wayland/WindowImpl.hpp"
-    #include "linux/x11/WindowImpl.hpp"
+    #include "linux/WindowImpl.hpp"
 #endif
 
 #include <stormkit/core/AssertMacro.hpp>

@@ -2,14 +2,9 @@
     set_kind("static")
     set_languages("cxxlatest", "clatest")
 
-    add_headerfiles("**.inl")
-    add_files("**.cpp")
-
-    if has_config("enable_cxx20_modules") then
-        add_files("**.mpp")
-    else
-        add_headerfiles("**.mpp")
-    end
+    add_headerfiles("*.inl")
+    add_headerfiles("*.hpp")
+    add_files("*.cpp")
 
     add_packages("wayland", "wayland-protocols")
 
@@ -19,7 +14,6 @@
 
     add_cxxflags("-fPIC")
 
-    add_options("enable_cxx20_modules")
     set_group("private-libraries")
 
     after_load(function(target, opt)

@@ -99,7 +99,6 @@
             return *this;                                                            \
         }                                                                            \
         operator x() noexcept { return m_handle; }                                   \
-        operator const x() const noexcept { return m_handle; }                       \
         auto handle() noexcept -> x& { return m_handle; }                            \
         auto handle() const noexcept -> x { return m_handle; }                       \
         auto release() noexcept -> x {                                               \
@@ -130,6 +129,8 @@
     using name##Scoped = std::unique_ptr<x, name##Deleter>;
 
 #define STORMKIT_FORWARD(x) static_cast<decltype(x)&&>(x);
-#define STORMKIT_RETURNS(expr) \
-    noexcept(noexcept(expr))->decltype(expr) { return expr; }
+#define STORMKIT_RETURNS(expr)                 \
+    noexcept(noexcept(expr))->decltype(expr) { \
+        return expr;                           \
+    }
 #define STORMKIT_OVERLOADS_OF(name) [&](auto&&...args) STORMKIT_RETURNS(name(FWD(args)...))

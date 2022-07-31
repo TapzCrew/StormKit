@@ -2,121 +2,87 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-module;
-
 #pragma once
 
-#if defined(STORMKIT_CXX20_MODULES)
-// clang-format off
-export module stormkit.wsi.details.windowimpl;
-
 /////////// - STL - ///////////
-import <variant>;
+#include <variant>
 
 /////////// - StormKit::core - ///////////
-import stormkit.core.math;
-import stormkit.core.types;
+#include <stormkit/core/Math.hpp>
+#include <stormkit/core/Types.hpp>
 
 /////////// - StormKit::wsi - ///////////
-import stormkit.wsi.event;
-import stormkit.wsi.videosettings;
-import stormkit.wsi.windowstyle;
-import stormkit.wsi.window;
+#include <stormkit/wsi/Event.hpp>
+#include <stormkit/wsi/Fwd.hpp>
+#include <stormkit/wsi/Monitor.hpp>
+#include <stormkit/wsi/Window.hpp>
+#include <stormkit/wsi/WindowStyle.hpp>
 
-import stormkit.wsi.details.x11.windowimpl;
-import stormkit.wsi.details.wayland.windowimpl;
-// clang-format on
-export {
-#else
-    /////////// - STL - ///////////
-    #include <variant>
+#include "../common/WindowImplBase.hpp"
+#include "wayland/WindowImpl.hpp"
+#include "x11/WindowImpl.hpp"
 
-    /////////// - StormKit::core - ///////////
-    #include <stormkit/core/Math.mpp>
-    #include <stormkit/core/Types.mpp>
+namespace stormkit::wsi::details {
+    class WindowImpl: public WindowImplBase {
+      public:
+        explicit WindowImpl(Window::WM wm);
+        WindowImpl(Window::WM wm, std::string title, const core::ExtentU& size, WindowStyle style);
+        ~WindowImpl();
 
-    /////////// - StormKit::wsi - ///////////
-    #include <stormkit/wsi/Event.mpp>
-    #include <stormkit/wsi/Fwd.hpp>
-    #include <stormkit/wsi/VideoSettings.mpp>
-    #include <stormkit/wsi/Window.mpp>
-    #include <stormkit/wsi/WindowStyle.mpp>
+        WindowImpl(const WindowImpl&) noexcept                    = delete;
+        auto operator=(const WindowImpl&) noexcept -> WindowImpl& = delete;
 
-    #include "wayland/WindowImpl.mpp"
-    #include "x11/WindowImpl.mpp"
-#endif
+        WindowImpl(WindowImpl&&) noexcept;
+        auto operator=(WindowImpl&&) noexcept -> WindowImpl&;
 
-    namespace stormkit::wsi::details {
-        class WindowImpl {
-          public:
-            explicit WindowImpl(Window::WM wm);
-            WindowImpl(Window::WM wm,
-                       std::string title,
-                       const VideoSettings &settings,
-                       WindowStyle style);
-            ~WindowImpl();
+        auto create(std::string title, const core::ExtentU& size, WindowStyle style) -> void;
+        auto close() noexcept -> void;
 
-            WindowImpl(const WindowImpl &) noexcept = delete;
-            auto operator=(const WindowImpl &) noexcept -> WindowImpl & = delete;
+        [[nodiscard]] auto pollEvent(Event& event) noexcept -> bool;
+        [[nodiscard]] auto waitEvent(Event& event) noexcept -> bool;
 
-            WindowImpl(WindowImpl &&) noexcept;
-            auto operator=(WindowImpl &&) noexcept -> WindowImpl &;
+        auto setTitle(std::string title) noexcept -> void;
+        auto setExtent(const core::ExtentU& size) noexcept -> void;
+        auto setFullscreenEnabled(bool enabled) noexcept -> void;
 
-            auto create(std::string title, const VideoSettings &settings, WindowStyle style)
-                -> void;
-            auto close() noexcept -> void;
+        auto lockMouse() noexcept -> void;
+        auto unlockMouse() noexcept -> void;
 
-            [[nodiscard]] auto pollEvent(Event &event) noexcept -> bool;
-            [[nodiscard]] auto waitEvent(Event &event) noexcept -> bool;
+        auto hideMouse() noexcept -> void;
+        auto unhideMouse() noexcept -> void;
 
-            auto setTitle(std::string title) noexcept -> void;
+        [[nodiscard]] auto extent() const noexcept -> const core::ExtentU&;
+        [[nodiscard]] auto title() const noexcept -> const std::string&;
 
-            auto setFullscreenEnabled(bool enabled) noexcept -> void;
+        [[nodiscard]] auto isOpen() const noexcept -> bool;
+        [[nodiscard]] auto visible() const noexcept -> bool;
 
-            auto lockMouse() noexcept -> void;
-            auto unlockMouse() noexcept -> void;
+        [[nodiscard]] auto nativeHandle() const noexcept -> Window::NativeHandle;
 
-            auto hideMouse() noexcept -> void;
-            auto unhideMouse() noexcept -> void;
+        [[nodiscard]] auto mouseLocked() const noexcept -> bool;
+        [[nodiscard]] auto mouseHidden() const noexcept -> bool;
+        [[nodiscard]] auto fullscreen() const noexcept -> bool;
 
-            [[nodiscard]] auto size() const noexcept -> const core::ExtentU &;
-            [[nodiscard]] auto title() const noexcept -> std::string_view;
-            [[nodiscard]] auto videoSettings() const noexcept -> const VideoSettings &;
+        auto setKeyRepeatEnabled(bool enabled) noexcept -> void;
+        [[nodiscard]] auto keyRepeatEnabled() const noexcept -> bool;
 
-            [[nodiscard]] auto isOpen() const noexcept -> bool;
-            [[nodiscard]] auto visible() const noexcept -> bool;
+        auto setVirtualKeyboardVisible(bool visible) noexcept -> void;
 
-            [[nodiscard]] auto nativeHandle() const noexcept -> Window::NativeHandle;
+        auto setMousePosition(const core::Position2i& position) noexcept -> void;
+        static auto setMousePositionOnDesktop(Window::WM wm,
+                                              const core::Position2u& position) noexcept -> void;
 
-            [[nodiscard]] auto mouseLocked() const noexcept -> bool;
-            [[nodiscard]] auto fullscreen() const noexcept -> bool;
+        [[nodiscard]] static auto getMonitorSettings(Window::WM wm) -> std::vector<Monitor>;
 
-            auto setKeyRepeatEnabled(bool enabled) noexcept -> void;
-            [[nodiscard]] auto keyRepeatEnabled() const noexcept -> bool;
+      private:
+        struct Sentinelle {};
 
-            auto setVirtualKeyboardVisible(bool visible) noexcept -> void;
+        using BackendWindowImpl = std::variant<x11::WindowImpl, wayland::WindowImpl, Sentinelle>;
 
-            auto setMousePosition(core::Position2i position) noexcept -> void;
-            static auto setMousePositionOnDesktop(Window::WM wm, core::Position2u position) noexcept
-                -> void;
+        Window::WM m_wm;
 
-            [[nodiscard]] static auto getDesktopModes(Window::WM wm) -> std::vector<VideoSettings>;
-            [[nodiscard]] static auto getDesktopFullscreenSize(Window::WM wm) -> VideoSettings;
-
-            struct Sentinelle {};
-
-          private:
-            using BackendWindowImpl =
-                std::variant<x11::WindowImpl, wayland::WindowImpl, Sentinelle>;
-
-            Window::WM m_wm;
-
-            BackendWindowImpl m_impl;
-        };
-    } // namespace stormkit::wsi::details
-
-#if defined(STORMKIT_CXX20_MODULES)
-}
-#endif
+        BackendWindowImpl m_impl;
+    };
+} // namespace stormkit::wsi::details
 
 #include "WindowImpl.inl"

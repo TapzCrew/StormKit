@@ -3,17 +3,12 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#if defined(STORMKIT_CXX20_MODULES)
-module stormkit.wsi.details.x11.windowimpl;
+#include <stormkit/core/Numerics.hpp>
 
-import stormkit.wsi.details.x11.log;
-import stormkit.wsi.details.x11.utils;
-#else
-    /////////// - StormKit::wsi - ///////////
-    #include "WindowImpl.mpp"
-    #include "Log.mpp"
-    #include "Utils.mpp"
-#endif
+/////////// - StormKit::wsi - ///////////
+#include "Log.hpp"
+#include "Utils.hpp"
+#include "WindowImpl.hpp"
 
 /////////// - SL - ///////////
 #include <cstddef>
@@ -72,26 +67,28 @@ namespace stormkit::wsi::details::x11 {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    WindowImpl::WindowImpl(std::string title, const VideoSettings &settings, WindowStyle style)
+    WindowImpl::WindowImpl(std::string title, const core::ExtentU& extent, WindowStyle style)
         : WindowImpl {} {
-        create(std::move(title), settings, style);
+        create(std::move(title), extent, style);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    WindowImpl::~WindowImpl() { xcb_flush(getXCBConnection()); }
+    WindowImpl::~WindowImpl() {
+        xcb_flush(getXCBConnection());
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    WindowImpl::WindowImpl(WindowImpl &&) noexcept = default;
+    WindowImpl::WindowImpl(WindowImpl&&) noexcept = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto WindowImpl::operator=(WindowImpl &&) noexcept -> WindowImpl & = default;
+    auto WindowImpl::operator=(WindowImpl&&) noexcept -> WindowImpl& = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto WindowImpl::create(std::string title, const VideoSettings &settings, WindowStyle style)
+    auto WindowImpl::create(std::string title, const core::ExtentU& extent, WindowStyle style)
         -> void {
         static constexpr const auto EVENTS =
             XCB_EVENT_MASK_FOCUS_CHANGE | XCB_EVENT_MASK_BUTTON_PRESS |
@@ -112,8 +109,8 @@ namespace stormkit::wsi::details::x11 {
                                       screen->root,
                                       0,
                                       0,
-                                      settings.size.width,
-                                      settings.size.height,
+                                      extent.width,
+                                      extent.height,
                                       1,
                                       XCB_WINDOW_CLASS_INPUT_OUTPUT,
                                       screen->root_visual,
@@ -124,7 +121,7 @@ namespace stormkit::wsi::details::x11 {
         if (error) [[unlikely]]
             elog("Failed to create window\n    > reason: {}", getXCBError(error));
 
-        m_extent = settings.size;
+        m_extent = extent;
 
         m_locked_mouse_position.x = m_extent.width / 2;
         m_locked_mouse_position.y = m_extent.height / 2;
@@ -216,21 +213,21 @@ namespace stormkit::wsi::details::x11 {
 
         // set the.wsi.s style
         // checking if the.wsi.manager support.wsi.decoration
-        static constexpr const auto MWM_HINTS_FUNCTIONS   = 1 << 0;
-        static constexpr const auto MWM_HINTS_DECORATIONS = 1 << 1;
+        constexpr auto MWM_HINTS_FUNCTIONS   = 1 << 0;
+        constexpr auto MWM_HINTS_DECORATIONS = 1 << 1;
 
-        static constexpr const auto MWM_DECOR_BORDER   = 1 << 1;
-        static constexpr const auto MWM_DECOR_RESIZE   = 1 << 2;
-        static constexpr const auto MWM_DECOR_TITLE    = 1 << 3;
-        static constexpr const auto MWM_DECOR_MENU     = 1 << 4;
-        static constexpr const auto MWM_DECOR_MINIMIZE = 1 << 5;
-        static constexpr const auto MWM_DECOR_MAXIMIZE = 1 << 6;
+        constexpr auto MWM_DECOR_BORDER   = 1 << 1;
+        constexpr auto MWM_DECOR_RESIZE   = 1 << 2;
+        constexpr auto MWM_DECOR_TITLE    = 1 << 3;
+        constexpr auto MWM_DECOR_MENU     = 1 << 4;
+        constexpr auto MWM_DECOR_MINIMIZE = 1 << 5;
+        constexpr auto MWM_DECOR_MAXIMIZE = 1 << 6;
 
-        static constexpr const auto MWM_FUNC_RESIZE   = 1 << 1;
-        static constexpr const auto MWM_FUNC_MOVE     = 1 << 2;
-        static constexpr const auto MWM_FUNC_MINIMIZE = 1 << 3;
-        static constexpr const auto MWM_FUNC_MAXIMIZE = 1 << 4;
-        static constexpr const auto MWM_FUNC_CLOSE    = 1 << 5;
+        constexpr auto MWM_FUNC_RESIZE   = 1 << 1;
+        constexpr auto MWM_FUNC_MOVE     = 1 << 2;
+        constexpr auto MWM_FUNC_MINIMIZE = 1 << 3;
+        constexpr auto MWM_FUNC_MAXIMIZE = 1 << 4;
+        constexpr auto MWM_FUNC_CLOSE    = 1 << 5;
 
         m_window_hints.flags = MWM_HINTS_FUNCTIONS | MWM_HINTS_DECORATIONS;
 
@@ -323,24 +320,24 @@ namespace stormkit::wsi::details::x11 {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto WindowImpl::pollEvent(Event &event) noexcept -> bool {
+    auto WindowImpl::pollEvent(Event& event) noexcept -> bool {
         STORMKIT_RAII_CAPSULE(Event, xcb_generic_event_t, free)
 
         for (auto xevent = EventScoped { xcb_poll_for_event(m_connection) }; xevent;
              xevent.reset(xcb_poll_for_event(m_connection)))
-            processEvents(*xevent);
+            processEvents(xevent.get());
 
         return WindowImplBase::pollEvent(event);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto WindowImpl::waitEvent(Event &event) noexcept -> bool {
+    auto WindowImpl::waitEvent(Event& event) noexcept -> bool {
         auto xevent = xcb_poll_for_event(m_connection);
 
         while (!xevent) xevent = xcb_poll_for_event(m_connection);
 
-        processEvents(*xevent);
+        processEvents(xevent);
 
         return WindowImplBase::waitEvent(event);
     }
@@ -360,6 +357,12 @@ namespace stormkit::wsi::details::x11 {
         xcb_flush(m_connection);
 
         m_title = std::move(title);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    auto WindowImpl::setExtent(const core::ExtentU& extent) noexcept -> void {
+        m_extent = extent;
     }
 
     /////////////////////////////////////
@@ -496,13 +499,13 @@ namespace stormkit::wsi::details::x11 {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto WindowImpl::setVirtualKeyboardVisible(bool visible) noexcept -> void {
+    auto WindowImpl::setVirtualKeyboardVisible([[maybe_unused]] bool visible) noexcept -> void {
         elog("x11::WindowImpl::setVirtualKeyboardVisible isn't yet implemented");
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto WindowImpl::setMousePosition(core::Position2i position) noexcept -> void {
+    auto WindowImpl::setMousePosition(const core::Position2i& position) noexcept -> void {
         auto connection = getXCBConnection();
 
         xcb_warp_pointer(connection, XCB_NONE, m_window, 0, 0, 0, 0, position->x, position->y);
@@ -512,7 +515,7 @@ namespace stormkit::wsi::details::x11 {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto WindowImpl::setMousePositionOnDesktop(core::Position2u position) noexcept -> void {
+    auto WindowImpl::setMousePositionOnDesktop(const core::Position2u& position) noexcept -> void {
         auto connection = getXCBConnection();
 
         const auto default_screen_id = 0;
@@ -525,82 +528,69 @@ namespace stormkit::wsi::details::x11 {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto WindowImpl::getDesktopModes() -> std::vector<VideoSettings> {
-        STORMKIT_RAII_CAPSULE(Reply, xcb_randr_get_screen_resources_current_reply_t, free)
+    auto WindowImpl::getMonitorSettings() -> std::vector<Monitor> {
+        STORMKIT_RAII_CAPSULE(Monitors, xcb_randr_get_monitors_reply_t, free)
         STORMKIT_RAII_CAPSULE(Output, xcb_randr_get_output_info_reply_t, free)
         STORMKIT_RAII_CAPSULE(CRTC, xcb_randr_get_crtc_info_reply_t, free)
 
-        static auto video_settings = std::vector<VideoSettings> {}; // TODO Reimplement with RAII
-        static auto init           = false;
+        auto connection = getXCBConnection();
+        auto root       = xcb_setup_roots_iterator(xcb_get_setup(connection)).data;
 
-        if (!init) {
-            auto display = getXCBConnection();
-            auto screen  = xcb_setup_roots_iterator(xcb_get_setup(display)).data;
-            auto root    = screen->root;
+        auto xcb_monitors = MonitorsScoped {
+            xcb_randr_get_monitors_reply(connection,
+                                         xcb_randr_get_monitors(connection, root->root, 0),
+                                         nullptr)
+        };
+        auto monitors = std::vector<Monitor> {};
 
-            auto reply = ReplyScoped { xcb_randr_get_screen_resources_current_reply(
-                display,
-                xcb_randr_get_screen_resources_current(display, root),
-                nullptr) };
+        auto xcb_monitor_iter = xcb_randr_get_monitors_monitors_iterator(xcb_monitors.get());
+        for (auto i = 0; xcb_monitor_iter.rem;
+             xcb_randr_monitor_info_next(&xcb_monitor_iter), ++i) {
+            auto monitor_info = xcb_monitor_iter.data;
 
-            auto timestamp = reply->config_timestamp;
+            xcb_randr_select_input(connection, root->root, true);
 
-            auto len          = xcb_randr_get_screen_resources_current_outputs_length(reply.get());
-            auto randr_output = xcb_randr_get_screen_resources_current_outputs(reply.get());
+            auto& monitor = monitors.emplace_back();
+            if (monitor_info->primary) monitor.flags = Monitor::Flags::Primary;
 
-            video_settings.reserve(len);
+            auto name = getXCBAtomName(monitor_info->name);
+            if (!name) monitor.name = core::format("Monitor {}", i);
+            else
+                monitor.name = std::move(*name);
+
+            auto len     = xcb_randr_monitor_info_outputs_length(monitor_info);
+            auto outputs = xcb_randr_monitor_info_outputs(monitor_info);
+
             for (auto i : core::range(len)) {
                 auto output = OutputScoped { xcb_randr_get_output_info_reply(
-                    display,
-                    xcb_randr_get_output_info(display, randr_output[i], timestamp),
+                    connection,
+                    xcb_randr_get_output_info(connection, outputs[i], xcb_monitors->timestamp),
                     nullptr) };
-                if (output == nullptr) continue;
 
-                auto crtc =
-                    CRTCScoped { xcb_randr_get_crtc_info_reply(display,
-                                                               xcb_randr_get_crtc_info(display,
-                                                                                       output->crtc,
-                                                                                       timestamp),
-                                                               nullptr) };
+                if (!output) continue;
+                if (output->connection != XCB_RANDR_CONNECTION_CONNECTED) continue;
+                if (output->crtc != XCB_NONE) continue;
+
+                auto crtc = CRTCScoped { xcb_randr_get_crtc_info_reply(
+                    connection,
+                    xcb_randr_get_crtc_info(connection, output->crtc, output->timestamp),
+                    nullptr) };
 
                 if (crtc == nullptr) continue;
 
-                auto video_setting =
-                    stormkit::wsi::VideoSettings { { crtc->width, crtc->height }, 32u };
-                video_settings.emplace_back(std::move(video_setting));
+                monitor.extents.emplace_back(
+                    core::ExtentU { core::as<core::UInt32>(crtc->width),
+                                    core::as<core::UInt32>(crtc->height) });
             }
-
-            init = true;
         }
 
-        return video_settings;
+        return monitors;
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto WindowImpl::getDesktopFullscreenSize() -> VideoSettings {
-        static auto video_setting = stormkit::wsi::VideoSettings {};
-        static auto init          = false;
-
-        if (!init) {
-            const auto modes = getDesktopModes();
-
-            for (const auto &mode : modes) {
-                video_setting.size.width  = std::max(video_setting.size.width, mode.size.width);
-                video_setting.size.height = std::max(video_setting.size.height, mode.size.height);
-                video_setting.size.depth  = std::max(video_setting.size.depth, mode.size.depth);
-            }
-
-            init = true;
-        }
-
-        return video_setting;
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto WindowImpl::processEvents(xcb_generic_event_t event) -> void {
-        auto *xevent             = &event;
+    auto WindowImpl::processEvents(xcb_generic_event_t *event) -> void {
+        auto *xevent             = event;
         const auto response_type = xevent->response_type & ~0x80;
 
         switch (response_type) {
@@ -617,8 +607,8 @@ namespace stormkit::wsi::details::x11 {
             case XCB_MOTION_NOTIFY: {
                 auto mouse_event = reinterpret_cast<xcb_motion_notify_event_t *>(xevent);
 
-                const auto x = mouse_event->event_x;
-                const auto y = mouse_event->event_y;
+                const auto x = core::as<core::UInt32>(mouse_event->event_x);
+                const auto y = core::as<core::UInt32>(mouse_event->event_y);
 
                 if (m_mouse_locked) {
                     if (x != m_extent.width / 2 || y != m_extent.height / 2) {

@@ -28,30 +28,30 @@ namespace stormkit::wsi::details {
     /////////////////////////////////////
     inline WindowImpl::WindowImpl(Window::WM wm,
                                   std::string title,
-                                  const VideoSettings &settings,
+                                  const core::ExtentU& extent,
                                   WindowStyle style)
         : m_wm { wm }, m_impl { Sentinelle {} } {
-        if (m_wm == Window::WM::X11) m_impl = x11::WindowImpl { std::move(title), settings, style };
+        if (m_wm == Window::WM::X11) m_impl = x11::WindowImpl { std::move(title), extent, style };
         else if (m_wm == Window::WM::Wayland)
-            m_impl = wayland::WindowImpl { title, settings, style };
+            m_impl = wayland::WindowImpl { title, extent, style };
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline WindowImpl::WindowImpl(WindowImpl &&) noexcept = default;
+    inline WindowImpl::WindowImpl(WindowImpl&&) noexcept = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto WindowImpl::operator=(WindowImpl &&) noexcept -> WindowImpl & = default;
+    inline auto WindowImpl::operator=(WindowImpl&&) noexcept -> WindowImpl& = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
     inline auto WindowImpl::create(std::string title,
-                                   const VideoSettings &settings,
+                                   const core::ExtentU& extent,
                                    WindowStyle style) -> void {
         switch (m_wm) {
-            CASE_DO(Window::WM::X11, x11, create(std::move(title), settings, style));
-            CASE_DO(Window::WM::Wayland, wayland, create(std::move(title), settings, style));
+            CASE_DO(Window::WM::X11, x11, create(std::move(title), extent, style));
+            CASE_DO(Window::WM::Wayland, wayland, create(std::move(title), extent, style));
 
             default: break;
         }
@@ -70,7 +70,7 @@ namespace stormkit::wsi::details {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto WindowImpl::pollEvent(Event &event) noexcept -> bool {
+    inline auto WindowImpl::pollEvent(Event& event) noexcept -> bool {
         switch (m_wm) {
             CASE_DO_RETURN(Window::WM::X11, x11, pollEvent(event));
             CASE_DO_RETURN(Window::WM::Wayland, wayland, pollEvent(event));
@@ -83,7 +83,7 @@ namespace stormkit::wsi::details {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto WindowImpl::waitEvent(Event &event) noexcept -> bool {
+    inline auto WindowImpl::waitEvent(Event& event) noexcept -> bool {
         switch (m_wm) {
             CASE_DO_RETURN(Window::WM::X11, x11, waitEvent(event));
             CASE_DO_RETURN(Window::WM::Wayland, wayland, waitEvent(event));
@@ -100,6 +100,17 @@ namespace stormkit::wsi::details {
         switch (m_wm) {
             CASE_DO(Window::WM::X11, x11, setTitle(std::move(title)));
             CASE_DO(Window::WM::Wayland, wayland, setTitle(std::move(title)));
+
+            default: break;
+        }
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto WindowImpl::setExtent(const core::ExtentU& extent) noexcept -> void {
+        switch (m_wm) {
+            CASE_DO(Window::WM::X11, x11, setExtent(extent));
+            CASE_DO(Window::WM::Wayland, wayland, setExtent(extent));
 
             default: break;
         }
@@ -162,13 +173,30 @@ namespace stormkit::wsi::details {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto WindowImpl::size() const noexcept -> const stormkit::core::ExtentU & {
+    inline auto WindowImpl::extent() const noexcept -> const stormkit::core::ExtentU& {
         switch (m_wm) {
-            CASE_DO_RETURN(Window::WM::X11, x11, size());
-            CASE_DO(Window::WM::Wayland, wayland, size());
+            CASE_DO_RETURN(Window::WM::X11, x11, extent());
+            CASE_DO_RETURN(Window::WM::Wayland, wayland, extent());
 
             default: break;
         }
+
+        constinit static const auto empty = core::ExtentU {};
+        return empty;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto WindowImpl::title() const noexcept -> const std::string& {
+        switch (m_wm) {
+            CASE_DO_RETURN(Window::WM::X11, x11, title());
+            CASE_DO_RETURN(Window::WM::Wayland, wayland, title());
+
+            default: break;
+        }
+
+        static const auto empty = std::string {};
+        return empty;
     }
 
     /////////////////////////////////////
@@ -225,10 +253,10 @@ namespace stormkit::wsi::details {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto WindowImpl::fullscreen() const noexcept -> bool {
+    inline auto WindowImpl::mouseHidden() const noexcept -> bool {
         switch (m_wm) {
-            CASE_DO_RETURN(Window::WM::X11, x11, fullscreen());
-            CASE_DO_RETURN(Window::WM::Wayland, wayland, fullscreen());
+            CASE_DO_RETURN(Window::WM::X11, x11, mouseHidden());
+            CASE_DO_RETURN(Window::WM::Wayland, wayland, mouseHidden());
 
             default: break;
         }
@@ -238,26 +266,15 @@ namespace stormkit::wsi::details {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto WindowImpl::title() const noexcept -> std::string_view {
+    inline auto WindowImpl::fullscreen() const noexcept -> bool {
         switch (m_wm) {
-            CASE_DO_RETURN(Window::WM::X11, x11, title());
-            CASE_DO_RETURN(Window::WM::Wayland, wayland, title());
+            CASE_DO_RETURN(Window::WM::X11, x11, fullscreen());
+            CASE_DO_RETURN(Window::WM::Wayland, wayland, fullscreen());
 
             default: break;
         }
 
-        return "";
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    inline auto WindowImpl::videoSettings() const noexcept -> const VideoSettings & {
-        switch (m_wm) {
-            CASE_DO_RETURN(Window::WM::X11, x11, videoSettings());
-            CASE_DO_RETURN(Window::WM::Wayland, wayland, videoSettings());
-
-            default: break;
-        }
+        return false;
     }
 
     /////////////////////////////////////
@@ -297,7 +314,7 @@ namespace stormkit::wsi::details {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto WindowImpl::setMousePosition(core::Position2i position) noexcept -> void {
+    inline auto WindowImpl::setMousePosition(const core::Position2i& position) noexcept -> void {
         switch (m_wm) {
             CASE_DO(Window::WM::X11, x11, setMousePosition(position));
             CASE_DO(Window::WM::Wayland, wayland, setMousePosition(position));
@@ -309,7 +326,8 @@ namespace stormkit::wsi::details {
     /////////////////////////////////////
     /////////////////////////////////////
     inline auto WindowImpl::setMousePositionOnDesktop(Window::WM wm,
-                                                      core::Position2u position) noexcept -> void {
+                                                      const core::Position2u& position) noexcept
+        -> void {
         switch (wm) {
             case Window::WM::X11:
                 details::x11::WindowImpl::setMousePositionOnDesktop(position);
@@ -324,24 +342,12 @@ namespace stormkit::wsi::details {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto WindowImpl::getDesktopModes(Window::WM wm) -> std::vector<VideoSettings> {
+    inline auto WindowImpl::getMonitorSettings(Window::WM wm) -> std::vector<Monitor> {
         switch (wm) {
-            case Window::WM::X11: return details::x11::WindowImpl::getDesktopModes(); break;
-            case Window::WM::Wayland: return details::wayland::WindowImpl::getDesktopModes(); break;
-            default: break;
-        }
-
-        return {};
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    inline auto WindowImpl::getDesktopFullscreenSize(Window::WM wm) -> VideoSettings {
-        switch (wm) {
-            case Window::WM::X11: return details::x11::WindowImpl::getDesktopFullscreenSize();
+            case Window::WM::X11: return details::x11::WindowImpl::getMonitorSettings(); break;
             case Window::WM::Wayland:
-                return details::wayland::WindowImpl::getDesktopFullscreenSize();
-
+                return details::wayland::WindowImpl::getMonitorSettings();
+                break;
             default: break;
         }
 

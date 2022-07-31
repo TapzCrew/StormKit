@@ -2,18 +2,10 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#if defined(STORMKIT_CXX20_MODULES)
-module stormkit_window.details.wayland.windowimpl;
-
-import stormkit_window.details.wayland.log;
-import stormkit_window.details.wayland.utils;
-import stormkit_window.details.wayland.callbacks;
-#else
-    /////////// - StormKit::wsi - ///////////
-    #include "WindowImpl.mpp"
-    #include "Callbacks.mpp"
-    #include "Log.mpp"
-#endif
+/////////// - StormKit::wsi - ///////////
+#include "WindowImpl.hpp"
+#include "Callbacks.hpp"
+#include "Log.hpp"
 
 /////////// - Posix - ///////////
 #include <sys/mman.h>
@@ -25,30 +17,33 @@ import stormkit_window.details.wayland.callbacks;
 namespace stormkit::wsi::details::wayland {
     static auto globals = Globals {};
 
-    static const auto stormkit_registry_listener =
+    constinit const auto stormkit_registry_listener =
         wl_registry_listener { .global = registryHandler, .global_remove = registryRemoverHandler };
 
-    static const auto stormkit_surface_listener =
+    constinit const auto stormkit_surface_listener =
         wl_surface_listener { .enter = surfaceEnterHandler, .leave = surfaceLeaveHandler };
 
-    static const auto stormkit_xdg_surface_listener =
+    constinit const auto stormkit_xdg_surface_listener =
         xdg_surface_listener { .configure = surfaceConfigureHandler };
 
-    static const auto stormkit_xdg_toplevel_listener =
-        xdg_toplevel_listener { .configure = toplevelConfigureHandler,
-                                .close     = toplevelCloseHandler };
+    constinit const auto stormkit_xdg_toplevel_listener =
+        xdg_toplevel_listener { .configure        = toplevelConfigureHandler,
+                                .close            = toplevelCloseHandler,
+                                .configure_bounds = nullptr };
 
-    static const auto stormkit_shell_listener = xdg_wm_base_listener { .ping = shellPingHandler };
+    constinit const auto stormkit_shell_listener =
+        xdg_wm_base_listener { .ping = shellPingHandler };
 
-    static const auto stormkit_shell_surface_listener =
-        wl_shell_surface_listener { .ping      = shellPingHandler,
-                                    .configure = shellSurfaceConfigureHandler };
+    constinit const auto stormkit_shell_surface_listener =
+        wl_shell_surface_listener { .ping       = shellPingHandler,
+                                    .configure  = shellSurfaceConfigureHandler,
+                                    .popup_done = nullptr };
 
-    static const auto stormkit_relative_pointer_listener =
+    constinit const auto stormkit_relative_pointer_listener =
         zwp_relative_pointer_v1_listener { .relative_motion =
                                                relativePointerRelativeMotionHandler };
 
-    static const auto stormkit_locked_pointer_listener =
+    constinit const auto stormkit_locked_pointer_listener =
         zwp_locked_pointer_v1_listener { .locked   = lockedPointerLockedHandler,
                                          .unlocked = lockedPointerUnlockedHandler };
 
@@ -154,31 +149,32 @@ namespace stormkit::wsi::details::wayland {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    WindowImpl::~WindowImpl() { wl_display_flush(globals.display.get()); }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    WindowImpl::WindowImpl(std::string title, const VideoSettings &settings, WindowStyle style)
+    WindowImpl::WindowImpl(std::string title, const core::ExtentU& extent, WindowStyle style)
         : WindowImpl {} {
-        create(std::move(title), settings, style);
+        create(std::move(title), extent, style);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    WindowImpl::WindowImpl(WindowImpl &&) noexcept = default;
+    WindowImpl::~WindowImpl() {
+        wl_display_flush(globals.display.get());
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto WindowImpl::operator=(WindowImpl &&) noexcept -> WindowImpl & = default;
+    WindowImpl::WindowImpl(WindowImpl&&) noexcept = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto WindowImpl::create(std::string title, const VideoSettings &settings, WindowStyle style)
+    auto WindowImpl::operator=(WindowImpl&&) noexcept -> WindowImpl& = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    auto WindowImpl::create(std::string title, const core::ExtentU& extent, WindowStyle style)
         -> void {
-        m_title          = title;
-        m_extent         = settings.size;
-        m_video_settings = settings;
-        m_style          = style;
+        m_title  = title;
+        m_extent = extent;
+        m_style  = style;
 
         m_locked_mouse_position.x = m_extent.width / 2;
         m_locked_mouse_position.y = m_extent.height / 2;
@@ -269,7 +265,7 @@ namespace stormkit::wsi::details::wayland {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto WindowImpl::pollEvent(Event &event) noexcept -> bool {
+    auto WindowImpl::pollEvent(Event& event) noexcept -> bool {
         while (!m_configured) wl_display_dispatch(globals.display.get());
 
         while (wl_display_prepare_read(globals.display.get()) != 0)
@@ -284,7 +280,7 @@ namespace stormkit::wsi::details::wayland {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto WindowImpl::waitEvent(Event &event) noexcept -> bool {
+    auto WindowImpl::waitEvent(Event& event) noexcept -> bool {
         while (!m_configured) wl_display_dispatch(globals.display.get());
 
         while (wl_display_prepare_read(globals.display.get()) != 0)
@@ -306,6 +302,11 @@ namespace stormkit::wsi::details::wayland {
         } else {
             wl_shell_surface_set_title(m_wlshell_surface.get(), m_title.c_str());
         }
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    auto WindowImpl::setExtent([[maybe_unused]] const core::ExtentU& extent) noexcept -> void {
     }
 
     /////////////////////////////////////
@@ -400,20 +401,20 @@ namespace stormkit::wsi::details::wayland {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto WindowImpl::setKeyRepeatEnabled(bool enabled) noexcept -> void {
+    auto WindowImpl::setKeyRepeatEnabled([[maybe_unused]] bool enabled) noexcept -> void {
         elog("wayland::WindowImpl::setKeyRepeatEnabled isn't yet implemented");
         m_key_repeat_enabled = false;
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto WindowImpl::setVirtualKeyboardVisible(bool visible) noexcept -> void {
+    auto WindowImpl::setVirtualKeyboardVisible([[maybe_unused]] bool visible) noexcept -> void {
         elog("wayland::WindowImpl::setVirtualKeyboardVisible isn't yet implemented");
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto WindowImpl::setMousePosition(core::Position2i position) noexcept -> void {
+    auto WindowImpl::setMousePosition(const core::Position2i& position) noexcept -> void {
         if (!m_open) return;
         if (m_mouse_locked) {
             zwp_locked_pointer_v1_set_cursor_position_hint(m_locked_pointer.get(),
@@ -425,37 +426,20 @@ namespace stormkit::wsi::details::wayland {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto WindowImpl::setMousePositionOnDesktop(core::Position2u position) noexcept -> void {
+    auto WindowImpl::setMousePositionOnDesktop(
+        [[maybe_unused]] const core::Position2u& position) noexcept -> void {
         elog("wayland::WindowImpl::setMousePositionOnDesktop isn't yet implemented");
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto WindowImpl::getDesktopModes() -> std::vector<VideoSettings> {
+    auto WindowImpl::getMonitorSettings() -> std::vector<Monitor> {
         if (!globals.display) init();
 
-        return globals.video_settings;
-    }
+        auto output =
+            core::transform(globals.monitors, [](const auto& pair) { return pair.second; });
 
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto WindowImpl::getDesktopFullscreenSize() -> VideoSettings {
-        static auto video_setting = stormkit::wsi::VideoSettings {};
-        static auto init          = false;
-
-        if (!init) {
-            const auto modes = getDesktopModes();
-
-            for (const auto &mode : modes) {
-                video_setting.size.width  = std::max(video_setting.size.width, mode.size.width);
-                video_setting.size.height = std::max(video_setting.size.height, mode.size.height);
-                video_setting.size.depth  = std::max(video_setting.size.depth, mode.size.depth);
-            }
-
-            init = true;
-        }
-
-        return video_setting;
+        return output;
     }
 
     /////////////////////////////////////
@@ -535,7 +519,10 @@ namespace stormkit::wsi::details::wayland {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto WindowImpl::seatCapabilities(wl_seat *seat, std::uint32_t capabilities) noexcept -> void {}
+    auto WindowImpl::seatCapabilities([[maybe_unused]] wl_seat *seat,
+                                      [[maybe_unused]] std::uint32_t capabilities) noexcept
+        -> void {
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
@@ -664,9 +651,9 @@ namespace stormkit::wsi::details::wayland {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto WindowImpl::keyboardLeave(wl_keyboard *keyboard,
-                                   std::uint32_t serial,
-                                   wl_surface *surface) noexcept -> void {
+    auto WindowImpl::keyboardLeave([[maybe_unused]] wl_keyboard *keyboard,
+                                   [[maybe_unused]] std::uint32_t serial,
+                                   [[maybe_unused]] wl_surface *surface) noexcept -> void {
         WindowImplBase::lostFocusEvent();
     }
 
@@ -689,7 +676,7 @@ namespace stormkit::wsi::details::wayland {
         const auto down = state == WL_KEYBOARD_KEY_STATE_PRESSED;
 
         auto it = std::ranges::find_if(m_keyboard_state,
-                                       [symbol](const auto &s) { return s.key == symbol; });
+                                       [symbol](const auto& s) { return s.key == symbol; });
 
         it->down = down;
         if (down) WindowImplBase::keyDownEvent(skey, character);
@@ -718,17 +705,19 @@ namespace stormkit::wsi::details::wayland {
     /////////////////////////////////////
     auto WindowImpl::keyboardRepeatInfo([[maybe_unused]] wl_keyboard *keyboard,
                                         [[maybe_unused]] std::int32_t rate,
-                                        [[maybe_unused]] std::int32_t delay) noexcept -> void {}
+                                        [[maybe_unused]] std::int32_t delay) noexcept -> void {
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto WindowImpl::relativePointerRelativeMotion(zwp_relative_pointer_v1 *pointer,
-                                                   std::uint32_t time_hi,
-                                                   std::uint32_t time_lw,
-                                                   wl_fixed_t dx,
-                                                   wl_fixed_t dy,
-                                                   wl_fixed_t dx_unaccel,
-                                                   wl_fixed_t dy_unaccel) noexcept -> void {
+    auto
+        WindowImpl::relativePointerRelativeMotion([[maybe_unused]] zwp_relative_pointer_v1 *pointer,
+                                                  [[maybe_unused]] std::uint32_t time_hi,
+                                                  [[maybe_unused]] std::uint32_t time_lw,
+                                                  [[maybe_unused]] wl_fixed_t dx,
+                                                  [[maybe_unused]] wl_fixed_t dy,
+                                                  wl_fixed_t dx_unaccel,
+                                                  wl_fixed_t dy_unaccel) noexcept -> void {
         m_mouse_state.position_in_window.x += wl_fixed_to_int(dx_unaccel);
         m_mouse_state.position_in_window.y += wl_fixed_to_int(dy_unaccel);
 
@@ -756,12 +745,18 @@ namespace stormkit::wsi::details::wayland {
             xdg_toplevel_set_min_size(m_xdg_toplevel.get(), m_extent.width, m_extent.height);
             xdg_toplevel_set_max_size(m_xdg_toplevel.get(), m_extent.width, m_extent.height);
         } else {
-            auto fullscreen_size = getDesktopFullscreenSize();
+            const auto fullscreen_size = [] {
+                const auto monitors = getMonitorSettings();
+                for (const auto& monitor : monitors)
+                    if (monitor.flags == Monitor::Flags::Primary) return monitor.extents[0];
+
+                return core::ExtentU { 1, 1 };
+            }();
 
             xdg_toplevel_set_min_size(m_xdg_toplevel.get(), 1, 1);
             xdg_toplevel_set_max_size(m_xdg_toplevel.get(),
-                                      fullscreen_size.size.width,
-                                      fullscreen_size.size.height);
+                                      fullscreen_size.width,
+                                      fullscreen_size.height);
         }
 
         if (globals.xdg_decoration_manager) {
@@ -788,10 +783,8 @@ namespace stormkit::wsi::details::wayland {
     }
 
     auto WindowImpl::createPixelBuffer() noexcept -> void {
-        const auto byte_per_pixel = m_video_settings.bpp / sizeof(core::Byte);
-        const auto buffer_size =
-            m_video_settings.size.width * m_video_settings.size.height * byte_per_pixel;
-        const auto buffer_stride = m_video_settings.size.width * byte_per_pixel;
+        const auto buffer_size   = m_extent.width * m_extent.height * 4;
+        const auto buffer_stride = m_extent.width * 4;
 
         auto fd = syscall(SYS_memfd_create, "buffer", 0);
         ftruncate(fd, buffer_size);
@@ -803,8 +796,8 @@ namespace stormkit::wsi::details::wayland {
 
         m_buffer.reset(wl_shm_pool_create_buffer(m_shm_pool.get(),
                                                  0,
-                                                 m_video_settings.size.width,
-                                                 m_video_settings.size.height,
+                                                 m_extent.width,
+                                                 m_extent.height,
                                                  buffer_stride,
                                                  WL_SHM_FORMAT_XRGB8888));
 
