@@ -12,8 +12,10 @@
 #include <winuser.h>
 
 namespace stormkit::wsi::details::win32 {
-    constinit auto CLASS_NAME = L"Stormkit_Window";
+    constexpr auto CLASS_NAME = L"Stormkit_Window";
 
+    /////////////////////////////////////
+    /////////////////////////////////////
     auto fromStdString(std::string_view str) -> std::wstring {
         const auto size =
             core::as<std::size_t>(MultiByteToWideChar(CP_UTF8, 0, std::data(str), -1, nullptr, 0));
@@ -27,13 +29,14 @@ namespace stormkit::wsi::details::win32 {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    WindowImpl::WindowImpl([[maybe_unused]] Window::WM wm) {}
+    WindowImpl::WindowImpl([[maybe_unused]] Window::WM wm) {
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
     WindowImpl::WindowImpl(Window::WM wm,
                            std::string title,
-                           const core::ExtentU &size,
+                           const core::ExtentU& size,
                            WindowStyle style)
         : WindowImpl { wm } {
         create(std::move(title), size, style);
@@ -49,15 +52,15 @@ namespace stormkit::wsi::details::win32 {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    WindowImpl::WindowImpl(WindowImpl &&) noexcept = default;
+    WindowImpl::WindowImpl(WindowImpl&&) noexcept = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto WindowImpl::operator=(WindowImpl &&) noexcept -> WindowImpl & = default;
+    auto WindowImpl::operator=(WindowImpl&&) noexcept -> WindowImpl& = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto WindowImpl::create(std::string title, const core::ExtentU &size, WindowStyle style)
+    auto WindowImpl::create(std::string title, const core::ExtentU& size, WindowStyle style)
         -> void {
         registerWindowClass();
 
@@ -103,7 +106,7 @@ namespace stormkit::wsi::details::win32 {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto WindowImpl::pollEvent(Event &event) noexcept -> bool {
+    auto WindowImpl::pollEvent(Event& event) noexcept -> bool {
         auto message = MSG {};
         ZeroMemory(&message, sizeof(MSG));
 
@@ -117,7 +120,7 @@ namespace stormkit::wsi::details::win32 {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto WindowImpl::waitEvent(Event &event) noexcept -> bool {
+    auto WindowImpl::waitEvent(Event& event) noexcept -> bool {
         auto message = MSG {};
         ZeroMemory(&message, sizeof(MSG));
 
@@ -141,13 +144,13 @@ namespace stormkit::wsi::details::win32 {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto WindowImpl::setSize(const core::ExtentU &size) noexcept -> void {
+    auto WindowImpl::setExtent(const core::ExtentU& extent) noexcept -> void {
         SetWindowPos(m_window_handle,
                      HWND_TOP,
                      0,
                      0,
-                     size.width,
-                     size.height,
+                     extent.width,
+                     extent.height,
                      SWP_NOMOVE | SWP_FRAMECHANGED);
     }
 
@@ -221,22 +224,26 @@ namespace stormkit::wsi::details::win32 {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto WindowImpl::hideMouse() noexcept -> void { ShowCursor(TRUE); }
+    auto WindowImpl::hideMouse() noexcept -> void {
+        ShowCursor(TRUE);
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto WindowImpl::unhideMouse() noexcept -> void { ShowCursor(FALSE); }
+    auto WindowImpl::unhideMouse() noexcept -> void {
+        ShowCursor(FALSE);
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto WindowImpl::size() const noexcept -> const core::ExtentU16 & {
+    auto WindowImpl::extent() const noexcept -> const core::ExtentU& {
         auto rect = RECT {};
         ZeroMemory(&rect, sizeof(RECT));
 
         GetClientRect(m_window_handle, &rect);
 
-        m_current_size.width  = core::as<core::UInt16>(rect.right - rect.left);
-        m_current_size.height = core::as<core::UInt16>(rect.bottom - rect.top);
+        m_current_size.width  = core::as<core::UInt32>(rect.right - rect.left);
+        m_current_size.height = core::as<core::UInt32>(rect.bottom - rect.top);
 
         return m_current_size;
     }
@@ -276,7 +283,7 @@ namespace stormkit::wsi::details::win32 {
                      LPARAM data) -> BOOL {
         if (_monitor == nullptr) return TRUE;
 
-        auto &monitors = *reinterpret_cast<std::vector<Monitor> *>(data);
+        auto& monitors = *reinterpret_cast<std::vector<Monitor> *>(data);
 
         auto monitor_info = MONITORINFOEX {};
         ZeroMemory(&monitor_info, sizeof(MONITORINFOEX));
@@ -284,7 +291,7 @@ namespace stormkit::wsi::details::win32 {
 
         GetMonitorInfo(_monitor, &monitor_info);
 
-        auto &monitor  = monitors.emplace_back();
+        auto& monitor  = monitors.emplace_back();
         monitor.handle = _monitor;
         if ((monitor_info.dwFlags & MONITORINFOF_PRIMARY) == MONITORINFOF_PRIMARY)
             monitor.flags = Monitor::Flags::Primary;
@@ -295,13 +302,13 @@ namespace stormkit::wsi::details::win32 {
         ZeroMemory(&dm, sizeof(DEVMODE));
 
         for (auto i = 0; EnumDisplaySettings(monitor_info.szDevice, i, &dm) != 0; ++i) {
-            monitor.sizes.emplace_back(core::as<core::UInt32>(dm.dmPelsWidth),
-                                       core::as<core::UInt32>(dm.dmPelsHeight));
+            monitor.extents.emplace_back(core::as<core::UInt32>(dm.dmPelsWidth),
+                                         core::as<core::UInt32>(dm.dmPelsHeight));
         }
 
-        monitor.sizes.erase(std::unique(std::begin(monitor.sizes), std::end(monitor.sizes)),
-                            std::end(monitor.sizes));
-        std::ranges::sort(monitor.sizes);
+        monitor.extents.erase(std::unique(std::begin(monitor.extents), std::end(monitor.extents)),
+                              std::end(monitor.extents));
+        std::ranges::sort(monitor.extents);
 
         return TRUE;
     }
@@ -309,28 +316,11 @@ namespace stormkit::wsi::details::win32 {
     /////////////////////////////////////
     /////////////////////////////////////
     auto WindowImpl::getMonitorSettings([[maybe_unused]] Window::WM wm) -> std::vector<Monitor> {
-        static auto monitors = std::vector<Monitor> {};
-        static auto init     = false;
+        auto monitors = std::vector<Monitor> {};
 
-        if (!init) {
-            EnumDisplayMonitors(nullptr, nullptr, loadMonitor, reinterpret_cast<LPARAM>(&monitors));
-
-            init = true;
-        }
+        EnumDisplayMonitors(nullptr, nullptr, loadMonitor, reinterpret_cast<LPARAM>(&monitors));
 
         return monitors;
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto WindowImpl::getPrimaryMonitorSettings(Window::WM wm) -> Monitor {
-        const auto settings = getMonitorSettings(wm);
-
-        const auto it = std::ranges::find_if(settings, [](const auto &monitor) {
-            return core::checkFlag(monitor.flags, Monitor::Flags::Primary);
-        });
-
-        return *it;
     }
 
     /////////////////////////////////////
@@ -376,8 +366,8 @@ namespace stormkit::wsi::details::win32 {
         switch (message) {
             case WM_CLOSE: closeEvent(); break;
             case WM_SIZE:
-                if ((w_param != SIZE_MINIMIZED) && !m_resizing && (m_last_size != size())) {
-                    m_last_size = size();
+                if ((w_param != SIZE_MINIMIZED) && !m_resizing && (m_last_size != extent())) {
+                    m_last_size = extent();
 
                     resizeEvent(m_last_size.width, m_last_size.height);
                 }
@@ -386,51 +376,51 @@ namespace stormkit::wsi::details::win32 {
             case WM_EXITSIZEMOVE:
                 m_resizing = false;
 
-                if (m_last_size != size()) {
-                    m_last_size = size();
+                if (m_last_size != extent()) {
+                    m_last_size = extent();
 
                     resizeEvent(m_last_size.width, m_last_size.height);
                 }
                 break;
             case WM_LBUTTONDOWN: {
-                auto x = core::as<core::Int16>(LOWORD(l_param));
-                auto y = core::as<core::Int16>(HIWORD(l_param));
+                auto x = core::as<core::Int32>(LOWORD(l_param));
+                auto y = core::as<core::Int32>(HIWORD(l_param));
                 mouseDownEvent(MouseButton::Left, x, y);
                 break;
             }
             case WM_LBUTTONUP: {
-                auto x = core::as<core::Int16>(LOWORD(l_param));
-                auto y = core::as<core::Int16>(HIWORD(l_param));
+                auto x = core::as<core::Int32>(LOWORD(l_param));
+                auto y = core::as<core::Int32>(HIWORD(l_param));
                 mouseUpEvent(MouseButton::Left, x, y);
                 break;
             }
             case WM_RBUTTONDOWN: {
-                auto x = core::as<core::Int16>(LOWORD(l_param));
-                auto y = core::as<core::Int16>(HIWORD(l_param));
+                auto x = core::as<core::Int32>(LOWORD(l_param));
+                auto y = core::as<core::Int32>(HIWORD(l_param));
                 mouseDownEvent(MouseButton::Right, x, y);
                 break;
             }
             case WM_RBUTTONUP: {
-                auto x = core::as<core::Int16>(LOWORD(l_param));
-                auto y = core::as<core::Int16>(HIWORD(l_param));
+                auto x = core::as<core::Int32>(LOWORD(l_param));
+                auto y = core::as<core::Int32>(HIWORD(l_param));
                 mouseUpEvent(MouseButton::Right, x, y);
                 break;
             }
             case WM_MBUTTONDOWN: {
-                auto x = core::as<core::Int16>(LOWORD(l_param));
-                auto y = core::as<core::Int16>(HIWORD(l_param));
+                auto x = core::as<core::Int32>(LOWORD(l_param));
+                auto y = core::as<core::Int32>(HIWORD(l_param));
                 mouseDownEvent(MouseButton::Middle, x, y);
                 break;
             }
             case WM_MBUTTONUP: {
-                auto x = core::as<core::Int16>(LOWORD(l_param));
-                auto y = core::as<core::Int16>(HIWORD(l_param));
+                auto x = core::as<core::Int32>(LOWORD(l_param));
+                auto y = core::as<core::Int32>(HIWORD(l_param));
                 mouseUpEvent(MouseButton::Middle, x, y);
                 break;
             }
             case WM_XBUTTONDOWN: {
-                auto x      = core::as<core::Int16>(LOWORD(l_param));
-                auto y      = core::as<core::Int16>(HIWORD(l_param));
+                auto x      = core::as<core::Int32>(LOWORD(l_param));
+                auto y      = core::as<core::Int32>(HIWORD(l_param));
                 auto button = HIWORD(w_param);
                 if (button == XBUTTON1) mouseDownEvent(MouseButton::Button1, x, y);
                 else if (button == XBUTTON2)
@@ -438,8 +428,8 @@ namespace stormkit::wsi::details::win32 {
                 break;
             }
             case WM_XBUTTONUP: {
-                auto x      = core::as<core::Int16>(LOWORD(l_param));
-                auto y      = core::as<core::Int16>(HIWORD(l_param));
+                auto x      = core::as<core::Int32>(LOWORD(l_param));
+                auto y      = core::as<core::Int32>(HIWORD(l_param));
                 auto button = HIWORD(w_param);
                 if (button == XBUTTON1) mouseUpEvent(MouseButton::Button2, x, y);
                 else if (button == XBUTTON2)
@@ -447,8 +437,8 @@ namespace stormkit::wsi::details::win32 {
                 break;
             }
             case WM_MOUSEMOVE: {
-                auto x = core::as<core::Int16>(LOWORD(l_param));
-                auto y = core::as<core::Int16>(HIWORD(l_param));
+                auto x = core::as<core::Int32>(LOWORD(l_param));
+                auto y = core::as<core::Int32>(HIWORD(l_param));
 
                 auto area = RECT {};
                 GetClientRect(m_window_handle, &area);

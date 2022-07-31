@@ -111,6 +111,7 @@ namespace stormkit::wsi::details::win32 {
             case '7': return Key::Num7;
             case '8': return Key::Num8;
             case '9': return Key::Num9;
+            default: break;
         }
 
         return Key::Unknow;
@@ -121,7 +122,6 @@ namespace stormkit::wsi::details::win32 {
     auto stormKitKeyToWin32(Key key) noexcept -> int {
         int vkey = 0;
         switch (key) {
-            default: vkey = 0; break;
             case Key::A: vkey = 'A'; break;
             case Key::B: vkey = 'B'; break;
             case Key::C: vkey = 'C'; break;
@@ -223,6 +223,7 @@ namespace stormkit::wsi::details::win32 {
             case Key::F14: vkey = VK_F14; break;
             case Key::F15: vkey = VK_F15; break;
             case Key::Pause: vkey = VK_PAUSE; break;
+            default: vkey = 0; break;
         }
 
         return vkey;
@@ -289,6 +290,7 @@ namespace stormkit::wsi::details::win32 {
             case '8': return '8';
             case VK_NUMPAD9: [[fallthrough]];
             case '9': return '9';
+            default: break;
         }
 
         return '\0';
