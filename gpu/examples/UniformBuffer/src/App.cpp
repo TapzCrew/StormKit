@@ -41,16 +41,16 @@ auto App::run([[maybe_unused]] const int argc, [[maybe_unused]] const char **arg
     namespace Chrono = std::chrono;
     using Clock      = std::chrono::high_resolution_clock;
 
-    const auto size = wsi::Window::getPrimaryMonitorSettings().sizes.back();
+    const auto extent = wsi::Window::getPrimaryMonitorSettings().extents.back();
 
     auto event_handler = wsi::EventHandler { *m_window };
     event_handler.addCallback(wsi::EventType::Closed,
-                              [this]([[maybe_unused]] const wsi::Event &event) {
+                              [this]([[maybe_unused]] const wsi::Event& event) {
                                   m_window->close();
                               });
     event_handler.addCallback(wsi::EventType::KeyReleased,
-                              [&]([[maybe_unused]] const wsi::Event &event) {
-                                  const auto &event_data =
+                              [&]([[maybe_unused]] const wsi::Event& event) {
+                                  const auto& event_data =
                                       core::as<wsi::KeyReleasedEventData>(event.data);
                                   if (event_data.key == wsi::Key::Escape) [[unlikely]]
                                       m_window->close();
@@ -60,7 +60,7 @@ auto App::run([[maybe_unused]] const int argc, [[maybe_unused]] const char **arg
                                           m_window->setFullscreenEnabled(false);
                                       } else {
                                           m_fullscreen_enabled = true;
-                                          m_window->setSize(size);
+                                          m_window->setExtent(extent);
                                           m_window->setFullscreenEnabled(true);
                                       }
                                   }
@@ -88,7 +88,7 @@ auto App::run([[maybe_unused]] const int argc, [[maybe_unused]] const char **arg
                                                   MODEL_BUFFER_SIZE * frame.image_index);
         m_model_staging_buffer->flush(MODEL_BUFFER_SIZE * frame.image_index, MODEL_BUFFER_SIZE);
 
-        auto &frame_data = m_frame_datas[frame.image_index];
+        auto& frame_data = m_frame_datas[frame.image_index];
 
         auto wait   = core::makeConstObserverStaticArray(frame.image_available);
         auto signal = core::makeConstObserverStaticArray(frame.render_finished);
@@ -126,15 +126,15 @@ auto App::doInitBaseRenderObjects() -> void {
          STORMKIT_COMPILER);
 
     ilog("--------- Physical Devices ----------");
-    for (const auto &device : m_instance->physicalDevices()) ilog("{}", device.info());
+    for (const auto& device : m_instance->physicalDevices()) ilog("{}", device.info());
 
     auto surface = m_instance->allocateWindowSurface(*m_window);
 
-    const auto &physical_device = m_instance->pickPhysicalDevice(*surface);
+    const auto& physical_device = m_instance->pickPhysicalDevice(*surface);
 
     m_surface = std::move(surface);
 
-    const auto &physical_device_info = physical_device.info();
+    const auto& physical_device_info = physical_device.info();
 
     ilog("Using physical device {} ({:#06x})",
          physical_device_info.device_name,
@@ -153,7 +153,7 @@ auto App::doInitBaseRenderObjects() -> void {
 ////////////////////////////////////////
 ////////////////////////////////////////
 auto App::doInitMeshRenderObjects() -> void {
-    const auto &surface_extent = m_surface->extent();
+    const auto& surface_extent = m_surface->extent();
     const auto surface_extentf = core::ExtentF { surface_extent };
     const auto buffering_count = m_surface->bufferingCount();
 
@@ -202,9 +202,9 @@ auto App::doInitMeshRenderObjects() -> void {
         },
         .subpasses   = { { .bind_point      = gpu::PipelineBindPoint::Graphics,
                            .attachment_refs = { { .attachment_id = 0u },
-                                              { .attachment_id = 1u,
+                                                { .attachment_id = 1u,
                                                   .layout        = gpu::ImageLayout::
-                                                    Depth_Stencil_Attachment_Optimal } } } }
+                                                      Depth_Stencil_Attachment_Optimal } } } }
     };
     m_render_pass = m_device->allocateRenderPass(description);
     ilog("Renderpass successfully created");
@@ -222,16 +222,16 @@ auto App::doInitMeshRenderObjects() -> void {
         .color_blend_state   = { .attachments = { {} } },
         .dynamic_state       = { { gpu::DynamicState::Viewport, gpu::DynamicState::Scissor } },
         .shader_state        = { .shaders =
-                              core::makeConstObserverArray(m_vertex_shader, m_fragment_shader) },
+                                     core::makeConstObserverArray(m_vertex_shader, m_fragment_shader) },
         .vertex_input_state  = { .binding_descriptions =
-                                    core::toArray(MESH_VERTEX_BINDING_DESCRIPTIONS),
+                                     core::toArray(MESH_VERTEX_BINDING_DESCRIPTIONS),
                                  .input_attribute_descriptions =
-                                    core::toArray(MESH_VERTEX_ATTRIBUTE_DESCRIPTIONS) },
+                                     core::toArray(MESH_VERTEX_ATTRIBUTE_DESCRIPTIONS) },
         .depth_stencil_state = { .depth_test_enable  = true,
                                  .depth_write_enable = true,
                                  .depth_compare_op   = gpu::CompareOperation::Greater },
         .layout              = { .descriptor_set_layouts =
-                        core::makeConstObserverArray(m_descriptor_set_layout) }
+                                     core::makeConstObserverArray(m_descriptor_set_layout) }
     };
 
     m_pipeline->setState(state);
@@ -239,7 +239,7 @@ auto App::doInitMeshRenderObjects() -> void {
     m_pipeline->bake();
     ilog("engine pipeline successfully created");
 
-    const auto &capabilities = m_device->physicalDevice().capabilities();
+    const auto& capabilities = m_device->physicalDevice().capabilities();
     auto cmb                 = m_queue->createCommandBuffer();
 
     cmb.begin(true);
@@ -302,7 +302,7 @@ auto App::doInitMeshRenderObjects() -> void {
 ////////////////////////////////////////
 ////////////////////////////////////////
 auto App::doInitPerFrameObjects() -> void {
-    const auto &surface_extent = m_surface->extent();
+    const auto& surface_extent = m_surface->extent();
     const auto surface_extentf = core::ExtentF { surface_extent };
     const auto buffering_count = m_surface->bufferingCount();
 
@@ -313,7 +313,7 @@ auto App::doInitPerFrameObjects() -> void {
 
     m_surface_views.clear();
     m_surface_views.reserve(std::size(m_surface->images()));
-    for (const auto &image : m_surface->images()) m_surface_views.emplace_back(image.createView());
+    for (const auto& image : m_surface->images()) m_surface_views.emplace_back(image.createView());
 
     m_depth_buffers.reserve(buffering_count);
     m_depth_buffer_views.reserve(buffering_count);
@@ -342,9 +342,9 @@ auto App::doInitPerFrameObjects() -> void {
                                                     gpu::ClearValue { gpu::ClearDepthStencil {} });
 
     for (auto i : core::range(buffering_count)) {
-        const auto &image_view = m_surface_views[i];
+        const auto& image_view = m_surface_views[i];
 
-        const auto &depth =
+        const auto& depth =
             m_depth_buffers.emplace_back(*m_device,
                                          gpu::Image::CreateInfo {
                                              surface_extent,
@@ -356,13 +356,13 @@ auto App::doInitPerFrameObjects() -> void {
                                              gpu::SampleCountFlag::C1,
                                              gpu::ImageUsageFlag::Depth_Stencil_Attachment });
 
-        const auto &depth_view = m_depth_buffer_views.emplace_back(
+        const auto& depth_view = m_depth_buffer_views.emplace_back(
             depth.createView(gpu::ImageViewType::T2D,
                              { .aspect_mask = gpu::ImageAspectMaskFlag::Depth }));
 
         const auto attachments = core::makeConstRefArray(image_view, depth_view);
 
-        auto &frame = m_frame_datas.emplace_back(Frame {
+        auto& frame = m_frame_datas.emplace_back(Frame {
             .framebuffer = m_render_pass->createFramebuffer(surface_extent, std::move(attachments)),
             .commandbuffer = m_queue->createCommandBuffer(),
         });
@@ -394,5 +394,5 @@ auto App::doInitPerFrameObjects() -> void {
 
 ////////////////////////////////////////
 ////////////////////////////////////////
-auto App::updateModelMatrix([[maybe_unused]] stormkit::core::Secondf &delta) -> void {
+auto App::updateModelMatrix([[maybe_unused]] stormkit::core::Secondf& delta) -> void {
 }

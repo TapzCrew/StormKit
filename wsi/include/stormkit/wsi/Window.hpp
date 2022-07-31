@@ -34,35 +34,42 @@ namespace stormkit::wsi {
       public:
         using NativeHandle = void *;
 
-        enum class WM { Win32, X11, Wayland, macOS, iOS, Android, Switch };
+        enum class WM {
+            Win32,
+            X11,
+            Wayland,
+            macOS,
+            iOS,
+            Android,
+            Switch
+        };
 
         Window() noexcept;
-        Window(std::string title, const core::ExtentU &size, WindowStyle style) noexcept;
+        Window(std::string title, const core::ExtentU& size, WindowStyle style) noexcept;
         ~Window();
 
-        Window(Window &&);
-        auto operator=(Window &&) -> Window &;
+        Window(Window&&);
+        auto operator=(Window&&) -> Window&;
 
-        auto create(std::string title, const core::ExtentU &size, WindowStyle style) noexcept
+        auto create(std::string title, const core::ExtentU& size, WindowStyle style) noexcept
             -> void;
         auto close() noexcept -> void;
 
-        [[nodiscard]] auto pollEvent(Event &event) noexcept -> bool;
-        [[nodiscard]] auto waitEvent(Event &event) noexcept -> bool;
+        [[nodiscard]] auto pollEvent(Event& event) noexcept -> bool;
+        [[nodiscard]] auto waitEvent(Event& event) noexcept -> bool;
 
         auto setTitle(std::string title) noexcept -> void;
 
         auto setFullscreenEnabled(bool fullscreen) noexcept -> void;
 
-        auto setSize(const core::ExtentU &size) noexcept -> void;
+        auto setExtent(const core::ExtentU& extent) noexcept -> void;
 
         auto lockMouse() noexcept -> void;
         auto unlockMouse() noexcept -> void;
         auto hideMouse() noexcept -> void;
 
-        [[nodiscard]] auto size() const noexcept -> const core::ExtentU16 &;
-        [[nodiscard]] auto title() const noexcept -> const std::string &;
-        [[nodiscard]] auto videoSettings() const noexcept -> const Monitor &;
+        [[nodiscard]] auto extent() const noexcept -> const core::ExtentU&;
+        [[nodiscard]] auto title() const noexcept -> const std::string&;
 
         [[nodiscard]] auto isOpen() const noexcept -> bool;
         [[nodiscard]] auto visible() const noexcept -> bool;
@@ -77,8 +84,8 @@ namespace stormkit::wsi {
 
         auto setVirtualKeyboardVisible(bool visible) noexcept -> void;
 
-        auto setMousePosition(core::Position2i position) noexcept -> void;
-        static auto setMousePositionOnDesktop(core::Position2u position) noexcept -> void;
+        auto setMousePosition(const core::Position2i& position) noexcept -> void;
+        static auto setMousePositionOnDesktop(const core::Position2u& position) noexcept -> void;
 
         [[nodiscard]] static auto getMonitorSettings() -> std::vector<Monitor>;
         [[nodiscard]] static auto getPrimaryMonitorSettings() -> Monitor;

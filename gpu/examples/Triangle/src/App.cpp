@@ -38,18 +38,18 @@ App::~App() {
 ////////////////////////////////////////
 ////////////////////////////////////////
 auto App::run([[maybe_unused]] const int argc, [[maybe_unused]] const char **argv) -> core::Int32 {
-    const auto size = wsi::Window::getPrimaryMonitorSettings().sizes.back();
+    const auto extent = wsi::Window::getPrimaryMonitorSettings().extents.back();
 
     auto stop = std::atomic_bool { false };
 
     auto event_handler = wsi::EventHandler { *m_window };
     event_handler.addCallback(wsi::EventType::Closed,
-                              [this]([[maybe_unused]] const wsi::Event &event) {
+                              [this]([[maybe_unused]] const wsi::Event& event) {
                                   m_window->close();
                               });
     event_handler.addCallback(wsi::EventType::KeyReleased,
-                              [&]([[maybe_unused]] const wsi::Event &event) {
-                                  const auto &event_data =
+                              [&]([[maybe_unused]] const wsi::Event& event) {
+                                  const auto& event_data =
                                       core::as<wsi::KeyReleasedEventData>(event.data);
                                   if (event_data.key == wsi::Key::Escape) [[unlikely]] {
                                       stop = true;
@@ -61,7 +61,7 @@ auto App::run([[maybe_unused]] const int argc, [[maybe_unused]] const char **arg
                                           m_window->setFullscreenEnabled(false);
                                       } else {
                                           m_fullscreen_enabled = true;
-                                          m_window->setSize(size);
+                                          m_window->setExtent(extent);
                                           m_window->setFullscreenEnabled(true);
                                       }
                                   }
@@ -75,7 +75,7 @@ auto App::run([[maybe_unused]] const int argc, [[maybe_unused]] const char **arg
         }
 
         auto frame       = std::move(m_surface->acquireNextFrame().value());
-        auto &frame_data = m_frame_datas[frame.image_index];
+        auto& frame_data = m_frame_datas[frame.image_index];
 
         auto wait   = core::makeConstObserverStaticArray(frame.image_available);
         auto signal = core::makeConstObserverStaticArray(frame.render_finished);
@@ -113,15 +113,15 @@ auto App::doInitBaseRenderObjects() -> void {
          STORMKIT_COMPILER);
 
     ilog("--------- Physical Devices ----------");
-    for (const auto &device : m_instance->physicalDevices()) ilog("{}", device.info());
+    for (const auto& device : m_instance->physicalDevices()) ilog("{}", device.info());
 
     auto surface = m_instance->allocateWindowSurface(*m_window);
 
-    const auto &physical_device = m_instance->pickPhysicalDevice(*surface);
+    const auto& physical_device = m_instance->pickPhysicalDevice(*surface);
 
     m_surface = std::move(surface);
 
-    const auto &physical_device_info = physical_device.info();
+    const auto& physical_device_info = physical_device.info();
 
     ilog("Using physical device {} ({:#06x})",
          physical_device_info.device_name,
@@ -140,7 +140,7 @@ auto App::doInitBaseRenderObjects() -> void {
 ////////////////////////////////////////
 ////////////////////////////////////////
 auto App::doInitMeshRenderObjects() -> void {
-    const auto &surface_extent = m_surface->extent();
+    const auto& surface_extent = m_surface->extent();
     const auto surface_extentf = core::ExtentF { surface_extent };
 
     // We load our triangle shaders
@@ -171,7 +171,7 @@ auto App::doInitMeshRenderObjects() -> void {
         .color_blend_state  = { .attachments = { {} } },
         .dynamic_state      = { { gpu::DynamicState::Viewport, gpu::DynamicState::Scissor } },
         .shader_state       = { .shaders =
-                              core::makeConstObserverArray(m_vertex_shader, m_fragment_shader) },
+                                    core::makeConstObserverArray(m_vertex_shader, m_fragment_shader) },
         .vertex_input_state = { .binding_descriptions =
                                     core::toArray(MESH_VERTEX_BINDING_DESCRIPTIONS),
                                 .input_attribute_descriptions =
@@ -191,13 +191,13 @@ auto App::doInitMeshRenderObjects() -> void {
 ////////////////////////////////////////
 ////////////////////////////////////////
 auto App::doInitPerFrameObjects() -> void {
-    const auto &surface_extent = m_surface->extent();
+    const auto& surface_extent = m_surface->extent();
     const auto surface_extentf = core::ExtentF { surface_extent };
     const auto buffering_count = m_surface->bufferingCount();
 
     m_surface_views.clear();
     m_surface_views.reserve(std::size(m_surface->images()));
-    for (const auto &image : m_surface->images()) m_surface_views.emplace_back(image.createView());
+    for (const auto& image : m_surface->images()) m_surface_views.emplace_back(image.createView());
 
     m_frame_datas.clear();
     m_frame_datas.reserve(buffering_count);
@@ -217,7 +217,7 @@ auto App::doInitPerFrameObjects() -> void {
     }();
 
     for (auto i : core::range(buffering_count)) {
-        const auto &image_view = m_surface_views[i];
+        const auto& image_view = m_surface_views[i];
         auto attachments       = core::makeConstRefArray(image_view);
 
         auto frame =

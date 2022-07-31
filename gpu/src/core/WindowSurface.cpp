@@ -542,7 +542,7 @@ namespace stormkit::gpu {
             capabilities.currentExtent.height != int_max)
             return capabilities.currentExtent;
 
-        auto actual_extent = VkExtent2D { m_window->size().width, m_window->size().height };
+        auto actual_extent = VkExtent2D { m_window->extent().width, m_window->extent().height };
         actual_extent.width =
             std::max(capabilities.minImageExtent.width,
                      std::min(capabilities.maxImageExtent.width, actual_extent.width));

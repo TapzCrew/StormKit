@@ -72,7 +72,7 @@ namespace stormkit::wsi {
 
     struct ResizedEventData {
         static constexpr auto TYPE = EventType::Resized;
-        core::ExtentU16 extent;
+        core::ExtentU extent;
     };
 
     struct MinimizedEventData {

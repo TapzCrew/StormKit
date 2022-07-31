@@ -35,7 +35,7 @@ namespace stormkit::engine {
                                          m_window->close();
                                      });
         m_event_handler->addCallback(wsi::EventType::KeyReleased, [&](const wsi::Event& event) {
-            const auto size = wsi::Window::getPrimaryMonitorSettings().sizes.back();
+            const auto extent = wsi::Window::getPrimaryMonitorSettings().extents.back();
 
             const auto& event_data = core::as<wsi::KeyReleasedEventData>(event.data);
             if (event_data.key == wsi::Key::Escape) [[unlikely]] { m_window->close(); }
@@ -45,7 +45,7 @@ namespace stormkit::engine {
                     m_window->setFullscreenEnabled(false);
                 } else {
                     m_fullscreen_enabled = true;
-                    m_window->setSize(size);
+                    m_window->setExtent(extent);
                     m_window->setFullscreenEnabled(true);
                 }
             }

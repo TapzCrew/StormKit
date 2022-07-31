@@ -18,13 +18,13 @@
 namespace stormkit::wsi::details {
     class WindowImplBase {
       public:
-        [[nodiscard]] auto pollEvent(Event &event) noexcept -> bool;
-        [[nodiscard]] auto waitEvent(Event &event) noexcept -> bool;
+        [[nodiscard]] auto pollEvent(Event& event) noexcept -> bool;
+        [[nodiscard]] auto waitEvent(Event& event) noexcept -> bool;
 
-        auto mouseDownEvent(MouseButton button, core::Int16 x, core::Int16 y) noexcept -> void;
-        auto mouseUpEvent(MouseButton button, core::Int16 x, core::Int16 y) noexcept -> void;
+        auto mouseDownEvent(MouseButton button, core::Int32 x, core::Int32 y) noexcept -> void;
+        auto mouseUpEvent(MouseButton button, core::Int32 x, core::Int32 y) noexcept -> void;
 
-        auto mouseMoveEvent(core::Int16 x, core::Int16 y) noexcept -> void;
+        auto mouseMoveEvent(core::Int32 x, core::Int32 y) noexcept -> void;
 
         auto mouseEnteredEvent() noexcept -> void;
         auto mouseExitedEvent() noexcept -> void;
@@ -34,7 +34,7 @@ namespace stormkit::wsi::details {
 
         auto closeEvent() noexcept -> void;
 
-        auto resizeEvent(core::UInt16 width, core::UInt16 height) noexcept -> void;
+        auto resizeEvent(core::UInt32 width, core::UInt32 height) noexcept -> void;
         auto minimizeEvent() noexcept -> void;
         auto maximizeEvent() noexcept -> void;
 
@@ -42,7 +42,7 @@ namespace stormkit::wsi::details {
         auto gainedFocusEvent() noexcept -> void;
 
       protected:
-        auto pushEvent(const Event &event) noexcept -> void;
+        auto pushEvent(const Event& event) noexcept -> void;
 
         Monitor m_video_settings;
 

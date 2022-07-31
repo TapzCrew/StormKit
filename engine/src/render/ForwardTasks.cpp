@@ -45,7 +45,7 @@ namespace stormkit::engine {
                                    SHADER_DATA,
                                    gpu::ShaderStageFlag::Vertex);
 
-            const auto& extent = engine.window().size();
+            const auto& extent = engine.window().extent();
             struct ForwardPass {
                 engine::GraphImage *output;
             };
@@ -68,26 +68,25 @@ namespace stormkit::engine {
                     const auto state = gpu::GraphicsPipelineState {
                         .viewport_state = { .viewports = { gpu::Viewport {
                                                 .position = { 0.f, 0.f },
-                                                .extent   = core::ExtentF { extent },
+                                                .extent   = extent,
                                                 .depth    = { 0.f, 1.f } } },
-                                            .scissors  = { gpu::Scissor {
-                                                 .offset = { 0, 0 },
-                                                 .extent = core::ExtentU { extent } } } },
+                                            .scissors  = { gpu::Scissor { .offset = { 0, 0 },
+                                                                          .extent = extent } } },
 
                         .color_blend_state   = { .attachments = { {} } },
                         .dynamic_state       = { { gpu::DynamicState::Viewport,
-                                             gpu::DynamicState::Scissor } },
+                                                   gpu::DynamicState::Scissor } },
                         .shader_state        = { .shaders =
-                                              core::makeConstObserverArray(vertex_shader,
+                                                     core::makeConstObserverArray(vertex_shader,
                                                                            fragment_shader) },
                         .vertex_input_state  = { .binding_descriptions =
-                                                    std::vector<gpu::VertexBindingDescription> {
+                                                     std::vector<gpu::VertexBindingDescription> {
                                                         std::begin(
                                                             VertexArray::bindingDescriptions()),
                                                         std::end(
                                                             VertexArray::bindingDescriptions()) },
                                                  .input_attribute_descriptions =
-                                                    std::vector<
+                                                     std::vector<
                                                         gpu::VertexInputAttributeDescription> {
                                                         std::begin(
                                                             VertexArray::attributesDescriptions()),

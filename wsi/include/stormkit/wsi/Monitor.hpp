@@ -12,32 +12,38 @@
 
 namespace stormkit::wsi {
     struct Monitor {
-        enum class Flags { None = 0, Primary };
+        enum class Flags {
+            None = 0,
+            Primary
+        };
 
         Flags flags = Flags::None;
         std::string name;
 
-        std::vector<core::ExtentU> sizes;
+        std::vector<core::ExtentU> extents;
 
         void *handle = nullptr;
 
-        [[nodiscard]] constexpr auto operator<=>(const Monitor &other) const noexcept
+        [[nodiscard]] constexpr auto operator<=>(const Monitor& other) const noexcept
             -> std::strong_ordering;
 
-        [[nodiscard]] constexpr auto operator==(const Monitor &other) const noexcept -> bool;
+        [[nodiscard]] constexpr auto operator==(const Monitor& other) const noexcept -> bool;
     };
 
     FORMATTER(stormkit::wsi::Monitor,
               "Monitor {{\n"
               "   flags: {},\n"
               "   name: {},\n"
-              "   sizes: {}\n"
+              "   extents: {}\n"
               "}}",
               data.flags,
               data.name,
-              data.sizes);
+              data.extents);
+
+    auto toString(Monitor::Flags flags) -> std::string;
 } // namespace stormkit::wsi
 
+CUSTOM_FORMAT(stormkit::wsi::Monitor::Flags, stormkit::wsi::toString(data))
 CUSTOM_FORMAT(stormkit::wsi::Monitor, stormkit::wsi::toString(data))
 FLAG_ENUM(stormkit::wsi::Monitor::Flags)
 
