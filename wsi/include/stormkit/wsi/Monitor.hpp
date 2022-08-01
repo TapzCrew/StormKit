@@ -31,15 +31,6 @@ namespace stormkit::wsi {
         [[nodiscard]] constexpr auto operator==(const Monitor& other) const noexcept -> bool;
     };
 
-    [[nodiscard]] constexpr auto toString(Monitor::Flags value) -> std::string_view {
-        switch (value) {
-            case Monitor::Flags::None: return "None";
-            case Monitor::Flags::Primary: return "Primary";
-        }
-
-        return "Unknown";
-    }
-
     FORMATTER(stormkit::wsi::Monitor,
               "Monitor {{\n"
               "   flags: {},\n"
