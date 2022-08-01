@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <cstdint>
+
 #include <frozen/unordered_map.h>
 #include <frozen/unordered_set.h>
 
@@ -19,21 +21,21 @@ namespace stormkit::core {
              core::HashFuncType<Value> Hasher,
              core::BinaryPredicateType<Value> Equal>
     [[nodiscard]] constexpr auto makeFrozenMap(const std::pair<Key, Value> (&items)[N],
-                                               const Hasher &hash = frozen::elsa<Key> {},
-                                               const Equal &equal = std::equal_to<Key> {}) noexcept;
+                                               const Hasher& hash = frozen::elsa<Key> {},
+                                               const Equal& equal = std::equal_to<Key> {}) noexcept;
 
     template<core::HashableType Key, typename Value, std::size_t N>
     [[nodiscard]] constexpr auto
-        makeFrozenMap(const std::array<std::pair<Key, Value>, N> &items) noexcept;
+        makeFrozenMap(const std::array<std::pair<Key, Value>, N>& items) noexcept;
 
     template<typename Key,
              typename Value,
              std::size_t N,
              core::HashFuncType<Value> Hasher,
              core::BinaryPredicateType<Value> Equal>
-    [[nodiscard]] constexpr auto makeFrozenMap(const std::array<std::pair<Key, Value>, N> &items,
-                                               const Hasher &hash = frozen::elsa<Key> {},
-                                               const Equal &equal = std::equal_to<Key> {}) noexcept;
+    [[nodiscard]] constexpr auto makeFrozenMap(const std::array<std::pair<Key, Value>, N>& items,
+                                               const Hasher& hash = frozen::elsa<Key> {},
+                                               const Equal& equal = std::equal_to<Key> {}) noexcept;
 } // namespace stormkit::core
 
 #include "FrozenMap.inl"
