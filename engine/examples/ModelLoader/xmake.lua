@@ -10,7 +10,7 @@ target("model_loader")
 
     add_files("src/*.cpp")
     add_headerfiles("src/*.hpp")
-    add_modulefiles("src/*.mpp")
+    add_files("src/*.mpp")
 
     if is_plat("windows") then
         add_files("win32/*.manifest")

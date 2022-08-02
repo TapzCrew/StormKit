@@ -9,8 +9,8 @@ target("stormkit-engine")
         set_suffixname("-d")
     end
 
-    add_modulefiles("include/stormkit/**.mpp")
-    add_modulefiles("src/**.mpp")
+    add_files("include/stormkit/**.mpp")
+    add_files("src/**.mpp")
     add_headerfiles("src/**.hpp")
     add_files("src/**.nzsl")
     add_files("src/**.cpp")
