@@ -26,11 +26,11 @@ namespace stormkit::core {
         ThreadPool(core::USize worker_count = std::thread::hardware_concurrency() / 2);
         ~ThreadPool();
 
-        ThreadPool(const ThreadPool &) = delete;
-        auto operator=(const ThreadPool &) -> ThreadPool & = delete;
+        ThreadPool(const ThreadPool&)                    = delete;
+        auto operator=(const ThreadPool&) -> ThreadPool& = delete;
 
-        ThreadPool(ThreadPool &&) noexcept;
-        auto operator=(ThreadPool &&) noexcept -> ThreadPool &;
+        ThreadPool(ThreadPool&&) noexcept;
+        auto operator=(ThreadPool&&) noexcept -> ThreadPool&;
 
         auto workerCount() const noexcept -> core::USize;
 
@@ -43,13 +43,20 @@ namespace stormkit::core {
 
       private:
         struct Task {
-            enum class Type { Standard, Terminate };
+            enum class Type {
+                Standard,
+                Terminate
+            };
 
             Task() = default;
-            Task(Type _type, Callback<void> _work) : type { _type }, work { std::move(_work) } {}
+            Task(Type _type, std::function<void()> _work)
+                : type { _type }, work { std::move(_work) } {}
+
+            Task(Task&&) noexcept                    = default;
+            auto operator=(Task&&) noexcept -> Task& = default;
 
             Type type;
-            std::packaged_task<void()> work;
+            std::function<void()> work;
         };
 
         template<typename T>
@@ -68,19 +75,19 @@ namespace stormkit::core {
         std::queue<Task> m_tasks;
     };
 
-    template<std::ranges::range Range, std::invocable<typename Range::element_type &> F>
-    auto parallelFor(ThreadPool &pool, Range &&range, F &&f)
-        -> std::future<std::invoke_result_t<F, typename Range::element_type &>>;
+    template<std::ranges::range Range, std::invocable<typename Range::element_type&> F>
+    auto parallelFor(ThreadPool& pool, Range&& range, F&& f)
+        -> std::future<std::invoke_result_t<F, typename Range::element_type&>>;
 
-    template<std::ranges::range Range, std::invocable<typename Range::element_type &> F>
-    auto parallelTransform(ThreadPool &pool, Range &&range, F &&f)
-        -> std::future<std::invoke_result_t<F, typename Range::element_type &>>;
+    template<std::ranges::range Range, std::invocable<typename Range::element_type&> F>
+    auto parallelTransform(ThreadPool& pool, Range&& range, F&& f)
+        -> std::future<std::invoke_result_t<F, typename Range::element_type&>>;
 
     template<std::ranges::range Range,
-             std::predicate<typename Range::element_type &> Predicate,
-             std::invocable<typename Range::element_type &> F>
-    auto parallelTransformIf(ThreadPool &pool, Range &&range, Predicate &&predicate, F &&f)
-        -> std::future<std::invoke_result_t<F, typename Range::element_type &>>;
+             std::predicate<typename Range::element_type&> Predicate,
+             std::invocable<typename Range::element_type&> F>
+    auto parallelTransformIf(ThreadPool& pool, Range&& range, Predicate&& predicate, F&& f)
+        -> std::future<std::invoke_result_t<F, typename Range::element_type&>>;
 } // namespace stormkit::core
 
 #include "ThreadPool.inl"
