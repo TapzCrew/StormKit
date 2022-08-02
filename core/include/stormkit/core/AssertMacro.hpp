@@ -11,19 +11,6 @@
 #include <cstdlib>
 
 #if defined(STORMKIT_BUILD_DEBUG) || defined(STORMKIT_GEN_DOC)
-namespace stormkit::core::details {
-    struct AssertFailure {
-        [[noreturn]] AssertFailure(const char *type, const char *message) noexcept {
-            std::fprintf(stderr, "%s failure: %s", type, message);
-    #ifdef STORMKIT_OS_MACOS
-            std::exit(EXIT_FAILURE);
-    #else
-            std::quick_exit(EXIT_FAILURE);
-    #endif
-        }
-    };
-} // namespace stormkit::core::details
-
     #define STORMKIT_ASSERT_LINE STORMKIT_STRINGIFY(STORMKIT_CURRENT_LINE)
     #ifdef STORMKIT_OS_MACOS
         #define STORMKIT_ASSERT_BASE(condition, type, message)                                \
@@ -55,28 +42,28 @@ namespace stormkit::core::details {
         else                                                                     \
             STORMKIT_ASSERT_BASE(condition, type, message)
 
-/// \brief `STORMKIT_ASSERT` define an assertion, a confition that should be satisfied where it
-/// appears in a function body.
-///
-/// If the invariant is not satisfied, the program will stop, printing the
-/// message in the standard error output.
-///
-/// \param condition The condition of the assertion.
-/// \param message The failure message.
-/// \notes Disabled on release build.
+    /// \brief `STORMKIT_ASSERT` define an assertion, a confition that should be satisfied where it
+    /// appears in a function body.
+    ///
+    /// If the invariant is not satisfied, the program will stop, printing the
+    /// message in the standard error output.
+    ///
+    /// \param condition The condition of the assertion.
+    /// \param message The failure message.
+    /// \notes Disabled on release build.
     #define STORMKIT_ASSERT(condition) STORMKIT_ASSERT_BASE(condition, "Assertion", "")
 
     #define STORMKIT_ASSERT_MESSAGE(condition, message) \
         STORMKIT_ASSERT_BASE(condition, "Assertion", message)
 
-/// \brief `STORMKIT_ENSURES` define a postcondition, a condition that a function should ensure
-/// before returning value the state of other object upon entry the function.
-///
-/// If the invariant is not satisfied, the program will stop, printing the
-/// message in the standard error output.
-///
-/// \param condition The precondition.
-/// \notes Disabled on release build.
+    /// \brief `STORMKIT_ENSURES` define a postcondition, a condition that a function should ensure
+    /// before returning value the state of other object upon entry the function.
+    ///
+    /// If the invariant is not satisfied, the program will stop, printing the
+    /// message in the standard error output.
+    ///
+    /// \param condition The precondition.
+    /// \notes Disabled on release build.
     #define STORMKIT_ENSURES(condition) STORMKIT_ASSERT_BASE(condition, "Postcondition", "")
 
     /// \brief Same as `STORMKIT_ENSURES` but with a custom failure message.
