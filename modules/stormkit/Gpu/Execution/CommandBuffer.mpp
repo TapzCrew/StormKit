@@ -1,0 +1,312 @@
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+export module stormkit.Gpu:Execution.CommandBuffer;
+
+import std;
+
+import <stormkit/Core/PlatformMacro.hpp>;
+import <stormkit/Core/HashMacro.hpp>;
+
+import stormkit.Core;
+
+import :Core;
+import :Resource;
+
+import :Execution.Descriptors;
+import :Execution.RenderPass;
+import :Execution.Pipeline;
+
+import vulkan;
+
+export namespace stormkit::gpu {
+    class STORMKIT_API Queue: public DeviceObject {
+      public:
+        static constexpr auto DEBUG_TYPE = DebugObjectType::Queue;
+
+        Queue(const Device& device, const Device::QueueEntry& entry);
+        ~Queue();
+
+        Queue(const Queue&)                   = delete;
+        auto operator=(const Queue&) noexcept = delete;
+
+        Queue(Queue&&) noexcept;
+        auto operator=(Queue&&) noexcept -> Queue&;
+
+        auto waitIdle() const noexcept -> void;
+
+        auto submit(std::span<core::NakedRef<const CommandBuffer>> commandbuffers,
+                    std::span<core::NakedRef<const Semaphore>> wait_semaphores   = {},
+                    std::span<core::NakedRef<const Semaphore>> signal_semaphores = {},
+                    Fence *fence = nullptr) const noexcept -> void;
+
+        [[nodiscard]] auto entry() const noexcept -> const Device::QueueEntry&;
+
+        [[nodiscard]] auto vkHandle() const noexcept -> const vk::raii::Queue&;
+
+      private:
+        Device::QueueEntry m_entry;
+
+        core::DeferInit<vk::raii::Queue> m_vk_queue;
+    };
+
+    class QueueObject: public ParentRef<Queue> {
+      public:
+        using ParentRef<Queue>::ParentRef;
+
+        [[nodiscard]] auto image() const noexcept -> const Queue&;
+    };
+
+    class CommandPool;
+    class CommandPoolObject: public ParentRef<CommandPool> {
+      public:
+        using ParentRef<CommandPool>::ParentRef;
+
+        [[nodiscard]] auto image() const noexcept -> const CommandPool&;
+    };
+
+    struct InheritanceInfo {
+        const RenderPass *render_pass  = nullptr;
+        core::UInt32 subpass           = 0;
+        const FrameBuffer *framebuffer = nullptr;
+    };
+
+    class STORMKIT_API CommandBuffer: public DeviceObject,
+                                      public QueueObject,
+                                      public CommandPoolObject {
+      public:
+        struct Tag {
+          public:
+            Tag(const Tag&) noexcept                    = default;
+            auto operator=(const Tag&) noexcept -> Tag& = default;
+            Tag(Tag&&) noexcept                         = default;
+            auto operator=(Tag&&) noexcept -> Tag&      = default;
+
+          private:
+            Tag() noexcept {}
+
+            friend class CommandBuffer;
+            friend class CommandBufferPool;
+        };
+
+        enum class State {
+            Initial,
+            Recording,
+            Executable
+        };
+
+        static constexpr auto DEBUG_TYPE = DebugObjectType::Command_Buffer;
+
+        using Deleter = std::function<void(vk::raii::CommandBuffer&)>;
+
+        CommandBuffer(const CommandPoolObject& command_pool,
+                      CommandBufferLevel level,
+                      vk::raii::CommandBuffer&& commandbuffer,
+                      Deleter deleter,
+                      Tag);
+        ~CommandBuffer();
+
+        CommandBuffer(const CommandBuffer&)                    = delete;
+        auto operator=(const CommandBuffer&) -> CommandBuffer& = delete;
+
+        CommandBuffer(CommandBuffer&&) noexcept;
+        auto operator=(CommandBuffer&&) noexcept -> CommandBuffer&;
+
+        auto reset() noexcept -> void;
+        auto submit(std::span<core::NakedRef<const Semaphore>> wait_semaphores   = {},
+                    std::span<core::NakedRef<const Semaphore>> signal_semaphores = {},
+                    Fence *fence = nullptr) const noexcept -> void;
+
+        [[nodiscard]] auto state() const noexcept -> State;
+        [[nodiscard]] auto level() const noexcept -> CommandBufferLevel;
+
+        auto beginDebugRegion(std::string_view name,
+                              const core::RGBColorF& color = core::RGBColorDef::White<float>)
+            -> void;
+        auto insertDebugLabel(std::string_view name,
+                              const core::RGBColorF& color = core::RGBColorDef::White<float>)
+            -> void;
+        auto endDebugRegion() -> void;
+
+        auto begin(bool one_time_submit                            = false,
+                   std::optional<InheritanceInfo> inheritance_info = std::nullopt) -> void;
+        auto end() -> void;
+
+        auto beginRenderPass(const RenderPass& render_pass,
+                             const FrameBuffer& framebuffer,
+                             std::span<const ClearValue> clear_values = std::array { ClearValue {
+                                 ClearColor { .color = core::RGBColorDef::Silver<float> } } },
+                             bool secondary_commandbuffers            = false) -> void;
+        auto nextSubPass() -> void;
+        auto endRenderPass() -> void;
+
+        auto bindPipeline(const Pipeline& pipeline) -> void;
+        auto setViewport(core::UInt32 first_viewport, std::span<const Viewport> viewports) -> void;
+        auto setScissor(core::UInt32 first_scissor, std::span<const Scissor> scissors) -> void;
+        auto setLineWidth(float width) -> void;
+        auto setDepthBias(float constant_factor, float clamp, float slope_factor) -> void;
+        auto setBlendConstants(std::span<const float> constants) -> void;
+        auto setDepthBounds(float min, float max) -> void;
+        auto setStencilCompareMask(StencilFaceFlag face, core::UInt32 mask) -> void;
+        auto setStencilWriteMask(StencilFaceFlag face, core::UInt32 mask) -> void;
+        auto setStencilReference(StencilFaceFlag face, core::UInt32 reference) -> void;
+
+        auto dispatch(core::UInt32 group_count_x,
+                      core::UInt32 group_count_y,
+                      core::UInt32 group_count_z) -> void;
+
+        auto draw(core::UInt32 vertex_count,
+                  core::UInt32 instance_count = 1u,
+                  core::UInt32 first_vertex   = 0,
+                  core::UInt32 first_instance = 0) -> void;
+        auto drawIndexed(core::UInt32 index_count,
+                         core::UInt32 instance_count = 1u,
+                         core::UInt32 first_index    = 0u,
+                         core::Int32 vertex_offset   = 0,
+                         core::UInt32 first_instance = 0u) -> void;
+        auto drawIndirect(const Buffer& buffer,
+                          core::RangeExtent offset,
+                          core::UInt32 draw_count,
+                          core::UInt32 stride) -> void;
+        auto drawIndexedIndirect(const Buffer& buffer,
+                                 core::RangeExtent offset,
+                                 core::UInt32 draw_count,
+                                 core::UInt32 stride) -> void;
+
+        auto bindVertexBuffers(std::span<const Buffer *> buffers,
+                               std::span<const core::UInt64> offsets) -> void;
+        auto bindIndexBuffer(const Buffer& buffer,
+                             core::UInt64 offset = 0,
+                             bool large_indices  = false) -> void;
+        auto bindDescriptorSets(const Pipeline& pipeline,
+                                std::span<const DescriptorSet *> descriptor_sets,
+                                std::span<const core::UInt32> dynamic_offsets = {}) -> void;
+
+        auto copyBuffer(const Buffer& source,
+                        const Buffer& destination,
+                        core::RangeExtent size,
+                        core::UInt64 src_offset = 0u,
+                        core::UInt64 dst_offset = 0u) -> void;
+        auto copyBufferToImage(const Buffer& source,
+                               const Image& destination,
+                               std::span<const BufferImageCopy> buffer_image_copies = {}) -> void;
+        auto copyImageToBuffer(const Image& source,
+                               const Buffer& destination,
+                               std::span<const BufferImageCopy> buffer_image_copies = {}) -> void;
+        auto copyImage(const Image& source,
+                       const Image& destination,
+                       ImageLayout source_layout,
+                       ImageLayout destination_layout,
+                       const ImageSubresourceLayers& source_subresource_layers,
+                       const ImageSubresourceLayers& destination_subresource_layers,
+                       const core::math::ExtentU& extent) -> void;
+
+        auto resolveImage(const Image& source,
+                          const Image& destination,
+                          ImageLayout source_layout,
+                          ImageLayout destination_layout,
+                          const ImageSubresourceLayers& source_subresource_layers      = {},
+                          const ImageSubresourceLayers& destination_subresource_layers = {})
+            -> void;
+
+        auto blitImage(const Image& source,
+                       const Image& destination,
+                       ImageLayout source_layout,
+                       ImageLayout destination_layout,
+                       std::span<const BlitRegion> regions,
+                       Filter filter) -> void;
+
+        auto transitionImageLayout(const Image& image,
+                                   ImageLayout source_layout,
+                                   ImageLayout destination_layout,
+                                   const ImageSubresourceRange& subresource_range = {}) -> void;
+
+        auto executeSubCommandBuffers(std::span<const CommandBuffer *> commandbuffers) -> void;
+
+        auto pipelineBarrier(PipelineStageFlag src_mask,
+                             PipelineStageFlag dst_mask,
+                             DependencyFlag dependency,
+                             std::span<const MemoryBarrier> memory_barriers,
+                             std::span<const BufferMemoryBarrier> buffer_memory_barriers,
+                             std::span<const ImageMemoryBarrier> image_memory_barriers) -> void;
+
+        auto pushConstants(const Pipeline& pipeline,
+                           ShaderStageFlag stage,
+                           std::span<const core::Byte> data,
+                           core::UInt32 offset = 0u) -> void;
+
+        [[nodiscard]] auto vkHandle() const noexcept -> const vk::raii::CommandBuffer&;
+
+      private:
+        State m_state              = State::Initial;
+        CommandBufferLevel m_level = CommandBufferLevel::Primary;
+
+        core::DeferInit<vk::raii::CommandBuffer> m_vk_command_buffer;
+
+        Deleter m_deleter;
+    };
+
+    class STORMKIT_API CommandBufferPool: public DeviceObject, public QueueObject {
+      public:
+        CommandBufferPool(const Device& device, const Queue& queue);
+        ~CommandBufferPool();
+
+        CommandBufferPool(const CommandBufferPool&)       = delete;
+        auto operator=(const CommandBufferPool&) noexcept = delete;
+
+        CommandBufferPool(CommandBufferPool&&) noexcept;
+        auto operator=(CommandBufferPool&&) noexcept -> CommandBufferPool&;
+
+        [[nodiscard]] auto vkHandle() const noexcept -> const vk::raii::CommandPool&;
+
+      private:
+        auto createCommandBuffers(core::RangeExtent count, CommandBufferLevel level) const noexcept
+            -> std::vector<vk::raii::CommandBuffer>;
+        auto deleteCommandBuffer(vk::raii::CommandBuffer cmb) const noexcept -> void;
+
+        core::DeferInit<vk::raii::CommandPool> m_vk_command_pool;
+    };
+} // namespace stormkit::gpu
+
+////////////////////////////////////////////////////////////////////
+///                      IMPLEMENTATION                          ///
+////////////////////////////////////////////////////////////////////
+
+namespace stormkit::gpu {
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Queue::entry() const noexcept -> const Device::QueueEntry& {
+        return m_entry;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Queue::vkHandle() const noexcept -> const vk::raii::Queue & {
+        return m_vk_queue;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto CommandBuffer::state() const noexcept -> State {
+        return m_state;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto CommandBuffer::level() const noexcept -> CommandBufferLevel {
+        return m_level;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto CommandBuffer::vkHandle() const noexcept -> const vk::raii::CommandBuffer& {
+        return m_vk_command_buffer;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto CommandBufferPool::vkHandle() const noexcept -> const vk::raii::CommandPool& {
+        return m_vk_command_pool;
+    }
+} // namespace stormkit::gpu

@@ -1,0 +1,219 @@
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+export module stormkit.Gpu:Resource.Buffer;
+
+import std;
+
+import stormkit.Core;
+
+import :Core;
+
+export namespace stormkit::gpu {
+    class STORMKIT_API Buffer: public DeviceObject {
+      public:
+        struct CreateInfo {
+            BufferUsageFlag usages;
+            core::RangeExtent size;
+            MemoryPropertyFlag property =
+                MemoryPropertyFlag::Host_Visible | MemoryPropertyFlag::Host_Coherent;
+        };
+
+        static constexpr auto DEBUG_TYPE = DebugObjectType::Buffer;
+
+        Buffer(const Device& device, const CreateInfo& info, bool persistently_mapping = false);
+        ~Buffer();
+
+        Buffer(const Buffer&) = delete;
+        auto operator=(const Buffer&) -> Buffer&;
+
+        Buffer(Buffer&&) noexcept;
+        auto operator=(Buffer&&) noexcept -> Buffer&;
+
+        [[nodiscard]] auto usages() const noexcept -> BufferUsageFlag;
+        [[nodiscard]] auto size() const noexcept -> core::RangeExtent;
+
+        [[nodiscard]] auto map(core::Int64 offset) noexcept -> core::Byte *;
+        [[nodiscard]] auto map(core::Int64 offset, core::RangeExtent size) noexcept
+            -> std::span<core::Byte>;
+
+        template<class T>
+        [[nodiscard]] auto mapAs(core::Int64 offset) -> T *;
+
+        [[nodiscard]] auto data() noexcept -> core::Byte *;
+        [[nodiscard]] auto data() const noexcept -> const core::Byte *;
+        [[nodiscard]] auto data(core::RangeExtent size) noexcept -> std::span<core::Byte>;
+        [[nodiscard]] auto data(core::RangeExtent size) const noexcept
+            -> std::span<const core::Byte>;
+
+        template<class T>
+        [[nodiscard]] auto dataAs() noexcept -> T *;
+        template<class T>
+        [[nodiscard]] auto dataAs() const noexcept -> const T *;
+
+        auto flush(core::Int64 offset, core::RangeExtent size) -> void;
+        auto unmap() -> void;
+
+        [[nodiscard]] auto isPersistentlyMapped() const noexcept -> bool;
+
+        auto upload(std::span<const core::Byte> data, core::Int64 offset = 0) -> void;
+        template<class T>
+        auto upload(const T& data, core::Int64 offset = 0) -> void;
+        template<class T>
+        auto upload(std::span<const T> data, core::Int64 offset = 0) -> void;
+
+        [[nodiscard]] operator VkBuffer() const noexcept;
+        [[nodiscard]] auto vkHandle() const noexcept -> VkBuffer;
+
+      private:
+        static auto findMemoryType(core::UInt32 type_filter,
+                                   VkMemoryPropertyFlags properties,
+                                   const VkPhysicalDeviceMemoryProperties& mem_properties,
+                                   const VkMemoryRequirements& mem_requirements) -> core::UInt32;
+
+        BufferUsageFlag m_usages = {};
+        core::RangeExtent m_size = 0;
+
+        bool m_is_persistently_mapped = false;
+        core::Byte *m_mapped_pointer  = nullptr;
+
+        VkBuffer m_buffer             = VK_NULL_HANDLE;
+        VmaAllocation m_buffer_memory = VK_NULL_HANDLE;
+    };
+
+    DECLARE_PTR_AND_REF(Buffer);
+
+    struct BufferMemoryBarrier {
+        AccessFlag src;
+        AccessFlag dst;
+
+        core::UInt32 src_queue_family_index = QUEUE_FAMILY_IGNORED;
+        core::UInt32 dst_queue_family_index = QUEUE_FAMILY_IGNORED;
+
+        const Buffer& buffer;
+        core::RangeExtent size;
+        core::UInt64 offset = 0;
+    };
+} // namespace stormkit::gpu
+
+////////////////////////////////////////////////////////////////////
+///                      IMPLEMENTATION                          ///
+////////////////////////////////////////////////////////////////////
+
+namespace stormkit::gpu {
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Buffer::usages() const noexcept -> BufferUsageFlag {
+        core::expects(m_buffer);
+        core::expects(m_buffer_memory);
+
+        return m_usages;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Buffer::size() const noexcept -> core::RangeExtent {
+        core::expects(m_buffer);
+        core::expects(m_buffer_memory);
+
+        return m_size;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Buffer::map(core::Int64 offset, core::RangeExtent size) noexcept
+        -> std::span<core::Byte> {
+        return std::span<core::Byte> { map(offset), size };
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<class T>
+    inline auto Buffer::mapAs(core::Int64 offset) -> T * {
+        return reinterpret_cast<T *>(map(offset));
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Buffer::data() noexcept -> core::Byte * {
+        core::expects(m_buffer);
+        core::expects(m_buffer_memory);
+        core::expects(m_mapped_pointer);
+
+        return m_mapped_pointer;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Buffer::data() const noexcept -> const core::Byte * {
+        core::expects(m_buffer);
+        core::expects(m_buffer_memory);
+        core::expects(m_mapped_pointer);
+
+        return m_mapped_pointer;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Buffer::data(core::RangeExtent size) noexcept -> std::span<core::Byte> {
+        core::expects(m_buffer);
+        core::expects(m_buffer_memory);
+        core::expects(m_mapped_pointer);
+
+        return std::span<core::Byte> { m_mapped_pointer, size };
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Buffer::data(core::RangeExtent size) const noexcept -> std::span<const core::Byte> {
+        core::expects(m_buffer);
+        core::expects(m_buffer_memory);
+        core::expects(m_mapped_pointer);
+
+        return std::span<const core::Byte> { m_mapped_pointer, size };
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<class T>
+    inline auto Buffer::dataAs() noexcept -> T * {
+        return reinterpret_cast<T *>(data());
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<class T>
+    inline auto Buffer::dataAs() const noexcept -> const T * {
+        return reinterpret_cast<const T *>(data());
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<class T>
+    inline auto Buffer::upload(const T& data, core::Int64 offset) -> void {
+        upload(core::asByteView(data), offset);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<class T>
+    inline auto Buffer::upload(std::span<const T> data, core::Int64 offset) -> void {
+        upload(core::asByteView(data), offset);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline Buffer::operator VkBuffer() const noexcept {
+        return vkHandle();
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Buffer::vkHandle() const noexcept -> VkBuffer {
+        core::expects(m_buffer);
+        core::expects(m_buffer_memory);
+
+        return m_buffer;
+    }
+} // namespace stormkit::gpu

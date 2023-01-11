@@ -1,0 +1,169 @@
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+export module stormkit.Core:Utils.Flags;
+
+import std;
+
+import :Utils.AsCast;
+import :Meta;
+
+export {
+    namespace stormkit::core {
+        namespace details {
+            template<stormkit::core::IsEnumeration T>
+            struct EnableBitmaskOperators {
+                constexpr EnableBitmaskOperators() = default;
+                static constexpr auto enable       = false;
+            };
+
+            template<stormkit::core::IsEnumeration T>
+            inline constexpr auto EnableBitmaskOperatorsEnable = EnableBitmaskOperators<T>::enable;
+
+            template<IsEnumeration T>
+            constexpr auto toUnderlying(T value) -> std::underlying_type_t<T>;
+        } // namespace details
+
+        template<class T>
+        concept FlagsType = IsEnumeration<T> and details::EnableBitmaskOperatorsEnable<T>;
+
+        /// \brief Check if a flag bit is enabled
+        /// \requires `Enum` to be an enumeration promoted as a flag with `FLAG_ENUM` macro
+        /// \returns true if the flag big is set and false if not
+        template<FlagsType T>
+        constexpr auto checkFlag(T value, T flag) noexcept -> bool;
+
+        /// \exclude
+        template<FlagsType T>
+        constexpr auto nextValue(T value) noexcept -> T;
+
+    } // namespace stormkit::core
+
+    template<stormkit::core::FlagsType T>
+    constexpr auto operator|(T lhs, T rhs) noexcept -> T;
+
+    template<stormkit::core::FlagsType T>
+    constexpr auto operator&(T lhs, T rhs) noexcept -> T;
+
+    template<stormkit::core::FlagsType T>
+    constexpr auto operator^(T lhs, T rhs) noexcept -> T;
+
+    template<stormkit::core::FlagsType T>
+    constexpr auto operator~(T lhs) noexcept -> T;
+
+    template<stormkit::core::FlagsType T>
+    constexpr auto operator|=(T& lhs, T rhs) noexcept -> T;
+
+    template<stormkit::core::FlagsType T>
+    constexpr auto operator&=(T& lhs, T rhs) noexcept -> T;
+
+    template<stormkit::core::FlagsType T>
+    constexpr auto operator^=(T& lhs, T rhs) noexcept -> T;
+}
+
+////////////////////////////////////////////////////////////////////
+///                      IMPLEMENTATION                          ///
+////////////////////////////////////////////////////////////////////
+
+namespace stormkit::core {
+    namespace details {
+        /////////////////////////////////////
+        /////////////////////////////////////
+        template<IsEnumeration T>
+        constexpr auto toUnderlying(T value) -> std::underlying_type_t<T> {
+            using Type = T;
+
+            return as<std::underlying_type_t<Type>>(std::forward<T>(value));
+        }
+    } // namespace details
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<FlagsType T>
+    constexpr auto checkFlag(T value, T flag) noexcept -> bool {
+        return (value & flag) == flag;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<FlagsType T>
+    constexpr auto nextValue(T value) noexcept -> T {
+        using Type = T;
+
+        return as<Type>(details::toUnderlying(std::forward<T>(value)) << 1);
+    }
+} // namespace stormkit::core
+
+/////////////////////////////////////
+/////////////////////////////////////
+template<stormkit::core::FlagsType T>
+constexpr auto operator|(T lhs, T rhs) noexcept -> T {
+    namespace details = stormkit::core::details;
+    using Type        = T;
+
+    return stormkit::core::as<Type>(details::toUnderlying(lhs) | details::toUnderlying(rhs));
+}
+
+/////////////////////////////////////
+/////////////////////////////////////
+template<stormkit::core::FlagsType T>
+constexpr auto operator&(T lhs, T rhs) noexcept -> T {
+    namespace details = stormkit::core::details;
+    using Type        = T;
+
+    return stormkit::core::as<Type>(details::toUnderlying(lhs) & details::toUnderlying(rhs));
+}
+
+/////////////////////////////////////
+/////////////////////////////////////
+template<stormkit::core::FlagsType T>
+constexpr auto operator^(T lhs, T rhs) noexcept -> T {
+    namespace details = stormkit::core::details;
+    using Type        = T;
+
+    return stormkit::core::as<Type>(details::toUnderlying(lhs) ^ details::toUnderlying(rhs));
+}
+
+/////////////////////////////////////
+/////////////////////////////////////
+template<stormkit::core::FlagsType T>
+constexpr auto operator~(T lhs) noexcept -> T {
+    namespace details = stormkit::core::details;
+    using Type        = T;
+
+    return stormkit::core::as<Type>(~details::toUnderlying(lhs));
+}
+
+/////////////////////////////////////
+/////////////////////////////////////
+template<stormkit::core::FlagsType T>
+constexpr auto operator|=(T& lhs, T rhs) noexcept -> T {
+    namespace details = stormkit::core::details;
+    using Type        = T;
+
+    lhs = stormkit::core::as<Type>(details::toUnderlying(lhs) | details::toUnderlying(rhs));
+    return lhs;
+}
+
+/////////////////////////////////////
+/////////////////////////////////////
+template<stormkit::core::FlagsType T>
+constexpr auto operator&=(T& lhs, T rhs) noexcept -> T {
+    namespace details = stormkit::core::details;
+    using Type        = T;
+
+    lhs = stormkit::core::as<Type>(details::toUnderlying(lhs) & details::toUnderlying(rhs));
+    return lhs;
+}
+
+/////////////////////////////////////
+/////////////////////////////////////
+template<stormkit::core::FlagsType T>
+constexpr auto operator^=(T& lhs, T rhs) noexcept -> T {
+    namespace details = stormkit::core::details;
+    using Type        = T;
+
+    lhs = stormkit::core::as<Type>(details::toUnderlying(lhs) ^ details::toUnderlying(rhs));
+    return lhs;
+}

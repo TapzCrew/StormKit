@@ -1,21 +1,13 @@
-// Copyright (C) 2022 Arthur LAURENT <arthur.laurent4@gmail.com>
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#include <stormkit/core/ThreadUtils.hpp>
+module;
 
-#include <stormkit/log/Logger.hpp>
+#include <stormkit/Core/ThreadUtils.hpp>
+
 #include <stormkit/log/LogMacro.hpp>
-
-#include <stormkit/entities/EntityManager.hpp>
-#include <stormkit/entities/System.hpp>
-
-#include <stormkit/engine/Engine.hpp>
-#include <stormkit/engine/render/Renderer.hpp>
-#include <stormkit/engine/render/core/RenderQueue.hpp>
-#include <stormkit/engine/render/core/ShaderCache.hpp>
-#include <stormkit/engine/render/framegraph/BakedFrameGraph.hpp>
-#include <stormkit/engine/render/framegraph/FrameGraphBuilder.hpp>
+#include <stormkit/log/Logger.hpp>
 
 #include <stormkit/gpu/core/Device.hpp>
 #include <stormkit/gpu/core/Instance.hpp>
@@ -26,18 +18,31 @@
 #include <stormkit/gpu/core/WindowSurface.hpp>
 #include <stormkit/gpu/pipeline/PipelineCache.hpp>
 
+module stormkit.engine.render.Renderer;
+
+import stormkit.entities.System;
+import stormkit.entities.EntityManager;
+
+import stormkit.Engine;
+
+import stormkit.engine.render.core.RenderQueue;
+import stormkit.engine.render.core.ShaderCache;
+
+import stormkit.engine.render.framegraph.BakedFrameGraph;
+import stormkit.engine.render.framegraph.FrameGraphBuilder;
+
 namespace stormkit::engine {
     NAMED_LOGGER(renderer_logger, "StormKit.Renderer.Renderer");
 
     class RendererSyncSystem: public entities::System {
       public:
         RendererSyncSystem([[maybe_unused]] RenderQueue& queue, entities::EntityManager& manager)
-            : System { manager, 0, {} } {}
+            : entities::System { manager, 0, {} } {}
 
-        RendererSyncSystem(const RendererSyncSystem&) = delete;
+        RendererSyncSystem(const RendererSyncSystem&)                    = delete;
         auto operator=(const RendererSyncSystem&) -> RendererSyncSystem& = delete;
 
-        RendererSyncSystem(RendererSyncSystem&&) noexcept = default;
+        RendererSyncSystem(RendererSyncSystem&&) noexcept                    = default;
         auto operator=(RendererSyncSystem&&) noexcept -> RendererSyncSystem& = default;
 
         auto update([[maybe_unused]] core::Secondf delta) -> void override {};
@@ -97,7 +102,7 @@ namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     Renderer::Renderer(Engine& engine,
-                       const core::ExtentU& extent,
+                       const core::math::ExtentU& extent,
                        gpu::Surface::Buffering buffering)
         : EngineObject { engine }, m_build_framegraph { [](auto&) {} } {
         m_instance = std::make_unique<gpu::Instance>();
@@ -175,7 +180,7 @@ namespace stormkit::engine {
         if (other.m_render_thread.joinable()) other.m_render_thread.join();
 
         EngineObject::operator=(std::move(other));
-        m_build_framegraph    = std::exchange(other.m_build_framegraph, {});
+        m_build_framegraph = std::exchange(other.m_build_framegraph, {});
 
         m_instance      = std::move(other.m_instance);
         m_device        = std::move(other.m_device);

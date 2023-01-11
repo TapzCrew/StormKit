@@ -1,0 +1,90 @@
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+export module stormkit.Core:String.Operations;
+
+import std;
+
+import :Utils.Numerics;
+
+export namespace stormkit::core {
+    [[nodiscard]] auto split(std::string_view string, char delim) noexcept
+        -> std::vector<std::string>;
+    [[nodiscard]] auto toLower(std::string_view string,
+                               std::locale locale = std::locale { "" }) noexcept -> std::string;
+    [[nodiscard]] auto toUpper(std::string_view string,
+                               std::locale locale = std::locale { "" }) noexcept -> std::string;
+
+    [[nodiscard]] auto toString(auto&& value) noexcept -> std::string;
+
+    template<std::size_t N>
+    struct ConstexprString {
+        std::array<char, N> str {};
+
+        static constexpr auto size = N - 1u;
+
+        [[nodiscard]] constexpr auto view() const noexcept {
+            return std::string_view { std::data(str), std::data(str) + size };
+        }
+
+        [[nodiscard]] constexpr operator std::string_view() const noexcept {
+            return std::string_view { std::data(str), std::data(str) + size };
+        }
+
+        consteval ConstexprString() = default;
+
+        consteval ConstexprString(const char (&new_str)[N]) {
+            std::copy_n(new_str, size, std::data(str));
+        }
+    };
+} // namespace stormkit::core
+
+////////////////////////////////////////////////////////////////////
+///                      IMPLEMENTATION                          ///
+////////////////////////////////////////////////////////////////////
+
+namespace stormkit::core {
+    inline auto split(std::string_view string, char delim) noexcept -> std::vector<std::string> {
+        auto output = std::vector<std::string> {};
+        auto first  = RangeExtent { 0u };
+
+        while (first < string.size()) {
+            const auto second = string.find_first_of(delim, first);
+
+            if (first != second) output.emplace_back(string.substr(first, second - first));
+
+            if (second == std::string_view::npos) break;
+
+            first = second + 1;
+        }
+
+        return output;
+    }
+
+    inline auto toLower(std::string_view string, std::locale locale) noexcept -> std::string {
+        auto& facet = std::use_facet<std::ctype<typename std::string_view::value_type>>(locale);
+
+        auto result = std::string { string };
+        facet.tolower(&result[0], &result[0] + result.size());
+
+        return result;
+    }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    inline auto toUpper(std::string_view string, std::locale locale) noexcept -> std::string {
+        auto& facet = std::use_facet<std::ctype<typename std::string_view::value_type>>(locale);
+
+        auto result = std::string { string };
+        facet.toupper(&result[0], &result[0] + result.size());
+
+        return result;
+    }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    inline auto toString(auto&& value) noexcept -> std::string {
+        return std::to_string(std::forward<decltype(value)>(value));
+    }
+} // namespace stormkit::core

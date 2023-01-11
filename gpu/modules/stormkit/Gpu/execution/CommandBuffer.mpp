@@ -1,0 +1,459 @@
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+#ifndef STORMKIT_NO_MODULES
+export module stormkit.Gpu:Execution:CommandBuffer;
+
+import std;
+
+import stormkit.Core;
+
+import stormkit.Gpu:Core;
+import stormkit.Gpu:Resource;
+
+import :Descriptors;
+import :RenderPass;
+import :Pipeline;
+
+export {
+#else
+    #include <stormkit/std.hpp>
+
+    #include <stormkit/Core.hpp>
+
+    #include <stormkit/gpu/Core.hpp>
+    #include <stormkit/gpu/Resource.hpp>
+
+    #include <stormkit/gpu/execution/Descriptors.hpp>
+    #include <stormkit/gpu/execution/Pipeline.hpp>
+    #include <stormkit/gpu/execution/RenderPass.hpp>
+#endif
+
+    namespace stormkit::gpu {
+        class STORMKIT_API Queue: public DeviceObject {
+          public:
+            static constexpr auto DEBUG_TYPE = DebugObjectType::Queue;
+
+            Queue(const Device& device, const Device::QueueEntry& entry);
+            ~Queue();
+
+            Queue(const Queue&)                   = delete;
+            auto operator=(const Queue&) noexcept = delete;
+
+            Queue(Queue&&) noexcept;
+            auto operator=(Queue&&) noexcept -> Queue&;
+
+            auto waitIdle() const noexcept -> void;
+
+            auto submit(std::span<const CommandBuffer *> commandbuffers,
+                        std::span<const Semaphore *> wait_semaphores   = {},
+                        std::span<const Semaphore *> signal_semaphores = {},
+                        Fence *fence = nullptr) const noexcept -> void;
+
+            [[nodiscard]] auto entry() const noexcept -> const Device::QueueEntry&;
+
+            [[nodiscard]] operator VkQueue() const noexcept;
+            [[nodiscard]] auto vkHandle() const noexcept -> VkQueue;
+
+          private:
+            Device::QueueEntry m_entry;
+
+            VkQueue m_queue = VK_NULL_HANDLE;
+        };
+
+        DECLARE_PTR_AND_REF(Queue);
+
+        struct InheritanceInfo {
+            const RenderPass *render_pass  = nullptr;
+            core::UInt32 subpass           = 0;
+            const FrameBuffer *framebuffer = nullptr;
+        };
+
+        class STORMKIT_API CommandBuffer {
+          public:
+            struct Tag {
+              public:
+                Tag(const Tag&) noexcept                    = default;
+                auto operator=(const Tag&) noexcept -> Tag& = default;
+                Tag(Tag&&) noexcept                         = default;
+                auto operator=(Tag&&) noexcept -> Tag&      = default;
+
+              private:
+                Tag() noexcept {}
+
+                friend class CommandBuffer;
+                friend class CommandBufferPool;
+            };
+
+            enum class State {
+                Initial,
+                Recording,
+                Executable
+            };
+
+            static constexpr auto DEBUG_TYPE = DebugObjectType::Command_Buffer;
+
+            using Deleter = std::function<void(VkCommandBuffer)>;
+
+            CommandBuffer(const Queue& queue,
+                          CommandBufferLevel level,
+                          VkCommandBuffer commandbuffer,
+                          Deleter deleter,
+                          Tag);
+            ~CommandBuffer();
+
+            CommandBuffer(const CommandBuffer&)                    = delete;
+            auto operator=(const CommandBuffer&) -> CommandBuffer& = delete;
+
+            CommandBuffer(CommandBuffer&&) noexcept;
+            auto operator=(CommandBuffer&&) noexcept -> CommandBuffer&;
+
+            auto reset() noexcept -> void;
+            auto submit(std::span<const Semaphore *> wait_semaphores   = {},
+                        std::span<const Semaphore *> signal_semaphores = {},
+                        Fence *fence = nullptr) const noexcept -> void;
+
+            [[nodiscard]] auto state() const noexcept -> State;
+            [[nodiscard]] auto level() const noexcept -> CommandBufferLevel;
+
+            auto beginDebugRegion(std::string_view name,
+                                  const core::RGBColorF& color = core::RGBColorDef::White<float>)
+                -> void;
+            auto insertDebugLabel(std::string_view name,
+                                  const core::RGBColorF& color = core::RGBColorDef::White<float>)
+                -> void;
+            auto endDebugRegion() -> void;
+
+            auto begin(bool one_time_submit                            = false,
+                       std::optional<InheritanceInfo> inheritance_info = std::nullopt) -> void;
+            auto end() -> void;
+
+            auto
+                beginRenderPass(const RenderPass& render_pass,
+                                const FrameBuffer& framebuffer,
+                                std::span<const ClearValue> clear_values = std::array { ClearValue {
+                                    ClearColor { .color = core::RGBColorDef::Silver<float> } } },
+                                bool secondary_commandbuffers            = false) -> void;
+            auto nextSubPass() -> void;
+            auto endRenderPass() -> void;
+
+            auto bindPipeline(const Pipeline& pipeline) -> void;
+            auto setViewport(core::UInt32 first_viewport, std::span<const Viewport> viewports)
+                -> void;
+            auto setScissor(core::UInt32 first_scissor, std::span<const Scissor> scissors) -> void;
+            auto setLineWidth(float width) -> void;
+            auto setDepthBias(float constant_factor, float clamp, float slope_factor) -> void;
+            auto setBlendConstants(std::span<const float> constants) -> void;
+            auto setDepthBounds(float min, float max) -> void;
+            auto setStencilCompareMask(StencilFaceFlag face, core::UInt32 mask) -> void;
+            auto setStencilWriteMask(StencilFaceFlag face, core::UInt32 mask) -> void;
+            auto setStencilReference(StencilFaceFlag face, core::UInt32 reference) -> void;
+
+            auto dispatch(core::UInt32 group_count_x,
+                          core::UInt32 group_count_y,
+                          core::UInt32 group_count_z) -> void;
+
+            auto draw(core::UInt32 vertex_count,
+                      core::UInt32 instance_count = 1u,
+                      core::UInt32 first_vertex   = 0,
+                      core::UInt32 first_instance = 0) -> void;
+            auto drawIndexed(core::UInt32 index_count,
+                             core::UInt32 instance_count = 1u,
+                             core::UInt32 first_index    = 0u,
+                             core::Int32 vertex_offset   = 0,
+                             core::UInt32 first_instance = 0u) -> void;
+            auto drawIndirect(const Buffer& buffer,
+                              core::RangeExtent offset,
+                              core::UInt32 draw_count,
+                              core::UInt32 stride) -> void;
+            auto drawIndexedIndirect(const Buffer& buffer,
+                                     core::RangeExtent offset,
+                                     core::UInt32 draw_count,
+                                     core::UInt32 stride) -> void;
+
+            auto bindVertexBuffers(std::span<const Buffer *> buffers,
+                                   std::span<const core::UInt64> offsets) -> void;
+            auto bindIndexBuffer(const Buffer& buffer,
+                                 core::UInt64 offset = 0,
+                                 bool large_indices  = false) -> void;
+            auto bindDescriptorSets(const Pipeline& pipeline,
+                                    std::span<const DescriptorSet *> descriptor_sets,
+                                    std::span<const core::UInt32> dynamic_offsets = {}) -> void;
+
+            auto copyBuffer(const Buffer& source,
+                            const Buffer& destination,
+                            core::RangeExtent size,
+                            core::UInt64 src_offset = 0u,
+                            core::UInt64 dst_offset = 0u) -> void;
+            auto copyBufferToImage(const Buffer& source,
+                                   const Image& destination,
+                                   std::span<const BufferImageCopy> buffer_image_copies = {})
+                -> void;
+            auto copyImageToBuffer(const Image& source,
+                                   const Buffer& destination,
+                                   std::span<const BufferImageCopy> buffer_image_copies = {})
+                -> void;
+            auto copyImage(const Image& source,
+                           const Image& destination,
+                           ImageLayout source_layout,
+                           ImageLayout destination_layout,
+                           const ImageSubresourceLayers& source_subresource_layers,
+                           const ImageSubresourceLayers& destination_subresource_layers,
+                           const core::math::ExtentU& extent) -> void;
+
+            auto resolveImage(const Image& source,
+                              const Image& destination,
+                              ImageLayout source_layout,
+                              ImageLayout destination_layout,
+                              const ImageSubresourceLayers& source_subresource_layers      = {},
+                              const ImageSubresourceLayers& destination_subresource_layers = {})
+                -> void;
+
+            auto blitImage(const Image& source,
+                           const Image& destination,
+                           ImageLayout source_layout,
+                           ImageLayout destination_layout,
+                           std::span<const BlitRegion> regions,
+                           Filter filter) -> void;
+
+            auto transitionImageLayout(const Image& image,
+                                       ImageLayout source_layout,
+                                       ImageLayout destination_layout,
+                                       const ImageSubresourceRange& subresource_range = {}) -> void;
+
+            auto executeSubCommandBuffers(std::span<const CommandBuffer *> commandbuffers) -> void;
+
+            auto pipelineBarrier(PipelineStageFlag src_mask,
+                                 PipelineStageFlag dst_mask,
+                                 DependencyFlag dependency,
+                                 std::span<const MemoryBarrier> memory_barriers,
+                                 std::span<const BufferMemoryBarrier> buffer_memory_barriers,
+                                 std::span<const ImageMemoryBarrier> image_memory_barriers) -> void;
+
+            auto pushConstants(const Pipeline& pipeline,
+                               ShaderStageFlag stage,
+                               std::span<const core::Byte> data,
+                               core::UInt32 offset = 0u) -> void;
+
+            [[nodiscard]] operator VkCommandBuffer() const noexcept;
+            [[nodiscard]] auto vkHandle() const noexcept -> VkCommandBuffer;
+
+          private:
+            State m_state              = State::Initial;
+            const Queue *m_queue       = nullptr;
+            CommandBufferLevel m_level = CommandBufferLevel::Primary;
+
+            VkCommandBuffer m_commandbuffer = VK_NULL_HANDLE;
+
+            Deleter m_deleter;
+        };
+
+        DECLARE_PTR_AND_REF(CommandBuffer);
+
+        class STORMKIT_API CommandBufferPool: public DeviceObject {
+          public:
+            CommandBufferPool(const Device& device, const Queue& queue);
+            ~CommandBufferPool();
+
+            CommandBufferPool(const CommandBufferPool&)       = delete;
+            auto operator=(const CommandBufferPool&) noexcept = delete;
+
+            CommandBufferPool(CommandBufferPool&&) noexcept;
+            auto operator=(CommandBufferPool&&) noexcept -> CommandBufferPool&;
+
+            [[nodiscard]] auto
+                createCommandBuffer(CommandBufferLevel level = CommandBufferLevel::Primary) const
+                -> CommandBuffer;
+            [[nodiscard]] auto
+                allocateCommandBuffer(CommandBufferLevel level = CommandBufferLevel::Primary) const
+                -> std::unique_ptr<CommandBuffer>;
+            [[nodiscard]] auto allocateRefCountedCommandBuffer(
+                CommandBufferLevel level = CommandBufferLevel::Primary) const
+                -> std::shared_ptr<CommandBuffer>;
+
+            [[nodiscard]] auto
+                createCommandBuffers(core::RangeExtent count,
+                                     CommandBufferLevel level = CommandBufferLevel::Primary) const
+                -> std::vector<CommandBuffer>;
+            [[nodiscard]] auto
+                allocateCommandBuffers(core::RangeExtent count,
+                                       CommandBufferLevel level = CommandBufferLevel::Primary) const
+                -> std::vector<std::unique_ptr<CommandBuffer>>;
+            [[nodiscard]] auto allocateRefCountedCommandBuffers(
+                core::RangeExtent count,
+                CommandBufferLevel level = CommandBufferLevel::Primary) const
+                -> std::vector<std::shared_ptr<CommandBuffer>>;
+
+            [[nodiscard]] auto vkCommandPool() const noexcept -> VkCommandPool;
+            [[nodiscard]] auto vkHandle() const noexcept -> VkCommandPool;
+
+          private:
+            auto deleteCommandBuffer(VkCommandBuffer cmb) const noexcept -> void;
+
+            auto createVkCommandBuffers(core::RangeExtent count,
+                                        CommandBufferLevel level) const noexcept
+                -> std::vector<VkCommandBuffer>;
+
+            VkCommandPool m_command_pool = VK_NULL_HANDLE;
+
+            const Queue *m_queue = nullptr;
+        };
+
+        DECLARE_PTR_AND_REF(CommandBufferPool);
+    } // namespace stormkit::gpu
+
+#ifndef STORMKIT_NO_MODULES
+}
+#endif
+
+////////////////////////////////////////////////////////////////////
+///                      IMPLEMENTATION                          ///
+////////////////////////////////////////////////////////////////////
+
+namespace stormkit::gpu {
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Queue::entry() const noexcept -> const Device::QueueEntry& {
+        return m_entry;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline Queue::operator VkQueue() const noexcept {
+        return vkHandle();
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Queue::vkHandle() const noexcept -> VkQueue {
+        core::expects(m_queue);
+
+        return m_queue;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto CommandBuffer::state() const noexcept -> State {
+        core::expects(m_commandbuffer);
+
+        return m_state;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto CommandBuffer::level() const noexcept -> CommandBufferLevel {
+        core::expects(m_commandbuffer);
+
+        return m_level;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline CommandBuffer::operator VkCommandBuffer() const noexcept {
+        return vkHandle();
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto CommandBuffer::vkHandle() const noexcept -> VkCommandBuffer {
+        core::expects(m_commandbuffer);
+
+        return m_commandbuffer;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto CommandBufferPool::createCommandBuffer(CommandBufferLevel level) const
+        -> CommandBuffer {
+        auto commandbuffers = createCommandBuffers(1, level);
+
+        auto commandbuffer = std::move(commandbuffers.front());
+
+        return commandbuffer;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto CommandBufferPool::allocateCommandBuffer(CommandBufferLevel level) const
+        -> std::unique_ptr<CommandBuffer> {
+        auto commandbuffer = std::move(allocateCommandBuffers(1, level)[0]);
+
+        return commandbuffer;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto CommandBufferPool::allocateRefCountedCommandBuffer(CommandBufferLevel level) const
+        -> std::shared_ptr<CommandBuffer> {
+        auto commandbuffer = std::move(allocateRefCountedCommandBuffers(1, level)[0]);
+
+        return commandbuffer;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto CommandBufferPool::createCommandBuffers(core::RangeExtent count,
+                                                        CommandBufferLevel level) const
+        -> std::vector<CommandBuffer> {
+        auto vk_commandbuffers = createVkCommandBuffers(count, level);
+
+        return core::transform(vk_commandbuffers, [level, this](const auto& elem) {
+            return CommandBuffer { *m_queue,
+                                   level,
+                                   elem,
+                                   [this](auto cmb) { deleteCommandBuffer(cmb); },
+                                   CommandBuffer::Tag {} };
+        });
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto CommandBufferPool::allocateCommandBuffers(core::RangeExtent count,
+                                                          CommandBufferLevel level) const
+        -> std::vector<std::unique_ptr<CommandBuffer>> {
+        auto vk_commandbuffers = createVkCommandBuffers(count, level);
+
+        return core::transform(vk_commandbuffers, [level, this](const auto& elem) {
+            return std::make_unique<CommandBuffer>(
+                *m_queue,
+                level,
+                elem,
+                [this](auto cmb) { deleteCommandBuffer(cmb); },
+                CommandBuffer::Tag {});
+        });
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto CommandBufferPool::allocateRefCountedCommandBuffers(core::RangeExtent count,
+                                                                    CommandBufferLevel level) const
+        -> std::vector<std::shared_ptr<CommandBuffer>> {
+        auto vk_commandbuffers = createVkCommandBuffers(count, level);
+
+        return core::transform(vk_commandbuffers, [level, this](const auto& elem) {
+            return std::make_shared<CommandBuffer>(
+                *m_queue,
+                level,
+                elem,
+                [this](auto cmb) { deleteCommandBuffer(cmb); },
+                CommandBuffer::Tag {});
+        });
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto CommandBufferPool::vkCommandPool() const noexcept -> VkCommandPool {
+        core::expects(m_command_pool);
+
+        return m_command_pool;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto CommandBufferPool::vkHandle() const noexcept -> VkCommandPool {
+        core::expects(m_queue);
+
+        return m_command_pool;
+    }
+} // namespace stormkit::gpu

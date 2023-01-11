@@ -1,51 +1,29 @@
-// Copyright (C) 2022 Arthur LAURENT <arthur.laurent4@gmail.com>
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#include <map>
-#include <unordered_set>
+#ifdef STORMKIT_BUILD_MODULES
+module stormkit.Gpu:Core;
+#else
+    #include <stormkit/std.hpp>
 
-#include <stormkit/core/Math.hpp>
-
-#include <stormkit/log/Logger.hpp>
-
-#include <stormkit/gpu/core/Instance.hpp>
-#include <stormkit/gpu/core/OffscreenSurface.hpp>
-#include <stormkit/gpu/core/PhysicalDevice.hpp>
-#include <stormkit/gpu/core/PhysicalDeviceInfo.hpp>
-#include <stormkit/gpu/core/WindowSurface.hpp>
-
-#include <stormkit/log/LogMacro.hpp>
+    #include <stormkit/Core.hpp>
+    #include <stormkit/Gpu.hpp>
+    #include <stormkit/Log.hpp>
+#endif
 
 namespace stormkit::gpu {
-    NAMED_LOGGER(instance_logger, "StormKit.GPU.core.Instance")
+    NAMED_LOGGER(instance_logger, "stormkit.Gpu:core.Instance")
 
-    auto scorePhysicalDevice(const PhysicalDevice &physical_device) -> core::UInt64 {
-        if (!physical_device.checkExtensionSupport(DEVICE_EXTENSIONS)) return 0u;
-
-        auto score = core::UInt64 { 0u };
-
-        const auto &info = physical_device.info();
-
-        if (info.type == gpu::PhysicalDeviceType::Discrete_GPU) score += 10000000u;
-        else if (info.type == gpu::PhysicalDeviceType::Virtual_GPU)
-            score += 5000000u;
-        else if (info.type == gpu::PhysicalDeviceType::Integrated_GPU)
-            score += 250000u;
-
-        const auto &capabilities = physical_device.capabilities();
-
-        score += capabilities.limits.max_image_dimension_1D;
-        score += capabilities.limits.max_image_dimension_2D;
-        score += capabilities.limits.max_image_dimension_3D;
-        score += capabilities.limits.max_image_dimension_cube;
-        score += capabilities.limits.max_uniform_buffer_range;
-        score += info.api_major_version * 10000000u;
-        score += info.api_minor_version * 1000000u;
-        score += info.api_patch_version * 100u;
-
-        return score;
-    }
+    static constexpr auto VALIDATION_LAYERS = std::array {
+        "VK_LAYER_KHRONOS_validation",
+#ifdef STORMKIT_OS_LINUX
+        "VK_LAYER_MESA_overlay",
+#endif
+    };
+    static constexpr auto VALIDATION_FEATURES =
+        std::array { VK_VALIDATION_FEATURE_ENABLE_BEST_PRACTICES_EXT,
+                     VK_VALIDATION_FEATURE_ENABLE_GPU_ASSISTED_EXT };
 
     /////////////////////////////////////
     /////////////////////////////////////
@@ -120,17 +98,18 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    Instance::Instance(Instance &&other) noexcept
-        : m_loader { std::move(other.m_loader) }, m_instance { std::exchange(other.m_instance,
-                                                                             VK_NULL_HANDLE) },
+    Instance::Instance(Instance&& other) noexcept
+        : m_loader { std::move(other.m_loader) },
+          m_instance { std::exchange(other.m_instance, VK_NULL_HANDLE) },
           m_messenger { std::exchange(other.m_messenger, VK_NULL_HANDLE) },
           m_physical_devices { std::move(other.m_physical_devices) },
-          m_app_name { std::move(other.m_app_name) }, m_extensions { std::move(
-                                                          other.m_extensions) } {}
+          m_app_name { std::move(other.m_app_name) },
+          m_extensions { std::move(other.m_extensions) } {
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto Instance::operator=(Instance &&other) noexcept -> Instance & {
+    auto Instance::operator=(Instance&& other) noexcept -> Instance& {
         if (&other == this) [[unlikely]]
             return *this;
 
@@ -162,7 +141,7 @@ namespace stormkit::gpu {
         m_extensions.reserve(extension_count);
         std::ranges::transform(extensions,
                                std::back_inserter(m_extensions),
-                               [](const auto &extension) {
+                               [](const auto& extension) {
                                    return std::string { extension.extensionName };
                                });
 
@@ -178,29 +157,33 @@ namespace stormkit::gpu {
                                                   .pApplicationInfo      = &app_info,
                                                   .enabledExtensionCount = 0 };
 
-        auto instance_extensions = std::vector<core::CZString> {};
-        for (auto ext : INSTANCE_EXTENSIONS)
-            if (checkExtensionSupport(ext)) instance_extensions.emplace_back(std::data(ext));
-
         instance_logger.dlog("Instance extensions -----------");
-        for (const auto &str : m_extensions) instance_logger.dlog("	{}", str);
+        for (const auto& str : m_extensions) instance_logger.dlog("	{}", str);
         instance_logger.dlog("-------------------------------");
 
         const auto enable_validation = checkValidationLayerSupport(ENABLE_VALIDATION);
         if (enable_validation) {
             instance_logger.dlog("Validation layers enabled");
             instance_logger.dlog("enabling layers: -----------");
-            for (const auto &str : VALIDATION_LAYERS) instance_logger.dlog("	{}", str);
+            for (const auto& str : VALIDATION_LAYERS) instance_logger.dlog("	{}", str);
             instance_logger.dlog("-------------------------------");
 
             create_info.enabledLayerCount   = core::as<core::UInt32>(std::size(VALIDATION_LAYERS));
             create_info.ppEnabledLayerNames = std::data(VALIDATION_LAYERS);
-
-            instance_extensions.emplace_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
         }
+
+        const auto instance_extensions = [&] {
+            auto e = core::concat(INSTANCE_BASE_EXTENSIONS, SURFACE_EXTENSIONS);
+
+            if (enable_validation) core::merge(e, std::array { VK_EXT_DEBUG_UTILS_EXTENSION_NAME });
+
+            return e;
+        }();
 
         create_info.enabledExtensionCount = core::as<core::UInt32>(std::size(instance_extensions));
         create_info.ppEnabledExtensionNames = std::data(instance_extensions);
+
+        core::ensures(not checkExtensionSupport(instance_extensions));
 
         CHECK_VK_ERROR(vkCreateInstance(&create_info, nullptr, &m_instance));
 
@@ -212,7 +195,7 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     auto Instance::createDebugReportCallback() noexcept -> void {
-        STORMKIT_EXPECTS(m_instance != VK_NULL_HANDLE);
+        core::expects(m_instance != VK_NULL_HANDLE);
 
         const auto create_info = VkDebugUtilsMessengerCreateInfoEXT {
             .sType           = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
@@ -231,7 +214,7 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     auto Instance::retrievePhysicalDevices() noexcept -> void {
-        STORMKIT_EXPECTS(m_instance != VK_NULL_HANDLE);
+        core::expects(m_instance != VK_NULL_HANDLE);
 
         auto physical_devices_count = core::UInt32 { 0 };
         CHECK_VK_ERROR(vkEnumeratePhysicalDevices(*this, &physical_devices_count, nullptr))
@@ -242,107 +225,9 @@ namespace stormkit::gpu {
 
         std::ranges::transform(physical_devices,
                                std::back_inserter(m_physical_devices),
-                               [this](const auto &physical_device) {
+                               [this](const auto& physical_device) {
                                    return PhysicalDevice { physical_device, *this };
                                });
-    }
-
-#ifdef STORMKIT_WSI_ENABLED
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto Instance::createWindowSurface(const wsi::Window &window,
-                                       Surface::Buffering buffering) const -> WindowSurface {
-        STORMKIT_EXPECTS(m_instance != VK_NULL_HANDLE);
-
-        return WindowSurface { window, *this, buffering };
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto Instance::allocateWindowSurface(const wsi::Window &window,
-                                         Surface::Buffering buffering) const
-        -> WindowSurfaceOwnedPtr {
-        STORMKIT_EXPECTS(m_instance != VK_NULL_HANDLE);
-
-        return std::make_unique<WindowSurface>(window, *this, buffering);
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto Instance::allocateRefCountedWindowSurface(const wsi::Window &window,
-                                                   Surface::Buffering buffering) const
-        -> WindowSurfaceSharedPtr {
-        STORMKIT_EXPECTS(m_instance != VK_NULL_HANDLE);
-
-        return std::make_shared<WindowSurface>(window, *this, buffering);
-    }
-#endif
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto Instance::createOffscreenSurface(const core::ExtentU &extent,
-                                          Surface::Buffering buffering) const
-        -> gpu::OffscreenSurface {
-        STORMKIT_EXPECTS(m_instance != VK_NULL_HANDLE);
-
-        return OffscreenSurface { extent, *this, buffering };
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto Instance::allocateOffscreenSurface(const core::ExtentU &extent,
-                                            Surface::Buffering buffering) const
-        -> OffscreenSurfaceOwnedPtr {
-        STORMKIT_EXPECTS(m_instance != VK_NULL_HANDLE);
-
-        return std::make_unique<OffscreenSurface>(extent, *this, buffering);
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto Instance::allocateRefCountedOffscreenSurface(const core::ExtentU &extent,
-                                                      Surface::Buffering buffering) const
-        -> OffscreenSurfaceSharedPtr {
-        STORMKIT_EXPECTS(m_instance != VK_NULL_HANDLE);
-
-        return std::make_shared<OffscreenSurface>(extent, *this, buffering);
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto Instance::pickPhysicalDevice() const noexcept -> const gpu::PhysicalDevice & {
-        STORMKIT_EXPECTS(m_instance != VK_NULL_HANDLE);
-
-        auto ranked_devices = std::multimap<core::UInt64, gpu::PhysicalDeviceConstRef> {};
-
-        for (const auto &physical_device : m_physical_devices) {
-            const auto score = scorePhysicalDevice(physical_device);
-
-            ranked_devices.emplace(score, physical_device);
-        }
-        // ASSERT(ranked_devices.rbegin()->first >= 0u);
-
-        return ranked_devices.rbegin()->second.get();
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto Instance::pickPhysicalDevice(const gpu::WindowSurface &surface) noexcept
-        -> const gpu::PhysicalDevice & {
-        STORMKIT_EXPECTS(m_instance != VK_NULL_HANDLE);
-        auto ranked_devices = std::multimap<core::UInt64, gpu::PhysicalDeviceConstRef> {};
-
-        for (auto &physical_device : m_physical_devices) {
-            physical_device.checkIfPresentSupportIsEnabled(surface);
-
-            const auto score = scorePhysicalDevice(physical_device);
-
-            ranked_devices.emplace(score, physical_device);
-        }
-
-        // ASSERT(ranked_devices.rbegin()->first >= 0u);
-
-        return ranked_devices.rbegin()->second.get();
     }
 
     /////////////////////////////////////
@@ -355,10 +240,10 @@ namespace stormkit::gpu {
         auto layers = std::vector<VkLayerProperties> { layers_count };
         CHECK_VK_ERROR(vkEnumerateInstanceLayerProperties(&layers_count, std::data(layers)));
 
-        for (const auto &layer_name : std::as_const(VALIDATION_LAYERS)) {
+        for (const auto& layer_name : std::as_const(VALIDATION_LAYERS)) {
             auto layer_found = false;
 
-            for (const auto &layer_properties : layers) {
+            for (const auto& layer_properties : layers) {
                 if (std::strcmp(layer_name, layer_properties.layerName) == 0) {
                     layer_found = true;
                     break;
@@ -388,8 +273,17 @@ namespace stormkit::gpu {
         auto required_extensions = core::HashSet<std::string_view> { std::ranges::begin(extensions),
                                                                      std::ranges::end(extensions) };
 
-        for (const auto &extension : m_extensions) required_extensions.erase(extension);
+        for (const auto& extension : m_extensions) required_extensions.erase(extension);
 
         return required_extensions.empty();
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    auto Instance::checkExtensionSupport(std::span<const core::CZString> extensions) const noexcept
+        -> bool {
+        const auto ext =
+            core::transform(extensions, [](const auto& v) { return std::string_view { v }; });
+        return checkExtensionSupport(ext);
     }
 } // namespace stormkit::gpu

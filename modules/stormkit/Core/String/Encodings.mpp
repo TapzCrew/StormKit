@@ -1,0 +1,173 @@
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+module;
+
+#include <climits>
+#include <cstdlib>
+
+export module stormkit.Core:String.Encodings;
+
+import std;
+
+import <stormkit/Core/PlatformMacro.hpp>;
+
+import :Utils.AsCast;
+import :Utils.Numerics;
+
+export namespace stormkit::core {
+    auto asciiToUtf16(std::string_view) -> std::u16string;
+    auto utf16ToAscii(std::u16string_view) -> std::string;
+
+    auto asciiToWide(std::string_view) -> std::wstring;
+    auto wideToAscii(std::wstring_view) -> std::string;
+
+    auto asciiToUtf8(std::string_view) -> std::u8string;
+    auto utf8ToAscii(std::u8string_view) -> std::string;
+
+#ifdef STORMKIT_COMPILER_MSVC
+    auto toNativeEncoding(std::string_view) -> std::wstring;
+#else
+    auto toNativeEncoding(std::string_view) -> std::u8string;
+#endif
+} // namespace stormkit::core
+
+////////////////////////////////////////////////////////////////////
+///                      IMPLEMENTATION                          ///
+////////////////////////////////////////////////////////////////////
+
+namespace stormkit::core {
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    inline auto asciiToUtf16(std::string_view input) -> std::u16string {
+        auto state  = std::mbstate_t {};
+        auto output = std::u16string {};
+        output.resize(std::size(input));
+
+        auto len      = 0ull;
+        auto input_it = std::data(input);
+        while ((len = std::mbrtoc16(reinterpret_cast<char16_t *>(std::data(output)),
+                                    input_it,
+                                    MB_CUR_MAX,
+                                    &state)) > 0ull)
+            input_it += len;
+
+        return output;
+    }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    inline auto utf16ToAscii(std::u16string_view input) -> std::string {
+        auto state  = std::mbstate_t {};
+        auto output = std::string {};
+        output.resize(std::size(input));
+
+        for (const auto& c : input)
+            std::c16rtomb(reinterpret_cast<char *>(std::data(output)), c, &state);
+
+        return output;
+    }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    inline auto asciiToWide(std::string_view input) -> std::wstring {
+        auto state  = std::mbstate_t {};
+        auto output = std::wstring {};
+        output.resize(std::size(input));
+
+        auto len      = 0ull;
+        auto input_it = std::data(input);
+        auto i        = 0;
+#ifdef STORMKIT_COMPILER_MSVC
+        while ((len = std::mbrtoc16(reinterpret_cast<char16_t *>(std::data(output)) + i++,
+                                    input_it,
+                                    MB_CUR_MAX,
+                                    &state)) > 0u)
+            input_it += len;
+#else
+        while ((len = std::mbrtoc8(reinterpret_cast<char8_t *>(std::data(output)) + i++,
+                                   input_it,
+                                   MB_CUR_MAX,
+                                   &state)) > 0ull)
+            input_it += len;
+#endif
+
+        return output;
+    }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    inline auto wideToAscii(std::wstring_view input) -> std::string {
+        auto state  = std::mbstate_t {};
+        auto output = std::string {};
+        output.resize(std::size(input));
+
+#ifdef STORMKIT_COMPILER_MSVC
+        for (const auto& c : input) std::c16rtomb(std::data(output), core::as<char16_t>(c), &state);
+#else
+        for (const auto& c : input) std::c8rtomb(std::data(output), core::as<char>(c), &state);
+#endif
+
+        return output;
+    }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    inline auto asciiToUtf8(std::string_view input) -> std::u8string {
+        auto state  = std::mbstate_t {};
+        auto output = std::u8string {};
+        output.resize(std::size(input) * as<RangeExtent>(MB_LEN_MAX));
+
+#ifdef STORMKIT_COMPILER_MSVC
+        auto bytes = toByteSpan(output);
+        std::ranges::copy(asByteView(input), std::ranges::begin(bytes));
+#else
+        auto len      = 0ull;
+        auto input_it = std::data(input);
+        auto i        = 0;
+        while ((len = std::mbrtoc8(reinterpret_cast<char8_t *>(std::data(output)) + i++,
+                                   input_it,
+                                   MB_CUR_MAX,
+                                   &state)) > 0ull)
+            input_it += len;
+#endif
+
+        output.shrink_to_fit();
+
+        return output;
+    }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    inline auto utf8ToAscii(std::u8string_view input) -> std::string {
+        auto state  = std::mbstate_t {};
+        auto output = std::string {};
+        output.resize(std::size(input));
+
+#ifdef STORMKIT_COMPILER_MSVC
+        auto bytes = toByteSpan(output);
+        std::ranges::copy(asByteView(input), std::ranges::begin(bytes));
+#else
+        for (const auto& c : input) std::c8rtomb(std::data(output), c, &state);
+#endif
+
+        output.shrink_to_fit();
+
+        return output;
+    }
+
+#ifdef STORMKIT_COMPILER_MSVC
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    inline auto toNativeEncoding(std::string_view input) -> std::wstring {
+        return asciiToWide(input);
+    }
+#else
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    inline auto toNativeEncoding(std::string_view input) -> std::u8string {
+        return asciiToUtf8(input);
+    }
+#endif
+} // namespace stormkit::core

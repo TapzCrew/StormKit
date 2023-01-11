@@ -1,4 +1,9 @@
-#include "StormKitNode.hpp"
+module;
+
+#include <QMap>
+#include <QObjectData>
+
+module StormKitNode;
 
 ////////////////////////////////////////
 ////////////////////////////////////////

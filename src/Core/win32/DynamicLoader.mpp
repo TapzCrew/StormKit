@@ -1,0 +1,87 @@
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+module;
+
+#define WIN32_LEAN_AND_MEAN
+#define __SPECSTRINGS_STRICT_LEVEL 0
+#include <windows.h>
+
+export module stormkit.Core:Utils.DynamicLoaderImpl;
+
+import std;
+
+import :Utils.Expected;
+import :Utils.Numerics;
+import :Utils.AsCast;
+
+export namespace stormkit::core {
+    class DynamicLoaderImpl {
+      public:
+        template<class T>
+        using Expected = std::expected<T, std::error_code>;
+
+        /////////////////////////////////////
+        /////////////////////////////////////
+        constexpr DynamicLoaderImpl() noexcept = default;
+
+        /////////////////////////////////////
+        /////////////////////////////////////
+        ~DynamicLoaderImpl() noexcept {
+            if (m_library_handle) [[likely]]
+                m_library_handle = nullptr;
+        }
+
+        /////////////////////////////////////
+        /////////////////////////////////////
+        DynamicLoaderImpl(const DynamicLoaderImpl&)                    = delete;
+        auto operator=(const DynamicLoaderImpl&) -> DynamicLoaderImpl& = delete;
+
+        /////////////////////////////////////
+        /////////////////////////////////////
+        DynamicLoaderImpl(DynamicLoaderImpl&& other) noexcept
+            : m_library_handle { std::exchange(other.m_library_handle, nullptr) } {}
+
+        /////////////////////////////////////
+        /////////////////////////////////////
+        inline auto operator=(DynamicLoaderImpl&& other) noexcept -> DynamicLoaderImpl& {
+            if (&other == this) [[unlikely]]
+                return *this;
+
+            m_library_handle = std::exchange(other.m_library_handle, nullptr);
+
+            return *this;
+        }
+
+        /////////////////////////////////////
+        /////////////////////////////////////
+        inline auto doLoad(const std::filesystem::path& filepath) -> Expected<void> {
+            const auto wfilepath = filepath.wstring();
+
+            m_library_handle = ::LoadLibraryExW(std::data(wfilepath), nullptr, 0);
+
+            if (not m_library_handle) [[unlikely]]
+                return std::unexpected(
+                    std::error_code { as<Int32>(GetLastError()), std::system_category() });
+
+            return {};
+        }
+
+        /////////////////////////////////////
+        /////////////////////////////////////
+        inline auto doGetFunc(std::string_view name) const -> Expected<void *> {
+            core::expects(m_library_handle);
+            auto func = ::GetProcAddress(m_library_handle, std::data(name));
+
+            if (not func) [[unlikely]]
+                return std::unexpected(
+                    std::error_code { as<Int32>(::GetLastError()), std::system_category() });
+
+            return { func };
+        }
+
+      private:
+        HMODULE m_library_handle = nullptr;
+    };
+} // namespace stormkit::core

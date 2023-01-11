@@ -1,7 +1,7 @@
 target("stormkit-engine")
     set_kind("$(kind)")
     set_languages("cxxlatest", "clatest")
-    add_rules("utils.nzsl2spv")
+    add_rules("stormkit.utils.nzsl2spv")
 
     add_defines("STORMKIT_BUILD")
     if is_mode("debug") then
@@ -9,11 +9,11 @@ target("stormkit-engine")
         set_suffixname("-d")
     end
 
-    add_headerfiles("include/(stormkit/**.hpp)")
-    add_headerfiles("include/(stormkit/**.inl)")
+    add_files("include/stormkit/**.mpp")
+    add_files("src/**.mpp")
     add_headerfiles("src/**.hpp")
-    add_files("src/**.cpp")
     add_files("src/**.nzsl")
+    add_files("src/**.cpp")
 
     add_deps("stormkit-core", "stormkit-image", "stormkit-gpu", "stormkit-entities", { public = true })
     add_deps("stormkit-log")
@@ -21,13 +21,14 @@ target("stormkit-engine")
     add_packages("volk", "vulkan-headers", "vulkan-memory-allocator", { public = true })
     add_packages("nzsl")
 
-    add_includedirs("include", { public = true })
     add_includedirs("$(buildir)/include")
+
+    set_values("msvc.modules.stdifcdir", true)
 
     set_group("libraries")
 
     before_install(function(target)
-        target:set("headerfiles")
+        target:set("modulefiles")
     end)
 
     on_install(function(target)

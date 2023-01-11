@@ -1,41 +1,39 @@
-// Copyright (C) 2022 Arthur LAURENT <arthur.laurent4@gmail.com>
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#include <stormkit/engine/Engine.hpp>
-#include <stormkit/engine/render/Renderer.hpp>
-#include <stormkit/engine/render/framegraph/BakedFrameGraph.hpp>
+module;
 
 #include <stormkit/gpu/core/CommandBuffer.hpp>
 #include <stormkit/gpu/core/Device.hpp>
 #include <stormkit/gpu/core/Queue.hpp>
-#include <stormkit/gpu/pipeline/Framebuffer.hpp>
-#include <stormkit/gpu/pipeline/RenderPass.hpp>
-#include <stormkit/gpu/resource/Buffer.hpp>
-#include <stormkit/gpu/resource/Image.hpp>
-#include <stormkit/gpu/resource/ImageView.hpp>
 #include <stormkit/gpu/sync/Semaphore.hpp>
+
+module stormkit.engine.render.framegraph.BakedFrameGraph;
+
+import stormkit.Engine;
+import stormkit.engine.render.Renderer;
 
 namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
-    BakedFrameGraph::BakedFrameGraph(Engine &engine,
-                                     const FrameGraphBuilder &builder,
-                                     Data &&data,
+    BakedFrameGraph::BakedFrameGraph(Engine& engine,
+                                     const FrameGraphBuilder& builder,
+                                     Data&& data,
                                      [[maybe_unused]] BakedFrameGraph *old)
         : EngineObject { engine }, m_builder { &builder }, m_data { std::move(data) } {
-        const auto &device = this->engine().renderer().device();
+        const auto& device = this->engine().renderer().device();
 
         m_semaphore = device.allocateSemaphore();
 
-        const auto &queue = device.graphicsQueue();
+        const auto& queue = device.graphicsQueue();
 
         m_main_cmb = queue.allocateCommandBuffer();
         m_blit_cmb = queue.allocateCommandBuffer();
 
         m_main_cmb->begin();
 
-        for (const auto &task : m_data.tasks) {
+        for (const auto& task : m_data.tasks) {
             if (task.renderpass)
                 m_main_cmb->beginRenderPass(*task.renderpass,
                                             *task.framebuffer,
@@ -57,18 +55,17 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    BakedFrameGraph::BakedFrameGraph(BakedFrameGraph &&other) noexcept = default;
+    BakedFrameGraph::BakedFrameGraph(BakedFrameGraph&& other) noexcept = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto BakedFrameGraph::operator=(BakedFrameGraph &&other) noexcept
-        -> BakedFrameGraph      & = default;
+    auto BakedFrameGraph::operator=(BakedFrameGraph&& other) noexcept -> BakedFrameGraph& = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto BakedFrameGraph::execute(gpu::Surface::Frame &frame) -> void {
-        STORMKIT_EXPECTS(m_backbuffer);
-        STORMKIT_EXPECTS(m_backbuffer_view);
+    auto BakedFrameGraph::execute(gpu::Surface::Frame& frame) -> void {
+        core::expects(m_backbuffer);
+        core::expects(m_backbuffer_view);
 
         {
             auto signal = core::makeConstObserverStaticArray(m_semaphore);
@@ -86,7 +83,7 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto BakedFrameGraph::setBackbuffer(gpu::Image &backbuffer) -> void {
+    auto BakedFrameGraph::setBackbuffer(gpu::Image& backbuffer) -> void {
         if (&backbuffer != m_backbuffer) {
             m_backbuffer = &backbuffer;
 

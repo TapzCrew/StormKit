@@ -1,27 +1,15 @@
-#include "App.hpp"
-#include "Constants.hpp"
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
 
-#include <stormkit/core/Configure.hpp>
+#ifdef STORMKIT_BUILD_MODULES
+module App;
 
-#include <stormkit/log/Logger.hpp>
-
-#include <stormkit/wsi/Event.hpp>
-#include <stormkit/wsi/EventHandler.hpp>
-#include <stormkit/wsi/Monitor.hpp>
-#include <stormkit/wsi/Window.hpp>
-
-#include <stormkit/image/Image.hpp>
-
-#include <stormkit/gpu/core/Device.hpp>
-#include <stormkit/gpu/core/Instance.hpp>
-#include <stormkit/gpu/core/PhysicalDevice.hpp>
-#include <stormkit/gpu/core/PhysicalDeviceInfo.hpp>
-#include <stormkit/gpu/core/Queue.hpp>
-#include <stormkit/gpu/core/WindowSurface.hpp>
-
-static constexpr auto TEXTURE_DATA = std::array {
-#include <texture.png.hpp>
-};
+import TextureData;
+import ShaderData;
+#else
+    #include "App.mpp"
+#endif
 
 using namespace stormkit;
 
@@ -98,8 +86,9 @@ auto App::doInitWindow() -> void {
     // First we create the wsi
     const auto window_style = wsi::WindowStyle::All;
 
-    m_window =
-        std::make_unique<wsi::Window>(WINDOW_TITLE, core::ExtentU { 800u, 600u }, window_style);
+    m_window = std::make_unique<wsi::Window>(WINDOW_TITLE,
+                                             core::math::ExtentU { 800u, 600u },
+                                             window_style);
 }
 
 ////////////////////////////////////////
@@ -145,7 +134,7 @@ auto App::doInitBaseRenderObjects() -> void {
 ////////////////////////////////////////
 auto App::doInitMeshRenderObjects() -> void {
     const auto& surface_extent = m_surface->extent();
-    const auto surface_extentf = core::ExtentF { surface_extent };
+    const auto surface_extentf = core::math::ExtentF { surface_extent };
 
     // We load our shaders
     m_vertex_shader = m_device->allocateShader(SHADER_DATA, gpu::ShaderStageFlag::Vertex);
@@ -179,8 +168,8 @@ auto App::doInitMeshRenderObjects() -> void {
 
     // We create a pipeline, the pipeline describe all the fixed function parameters and the
     // shaders wich will be bound
-    m_pipeline       = m_device->allocateGraphicsPipeline();
-    const auto state = gpu::GraphicsPipelineState {
+    m_pipeline       = m_device->allocateRasterPipeline();
+    const auto state = gpu::RasterPipelineState {
         .input_assembly_state = { .topology = gpu::PrimitiveTopology::Triangle_Strip },
         .viewport_state       = { .viewports = { gpu::Viewport { .position = { 0.f, 0.f },
                                                                  .extent   = surface_extentf,
@@ -264,7 +253,7 @@ auto App::doInitMeshRenderObjects() -> void {
 ////////////////////////////////////////
 auto App::doInitPerFrameObjects() -> void {
     const auto& surface_extent = m_surface->extent();
-    const auto surface_extentf = core::ExtentF { surface_extent };
+    const auto surface_extentf = core::math::ExtentF { surface_extent };
     const auto buffering_count = m_surface->bufferingCount();
 
     m_surface_views.clear();
@@ -299,12 +288,12 @@ auto App::doInitPerFrameObjects() -> void {
 
         auto frame =
             Frame { .framebuffer =
-                        m_render_pass->createFramebuffer(surface_extent, std::move(attachments)),
+                        m_render_pass->createFrameBuffer(surface_extent, std::move(attachments)),
                     .commandbuffer = m_queue->createCommandBuffer() };
 
         frame.commandbuffer.begin();
         frame.commandbuffer.beginRenderPass(*m_render_pass, frame.framebuffer);
-        frame.commandbuffer.bindGraphicsPipeline(*m_pipeline);
+        frame.commandbuffer.bindRasterPipeline(*m_pipeline);
         frame.commandbuffer.setViewport(0, viewports);
         frame.commandbuffer.setScissor(0, scissors);
         frame.commandbuffer.bindDescriptorSets(*m_pipeline, sets, {});
@@ -316,6 +305,6 @@ auto App::doInitPerFrameObjects() -> void {
         frame.commandbuffer.end();
 
         m_frame_datas.emplace_back(std::move(frame));
-        ilog("Frame {} CommandBuffer and Framebuffer successfully created", i);
+        ilog("Frame {} CommandBuffer and FrameBuffer successfully created", i);
     }
 }

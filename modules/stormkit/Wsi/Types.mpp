@@ -1,0 +1,25 @@
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+export module stormkit.Wsi:Types;
+
+import :Key;
+import :MouseButton;
+import :Event;
+import :WindowStyle;
+
+export namespace stormkit::wsi {
+    enum class WM {
+        Win32,
+        Wayland,
+        X11,
+        Android,
+        macOS,
+        iOS,
+        tvOS,
+        Switch,
+    };
+
+    using NativeHandle = void *;
+} // namespace stormkit::wsi

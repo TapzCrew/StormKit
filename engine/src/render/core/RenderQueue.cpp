@@ -1,29 +1,36 @@
-// Copyright (C) 2022 Arthur LAURENT <arthur.laurent4@gmail.com>
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#include "stormkit/core/ThreadPool.hpp"
-#include "stormkit/gpu/resource/Buffer.hpp"
+module;
+
 #include <algorithm>
 #include <array>
 #include <functional>
 #include <iterator>
 #include <mutex>
-#include <stormkit/core/Memory.hpp>
-#include <stormkit/core/Types.hpp>
-#include <stormkit/engine/render/core/RenderQueue.hpp>
+#include <utility>
+#include <vector>
+
+#include <stormkit/Core/Memory.hpp>
+#include <stormkit/Core/Types.hpp>
+
 #include <stormkit/log/LogMacro.hpp>
 #include <stormkit/log/Logger.hpp>
 
-#include <stormkit/core/Numerics.hpp>
+#include <stormkit/Core/Numerics.hpp>
+#include <stormkit/Core/ThreadPool.hpp>
 
+#include <stormkit/gpu/core/CommandBuffer.hpp>
 #include <stormkit/gpu/core/Device.hpp>
+#include <stormkit/gpu/resource/Buffer.hpp>
 
-#include <stormkit/engine/Engine.hpp>
-#include <stormkit/engine/render/Renderer.hpp>
+module stormkit.engine.render.core.RenderQueue;
 
-#include <stormkit/engine/render/MeshComponent.hpp>
-#include <utility>
+import stormkit.Engine;
+
+import stormkit.engine.render.Renderer;
+import stormkit.engine.render.Components;
 
 using namespace stormkit::core::literals;
 using namespace std::literals;
@@ -85,10 +92,10 @@ namespace stormkit::engine {
                              [[maybe_unused]] std::lock_guard<std::mutex> lock) noexcept
         : EngineObject { std::move(other) }, m_next_id { std::exchange(other.m_next_id, 0) },
           m_entries { std::move(other.m_entries) },
-          m_to_be_added { std::move(other.m_to_be_added) }, m_to_be_removed { std::move(
-                                                                other.m_to_be_removed) },
-          m_shader_input { std::move(other.m_shader_input) }, m_command_buffers { std::move(
-                                                                  other.m_command_buffers) },
+          m_to_be_added { std::move(other.m_to_be_added) },
+          m_to_be_removed { std::move(other.m_to_be_removed) },
+          m_shader_input { std::move(other.m_shader_input) },
+          m_command_buffers { std::move(other.m_command_buffers) },
           m_vertex_buffer_fences { std::move(other.m_vertex_buffer_fences) },
           m_vertex_staging_buffers { std::move(other.m_vertex_staging_buffers) } {
     }
@@ -126,7 +133,7 @@ namespace stormkit::engine {
     }
 
     auto RenderQueue::removeMesh(ID id) -> void {
-        STORMKIT_EXPECTS(id != INVALID_ID);
+        core::expects(id != INVALID_ID);
 
 #ifdef STORMKIT_RENDERER_MULTITHREADED
         auto lock = std::lock_guard { m_mutex };
@@ -153,8 +160,8 @@ namespace stormkit::engine {
         auto& thread_pool = m_engine->threadPool();
 #endif
 
-        for (const auto id : m_to_be_removed)
-            [[maybe_unused]] const auto _ = std::ranges::remove_if(m_entries, [&](auto& entry) {
+        for (const auto id : m_to_be_removed) [[maybe_unused]]
+            const auto _ = std::ranges::remove_if(m_entries, [&](auto& entry) {
                 if (entry.id == id) {
                     entry.id   = INVALID_ID;
                     entry.mesh = nullptr;
@@ -209,11 +216,11 @@ namespace stormkit::engine {
                     auto output          = RenderEntry::SubMesh {};
                     output.submesh_index = i++;
 
-                    const auto positions = core::toConstByteSpan(submesh.vertices.positions());
-                    const auto normals   = core::toConstByteSpan(submesh.vertices.normals());
-                    const auto colors    = core::toConstByteSpan(submesh.vertices.colors());
-                    const auto uvs       = core::toConstByteSpan(submesh.vertices.uvs());
-                    const auto indices   = core::toConstByteSpan(submesh.indices);
+                    const auto positions = core::asByteView(submesh.vertices.positions());
+                    const auto normals   = core::asByteView(submesh.vertices.normals());
+                    const auto colors    = core::asByteView(submesh.vertices.colors());
+                    const auto uvs       = core::asByteView(submesh.vertices.uvs());
+                    const auto indices   = core::asByteView(submesh.indices);
 
                     output.positions =
                         m_shader_input.allocateBlock(std::size(positions), POSITION_HANDLE);

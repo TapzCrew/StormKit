@@ -1,0 +1,60 @@
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+export module stormkit.Wsi:EventHandler;
+
+import std;
+
+import stormkit.Core;
+
+import <stormkit/Core/PlatformMacro.hpp>;
+
+import :Event;
+import :Window;
+
+export namespace stormkit::wsi {
+    class STORMKIT_API EventHandler {
+      public:
+        using Callback = std::function<void(const Event&)>;
+
+        explicit EventHandler(Window& window);
+
+        auto update() -> void;
+
+        auto setCallback(EventType event_type, Callback callback) -> void;
+        auto setCallbacks(std::vector<std::pair<EventType, Callback>> callbacks) -> void;
+        auto clearCallbacks(EventType event_type) -> void;
+
+      private:
+        core::NakedRef<Window> m_window;
+
+        core::HashMap<EventType, std::vector<Callback>> m_callback;
+    };
+} // namespace stormkit::wsi
+
+////////////////////////////////////////////////////////////////////
+///                      IMPLEMENTATION                          ///
+////////////////////////////////////////////////////////////////////
+
+namespace stormkit::wsi {
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto EventHandler::setCallback(EventType event_type, Callback callback) -> void {
+        m_callback[event_type].emplace_back(std::move(callback));
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto EventHandler::setCallbacks(std::vector<std::pair<EventType, Callback>> callbacks)
+        -> void {
+        for (auto&& [event_type, callback] : callbacks)
+            setCallback(event_type, std::move(callback));
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto EventHandler::clearCallbacks(EventType event_type) -> void {
+        m_callback[event_type].clear();
+    }
+} // namespace stormkit::wsi

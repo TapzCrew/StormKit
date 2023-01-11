@@ -1,9 +1,19 @@
-// Copyright (C) 2022 Arthur LAURENT <arthur.laurent4@gmail.com>
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#include <stormkit/gpu/core/Device.hpp>
-#include <stormkit/gpu/resource/Sampler.hpp>
+#ifdef STORMKIT_BUILD_MODULES
+module stormkit.Gpu:Resource;
+
+import :Sampler;
+import :Image;
+import :ImageView;
+#else
+    #include <stormkit/std.hpp>
+
+    #include <stormkit/Core.hpp>
+    #include <stormkit/Gpu.hpp>
+#endif
 
 namespace stormkit::gpu {
     /////////////////////////////////////

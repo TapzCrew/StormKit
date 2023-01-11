@@ -1,14 +1,18 @@
-// Copyright (C) 2022 Arthur LAURENT <arthur.laurent4@gmail.com>
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#include <stormkit/engine/render/core/VertexArray.hpp>
+module;
+
+#include <stormkit/Core/Numerics.hpp>
+#include <stormkit/Core/Types.hpp>
+
+module stormkit.engine.render.core.VertexArray;
 
 namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
-    VertexArray::VertexArray() {
-    }
+    VertexArray::VertexArray() = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
@@ -38,7 +42,7 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto VertexArray::resize(core::USize size) -> void {
+    auto VertexArray::resize(core::RangeExtent size) -> void {
         if (m_size < size) {
             const auto diff = m_size - size;
 
@@ -87,8 +91,8 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto VertexArray::removeVertex(core::USize position) -> void {
-        STORMKIT_EXPECTS(position < m_size);
+    auto VertexArray::removeVertex(core::RangeExtent position) -> void {
+        core::expects(position < m_size);
 
         m_positions.erase(std::begin(m_positions) + position);
         m_normals.erase(std::begin(m_normals) + position);
@@ -101,8 +105,8 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto VertexArray::removeVertices(core::USize first, core::USize count) -> void {
-        STORMKIT_EXPECTS(first + count < m_size);
+    auto VertexArray::removeVertices(core::RangeExtent first, core::RangeExtent count) -> void {
+        core::expects(first + count < m_size);
 
         m_positions.erase(std::begin(m_positions) + first, std::begin(m_positions) + first + count);
         m_normals.erase(std::begin(m_normals) + first, std::begin(m_normals) + first + count);

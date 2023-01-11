@@ -1,0 +1,16 @@
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+export module stormkit.Core:Utils.Expected;
+
+import std;
+
+export namespace stormkit::core {
+    template<class T>
+    struct Construct {
+        auto operator()() const noexcept -> void {
+            static_assert(true, "Construct<T>() was not specialised for the type T supplied");
+        }
+    };
+} // namespace stormkit::core

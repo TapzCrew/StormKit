@@ -1,11 +1,11 @@
-// Copyright (C) 2022 Arthur LAURENT <arthur.laurent4@gmail.com>
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#include <stormkit/core/ThreadUtils.hpp>
+module;
 
-#include <stormkit/engine/Engine.hpp>
-#include <stormkit/engine/render/Renderer.hpp>
+#include <stormkit/Core/Format.hpp>
+#include <stormkit/Core/ThreadUtils.hpp>
 
 #include <stormkit/wsi/Event.hpp>
 #include <stormkit/wsi/EventHandler.hpp>
@@ -14,7 +14,11 @@
 
 #include <stormkit/log/ConsoleLogger.hpp>
 
-#include "Log.hpp"
+module stormkit.Engine;
+
+import stormkit.engine.details.Log;
+
+import stormkit.engine.render.Renderer;
 
 namespace stormkit::engine {
     /////////////////////////////////////
@@ -52,7 +56,7 @@ namespace stormkit::engine {
         });
     }
 
-    Engine::Engine(const core::ExtentU& extent, gpu::Surface::Buffering buffering) {
+    Engine::Engine(const core::math::ExtentU& extent, gpu::Surface::Buffering buffering) {
         m_logger = log::Logger::allocateLoggerInstance<log::ConsoleLogger>();
 
         core::setCurrentThreadName("StormKit:MainThread");

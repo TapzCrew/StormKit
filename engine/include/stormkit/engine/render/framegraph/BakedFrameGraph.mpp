@@ -1,0 +1,88 @@
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+module;
+
+#include <iterator>
+#include <memory>
+#include <optional>
+#include <ranges>
+#include <vector>
+
+#include <stormkit/Core/MemoryMacro.hpp>
+#include <stormkit/Core/PlatformMacro.hpp>
+
+#include <stormkit/Core/Types.hpp>
+
+#include <stormkit/gpu/Fwd.hpp>
+#include <stormkit/gpu/core/Surface.hpp>
+#include <stormkit/gpu/core/Types.hpp>
+#include <stormkit/gpu/pipeline/Framebuffer.hpp>
+#include <stormkit/gpu/pipeline/RenderPass.hpp>
+#include <stormkit/gpu/resource/Buffer.hpp>
+#include <stormkit/gpu/resource/Image.hpp>
+#include <stormkit/gpu/resource/ImageView.hpp>
+
+export module stormkit.engine.render.framegraph.BakedFrameGraph;
+
+import stormkit.Engine;
+import stormkit.engine.EngineObject;
+
+import stormkit.engine.render.framegraph.GraphID;
+
+export namespace stormkit::engine {
+    class FrameGraphBuilder;
+
+    class STORMKIT_API BakedFrameGraph: public EngineObject {
+        struct Data {
+            struct Task {
+                GraphID id;
+
+                std::unique_ptr<gpu::CommandBuffer> commandbuffer;
+
+                std::vector<gpu::ClearValue> clear_values = {};
+                std::unique_ptr<gpu::RenderPass> renderpass;
+                std::unique_ptr<gpu::Framebuffer> framebuffer;
+            };
+
+            std::vector<Task> tasks;
+            std::vector<gpu::Image> images          = {};
+            std::vector<gpu::ImageView> image_views = {};
+            std::vector<gpu::Buffer> buffers        = {};
+        };
+
+      public:
+        BakedFrameGraph(Engine& engine,
+                        const FrameGraphBuilder& builder,
+                        Data&& data,
+                        BakedFrameGraph *old = nullptr);
+        ~BakedFrameGraph();
+
+        BakedFrameGraph(const BakedFrameGraph&)                    = delete;
+        auto operator=(const BakedFrameGraph&) -> BakedFrameGraph& = delete;
+
+        BakedFrameGraph(BakedFrameGraph&&) noexcept;
+        auto operator=(BakedFrameGraph&&) noexcept -> BakedFrameGraph&;
+
+        auto execute(gpu::Surface::Frame& frame) -> void;
+
+        auto setBackbuffer(gpu::Image& backbuffer) -> void;
+
+      private:
+        const FrameGraphBuilder *m_builder = nullptr;
+
+        std::unique_ptr<gpu::CommandBuffer> m_main_cmb;
+        std::unique_ptr<gpu::CommandBuffer> m_blit_cmb;
+
+        std::unique_ptr<gpu::Semaphore> m_semaphore;
+        gpu::Image *m_backbuffer = nullptr;
+        std::unique_ptr<gpu::ImageView> m_backbuffer_view;
+
+        Data m_data;
+
+        friend class FrameGraphBuilder;
+    };
+
+    DECLARE_PTR_AND_REF(BakedFrameGraph);
+} // namespace stormkit::engine

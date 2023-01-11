@@ -1,24 +1,19 @@
-// Copyright (C) 2022 Arthur LAURENT <arthur.laurent4@gmail.com>
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#include <stormkit/core/Coroutines.hpp>
+#ifdef STORMKIT_BUILD_MODULES
+module stormkit.Gpu:Resource;
 
-#include <stormkit/gpu/core/CommandBuffer.hpp>
-#include <stormkit/gpu/core/Device.hpp>
-#include <stormkit/gpu/core/PhysicalDevice.hpp>
-#include <stormkit/gpu/core/Queue.hpp>
+import :Image;
+#else
+    #include <stormkit/std.hpp>
 
-#include <stormkit/gpu/resource/Buffer.hpp>
-#include <stormkit/gpu/resource/Image.hpp>
+    #include <stormkit/Core.hpp>
+    #include <stormkit/Gpu.hpp>
+#endif
 
-#include <stormkit/gpu/sync/Fence.hpp>
-
-#include <stormkit/image/Image.hpp>
-
-#include "ConvertFormatShaders.hpp"
-
-//#include <gli/load.hpp>
+// #include <gli/load.hpp>
 
 namespace stormkit::gpu {
     /* constexpr auto toPixelFormat(gli::format format) {
@@ -95,9 +90,8 @@ namespace stormkit::gpu {
     Image::Image(const Device& device, const CreateInfo& info, Tag)
         : DeviceObject { device }, m_extent { info.extent }, m_format { info.format },
           m_layers { info.layers }, m_faces { 1 }, m_mip_levels { info.mip_levels },
-          m_type { info.type }, m_flags { info.flags }, m_samples { info.samples }, m_usages {
-              info.usages
-          } {
+          m_type { info.type }, m_flags { info.flags }, m_samples { info.samples },
+          m_usages { info.usages } {
         if (core::checkFlag(m_flags, gpu::ImageCreateFlag::Cube_Compatible)) m_faces = 6u;
     }
 
@@ -148,7 +142,7 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     Image::Image(const Device& device,
-                 const core::ExtentU& extent,
+                 const core::math::ExtentU& extent,
                  gpu::PixelFormat format,
                  VkImage image)
         : Image { device, CreateInfo { extent, format, 1u, 1u }, Tag {} } {
@@ -174,19 +168,18 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     Image::Image(Image&& other) noexcept
-        : DeviceObject { std::move(other) }, m_extent { std::exchange(other.m_extent,
-                                                                      { 0, 0, 0 }) },
+        : DeviceObject { std::move(other) },
+          m_extent { std::exchange(other.m_extent, { 0, 0, 0 }) },
           m_format { std::exchange(other.m_format, {}) },
-          m_layers { std::exchange(other.m_layers, 0) }, m_faces { std::exchange(other.m_faces,
-                                                                                 0) },
+          m_layers { std::exchange(other.m_layers, 0) },
+          m_faces { std::exchange(other.m_faces, 0) },
           m_mip_levels { std::exchange(other.m_mip_levels, 0) },
           m_type { std::exchange(other.m_type, {}) }, m_flags { std::exchange(other.m_flags, {}) },
           m_samples { std::exchange(other.m_samples, {}) },
-          m_usages { std::exchange(other.m_usages, {}) }, m_image { std::exchange(other.m_image,
-                                                                                  VK_NULL_HANDLE) },
-          m_image_memory { std::exchange(other.m_image_memory, VK_NULL_HANDLE) }, m_own_image {
-              std::exchange(other.m_own_image, true)
-          } {
+          m_usages { std::exchange(other.m_usages, {}) },
+          m_image { std::exchange(other.m_image, VK_NULL_HANDLE) },
+          m_image_memory { std::exchange(other.m_image_memory, VK_NULL_HANDLE) },
+          m_own_image { std::exchange(other.m_own_image, true) } {
     }
 
     /////////////////////////////////////
@@ -214,137 +207,6 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto Image::loadFromImage(const image::Image& image, bool generate_mips) -> void {
-        auto staging_buffer = device().createStagingBuffer(image.size());
-
-        auto fence = device().createFence();
-        auto command_buffer =
-            device().graphicsQueue().createCommandBuffer(CommandBufferLevel::Primary);
-
-        command_buffer.begin(true);
-
-        loadFromImage(image, command_buffer, staging_buffer, 0u, generate_mips);
-
-        command_buffer.end();
-        command_buffer.submit({}, {}, &fence);
-
-        fence.wait();
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto Image::loadFromImage(const image::Image& image,
-                              CommandBuffer& command_buffer,
-                              Buffer& staging_buffer,
-                              core::UInt32 offset,
-                              bool generate_mips) -> void {
-        STORMKIT_EXPECTS(m_own_image);
-
-        loadFromMemory(image.data(),
-                       image.layers(),
-                       image.faces(),
-                       image.mipLevels(),
-                       command_buffer,
-                       staging_buffer,
-                       offset,
-                       generate_mips);
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto Image::loadFromMemory(core::ByteConstSpan data,
-                               core::UInt32 layers,
-                               core::UInt32 faces,
-                               core::UInt32 mip_levels,
-                               bool generate_mips) -> void {
-        auto staging_buffer = device().createStagingBuffer(std::size(data));
-
-        auto fence = device().createFence();
-        auto command_buffer =
-            device().graphicsQueue().createCommandBuffer(CommandBufferLevel::Primary);
-
-        command_buffer.begin(true);
-
-        loadFromMemory(data,
-                       layers,
-                       faces,
-                       mip_levels,
-                       command_buffer,
-                       staging_buffer,
-                       0u,
-                       generate_mips);
-
-        command_buffer.end();
-        command_buffer.submit({}, {}, core::makeObserver(fence));
-
-        fence.wait();
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto Image::loadFromMemory(core::ByteConstSpan data,
-                               core::UInt32 layers,
-                               core::UInt32 faces,
-                               core::UInt32 mip_levels,
-                               gpu::CommandBuffer& command_buffer,
-                               gpu::Buffer& buffer,
-                               core::UInt32 offset,
-                               bool generate_mips) -> void {
-        buffer.upload(data);
-
-        command_buffer.beginDebugRegion("Upload Image", core::RGBColorDef::Lime<float>);
-        command_buffer.transitionImageLayout(*this,
-                                             ImageLayout::Undefined,
-                                             ImageLayout::Transfer_Dst_Optimal,
-                                             { .level_count = m_mip_levels,
-                                               .layer_count = m_layers * m_faces });
-
-        const auto channel_count         = getChannelCountFor(m_format);
-        const auto byte_count_by_channel = getArraySizeByChannelFor(m_format);
-
-        auto _offset = 0u;
-        for (auto [layer, face, mip_level] :
-             core::generateIndicesAs<core::UInt32>(layers, faces, mip_levels)) {
-            const auto extent = core::ExtentU { std::max(1u, m_extent.width >> mip_level),
-                                                std::max(1u, m_extent.height >> mip_level),
-                                                std::max(1u, m_extent.depth >> mip_level) };
-
-            const auto size =
-                extent.width * extent.height * extent.depth * channel_count * byte_count_by_channel;
-
-            auto copy_regions = std::vector<BufferImageCopy> {};
-            copy_regions.reserve(m_layers);
-
-            copy_regions.emplace_back(BufferImageCopy {
-                .buffer_offset      = offset + _offset,
-                .subresource_layers = { .mip_level = core::as<core::UInt32>(mip_level),
-                                        .base_array_layer =
-                                            core::as<core::UInt32>(layer + (face * m_layers)) },
-                .extent             = extent,
-            });
-
-            command_buffer.copyBufferToImage(buffer, *this, std::move(copy_regions));
-
-            _offset += size;
-        }
-
-        auto layout = ImageLayout::Transfer_Dst_Optimal;
-        if (generate_mips) {
-            generateMipmap(command_buffer, m_mip_levels);
-
-            layout = ImageLayout::Transfer_Src_Optimal;
-        }
-
-        command_buffer.transitionImageLayout(*this,
-                                             layout,
-                                             ImageLayout::Shader_Read_Only_Optimal,
-                                             { .level_count = m_mip_levels,
-                                               .layer_count = m_layers * m_faces });
-        command_buffer.endDebugRegion();
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
     auto Image::createView(ImageViewType type,
                            ImageSubresourceRange subresource_range) const noexcept -> ImageView {
         return ImageView { device(), *this, type, subresource_range };
@@ -353,7 +215,7 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     auto Image::allocateView(ImageViewType type, ImageSubresourceRange subresource_range) const
-        -> ImageViewOwnedPtr {
+        -> std::unique_ptr<ImageView> {
         return std::make_unique<ImageView>(device(), *this, type, subresource_range);
     }
 
@@ -361,52 +223,7 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     auto Image::allocateRefCountedView(ImageViewType type,
                                        ImageSubresourceRange subresource_range) const
-        -> ImageViewSharedPtr {
+        -> std::shared_ptr<ImageView> {
         return std::make_shared<ImageView>(device(), *this, type, subresource_range);
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto Image::generateMipmap(CommandBuffer& command_buffer, core::UInt32 mip_levels) -> void {
-        command_buffer.beginDebugRegion("Generate Image mips", core::RGBColorDef::Maroon<float>);
-        command_buffer.transitionImageLayout(*this,
-                                             ImageLayout::Transfer_Dst_Optimal,
-                                             ImageLayout::Transfer_Src_Optimal,
-                                             { .layer_count = m_layers * m_faces });
-
-        for (auto i : core::range(1u, mip_levels)) {
-            auto region =
-                BlitRegion { .source = ImageSubresourceLayers { .mip_level   = i - 1u,
-                                                                .layer_count = m_layers * m_faces },
-                             .destination =
-                                 ImageSubresourceLayers { .mip_level   = i,
-                                                          .layer_count = m_layers * m_faces },
-                             .source_offset      = { core::ExtentU {},
-                                                     core::ExtentU {
-                                                    std::max(1u, m_extent.width >> (i - 1u)),
-                                                    std::max(1u, m_extent.height >> (i - 1u)),
-                                                    std::max(1u, m_extent.depth >> (i - 1u)),
-                                                } },
-                             .destination_offset = { core::ExtentU {},
-                                                     core::ExtentU {
-                                                         std::max(1u, m_extent.width >> (i)),
-                                                         std::max(1u, m_extent.height >> (i)),
-                                                         std::max(1u, m_extent.depth >> (i)),
-                                                     } } };
-
-            command_buffer.blitImage(*this,
-                                     *this,
-                                     gpu::ImageLayout::Transfer_Src_Optimal,
-                                     gpu::ImageLayout::Transfer_Dst_Optimal,
-                                     { &region, 1 },
-                                     gpu::Filter::Linear);
-
-            command_buffer.transitionImageLayout(*this,
-                                                 ImageLayout::Transfer_Dst_Optimal,
-                                                 ImageLayout::Transfer_Src_Optimal,
-                                                 { .base_mip_level = i,
-                                                   .layer_count    = m_layers * m_faces });
-        }
-        command_buffer.endDebugRegion();
     }
 } // namespace stormkit::gpu

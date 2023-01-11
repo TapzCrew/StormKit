@@ -1,4 +1,4 @@
-// Copyright (C) 2022 Arthur LAURENT <arthur.laurent4@gmail.com>
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
@@ -7,7 +7,7 @@
 #include <QtQuick/QQuickWindow>
 #include <QtQuickControls2/QQuickStyle>
 
-#include "StormKitView.hpp"
+import StormKitView;
 
 auto main(int argc, char *argv[]) -> int {
     auto app = QGuiApplication { argc, argv };
@@ -15,7 +15,7 @@ auto main(int argc, char *argv[]) -> int {
     auto engine = QQmlApplicationEngine {};
     engine.addImportPath("qrc:///");
 
-    QQuickWindow::setGraphicsApi(QSGRendererInterface::Vulkan);
+    // QQuickWindow::setGraphicsApi(QSGRendererInterface::Vulkan);
 
 #ifdef Q_OS_WINDOWS
     app.setWindowIcon(QIcon { QStringLiteral("qrc:/assets/glTF.ico") });

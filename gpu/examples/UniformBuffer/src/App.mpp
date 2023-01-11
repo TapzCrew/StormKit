@@ -1,0 +1,82 @@
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+#ifdef STORMKIT_BUILD_MODULES
+export module App;
+
+import std;
+
+import stormkit.Core;
+import stormkit.Gpu;
+import stormkit.Wsi;
+
+import Constants;
+
+export {
+#else
+    #include <stormkit/std.hpp>
+
+    #include <stormkit/Core.hpp>
+    #include <stormkit/Gpu.hpp>
+    #include <stormkit/Wsi.hpp>
+#endif
+
+    class App: public stormkit::core::App {
+      public:
+        App();
+        ~App() override;
+
+        auto run(const int argc, const char **argv) -> stormkit::core::Int32 override;
+
+      private:
+        auto doInitWindow() -> void;
+        auto doInitBaseRenderObjects() -> void;
+        auto doInitMeshRenderObjects() -> void;
+        auto doInitPerFrameObjects() -> void;
+
+        auto updateModelMatrix(stormkit::core::Secondf& delta) -> void;
+
+        std::unique_ptr<stormkit::wsi::Window> m_window;
+        bool m_fullscreen_enabled = false;
+
+        std::unique_ptr<stormkit::gpu::Instance> m_instance;
+        std::unique_ptr<stormkit::gpu::Device> m_device;
+        std::unique_ptr<stormkit::gpu::Surface> m_surface;
+        const stormkit::gpu::Queue *m_queue = nullptr;
+        std::vector<stormkit::gpu::ImageView> m_surface_views;
+
+        Camera m_camera;
+        Transform m_model;
+
+        std::unique_ptr<stormkit::gpu::Shader> m_vertex_shader;
+        std::unique_ptr<stormkit::gpu::Shader> m_fragment_shader;
+
+        std::unique_ptr<stormkit::gpu::DescriptorSetLayout> m_descriptor_set_layout;
+        std::unique_ptr<stormkit::gpu::DescriptorPool> m_descriptor_pool;
+
+        std::unique_ptr<stormkit::gpu::RenderPass> m_render_pass;
+        std::unique_ptr<stormkit::gpu::RasterPipeline> m_pipeline;
+
+        std::unique_ptr<stormkit::gpu::Buffer> m_vertex_buffer;
+
+        std::unique_ptr<stormkit::gpu::DescriptorSet> m_descriptor_set;
+        std::unique_ptr<stormkit::gpu::Buffer> m_camera_buffer;
+
+        std::unique_ptr<stormkit::gpu::DescriptorSet> m_model_descriptor_set;
+        std::unique_ptr<stormkit::gpu::Buffer> m_model_staging_buffer;
+        std::unique_ptr<stormkit::gpu::Buffer> m_model_buffer;
+
+        struct Frame {
+            stormkit::gpu::FrameBuffer framebuffer;
+            stormkit::gpu::CommandBuffer commandbuffer;
+        };
+
+        std::vector<stormkit::gpu::Image> m_depth_buffers;
+        std::vector<stormkit::gpu::ImageView> m_depth_buffer_views;
+        std::vector<Frame> m_frame_datas;
+    };
+
+#ifdef STORMKIT_BUILD_MODULES
+}
+#endif

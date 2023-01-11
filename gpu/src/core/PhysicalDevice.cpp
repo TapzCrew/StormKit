@@ -1,15 +1,18 @@
-// Copyright (C) 2022 Arthur LAURENT <arthur.laurent4@gmail.com>
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#include <unordered_set>
+#ifdef STORMKIT_BUILD_MODULES
+module stormkit.Gpu:Core;
+#else
+    #include <stormkit/std.hpp>
 
-#include <stormkit/gpu/core/Device.hpp>
-#include <stormkit/gpu/core/PhysicalDevice.hpp>
-#include <stormkit/gpu/core/WindowSurface.hpp>
+    #include <stormkit/Core.hpp>
+    #include <stormkit/Gpu.hpp>
+#endif
 
 namespace stormkit::gpu {
-    std::string_view vendorNameByID(core::UInt64 ID) {
+    static std::string_view vendorNameByID(core::UInt64 ID) {
         switch (ID) {
             case 0x1002: return "AMD";
             case 0x1010: return "ImgTex";
@@ -26,7 +29,7 @@ namespace stormkit::gpu {
     // https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VK_KHR_driver_properties.html
     /////////////////////////////////////
     /////////////////////////////////////
-    PhysicalDevice::PhysicalDevice(VkPhysicalDevice vk_physical_device, const Instance &instance)
+    PhysicalDevice::PhysicalDevice(VkPhysicalDevice vk_physical_device, const Instance& instance)
         : InstanceObject { instance }, m_physical_device { vk_physical_device } {
         const auto properties = [this] {
             auto p = VkPhysicalDeviceProperties {};
@@ -320,7 +323,7 @@ namespace stormkit::gpu {
 
         std::ranges::transform(extensions,
                                std::back_inserter(m_extensions),
-                               [](const auto &extension) {
+                               [](const auto& extension) {
                                    const auto string_size =
                                        std::char_traits<char>::length(extension.extensionName);
 
@@ -337,7 +340,7 @@ namespace stormkit::gpu {
         std::ranges::transform(std::span { m_vk_memory_properties.memoryTypes,
                                            m_vk_memory_properties.memoryTypeCount },
                                std::back_inserter(m_memory_properties),
-                               [](const auto &d) {
+                               [](const auto& d) {
                                    return core::as<MemoryPropertyFlag>(d.propertyFlags);
                                });
 
@@ -352,7 +355,7 @@ namespace stormkit::gpu {
         m_queue_families.reserve(std::size(queue_family_properties));
         std::ranges::transform(queue_family_properties,
                                std::back_inserter(m_queue_families),
-                               [](const auto &family) {
+                               [](const auto& family) {
                                    return QueueFamily { .flags =
                                                             core::as<QueueFlag>(family.queueFlags),
                                                         .count = family.queueCount };
@@ -365,74 +368,54 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    PhysicalDevice::PhysicalDevice(PhysicalDevice &&other) noexcept
+    PhysicalDevice::PhysicalDevice(PhysicalDevice&& other) noexcept
         : InstanceObject { std::move(other) },
           m_physical_device { std::exchange(other.m_physical_device, VK_NULL_HANDLE) },
           m_device_info { std::exchange(other.m_device_info, {}) },
           m_capabilities { std::exchange(other.m_capabilities, {}) },
           m_memory_properties { std::move(other.m_memory_properties) },
           m_queue_families { std::move(other.m_queue_families) },
-          m_vk_memory_properties { std::exchange(other.m_vk_memory_properties, {}) }, m_extensions {
-              std::move(other.m_extensions)
-          } {}
+          m_vk_memory_properties { std::exchange(other.m_vk_memory_properties, {}) },
+          m_extensions { std::move(other.m_extensions) } {
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto PhysicalDevice::operator=(PhysicalDevice &&other) noexcept -> PhysicalDevice & {
+    auto PhysicalDevice::operator=(PhysicalDevice&& other) noexcept -> PhysicalDevice& {
         if (&other == this) [[unlikely]]
             return *this;
 
         InstanceObject::operator=(std::move(other));
-        m_physical_device       = std::exchange(other.m_physical_device, VK_NULL_HANDLE);
-        m_device_info           = std::exchange(other.m_device_info, {});
-        m_capabilities          = std::exchange(other.m_capabilities, {});
-        m_memory_properties     = std::move(other.m_memory_properties);
-        m_queue_families        = std::move(other.m_queue_families);
-        m_vk_memory_properties  = std::exchange(other.m_vk_memory_properties, {});
-        m_extensions            = std::move(other.m_extensions);
+        m_physical_device      = std::exchange(other.m_physical_device, VK_NULL_HANDLE);
+        m_device_info          = std::exchange(other.m_device_info, {});
+        m_capabilities         = std::exchange(other.m_capabilities, {});
+        m_memory_properties    = std::move(other.m_memory_properties);
+        m_queue_families       = std::move(other.m_queue_families);
+        m_vk_memory_properties = std::exchange(other.m_vk_memory_properties, {});
+        m_extensions           = std::move(other.m_extensions);
 
         return *this;
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto PhysicalDevice::checkIfPresentSupportIsEnabled(const WindowSurface &surface) noexcept
-        -> void {
-        STORMKIT_EXPECTS(m_physical_device != VK_NULL_HANDLE);
-
-        auto index = 0u;
-
-        std::ranges::for_each(m_queue_families, [this, &index, &surface](auto &family) {
-            auto support = VkBool32 { VK_FALSE };
-
-            CHECK_VK_ERROR(vkGetPhysicalDeviceSurfaceSupportKHR(m_physical_device,
-                                                                index++,
-                                                                surface,
-                                                                &support));
-
-            family.has_present_support = support;
-        });
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
     auto PhysicalDevice::checkExtensionSupport(std::string_view extension) const noexcept -> bool {
-        STORMKIT_EXPECTS(m_physical_device != VK_NULL_HANDLE);
+        core::expects(m_physical_device != VK_NULL_HANDLE);
 
         return std::ranges::any_of(m_extensions,
-                                   [extension](const auto &e) { return e == extension; });
+                                   [extension](const auto& e) { return e == extension; });
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     auto PhysicalDevice::checkExtensionSupport(
         std::span<const std::string_view> extensions) const noexcept -> bool {
-        STORMKIT_EXPECTS(m_physical_device != VK_NULL_HANDLE);
+        core::expects(m_physical_device != VK_NULL_HANDLE);
 
         auto required_extensions = core::HashSet<std::string_view> { std::ranges::begin(extensions),
                                                                      std::ranges::end(extensions) };
 
-        for (const auto &extension : m_extensions) required_extensions.erase(extension);
+        for (const auto& extension : m_extensions) required_extensions.erase(extension);
 
         return std::empty(required_extensions);
     }
@@ -441,36 +424,36 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     auto PhysicalDevice::checkExtensionSupport(
         std::span<const core::CZString> extensions) const noexcept -> bool {
-        STORMKIT_EXPECTS(m_physical_device != VK_NULL_HANDLE);
+        core::expects(m_physical_device != VK_NULL_HANDLE);
 
         auto required_extensions = core::HashSet<std::string_view> { std::ranges::begin(extensions),
                                                                      std::ranges::end(extensions) };
 
-        for (const auto &extension : m_extensions) required_extensions.erase(extension);
+        for (const auto& extension : m_extensions) required_extensions.erase(extension);
 
         return std::empty(required_extensions);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto PhysicalDevice::createLogicalDevice() const -> gpu::Device {
-        STORMKIT_EXPECTS(m_physical_device != VK_NULL_HANDLE);
+    auto PhysicalDevice::createLogicalDevice() const -> Device {
+        core::expects(m_physical_device != VK_NULL_HANDLE);
 
         return Device { *this, instance() };
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto PhysicalDevice::allocateLogicalDevice() const -> gpu::DeviceOwnedPtr {
-        STORMKIT_EXPECTS(m_physical_device != VK_NULL_HANDLE);
+    auto PhysicalDevice::allocateLogicalDevice() const -> std::unique_ptr<Device> {
+        core::expects(m_physical_device != VK_NULL_HANDLE);
 
         return std::make_unique<Device>(*this, instance());
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto PhysicalDevice::allocateRefCountedLogicalDevice() const -> gpu::DeviceSharedPtr {
-        STORMKIT_EXPECTS(m_physical_device != VK_NULL_HANDLE);
+    auto PhysicalDevice::allocateRefCountedLogicalDevice() const -> std::shared_ptr<Device> {
+        core::expects(m_physical_device != VK_NULL_HANDLE);
 
         return std::make_shared<Device>(*this, instance());
     }

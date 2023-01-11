@@ -1,8 +1,8 @@
-#include <stormkit/core/Memory.hpp>
+#include <stormkit/Core/Memory.hpp>
 
 #include <stormkit/main/MainMacro.hpp>
 
-#include "App.hpp"
+import App;
 
 ////////////////////////////////////////
 ////////////////////////////////////////

@@ -1,20 +1,17 @@
-// Copyright (C) 2022 Arthur LAURENT <arthur.laurent4@gmail.com>
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#include <streambuf>
+#ifdef STORMKIT_BUILD_MODULES
+module stormkit.Gpu:Resource;
 
-#ifdef STORMKIT_ENABLE_SPIRV_INTROSPECT
-    /////////// - spirv-cross - ///////////
-    #include <spirv_glsl.hpp>
+import :Shader;
+#else
+    #include <stormkit/std.hpp>
+
+    #include <stormkit/Core.hpp>
+    #include <stormkit/Gpu.hpp>
 #endif
-
-#include <stormkit/core/Fstream.hpp>
-
-#include <stormkit/gpu/core/Device.hpp>
-#include <stormkit/gpu/core/PhysicalDevice.hpp>
-
-#include <stormkit/gpu/resource/Shader.hpp>
 
 namespace stormkit::gpu {
     /////////////////////////////////////
@@ -35,7 +32,7 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    Shader::Shader(core::ByteConstSpan data, ShaderStageFlag type, const Device& device)
+    Shader::Shader(std::span<const core::Byte> data, ShaderStageFlag type, const Device& device)
         : DeviceObject { device }, m_type {
               type
           } /*, m_descriptor_set_layout {
@@ -70,11 +67,10 @@ m_device->createDescriptorSetLayout()
     /////////////////////////////////////
     /////////////////////////////////////
     Shader::Shader(Shader&& other) noexcept
-        : DeviceObject { std::move(other) }, m_type { std::exchange(other.m_type,
-                                                                    ShaderStageFlag::None) },
-          m_source { std::move(other.m_source) }, m_shader_module {
-              std::exchange(other.m_shader_module, VK_NULL_HANDLE)
-          } {
+        : DeviceObject { std::move(other) },
+          m_type { std::exchange(other.m_type, ShaderStageFlag::None) },
+          m_source { std::move(other.m_source) },
+          m_shader_module { std::exchange(other.m_shader_module, VK_NULL_HANDLE) } {
     }
 
     /////////////////////////////////////

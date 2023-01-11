@@ -1,0 +1,211 @@
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+#ifndef STORMKIT_NO_MODULES
+export module stormkit.Gpu:core.InstanceObjectBuilder;
+
+import <stormkit/Gpu/Core/VulkanMacro.hpp>;
+
+import std;
+
+import stormkit.Core;
+    #ifdef STORMKIT_WSI_ENABLED
+import stormkit.Wsi;
+    #endif
+import stormkit.Gpu:Core;
+
+import stormkit.Gpu:Surface;
+export {
+#else
+    #include <stormkit/std.hpp>
+
+    #include <stormkit/Core.hpp>
+
+    #ifdef STORMKIT_WSI_ENABLED
+        #include <stormkit/Wsi.hpp>
+    #endif
+
+    #include <stormkit/gpu/Core.hpp>
+    #include <stormkit/gpu/Surface.hpp>
+#endif
+
+    namespace stormkit::gpu {
+        class STORMKIT_API InstanceObjectBuilder: public InstanceObject {
+          public:
+            enum class Error {
+                No_Physical_Device_Found,
+                No_Present_Compatible_Physical_Device_Found
+            };
+
+            template<class T>
+            using Expected = std::expected<T, Error>;
+
+            InstanceObjectBuilder(const Instance& instance) noexcept;
+            ~InstanceObjectBuilder() noexcept;
+
+            InstanceObjectBuilder(const InstanceObjectBuilder&)                    = default;
+            auto operator=(const InstanceObjectBuilder&) -> InstanceObjectBuilder& = default;
+
+            InstanceObjectBuilder(InstanceObjectBuilder&&) noexcept                    = default;
+            auto operator=(InstanceObjectBuilder&&) noexcept -> InstanceObjectBuilder& = default;
+        };
+
+        DECLARE_PTR_AND_REF(InstanceObjectBuilder);
+    } // namespace stormkit::gpu
+
+#ifndef STORMKIT_NO_MODULES
+}
+#endif
+
+////////////////////////////////////////////////////////////////////
+///                      IMPLEMENTATION                          ///
+////////////////////////////////////////////////////////////////////
+
+namespace stormkit::gpu {
+    namespace details {
+        /////////////////////////////////////
+        /////////////////////////////////////
+        inline auto scorePhysicalDevice(std::span<const core::CZString> extensions,
+                                        const PhysicalDevice& physical_device) -> core::UInt64 {
+            if (!physical_device.checkExtensionSupport(extensions)) return 0u;
+
+            auto score = core::UInt64 { 0u };
+
+            const auto& info = physical_device.info();
+
+            if (info.type == PhysicalDeviceType::Discrete_GPU) score += 10000000u;
+            else if (info.type == PhysicalDeviceType::Virtual_GPU)
+                score += 5000000u;
+            else if (info.type == PhysicalDeviceType::Integrated_GPU)
+                score += 250000u;
+
+            const auto& capabilities = physical_device.capabilities();
+
+            score += capabilities.limits.max_image_dimension_1D;
+            score += capabilities.limits.max_image_dimension_2D;
+            score += capabilities.limits.max_image_dimension_3D;
+            score += capabilities.limits.max_image_dimension_cube;
+            score += capabilities.limits.max_uniform_buffer_range;
+            score += info.api_major_version * 10000000u;
+            score += info.api_minor_version * 1000000u;
+            score += info.api_patch_version * 100u;
+
+            return score;
+        }
+    } // namespace details
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline InstanceObjectBuilder::InstanceObjectBuilder(const Instance& instance) noexcept
+        : InstanceObject { instance } {
+    }
+
+#ifdef STORMKIT_WSI_ENABLED
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto InstanceObjectBuilder::createWindowSurface(const wsi::Window& window,
+                                                           Surface::Buffering buffering) const
+        -> WindowSurface {
+        return WindowSurface { window, instance(), buffering };
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto InstanceObjectBuilder::allocateWindowSurface(const wsi::Window& window,
+                                                             Surface::Buffering buffering) const
+        -> std::unique_ptr<WindowSurface> {
+        return std::make_unique<WindowSurface>(window, instance(), buffering);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto
+        InstanceObjectBuilder::allocateRefCountedWindowSurface(const wsi::Window& window,
+                                                               Surface::Buffering buffering) const
+        -> std::shared_ptr<WindowSurface> {
+        return std::make_shared<WindowSurface>(window, instance(), buffering);
+    }
+#endif
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto InstanceObjectBuilder::createOffscreenSurface(const core::math::ExtentU& extent,
+                                                              Surface::Buffering buffering) const
+        -> OffscreenSurface {
+        return OffscreenSurface { extent, instance(), buffering };
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto InstanceObjectBuilder::allocateOffscreenSurface(const core::math::ExtentU& extent,
+                                                                Surface::Buffering buffering) const
+        -> std::unique_ptr<OffscreenSurface> {
+        return std::make_unique<OffscreenSurface>(extent, instance(), buffering);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto InstanceObjectBuilder::allocateRefCountedOffscreenSurface(
+        const core::math::ExtentU& extent,
+        Surface::Buffering buffering) const -> std::shared_ptr<OffscreenSurface> {
+        return std::make_shared<OffscreenSurface>(extent, instance(), buffering);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto InstanceObjectBuilder::pickPhysicalDevice() const noexcept
+        -> Expected<PhysicalDeviceConstRef> {
+        auto ranked_devices = std::multimap<core::UInt64, PhysicalDeviceConstRef> {};
+
+        for (const auto& physical_device : instance().physicalDevices()) {
+            const auto score =
+                details::scorePhysicalDevice(INSTANCE_BASE_EXTENSIONS, physical_device);
+
+            ranked_devices.emplace(score, physical_device);
+        }
+        if (std::ranges::empty(ranked_devices))
+            return std::unexpected(Error::No_Physical_Device_Found);
+
+        return std::cref(ranked_devices.rbegin()->second.get());
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto InstanceObjectBuilder::pickPhysicalDevice(const WindowSurface& surface) noexcept
+        -> Expected<PhysicalDeviceConstRef> {
+        auto ranked_devices = std::multimap<core::UInt64, PhysicalDeviceConstRef> {};
+
+        const auto has_present_support = [&] {
+            auto support = false;
+
+            for (const auto& physical_device : instance().physicalDevices()) {
+                auto i         = 0;
+                auto supported = false;
+                for (const auto queue_family : physical_device.queueFamilies()) {
+                    auto supported = surface.isPhysicalDeviceSupported(physical_device, i++);
+                    if (supported) break;
+                }
+
+                if (!supported) continue;
+
+                support = true;
+
+                const auto extensions = core::concat(INSTANCE_BASE_EXTENSIONS, SURFACE_EXTENSIONS);
+                const auto score      = details::scorePhysicalDevice(extensions, physical_device);
+
+                ranked_devices.emplace(score, physical_device);
+            }
+
+            return support;
+        }();
+
+        if (std::ranges::empty(ranked_devices))
+            return std::unexpected(Error::No_Physical_Device_Found);
+
+        if (!has_present_support)
+            return std::unexpected(Error::No_Present_Compatible_Physical_Device_Found);
+
+        return std::cref(ranked_devices.rbegin()->second.get());
+    }
+} // namespace stormkit::gpu

@@ -1,0 +1,118 @@
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+export module stormkit.Gpu:Core.Instance;
+
+import <stormkit/Gpu/Core/VulkanMacro.hpp>;
+
+import std;
+
+import stormkit.Core;
+
+import :Types;
+import :Vulkan;
+
+export namespace stormkit::gpu {
+    class PhysicalDevice;
+
+    class STORMKIT_API DynamicLoader {
+      public:
+        using GetInstanceProcAddrType = PFN_vkVoidFunction(VkInstance, const char *);
+
+        explicit DynamicLoader(std::filesystem::path vulkan_lib_path = DEFAULT_VULKAN_LIB);
+        ~DynamicLoader();
+
+        DynamicLoader(const DynamicLoader&)                    = delete;
+        auto operator=(const DynamicLoader&) -> DynamicLoader& = delete;
+
+        DynamicLoader(DynamicLoader&&) noexcept;
+        auto operator=(DynamicLoader&&) noexcept -> DynamicLoader&;
+
+        auto success() const noexcept -> bool;
+
+        template<class T>
+        auto get(std::string_view name) const noexcept -> T;
+
+      private:
+        bool m_success = false;
+        core::DeferredAlloc<core::DynamicLoader> m_loader;
+    };
+
+    class STORMKIT_API Instance {
+      public:
+        static constexpr auto DEBUG_TYPE = DebugObjectType::Instance;
+
+        explicit Instance(std::string app_name = "");
+        ~Instance();
+
+        Instance(const Instance&)                    = delete;
+        auto operator=(const Instance&) -> Instance& = delete;
+
+        Instance(Instance&&) noexcept;
+        auto operator=(Instance&&) noexcept -> Instance&;
+
+        [[nodiscard]] auto physicalDevices() const noexcept -> const std::vector<PhysicalDevice>&;
+
+        [[nodiscard]] auto loader() const noexcept -> const DynamicLoader&;
+
+        [[nodiscard]] operator VkInstance() const noexcept;
+        [[nodiscard]] auto vkHandle() const noexcept -> VkInstance;
+
+      private:
+        auto createInstance() noexcept -> void;
+        auto createDebugReportCallback() noexcept -> void;
+        auto retrievePhysicalDevices() noexcept -> void;
+
+        auto checkValidationLayerSupport(bool enable_validation) noexcept -> bool;
+        auto checkExtensionSupport(std::string_view extention) const noexcept -> bool;
+        auto checkExtensionSupport(std::span<const std::string_view> extentions) const noexcept
+            -> bool;
+        auto checkExtensionSupport(std::span<const core::CZString> extentions) const noexcept
+            -> bool;
+
+        static inline bool s_has_instance = 0;
+
+        DynamicLoader m_loader;
+
+        VkInstance m_instance                = VK_NULL_HANDLE;
+        VkDebugUtilsMessengerEXT m_messenger = VK_NULL_HANDLE;
+
+        std::vector<PhysicalDevice> m_physical_devices;
+
+        std::string m_app_name;
+
+        std::vector<std::string> m_extensions;
+    };
+} // namespace stormkit::gpu
+
+////////////////////////////////////////////////////////////////////
+///                      IMPLEMENTATION                          ///
+////////////////////////////////////////////////////////////////////
+
+namespace stormkit::gpu {
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Instance::physicalDevices() const noexcept -> const std::vector<PhysicalDevice>& {
+        return m_physical_devices;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Instance::loader() const noexcept -> const DynamicLoader& {
+        return m_loader;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline Instance::operator VkInstance() const noexcept {
+        return vkHandle();
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Instance::vkHandle() const noexcept -> VkInstance {
+        return m_instance;
+    }
+
+} // namespace stormkit::gpu

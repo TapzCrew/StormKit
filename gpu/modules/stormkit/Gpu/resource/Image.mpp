@@ -1,0 +1,354 @@
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+#ifndef STORMKIT_NO_MODULES
+export module stormkit.Gpu:Resource:Image;
+
+import std;
+
+import stormkit.Core;
+import stormkit.Image;
+
+import stormkit.Gpu:Core;
+
+export {
+#else
+    #include <stormkit/std.hpp>
+
+    #include <stormkit/Core.hpp>
+
+    #include <stormkit/gpu/Core.hpp>
+#endif
+
+    namespace stormkit::gpu {
+        class STORMKIT_API Sampler: public DeviceObject {
+          public:
+            struct Settings {
+                Filter mag_filter = Filter::Linear;
+                Filter min_filter = Filter::Linear;
+
+                SamplerAddressMode address_mode_u = SamplerAddressMode::Repeat;
+                SamplerAddressMode address_mode_v = SamplerAddressMode::Repeat;
+                SamplerAddressMode address_mode_w = SamplerAddressMode::Repeat;
+
+                bool enable_anisotropy = false;
+                float max_anisotropy   = 0.f;
+
+                BorderColor border_color = BorderColor::Int_Opaque_Black;
+
+                bool unnormalized_coordinates = false;
+
+                bool compare_enable                = false;
+                CompareOperation compare_operation = CompareOperation::Always;
+
+                SamplerMipmapMode mipmap_mode = SamplerMipmapMode::Linear;
+                float mip_lod_bias            = 0.f;
+
+                float min_lod = 0.f;
+                float max_lod = 0.f;
+            };
+
+            static constexpr auto DEBUG_TYPE = DebugObjectType::Sampler;
+
+            Sampler(Settings settings, const Device& device);
+            ~Sampler();
+
+            Sampler(const Sampler&)                    = delete;
+            auto operator=(const Sampler&) -> Sampler& = delete;
+
+            Sampler(Sampler&&) noexcept;
+            auto operator=(Sampler&&) noexcept -> Sampler&;
+
+            [[nodiscard]] auto settings() const noexcept -> const Settings&;
+
+            [[nodiscard]] operator VkSampler() const noexcept;
+            [[nodiscard]] auto vkHandle() const noexcept -> VkSampler;
+
+          private:
+            Settings m_settings = {};
+
+            VkSampler m_sampler = VK_NULL_HANDLE;
+        };
+
+        DECLARE_PTR_AND_REF(Sampler);
+
+        class Image;
+
+        class STORMKIT_API ImageView: public DeviceObject {
+          public:
+            static constexpr auto DEBUG_TYPE = DebugObjectType::Image_View;
+
+            ImageView(const Device& device,
+                      const Image& image,
+                      ImageViewType type                      = ImageViewType::T2D,
+                      ImageSubresourceRange subresource_range = {});
+            ~ImageView();
+
+            ImageView(const ImageView&)                    = delete;
+            auto operator=(const ImageView&) -> ImageView& = delete;
+
+            ImageView(ImageView&&) noexcept;
+            auto operator=(ImageView&&) noexcept -> ImageView&;
+
+            [[nodiscard]] auto image() const noexcept -> const Image&;
+            [[nodiscard]] auto type() const noexcept -> ImageViewType;
+            [[nodiscard]] auto subresourceRange() const noexcept -> const ImageSubresourceRange&;
+
+            [[nodiscard]] operator VkImageView() const noexcept;
+            [[nodiscard]] auto vkHandle() const noexcept -> VkImageView;
+
+          private:
+            const Image *m_image = nullptr;
+
+            ImageViewType m_type                      = {};
+            ImageSubresourceRange m_subresource_range = {};
+
+            VkImageView m_image_view = VK_NULL_HANDLE;
+        };
+
+        DECLARE_PTR_AND_REF(ImageView);
+
+        class STORMKIT_API Image: public DeviceObject {
+          public:
+            struct CreateInfo {
+                core::math::ExtentU extent;
+                PixelFormat format      = PixelFormat::RGBA8_UNorm;
+                core::UInt32 layers     = 1u;
+                core::UInt32 mip_levels = 1u;
+                ImageType type          = ImageType::T2D;
+                ImageCreateFlag flags   = ImageCreateFlag::None;
+                SampleCountFlag samples = SampleCountFlag::C1;
+                ImageUsageFlag usages   = ImageUsageFlag::Sampled | ImageUsageFlag::Transfert_Dst |
+                                        ImageUsageFlag::Transfert_Src;
+                ImageTiling tiling          = ImageTiling::Optimal;
+                MemoryPropertyFlag property = MemoryPropertyFlag::Device_Local;
+            };
+
+            static constexpr auto DEBUG_TYPE = DebugObjectType::Image;
+
+            Image(const Device& device, const CreateInfo& create_info);
+            Image(const Device& device,
+                  const core::math::ExtentU& extent,
+                  PixelFormat format,
+                  VkImage image);
+            ~Image();
+
+            Image(const Image&)                    = delete;
+            auto operator=(const Image&) -> Image& = delete;
+
+            Image(Image&&) noexcept;
+            auto operator=(Image&&) noexcept -> Image&;
+
+            [[nodiscard]] auto
+                createView(ImageViewType type                      = ImageViewType::T2D,
+                           ImageSubresourceRange subresource_range = {}) const noexcept
+                -> ImageView;
+            [[nodiscard]] auto allocateView(ImageViewType type = ImageViewType::T2D,
+                                            ImageSubresourceRange subresource_range = {}) const
+                -> std::unique_ptr<ImageView>;
+            [[nodiscard]] auto
+                allocateRefCountedView(ImageViewType type                      = ImageViewType::T2D,
+                                       ImageSubresourceRange subresource_range = {}) const
+                -> std::shared_ptr<ImageView>;
+
+            [[nodiscard]] auto extent() const noexcept -> const core::math::ExtentU&;
+            [[nodiscard]] auto format() const noexcept -> PixelFormat;
+            [[nodiscard]] auto type() const noexcept -> ImageType;
+            [[nodiscard]] auto samples() const noexcept -> SampleCountFlag;
+            [[nodiscard]] auto layers() const noexcept -> core::UInt32;
+            [[nodiscard]] auto faces() const noexcept -> core::UInt32;
+            [[nodiscard]] auto mipLevels() const noexcept -> core::UInt32;
+            [[nodiscard]] auto usages() const noexcept -> ImageUsageFlag;
+
+            [[nodiscard]] operator VkImage() const noexcept;
+            [[nodiscard]] auto vkHandle() const noexcept -> VkImage;
+
+          private:
+            struct Tag {};
+
+            Image(const Device& device, const CreateInfo& create_info, Tag);
+
+            core::math::ExtentU m_extent = { 0, 0, 0 };
+            PixelFormat m_format         = {};
+            core::UInt32 m_layers        = 0;
+            core::UInt32 m_faces         = 0;
+            core::UInt32 m_mip_levels    = 0;
+            ImageType m_type             = {};
+            ImageCreateFlag m_flags      = {};
+            SampleCountFlag m_samples    = {};
+            ImageUsageFlag m_usages      = {};
+
+            VkImage m_image              = VK_NULL_HANDLE;
+            VmaAllocation m_image_memory = VK_NULL_HANDLE;
+
+            bool m_own_image = true;
+        };
+
+        DECLARE_PTR_AND_REF(Image);
+
+        struct ImageMemoryBarrier {
+            AccessFlag src;
+            AccessFlag dst;
+
+            ImageLayout old_layout;
+            ImageLayout new_layout;
+
+            core::UInt32 src_queue_family_index = QUEUE_FAMILY_IGNORED;
+            core::UInt32 dst_queue_family_index = QUEUE_FAMILY_IGNORED;
+
+            const Image& image;
+            ImageSubresourceRange range;
+        };
+    } // namespace stormkit::gpu
+
+#ifndef STORMKIT_NO_MODULES
+}
+#endif
+
+////////////////////////////////////////////////////////////////////
+///                      IMPLEMENTATION                          ///
+////////////////////////////////////////////////////////////////////
+
+namespace stormkit::gpu {
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Sampler::settings() const noexcept -> const Settings& {
+        core::expects(m_sampler);
+
+        return m_settings;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline Sampler::operator VkSampler() const noexcept {
+        return vkHandle();
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Sampler::vkHandle() const noexcept -> VkSampler {
+        core::expects(m_sampler);
+
+        return m_sampler;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto ImageView::image() const noexcept -> const Image& {
+        core::expects(m_image);
+
+        return *m_image;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto ImageView::type() const noexcept -> ImageViewType {
+        core::expects(m_image);
+        core::expects(m_image_view);
+
+        return m_type;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto ImageView::subresourceRange() const noexcept -> const ImageSubresourceRange& {
+        core::expects(m_image);
+        core::expects(m_image_view);
+
+        return m_subresource_range;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline ImageView::operator VkImageView() const noexcept {
+        return vkHandle();
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto ImageView::vkHandle() const noexcept -> VkImageView {
+        core::expects(m_image);
+        core::expects(m_image_view);
+
+        return m_image_view;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Image::extent() const noexcept -> const core::math::ExtentU& {
+        core::expects(m_image);
+
+        return m_extent;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Image::format() const noexcept -> PixelFormat {
+        core::expects(m_image);
+
+        return m_format;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Image::type() const noexcept -> ImageType {
+        core::expects(m_image);
+
+        return m_type;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Image::samples() const noexcept -> SampleCountFlag {
+        core::expects(m_image);
+
+        return m_samples;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Image::layers() const noexcept -> core::UInt32 {
+        core::expects(m_image);
+
+        return m_layers;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Image::faces() const noexcept -> core::UInt32 {
+        core::expects(m_image);
+
+        return m_faces;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Image::mipLevels() const noexcept -> core::UInt32 {
+        core::expects(m_image);
+
+        return m_mip_levels;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Image::usages() const noexcept -> ImageUsageFlag {
+        core::expects(m_image);
+
+        return m_usages;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline Image::operator VkImage() const noexcept {
+        return vkHandle();
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Image::vkHandle() const noexcept -> VkImage {
+        core::expects(m_image);
+
+        return m_image;
+    }
+} // namespace stormkit::gpu

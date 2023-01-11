@@ -1,11 +1,17 @@
-// Copyright (C) 2022 Arthur LAURENT <arthur.laurent4@gmail.com>
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#include <stormkit/gpu/core/Device.hpp>
-#include <stormkit/gpu/core/Enums.hpp>
+#ifdef STORMKIT_BUILD_MODULES
+module stormkit.Gpu:Resource;
 
-#include <stormkit/gpu/resource/Buffer.hpp>
+import :Buffer;
+#else
+    #include <stormkit/std.hpp>
+
+    #include <stormkit/Core.hpp>
+    #include <stormkit/Gpu.hpp>
+#endif
 
 namespace stormkit::gpu {
     /////////////////////////////////////
@@ -70,9 +76,8 @@ namespace stormkit::gpu {
           m_size { std::exchange(other.m_size, 0) },
           m_is_persistently_mapped { std::exchange(other.m_is_persistently_mapped, false) },
           m_mapped_pointer { std::exchange(other.m_mapped_pointer, nullptr) },
-          m_buffer { std::exchange(other.m_buffer, VK_NULL_HANDLE) }, m_buffer_memory {
-              std::exchange(other.m_buffer_memory, VK_NULL_HANDLE)
-          } {
+          m_buffer { std::exchange(other.m_buffer, VK_NULL_HANDLE) },
+          m_buffer_memory { std::exchange(other.m_buffer_memory, VK_NULL_HANDLE) } {
     }
 
     /////////////////////////////////////
@@ -95,9 +100,9 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     auto Buffer::map(core::Int64 offset) noexcept -> core::Byte * {
-        STORMKIT_EXPECTS(m_buffer);
-        STORMKIT_EXPECTS(m_buffer_memory);
-        STORMKIT_EXPECTS(offset < core::as<core::Size>(m_size));
+        core::expects(m_buffer);
+        core::expects(m_buffer_memory);
+        core::expects(offset < core::as<core::Size>(m_size));
 
         if (!m_mapped_pointer) {
             vmaMapMemory(device().vmaAllocator(),
@@ -111,11 +116,11 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto Buffer::flush(core::Int64 offset, core::USize size) -> void {
-        STORMKIT_EXPECTS(m_buffer);
-        STORMKIT_EXPECTS(m_buffer_memory);
-        STORMKIT_EXPECTS(offset < core::as<core::Size>(m_size));
-        STORMKIT_EXPECTS(size <= m_size);
+    auto Buffer::flush(core::Int64 offset, core::RangeExtent size) -> void {
+        core::expects(m_buffer);
+        core::expects(m_buffer_memory);
+        core::expects(offset < core::as<core::Size>(m_size));
+        core::expects(size <= m_size);
 
         vmaFlushAllocation(device().vmaAllocator(),
                            m_buffer_memory,
@@ -126,8 +131,8 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     auto Buffer::unmap() -> void {
-        STORMKIT_EXPECTS(m_buffer);
-        STORMKIT_EXPECTS(m_buffer_memory);
+        core::expects(m_buffer);
+        core::expects(m_buffer_memory);
 
         if (!m_is_persistently_mapped) {
             vmaUnmapMemory(device().vmaAllocator(), m_buffer_memory);
@@ -138,7 +143,7 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto Buffer::upload(core::ByteConstSpan data, core::Int64 offset) -> void {
+    auto Buffer::upload(std::span<const core::Byte> data, core::Int64 offset) -> void {
         auto ptr = map(offset, std::size(data));
 
         std::ranges::copy(data, std::begin(ptr));
@@ -154,7 +159,7 @@ namespace stormkit::gpu {
                                 [[maybe_unused]] const VkMemoryRequirements& mem_requirements)
         -> core::UInt32 {
         for (auto i : core::range(mem_properties.memoryTypeCount)) {
-            if ((type_filter & (1 << i)) &&
+            if ((type_filter & (1 << i)) and
                 (mem_properties.memoryTypes[i].propertyFlags & properties) == properties)
                 return i;
         }

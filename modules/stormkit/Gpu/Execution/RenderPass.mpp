@@ -1,0 +1,177 @@
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+export module stormkit.Gpu:Execution.RenderPass;
+
+import std;
+
+import <stormkit/Core/PlatformMacro.hpp>;
+import <stormkit/Core/HashMacro.hpp>;
+
+import stormkit.Core;
+
+import :Core;
+import :Resource;
+
+import vulkan;
+
+export {
+    namespace stormkit::gpu {
+        class RenderPass;
+
+        class RenderPassObject: public ParentRef<RenderPass> {
+          public:
+            using ParentRef<RenderPass>::ParentRef;
+
+            [[nodiscard]] auto image() const noexcept -> const RenderPass&;
+        };
+
+        class STORMKIT_API FrameBuffer: public DeviceObject, public RenderPassObject {
+          public:
+            static constexpr auto DEBUG_TYPE = DebugObjectType::FrameBuffer;
+
+            FrameBuffer(const RenderPass& render_pass,
+                        const core::math::ExtentU& size,
+                        std::vector<core::NakedRef<ImageView>> attachments);
+            ~FrameBuffer();
+
+            FrameBuffer(const FrameBuffer&)                    = delete;
+            auto operator=(const FrameBuffer&) -> FrameBuffer& = delete;
+
+            FrameBuffer(FrameBuffer&&) noexcept;
+            auto operator=(FrameBuffer&&) noexcept -> FrameBuffer&;
+
+            [[nodiscard]] auto extent() const noexcept -> const core::math::ExtentU&;
+            [[nodiscard]] auto attachments() const noexcept
+                -> const std::vector<core::NakedRef<ImageView>>&;
+
+            [[nodiscard]] auto vkHandle() const noexcept -> const vk::raii::Framebuffer&;
+
+          private:
+            core::math::ExtentU m_extent = { 0, 0 };
+            std::vector<core::NakedRef<ImageView>> m_attachments;
+
+            core::DeferInit<vk::raii::Framebuffer> m_vk_framebuffer;
+        };
+
+        struct AttachmentDescription {
+            PixelFormat format;
+            SampleCountFlag samples = SampleCountFlag::C1;
+
+            AttachmentLoadOperation load_op   = AttachmentLoadOperation::Clear;
+            AttachmentStoreOperation store_op = AttachmentStoreOperation::Store;
+
+            AttachmentLoadOperation stencil_load_op   = AttachmentLoadOperation::Dont_Care;
+            AttachmentStoreOperation stencil_store_op = AttachmentStoreOperation::Dont_Care;
+
+            ImageLayout source_layout      = ImageLayout::Undefined;
+            ImageLayout destination_layout = ImageLayout::Present_Src;
+
+            bool resolve = false;
+        };
+
+        using AttachmentDescriptions = std::vector<AttachmentDescription>;
+
+        struct Subpass {
+            struct Ref {
+                core::UInt32 attachment_id;
+
+                ImageLayout layout = ImageLayout::Color_Attachment_Optimal;
+            };
+
+            PipelineBindPoint bind_point;
+            std::vector<Ref> attachment_refs;
+        };
+
+        using Subpasses = std::vector<Subpass>;
+
+        struct RenderPassDescription {
+            AttachmentDescriptions attachments;
+            Subpasses subpasses;
+
+            auto isCompatible(const RenderPassDescription& description) const noexcept -> bool;
+        };
+
+        class Device;
+
+        class STORMKIT_API RenderPass: public DeviceObject {
+          public:
+            static constexpr auto DEBUG_TYPE = DebugObjectType::Render_Pass;
+
+            // RenderPass(const Device &device, vk::RenderPass render_pass);
+            RenderPass(const Device& device, const RenderPassDescription& description);
+            ~RenderPass();
+
+            RenderPass(const RenderPass&)                    = delete;
+            auto operator=(const RenderPass&) -> RenderPass& = delete;
+
+            RenderPass(RenderPass&&) noexcept;
+            auto operator=(RenderPass&&) noexcept -> RenderPass&;
+
+            [[nodiscard]] auto isCompatible(const RenderPass& render_pass) const noexcept -> bool;
+
+            [[nodiscard]] auto description() const noexcept -> const RenderPassDescription&;
+
+            [[nodiscard]] auto vkHandle() const noexcept -> const vk::raii::RenderPass&;
+
+          private:
+            auto bake() noexcept -> void;
+
+            RenderPassDescription m_description = {};
+
+            core::DeferInit<vk::raii::RenderPass> m_vk_render_pass;
+        };
+    } // namespace stormkit::gpu
+
+    HASH_FUNC(stormkit::gpu::AttachmentDescription,
+              value.format,
+              value.samples,
+              value.load_op,
+              value.store_op,
+              value.stencil_load_op,
+              value.stencil_store_op,
+              value.source_layout,
+              value.destination_layout,
+              value.resolve)
+    HASH_FUNC(stormkit::gpu::Subpass::Ref, value.attachment_id, value.layout)
+    HASH_FUNC(stormkit::gpu::Subpass, value.bind_point, value.attachment_refs)
+    HASH_FUNC(stormkit::gpu::RenderPassDescription, value.attachments, value.subpasses)
+}
+
+////////////////////////////////////////////////////////////////////
+///                      IMPLEMENTATION                          ///
+////////////////////////////////////////////////////////////////////
+
+namespace stormkit::gpu {
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto FrameBuffer::extent() const noexcept -> const core::math::ExtentU& {
+        return m_extent;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto FrameBuffer::attachments() const noexcept
+        -> const std::vector<core::NakedRef<ImageView>>& {
+        return m_attachments;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto FrameBuffer::vkHandle() const noexcept -> const vk::raii::Framebuffer& {
+        return m_vk_framebuffer;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto RenderPass::description() const noexcept -> const RenderPassDescription& {
+        return m_description;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto RenderPass::vkHandle() const noexcept -> const vk::raii::RenderPass& {
+        return m_vk_render_pass;
+    }
+} // namespace stormkit::gpu

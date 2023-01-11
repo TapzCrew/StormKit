@@ -1,0 +1,117 @@
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+export module stormkit.Gpu:Core.Sync;
+
+import std;
+
+import stormkit.Core;
+
+import <stormkit/Core/PlatformMacro.hpp>;
+
+import vulkan;
+
+import :Core.Types;
+import :Core.Device;
+import :Core.Vulkan.Utils;
+
+export namespace stormkit::gpu {
+    class Device;
+    class STORMKIT_API Fence: public DeviceObject {
+      public:
+        static constexpr auto DEBUG_TYPE = DebugObjectType::Fence;
+
+        enum class Status {
+            Signaled,
+            Unsignaled
+        };
+
+        explicit Fence(const Device& device, bool signaled = false);
+        ~Fence();
+
+        Fence(const Fence&)                    = delete;
+        auto operator=(const Fence&) -> Fence& = delete;
+
+        Fence(Fence&&) noexcept;
+        auto operator=(Fence&&) noexcept -> Fence&;
+
+        auto
+            wait(const std::chrono::milliseconds& wait_for = std::chrono::milliseconds::max()) const
+            -> Result;
+        auto reset() -> Result;
+
+        [[nodiscard]] auto status() const noexcept -> Status;
+
+        [[nodiscard]] auto vkHandle() const noexcept -> const vk::raii::Fence&;
+
+      private:
+        core::DeferInit<vk::raii::Fence> m_vk_fence;
+    };
+
+    class STORMKIT_API Semaphore: public DeviceObject {
+      public:
+        static constexpr auto DEBUG_TYPE = DebugObjectType::Semaphore;
+
+        explicit Semaphore(const Device& device);
+        ~Semaphore();
+
+        Semaphore(const Semaphore&)                    = delete;
+        auto operator=(const Semaphore&) -> Semaphore& = delete;
+
+        Semaphore(Semaphore&&) noexcept;
+        auto operator=(Semaphore&&) noexcept -> Semaphore&;
+
+        [[nodiscard]] auto vkHandle() const noexcept -> const vk::raii::Semaphore&;
+
+      private:
+        core::DeferInit<vk::raii::Semaphore> m_vk_semaphore;
+    };
+} // namespace stormkit::gpu
+
+////////////////////////////////////////////////////////////////////
+///                      IMPLEMENTATION                          ///
+////////////////////////////////////////////////////////////////////
+
+namespace stormkit::gpu {
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Fence::wait(const std::chrono::milliseconds& wait_for) const -> Result {
+        return device().waitForFence(*this, wait_for);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Fence::reset() -> Result {
+        return device().resetFence(*this);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Fence::vkHandle() const noexcept -> const vk::raii::Fence& {
+        return m_vk_fence.get();
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Semaphore::vkHandle() const noexcept -> const vk::raii::Semaphore& {
+        return m_vk_semaphore.get();
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto createFence(const Device& device) noexcept -> Expected<Fence> try {
+        return Fence { device };
+    } catch (const vk::SystemError& err) {
+        return std::unexpected { core::as<Result>(err.code().value()) };
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto allocateFence(const Device& device) noexcept
+        -> Expected<std::unique_ptr<Fence>> try {
+        return std::make_unique<Fence>(device);
+    } catch (const vk::SystemError& err) {
+        return std::unexpected { core::as<Result>(err.code().value()) };
+    }
+} // namespace stormkit::gpu

@@ -2,58 +2,72 @@ name: macOS
 
 on:
   push:
-    branches: [ develop ]
+    branches: [ main ]
+    paths-ignore:
+      - '.github/workflows/Archlinux.yml'
+      - '.github/workflows/Windows.yml'
+      - '.github/workflows/Fedora.yml'
+      - '.github/workflows/iOS.yml'
+      - '.github/workflows/Android.yml'
+      - '.github/workflows/Ubuntu.yml'
+      - '.gitignore'
+      - 'LICENSE'
+      - 'README.md'
   pull_request:
-    branches: [ develop ]
+    branches: [ main ]
+    paths-ignore:
+      - '.github/workflows/Archlinux.yml'
+      - '.github/workflows/Windows.yml'
+      - '.github/workflows/Fedora.yml'
+      - '.github/workflows/iOS.yml'
+      - '.github/workflows/Android.yml'
+      - '.github/workflows/Ubuntu.yml'
+      - '.gitignore'
+      - 'LICENSE'
+      - 'README.md'
 
 jobs:
   build:
-    name: ${{ matrix.os.name }} ( ${{matrix.os.compiler }} ${{ matrix.kind }}, ${{ matrix.mode }} )
-    runs-on: ${{ matrix.os.value }}
+    name: ${{ matrix.os }}-x64 ( ${{ matrix.kind }}-${{ matrix.mode }} )
+
     strategy:
       fail-fast: false
       matrix:
-        os:
-        - {
-           name: "macOS 11",
-           compiler: "LLVM",
-           value: macos-latest,
-           triplet: "x64-macos"
-        }
-
+        os: [macOS-latest]
         kind: [static, shared]
         mode: [release, debug, asan]
+
+    runs-on: ${{ matrix.os }}
+
+    concurrency:
+      group: ${{ github.ref }}-${{ github.base_ref }}-${{ github.head_ref }}-macOS-${{ matrix.kind }}-${{ matrix.mode }}
+
     steps:
-        - name: Install brew dependencies
-          run: |
-            brew update
-            brew tap apenngrace/homebrew-vulkan
-            brew install vulkan-sdk wget p7zip
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
-        - name: Install xmake
-          uses: xmake-io/github-action-setup-xmake@v1
+      - name: Install xmake
+        uses: xmake-io/github-action-setup-xmake@v1
+        with:
+          xmake-version: branch@dev
 
-        - name: Checkout
-          uses: actions/checkout@v2
-          with:
-            fetch-depth: 0
-            
-        - name: Configure & Build
-          id: confandbuild
-          run: |
-            xrepo install -v llvm
-            $LLVM_TOOLCHAIN=xrepo info llvm | grep "installdir:" | grep -o "/"
-            xmake f --unity_build=y -v --yes -m ${{ matrix.mode }} -k ${{ matrix.kind }} --sdk=$LLVM_TOOLCHAIN 
-            xmake b -v
+      - name: Update xmake repository
+        run: xmake repo --update
 
-        - name: Install
-          id: install
-          run: |
-            xmake install -v --installdir="${{ runner.workspace }}/StormKit_Output"
+      - name: Configure & Build
+        id: build
+        run: |
+          xmake f -D --yes -m ${{ matrix.mode }} -k ${{ matrix.kind }}
+          xmake b -D
 
-        - name: Upload artifacts
-          id: upload
-          uses: actions/upload-artifact@v1
-          with:
-            name: ${{ matrix.os.name }}-${{ matrix.os.compiler }}-${{ matrix.kind }}-${{ matrix.mode }}
-            path: ${{ runner.workspace }}/StormKit_Output
+      - name: Installation
+        run: xmake install -D --installdir="${{ runner.workspace }}/output"
+
+      - name: Upload artifacts
+        id: upload
+        uses: actions/upload-artifact@v1
+        with:
+          name: ${{ matrix.os }}-x64-${{ matrix.kind }}-${{ matrix.mode }}
+          path: ${{ runner.workspace }}/output

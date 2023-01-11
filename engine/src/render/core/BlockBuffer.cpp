@@ -1,22 +1,24 @@
-// Copyright (C) 2022 Arthur LAURENT <arthur.laurent4@gmail.com>
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#include <stormkit/engine/Engine.hpp>
-#include <stormkit/engine/render/Renderer.hpp>
-#include <stormkit/engine/render/core/BlockBuffer.hpp>
+module;
 
 #include <stormkit/gpu/core/Device.hpp>
 
-namespace stormkit::engine {
+module stormkit.engine.render.core.BlockBuffer;
 
+import stormkit.Engine;
+import stormkit.engine.render.Renderer;
+
+namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     BlockBuffer::BlockBuffer(Engine& engine, const gpu::Buffer::CreateInfo& info)
         : EngineObject { engine }, m_blocks { { 0, info.size, true, 0u } },
           m_buffer { engine.renderer().device().createBuffer(info) }, m_size { info.size },
           m_free_space { info.size }, m_next_handle { 1u } {
-        STORMKIT_EXPECTS(m_size > 0u);
+        core::expects(m_size > 0u);
     }
 
     /////////////////////////////////////
@@ -33,8 +35,8 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto BlockBuffer::requestBlock(core::USize size) noexcept -> BlockBuffer::Block::Handle {
-        STORMKIT_EXPECTS(size > 0u);
+    auto BlockBuffer::requestBlock(core::RangeExtent size) noexcept -> BlockBuffer::Block::Handle {
+        core::expects(size > 0u);
 
         if (size < m_free_space) return Block::Handle {};
 
@@ -67,7 +69,7 @@ namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     auto BlockBuffer::freeBlock(Block::Handle handle) -> void {
-        STORMKIT_EXPECTS(handle != Block::Handle::invalidHandle());
+        core::expects(handle != Block::Handle::invalidHandle());
         auto it =
             std::ranges::find_if(m_blocks, [handle](const auto& b) { return b.handle == handle; });
 

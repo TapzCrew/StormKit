@@ -1,0 +1,72 @@
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+export module IFC:Parser;
+
+import std;
+
+import :Header;
+import :Partition;
+import :IFCFile;
+
+import stormkit.Core;
+
+using namespace stormkit;
+
+export {
+    class Parser {
+      public:
+        enum class Error {
+            FailedToOpenFile,
+            SignatureMismatch
+        };
+
+        template<class T>
+        using Expected = std::expected<T, Error>;
+
+        [[nodiscard]] static auto load(const std::filesystem::path& path) noexcept
+            -> Expected<IFCFile>;
+
+      private:
+        Parser();
+
+        [[nodiscard]] auto loadImpl(const std::filesystem::path& path) noexcept
+            -> Expected<IFCFile>;
+
+        struct ParseState;
+        auto doParseHeader(ParseState&& state) noexcept -> Expected<ParseState>;
+        auto doParseStringTable(ParseState&& state) noexcept -> Expected<ParseState>;
+        auto doParsePartitions(ParseState&& state) noexcept -> Expected<ParseState>;
+        auto doParseGlobalScope(ParseState&& state) noexcept -> Expected<ParseState>;
+    };
+
+    constexpr auto toStringView(Parser::Error error) noexcept -> std::string_view;
+    constexpr auto toString(Parser::Error error)->std::string;
+}
+
+namespace details {
+    constexpr auto PARSER_ERROR_TO_STRING = [] {
+        using namespace std::literals;
+
+        return core::makeFrozenMap<Parser::Error, std::string_view>({
+            { Parser::Error::FailedToOpenFile, "Failed to open file"sv },
+            { Parser::Error::SignatureMismatch, "Signature Mismatch"sv },
+        });
+    }();
+} // namespace details
+
+/////////////////////////////////////
+/////////////////////////////////////
+constexpr auto toStringView(Parser::Error error) noexcept -> std::string_view {
+    const auto it = details::PARSER_ERROR_TO_STRING.find(error);
+    core::expects(it != std::ranges::cend(details::PARSER_ERROR_TO_STRING));
+
+    return it->second;
+}
+
+/////////////////////////////////////
+/////////////////////////////////////
+constexpr auto toString(Parser::Error error) -> std::string {
+    return std::string { toStringView(error) };
+}

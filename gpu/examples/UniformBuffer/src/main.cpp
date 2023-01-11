@@ -1,11 +1,24 @@
-#include <stormkit/core/Memory.hpp>
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
 
-#include <stormkit/log/ConsoleLogger.hpp>
-#include <stormkit/log/Logger.hpp>
+#ifdef STORMKIT_BUILD_MODULES
+import std;
 
-#include <stormkit/main/MainMacro.hpp>
+import stormkit.Core;
+import stormkit.Main;
+import stormkit.Log;
 
-#include "App.hpp"
+import App;
+#else
+    #include <stormkit/std.hpp>
+
+    #include <stormkit/Core.hpp>
+    #include <stormkit/Log.hpp>
+    #include <stormkit/Main.hpp>
+
+    #include "App.mpp"
+#endif
 
 ////////////////////////////////////////
 ////////////////////////////////////////

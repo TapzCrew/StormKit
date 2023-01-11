@@ -1,0 +1,73 @@
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+export module stormkit.Gpu:Resource.Shader;
+
+import std;
+
+import <stormkit/Core/PlatformMacro.hpp>;
+
+import stormkit.Core;
+
+import :Core;
+
+import vulkan;
+import vma;
+
+namespace stormkit::gpu {
+    class STORMKIT_API Shader: public DeviceObject {
+      public:
+        static constexpr auto DEBUG_TYPE = DebugObjectType::Shader_Module;
+
+        Shader(std::filesystem::path filepath, ShaderStageFlag type, const Device& device);
+        Shader(std::span<const core::Byte> data, ShaderStageFlag type, const Device& device);
+        Shader(std::span<const SpirvID> data, ShaderStageFlag type, const Device& device);
+        ~Shader();
+
+        Shader(const Shader&)                    = delete;
+        auto operator=(const Shader&) -> Shader& = delete;
+
+        Shader(Shader&&) noexcept;
+        auto operator=(Shader&&) noexcept -> Shader&;
+
+        [[nodiscard]] auto type() const noexcept -> ShaderStageFlag;
+        [[nodiscard]] auto source() const noexcept -> const std::vector<SpirvID>&;
+        // const DescriptorSetLayout &descriptorSetLayout() const noexcept;
+
+        [[nodiscard]] auto vkHandle() const noexcept -> const vk::raii::ShaderModule&;
+
+      private:
+        auto compile() -> void;
+        auto reflect() noexcept -> void;
+
+        ShaderStageFlag m_type        = ShaderStageFlag::None;
+        std::vector<SpirvID> m_source = {};
+
+        core::DeferInit<vk::raii::ShaderModule> m_vk_shader_module;
+    };
+} // namespace stormkit::gpu
+
+////////////////////////////////////////////////////////////////////
+///                      IMPLEMENTATION                          ///
+////////////////////////////////////////////////////////////////////
+
+namespace stormkit::gpu {
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Shader::type() const noexcept -> ShaderStageFlag {
+        return m_type;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Shader::source() const noexcept -> const std::vector<SpirvID>& {
+        return m_source;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Shader::vkHandle() const noexcept -> const vk::raii::ShaderModule& {
+        return m_vk_shader_module;
+    }
+} // namespace stormkit::gpu

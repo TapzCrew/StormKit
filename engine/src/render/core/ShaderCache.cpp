@@ -1,15 +1,18 @@
-// Copyright (C) 2022 Arthur LAURENT <arthur.laurent4@gmail.com>
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#include <stormkit/engine/render/core/ShaderCache.hpp>
+module;
 
 #include <stormkit/gpu/core/Device.hpp>
+
+module stormkit.engine.render.core.ShaderCache;
 
 namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
-    ShaderCache::ShaderCache(const gpu::Device &device) : m_device { &device } {}
+    ShaderCache::ShaderCache(const gpu::Device& device) : m_device { &device } {
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
@@ -17,17 +20,17 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    ShaderCache::ShaderCache(ShaderCache &&other) noexcept = default;
+    ShaderCache::ShaderCache(ShaderCache&& other) noexcept = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto ShaderCache::operator=(ShaderCache &&other) noexcept -> ShaderCache & = default;
+    auto ShaderCache::operator=(ShaderCache&& other) noexcept -> ShaderCache& = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
     auto ShaderCache::load(std::string name,
                            std::filesystem::path filepath,
-                           gpu::ShaderStageFlag type) -> const gpu::Shader & {
+                           gpu::ShaderStageFlag type) -> const gpu::Shader& {
         auto shader = m_device->createShader(std::move(filepath), type);
 
         return insert(std::move(name), std::move(shader));
@@ -36,7 +39,7 @@ namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     auto ShaderCache::load(std::string name, core::ByteConstSpan data, gpu::ShaderStageFlag type)
-        -> const gpu::Shader & {
+        -> const gpu::Shader& {
         auto shader = m_device->createShader(data, type);
 
         return insert(std::move(name), std::move(shader));
@@ -46,7 +49,7 @@ namespace stormkit::engine {
     /////////////////////////////////////
     auto ShaderCache::load(std::string name,
                            std::span<const gpu::SpirvID> data,
-                           gpu::ShaderStageFlag type) -> const gpu::Shader & {
+                           gpu::ShaderStageFlag type) -> const gpu::Shader& {
         auto shader = m_device->createShader(data, type);
 
         return insert(std::move(name), std::move(shader));
@@ -54,7 +57,7 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto ShaderCache::insert(std::string name, gpu::Shader &&shader) -> const gpu::Shader & {
+    auto ShaderCache::insert(std::string name, gpu::Shader&& shader) -> const gpu::Shader& {
         const auto [it, _] = m_shaders.emplace(std::move(name), std::move(shader));
 
         m_device->setObjectName(it->second, it->first);

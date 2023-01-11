@@ -1,0 +1,104 @@
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+#ifndef STORMKIT_NO_MODULES
+export module stormkit.Gpu:Resource:Shader;
+
+import std;
+
+import stormkit.Core;
+
+import stormkit.Gpu:Core;
+
+export {
+#else
+    #include <stormkit/std.hpp>
+
+    #include <stormkit/Core.hpp>
+
+    #include <stormkit/gpu/Core.hpp>
+#endif
+
+    namespace stormkit::gpu {
+        class STORMKIT_API Shader: public DeviceObject {
+          public:
+            static constexpr auto DEBUG_TYPE = DebugObjectType::Shader_Module;
+
+            Shader(std::filesystem::path filepath, ShaderStageFlag type, const Device& device);
+            Shader(std::span<const core::Byte> data, ShaderStageFlag type, const Device& device);
+            Shader(std::span<const SpirvID> data, ShaderStageFlag type, const Device& device);
+            ~Shader();
+
+            Shader(const Shader&)                    = delete;
+            auto operator=(const Shader&) -> Shader& = delete;
+
+            Shader(Shader&&) noexcept;
+            auto operator=(Shader&&) noexcept -> Shader&;
+
+            [[nodiscard]] auto type() const noexcept -> ShaderStageFlag;
+            [[nodiscard]] auto source() const noexcept -> std::span<const core::Byte>;
+            // const DescriptorSetLayout &descriptorSetLayout() const noexcept;
+
+            [[nodiscard]] operator VkShaderModule() const noexcept;
+            [[nodiscard]] auto vkHandle() const noexcept -> VkShaderModule;
+
+          private:
+            auto compile() noexcept -> void;
+            auto reflect() noexcept -> void;
+
+            ShaderStageFlag m_type           = ShaderStageFlag::None;
+            std::vector<core::Byte> m_source = {};
+
+            VkShaderModule m_shader_module = VK_NULL_HANDLE;
+            // DescriptorSetLayout m_descriptor_set_layout;
+        };
+
+        DECLARE_PTR_AND_REF(Shader);
+    } // namespace stormkit::gpu
+
+#ifndef STORMKIT_NO_MODULES
+}
+#endif
+
+////////////////////////////////////////////////////////////////////
+///                      IMPLEMENTATION                          ///
+////////////////////////////////////////////////////////////////////
+
+namespace stormkit::gpu {
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Shader::type() const noexcept -> ShaderStageFlag {
+        core::expects(m_shader_module);
+
+        return m_type;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Shader::source() const noexcept -> std::span<const core::Byte> {
+        core::expects(m_shader_module);
+
+        return m_source;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    /*inline auto Shader::descriptorSetLayout() const noexcept -> const DescriptorSetLayout & {
+        return m_descriptor_set_layout;
+    }*/
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline Shader::operator VkShaderModule() const noexcept {
+        return vkHandle();
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Shader::vkHandle() const noexcept -> VkShaderModule {
+        core::expects(m_shader_module);
+
+        return m_shader_module;
+    }
+} // namespace stormkit::gpu

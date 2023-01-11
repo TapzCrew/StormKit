@@ -1,0 +1,216 @@
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+module;
+
+#include <iterator>
+#include <memory>
+#include <optional>
+#include <ranges>
+#include <vector>
+
+#include <stormkit/Core/MemoryMacro.hpp>
+#include <stormkit/Core/PlatformMacro.hpp>
+
+#include <stormkit/Core/Types.hpp>
+
+#include <stormkit/wsi/Fwd.hpp>
+
+#include <stormkit/gpu/Fwd.hpp>
+#include <stormkit/gpu/pipeline/VertexBindingDescription.hpp>
+#include <stormkit/gpu/pipeline/VertexInputAttributeDescription.hpp>
+
+#include <stormkit/gpu/resource/ImageView.hpp>
+
+export module stormkit.engine.render.core.VertexArray;
+
+export namespace stormkit::engine {
+    struct Vertex {
+        core::Vector3f position = { 0.f, 0.f, 0.f };
+        core::Vector3f normal   = { 1.f, 1.f, 1.f };
+        core::Vector3f color    = { 1.f, 1.f, 1.f };
+        core::math::Vector2F uv = { 0.f, 0.f };
+    };
+
+    struct VertexView {
+        VertexView(core::Vector3f& _position,
+                   core::Vector3f& _normal,
+                   core::Vector3f& _color,
+                   core::math::Vector2F& _uv)
+            : position { &_position }, normal { &_normal }, color { &_color }, uv { &_uv } {}
+
+        core::Vector3f *position;
+        core::Vector3f *normal;
+        core::Vector3f *color;
+        core::math::Vector2F *uv;
+    };
+
+    class STORMKIT_API VertexArray {
+      public:
+        using Iterator      = std::vector<VertexView>::iterator;
+        using ConstIterator = std::vector<VertexView>::const_iterator;
+
+        VertexArray();
+        VertexArray(std::span<const Vertex> vertices);
+        ~VertexArray();
+
+        VertexArray(const VertexArray&);
+        auto operator=(const VertexArray&) -> VertexArray&;
+
+        VertexArray(VertexArray&&) noexcept;
+        auto operator=(VertexArray&&) noexcept -> VertexArray&;
+
+        auto resize(core::RangeExtent size) -> void;
+
+        auto addVertices(std::span<const Vertex> vertices) -> void;
+        auto addVertex(const Vertex& vertex) -> void;
+        auto removeVertex(core::RangeExtent position) -> void;
+        auto removeVertices(core::RangeExtent first, core::RangeExtent count) -> void;
+
+        auto data() noexcept -> std::span<VertexView>;
+        auto data() const noexcept -> std::span<const VertexView>;
+
+        auto begin() noexcept -> Iterator;
+        auto begin() const noexcept -> ConstIterator;
+        auto cbegin() const noexcept -> ConstIterator;
+
+        auto end() noexcept -> Iterator;
+        auto end() const noexcept -> ConstIterator;
+        auto cend() const noexcept -> ConstIterator;
+
+        auto positions() const noexcept -> std::span<const core::Vector3f>;
+        auto normals() const noexcept -> std::span<const core::Vector3f>;
+        auto colors() const noexcept -> std::span<const core::Vector3f>;
+        auto uvs() const noexcept -> std::span<const core::math::Vector2F>;
+
+        static auto bindingDescriptions() noexcept
+            -> std::span<const stormkit::gpu::VertexBindingDescription>;
+        static auto attributesDescriptions() noexcept
+            -> std::span<const stormkit::gpu::VertexInputAttributeDescription>;
+
+      private:
+        std::vector<core::Vector3f> m_positions;
+        std::vector<core::Vector3f> m_normals;
+        std::vector<core::Vector3f> m_colors;
+        std::vector<core::math::Vector2F> m_uvs;
+
+        std::vector<VertexView> m_vertices;
+
+        core::RangeExtent m_size = 0;
+    };
+
+    DECLARE_PTR_AND_REF(VertexArray);
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto VertexArray::data() noexcept -> std::span<VertexView> {
+        return m_vertices;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto VertexArray::data() const noexcept -> std::span<const VertexView> {
+        return m_vertices;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto VertexArray::begin() noexcept -> Iterator {
+        return std::begin(m_vertices);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto VertexArray::begin() const noexcept -> ConstIterator {
+        return std::begin(m_vertices);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto VertexArray::cbegin() const noexcept -> ConstIterator {
+        return std::cbegin(m_vertices);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto VertexArray::end() noexcept -> Iterator {
+        return std::end(m_vertices);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto VertexArray::end() const noexcept -> ConstIterator {
+        return std::end(m_vertices);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto VertexArray::cend() const noexcept -> ConstIterator {
+        return std::cend(m_vertices);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto VertexArray::positions() const noexcept -> std::span<const core::Vector3f> {
+        return m_positions;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto VertexArray::normals() const noexcept -> std::span<const core::Vector3f> {
+        return m_normals;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto VertexArray::colors() const noexcept -> std::span<const core::Vector3f> {
+        return m_colors;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto VertexArray::uvs() const noexcept -> std::span<const core::math::Vector2F> {
+        return m_uvs;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto VertexArray::bindingDescriptions() noexcept
+        -> std::span<const stormkit::gpu::VertexBindingDescription> {
+        static constexpr auto BINDING_DESCRIPTIONS = std::array {
+            gpu::VertexBindingDescription { .binding = 0, .stride = sizeof(core::Vector3f) },
+            gpu::VertexBindingDescription { .binding = 1, .stride = sizeof(core::Vector3f) },
+            gpu::VertexBindingDescription { .binding = 2, .stride = sizeof(core::Vector3f) },
+            gpu::VertexBindingDescription { .binding = 3, .stride = sizeof(core::math::Vector2F) }
+        };
+
+        return BINDING_DESCRIPTIONS;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto VertexArray::attributesDescriptions() noexcept
+        -> std::span<const stormkit::gpu::VertexInputAttributeDescription> {
+        static constexpr auto VERTEX_ATTRIBUTE_DESCRIPTIONS = std::array {
+            gpu::VertexInputAttributeDescription { .location = 0,
+                                                   .binding  = 0,
+                                                   .format   = gpu::Format::Float3,
+                                                   .offset   = 0 },
+            gpu::VertexInputAttributeDescription { .location = 1,
+                                                   .binding  = 1,
+                                                   .format   = gpu::Format::Float3,
+                                                   .offset   = 0 },
+            gpu::VertexInputAttributeDescription { .location = 2,
+                                                   .binding  = 2,
+                                                   .format   = gpu::Format::Float3,
+                                                   .offset   = 0 },
+            gpu::VertexInputAttributeDescription { .location = 3,
+                                                   .binding  = 3,
+                                                   .format   = gpu::Format::Float2,
+                                                   .offset   = 0 },
+        };
+
+        return VERTEX_ATTRIBUTE_DESCRIPTIONS;
+    }
+} // namespace stormkit::engine

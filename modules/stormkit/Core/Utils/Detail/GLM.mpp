@@ -1,0 +1,310 @@
+module;
+
+#include <glm/glm.hpp>
+
+#include <glm/gtc/quaternion.hpp>
+#include <glm/integer.hpp>
+
+export module stormkit.Core:Utils.Details.GLM;
+
+export namespace glm {
+    /* glm.hpp */
+    using glm::abs;
+    using glm::ceil;
+    using glm::clamp;
+    using glm::floatBitsToInt;
+    using glm::floatBitsToUint;
+    using glm::floor;
+    using glm::fma;
+    using glm::fract;
+    using glm::frexp;
+    using glm::intBitsToFloat;
+    using glm::isinf;
+    using glm::isnan;
+    using glm::ldexp;
+    using glm::max;
+    using glm::min;
+    using glm::mix;
+    using glm::mod;
+    using glm::modf;
+    using glm::round;
+    using glm::roundEven;
+    using glm::sign;
+    using glm::smoothstep;
+    using glm::step;
+    using glm::trunc;
+    using glm::uintBitsToFloat;
+
+    using glm::exp;
+    using glm::exp2;
+    using glm::inversesqrt;
+    using glm::log;
+    using glm::log2;
+    using glm::pow;
+    using glm::sqrt;
+
+    using glm::cross;
+    using glm::distance;
+    using glm::dot;
+    using glm::faceforward;
+    using glm::length;
+    using glm::normalize;
+    using glm::reflect;
+    using glm::refract;
+
+    using glm::mat;
+
+    using glm::dmat2;
+    using glm::dmat2x2;
+    using glm::highp_dmat2;
+    using glm::highp_dmat2x2;
+    using glm::highp_mat2;
+    using glm::highp_mat2x2;
+    using glm::lowp_dmat2;
+    using glm::lowp_dmat2x2;
+    using glm::lowp_mat2;
+    using glm::lowp_mat2x2;
+    using glm::mat2;
+    using glm::mat2x2;
+    using glm::mediump_dmat2;
+    using glm::mediump_dmat2x2;
+    using glm::mediump_mat2;
+    using glm::mediump_mat2x2;
+
+    using glm::dmat2x3;
+    using glm::highp_dmat2x3;
+    using glm::highp_mat2x3;
+    using glm::lowp_dmat2x3;
+    using glm::lowp_mat2x3;
+    using glm::mat2x3;
+    using glm::mediump_dmat2x3;
+    using glm::mediump_mat2x3;
+
+    using glm::dmat2x4;
+    using glm::highp_dmat2x4;
+    using glm::highp_mat2x4;
+    using glm::lowp_dmat2x4;
+    using glm::lowp_mat2x4;
+    using glm::mat2x4;
+    using glm::mediump_dmat2x4;
+    using glm::mediump_mat2x4;
+
+    using glm::dmat3x2;
+    using glm::highp_dmat3x2;
+    using glm::highp_mat3x2;
+    using glm::lowp_dmat3x2;
+    using glm::lowp_mat3x2;
+    using glm::mat3x2;
+    using glm::mediump_dmat3x2;
+    using glm::mediump_mat3x2;
+
+    using glm::dmat3;
+    using glm::dmat3x3;
+    using glm::highp_dmat3;
+    using glm::highp_dmat3x3;
+    using glm::highp_mat3;
+    using glm::highp_mat3x3;
+    using glm::lowp_dmat3;
+    using glm::lowp_dmat3x3;
+    using glm::lowp_mat3;
+    using glm::lowp_mat3x3;
+    using glm::mat3;
+    using glm::mat3x3;
+    using glm::mediump_dmat3;
+    using glm::mediump_dmat3x3;
+    using glm::mediump_mat3;
+    using glm::mediump_mat3x3;
+
+    using glm::dmat3x4;
+    using glm::highp_dmat3x4;
+    using glm::highp_mat3x4;
+    using glm::lowp_dmat3x4;
+    using glm::lowp_mat3x4;
+    using glm::mat3x4;
+    using glm::mediump_dmat3x4;
+    using glm::mediump_mat3x4;
+
+    using glm::dmat4x2;
+    using glm::highp_dmat4x2;
+    using glm::highp_mat4x2;
+    using glm::lowp_dmat4x2;
+    using glm::lowp_mat4x2;
+    using glm::mat4x2;
+    using glm::mediump_dmat4x2;
+    using glm::mediump_mat4x2;
+
+    using glm::dmat4x3;
+    using glm::highp_dmat4x3;
+    using glm::highp_mat4x3;
+    using glm::lowp_dmat4x3;
+    using glm::lowp_mat4x3;
+    using glm::mat4x3;
+    using glm::mediump_dmat4x3;
+    using glm::mediump_mat4x3;
+
+    using glm::dmat4;
+    using glm::dmat4x4;
+    using glm::highp_dmat4;
+    using glm::highp_dmat4x4;
+    using glm::highp_mat4;
+    using glm::highp_mat4x4;
+    using glm::lowp_dmat4;
+    using glm::lowp_dmat4x4;
+    using glm::lowp_mat4;
+    using glm::lowp_mat4x4;
+    using glm::mat4;
+    using glm::mat4x4;
+    using glm::mediump_dmat4;
+    using glm::mediump_dmat4x4;
+    using glm::mediump_mat4;
+    using glm::mediump_mat4x4;
+
+    using glm::packDouble2x32;
+    using glm::packHalf2x16;
+    using glm::packSnorm4x8;
+    using glm::packUnorm2x16;
+    using glm::packUnorm4x8;
+    using glm::unpackDouble2x32;
+    using glm::unpackHalf2x16;
+    using glm::unpackSnorm2x16;
+    using glm::unpackSnorm4x8;
+    using glm::unpackUnorm2x16;
+    using glm::unpackUnorm4x8;
+
+    using glm::acos;
+    using glm::acosh;
+    using glm::asin;
+    using glm::asinh;
+    using glm::atan;
+    using glm::atanh;
+    using glm::cos;
+    using glm::cosh;
+    using glm::degrees;
+    using glm::radians;
+    using glm::sin;
+    using glm::sinh;
+    using glm::tan;
+    using glm::tanh;
+
+    using glm::vec;
+
+    using glm::bvec2;
+    using glm::dvec2;
+    using glm::highp_bvec2;
+    using glm::highp_dvec2;
+    using glm::highp_ivec2;
+    using glm::highp_uvec2;
+    using glm::highp_vec2;
+    using glm::ivec2;
+    using glm::lowp_bvec2;
+    using glm::lowp_dvec2;
+    using glm::lowp_ivec2;
+    using glm::lowp_uvec2;
+    using glm::lowp_vec2;
+    using glm::mediump_bvec2;
+    using glm::mediump_dvec2;
+    using glm::mediump_ivec2;
+    using glm::mediump_uvec2;
+    using glm::mediump_vec2;
+    using glm::uvec2;
+    using glm::vec2;
+
+    using glm::bvec3;
+    using glm::dvec3;
+    using glm::highp_bvec3;
+    using glm::highp_dvec3;
+    using glm::highp_ivec3;
+    using glm::highp_uvec3;
+    using glm::highp_vec3;
+    using glm::ivec3;
+    using glm::lowp_bvec3;
+    using glm::lowp_dvec3;
+    using glm::lowp_ivec3;
+    using glm::lowp_uvec3;
+    using glm::lowp_vec3;
+    using glm::mediump_bvec3;
+    using glm::mediump_dvec3;
+    using glm::mediump_ivec3;
+    using glm::mediump_uvec3;
+    using glm::mediump_vec3;
+    using glm::uvec3;
+    using glm::vec3;
+
+    using glm::bvec4;
+    using glm::dvec4;
+    using glm::highp_bvec4;
+    using glm::highp_dvec4;
+    using glm::highp_ivec4;
+    using glm::highp_uvec4;
+    using glm::highp_vec4;
+    using glm::ivec4;
+    using glm::lowp_bvec4;
+    using glm::lowp_dvec4;
+    using glm::lowp_ivec4;
+    using glm::lowp_uvec4;
+    using glm::lowp_vec4;
+    using glm::mediump_bvec4;
+    using glm::mediump_dvec4;
+    using glm::mediump_ivec4;
+    using glm::mediump_uvec4;
+    using glm::mediump_vec4;
+    using glm::uvec4;
+    using glm::vec4;
+
+    using glm::all;
+    using glm::any;
+    using glm::equal;
+    using glm::greaterThan;
+    using glm::greaterThanEqual;
+    using glm::lessThan;
+    using glm::lessThanEqual;
+    using glm::not_;
+    using glm::notEqual;
+
+    using glm::angleAxis;
+    using glm::axis;
+    using glm::conjugate;
+    using glm::inverse;
+    using glm::isinf;
+    using glm::isnan;
+    using glm::lerp;
+    using glm::mix;
+    using glm::rotate;
+    using glm::slerp;
+    using glm::translate;
+
+    /* integer.hpp */
+    using glm::bitCount;
+    using glm::bitfieldExtract;
+    using glm::bitfieldInsert;
+    using glm::bitfieldReverse;
+    using glm::findLSB;
+    using glm::findMSB;
+    using glm::imulExtended;
+    using glm::uaddCarry;
+    using glm::umulExtended;
+    using glm::usubBorrow;
+
+    /* gtc/quaternion.hpp */
+    using glm::qua;
+
+    using glm::dquat;
+    using glm::highp_dquat;
+    using glm::highp_quat;
+    using glm::lowp_dquat;
+    using glm::lowp_quat;
+    using glm::mediump_dquat;
+    using glm::mediump_quat;
+    using glm::quat;
+
+    using glm::eulerAngles;
+    using glm::mat3_cast;
+    using glm::mat4_cast;
+    using glm::pitch;
+    using glm::quat_cast;
+    using glm::quatLookAt;
+    using glm::quatLookAtLH;
+    using glm::quatLookAtRH;
+    using glm::roll;
+    using glm::yaw;
+} // namespace glm

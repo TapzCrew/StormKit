@@ -1,0 +1,256 @@
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+export module stormkit.Gpu:Execution.Descriptors;
+
+import std;
+
+import <stormkit/Core/PlatformMacro.hpp>;
+import <stormkit/Core/HashMacro.hpp>;
+
+import stormkit.Core;
+
+import :Core;
+import :Resource;
+
+import vulkan;
+
+export {
+    namespace stormkit::gpu {
+        struct BufferDescriptor {
+            DescriptorType type = DescriptorType::Uniform_Buffer;
+            core::UInt32 binding;
+            core::NakedRef<const Buffer> buffer;
+            core::UInt32 range;
+            core::UInt32 offset;
+        };
+
+        struct ImageDescriptor {
+            DescriptorType type = DescriptorType::Combined_Image_Sampler;
+            core::UInt32 binding;
+            ImageLayout layout;
+            core::NakedRef<const ImageView> image_view;
+            core::NakedRef<const Sampler> sampler;
+        };
+
+        using Descriptor = std::variant<BufferDescriptor, ImageDescriptor>;
+
+        class DescriptorPool;
+
+        class DescriptorPoolObject: public ParentRef<DescriptorPool> {
+          public:
+            using ParentRef<DescriptorPool>::ParentRef;
+
+            [[nodiscard]] auto image() const noexcept -> const DescriptorPool&;
+        };
+
+        class STORMKIT_API DescriptorSet: public DeviceObject, public DescriptorPoolObject {
+            struct Tag {};
+
+          public:
+            static constexpr auto DEBUG_TYPE = DebugObjectType::Descriptor_Set;
+
+            using Deleter = std::function<void(vk::raii::DescriptorSet&)>;
+
+            DescriptorSet(const DescriptorPool& pool,
+                          std::vector<DescriptorType> type,
+                          vk::raii::DescriptorSet&& sets,
+                          Deleter deleter,
+                          Tag);
+            ~DescriptorSet();
+
+            DescriptorSet(const DescriptorSet&)                    = delete;
+            auto operator=(const DescriptorSet&) -> DescriptorSet& = delete;
+
+            DescriptorSet(DescriptorSet&&) noexcept;
+            auto operator=(DescriptorSet&&) noexcept -> DescriptorSet&;
+
+            auto update(std::span<const Descriptor> descriptors) -> void;
+
+            [[nodiscard]] auto types() const noexcept -> const std::vector<DescriptorType>&;
+
+            [[nodiscard]] auto vkHandle() const noexcept -> const vk::raii::DescriptorSet&;
+
+          private:
+            std::vector<DescriptorType> m_types;
+
+            core::DeferInit<vk::raii::DescriptorSet> m_vk_descriptor_set;
+
+            Deleter m_deleter;
+            friend class DescriptorPool;
+        };
+
+        struct DescriptorSetLayoutBinding {
+            core::UInt32 binding;
+            DescriptorType type;
+            ShaderStageFlag stages;
+            core::RangeExtent descriptor_count;
+        };
+
+        class STORMKIT_API DescriptorSetLayout: public DeviceObject {
+          public:
+            static constexpr auto DEBUG_TYPE = DebugObjectType::Descriptor_Set_Layout;
+
+            explicit DescriptorSetLayout(const Device& device);
+            ~DescriptorSetLayout();
+
+            DescriptorSetLayout(const DescriptorSetLayout&)                    = delete;
+            auto operator=(const DescriptorSetLayout&) -> DescriptorSetLayout& = delete;
+
+            DescriptorSetLayout(DescriptorSetLayout&&) noexcept;
+            auto operator=(DescriptorSetLayout&&) noexcept -> DescriptorSetLayout&;
+
+            auto addBinding(const DescriptorSetLayoutBinding& binding) -> void;
+
+            auto bake() -> void;
+
+            [[nodiscard]] auto hash() const noexcept -> core::Hash64;
+            [[nodiscard]] auto bindings() const noexcept
+                -> const std::vector<DescriptorSetLayoutBinding>&;
+
+            [[nodiscard]] auto vkHandle() const noexcept -> const vk::raii::DescriptorSetLayout&;
+
+            [[nodiscard]] auto operator==(const DescriptorSetLayout& second) const noexcept -> bool;
+
+          private:
+            auto updateHash() noexcept -> void;
+
+            std::vector<DescriptorSetLayoutBinding> m_bindings;
+
+            core::Hash64 m_hash = 0;
+
+            core::DeferInit<vk::raii::DescriptorSetLayout> m_vk_descriptor_set_layout;
+        };
+
+        class STORMKIT_API DescriptorPool: public DeviceObject {
+          public:
+            static constexpr auto DEBUG_TYPE = DebugObjectType::Descriptor_Pool;
+
+            struct Size {
+                DescriptorType type;
+                core::UInt32 descriptor_count;
+            };
+
+            DescriptorPool(const Device& device,
+                           std::span<const Size> sizes,
+                           core::UInt32 max_sets);
+            ~DescriptorPool();
+
+            DescriptorPool(const DescriptorPool&)                    = delete;
+            auto operator=(const DescriptorPool&) -> DescriptorPool& = delete;
+
+            DescriptorPool(DescriptorPool&&) noexcept;
+            auto operator=(DescriptorPool&&) noexcept -> DescriptorPool&;
+
+            [[nodiscard]] auto vkHandle() const noexcept -> const vk::raii::DescriptorPool&;
+
+          private:
+            auto createDescriptorSets(core::RangeExtent count,
+                                      const DescriptorSetLayout& layout) const
+                -> std::pair<std::vector<vk::raii::DescriptorSet>, std::vector<DescriptorType>>;
+            auto deleteDescriptorSet(vk::raii::DescriptorSet& set) const -> void;
+
+            core::DeferInit<vk::raii::DescriptorPool> m_vk_descriptor_pool;
+        };
+    } // namespace stormkit::gpu
+
+    template<>
+    struct STORMKIT_API std::hash<stormkit::gpu::DescriptorSetLayout> {
+        [[nodiscard]] auto
+            operator()(const stormkit::gpu::DescriptorSetLayout& value) const noexcept
+            -> stormkit::core::Hash64 {
+            return value.hash();
+        }
+    };
+
+    HASH_FUNC(stormkit::gpu::DescriptorSetLayoutBinding,
+              value.binding,
+              value.type,
+              value.stages,
+              value.descriptor_count)
+    HASH_FUNC(stormkit::gpu::BufferDescriptor,
+              value.type,
+              value.binding,
+              &value.buffer.get(),
+              value.range,
+              value.offset)
+    HASH_FUNC(stormkit::gpu::ImageDescriptor,
+              value.type,
+              value.binding,
+              value.layout,
+              &value.image_view.get(),
+              &value.sampler.get())
+
+    template<>
+    struct STORMKIT_API std::hash<stormkit::gpu::Descriptor> {
+        [[nodiscard]] auto operator()(const stormkit::gpu::Descriptor& value) const noexcept
+            -> stormkit::core::Hash64 {
+            auto hash = stormkit::core::Hash64 { 0 };
+
+            std::visit([&hash](auto& descriptor) { stormkit::core::hashCombine(hash, descriptor); },
+                       value);
+
+            return hash;
+        }
+    };
+}
+
+////////////////////////////////////////////////////////////////////
+///                      IMPLEMENTATION                          ///
+////////////////////////////////////////////////////////////////////
+
+namespace stormkit::gpu {
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DescriptorSet::types() const noexcept -> const std::vector<DescriptorType>& {
+        return m_types;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DescriptorSet::vkHandle() const noexcept -> const vk::raii::DescriptorSet& {
+        return m_vk_descriptor_set;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DescriptorSetLayout::addBinding(const DescriptorSetLayoutBinding& binding) -> void {
+        m_bindings.emplace_back(binding);
+
+        updateHash();
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DescriptorSetLayout::hash() const noexcept -> core::Hash64 {
+        return m_hash;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DescriptorSetLayout::bindings() const noexcept
+        -> const std::vector<DescriptorSetLayoutBinding>& {
+        return m_bindings;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DescriptorSetLayout::vkHandle() const noexcept
+        -> const vk::raii::DescriptorSetLayout& {
+        return m_vk_descriptor_set_layout;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DescriptorSetLayout::operator==(const DescriptorSetLayout& second) const noexcept
+        -> bool {
+        return m_hash == second.hash();
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DescriptorPool::vkHandle() const noexcept -> const vk::raii::DescriptorPool& {
+        return m_vk_descriptor_pool;
+    }
+} // namespace stormkit::gpu

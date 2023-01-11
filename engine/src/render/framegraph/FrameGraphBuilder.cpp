@@ -1,6 +1,8 @@
-// Copyright (C) 2022 Arthur LAURENT <arthur.laurent4@gmail.com>
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
+
+module;
 
 #include <stack>
 
@@ -13,13 +15,17 @@
 #include <stormkit/gpu/resource/Image.hpp>
 #include <stormkit/gpu/resource/ImageView.hpp>
 
-#include <stormkit/engine/Engine.hpp>
-#include <stormkit/engine/render/Renderer.hpp>
-#include <stormkit/engine/render/framegraph/BakedFrameGraph.hpp>
-#include <stormkit/engine/render/framegraph/FrameGraphBuilder.hpp>
-#include <stormkit/engine/render/framegraph/GraphTaskBuilder.hpp>
+module stormkit.engine.render.framegraph.FrameGraphBuilder;
 
-//#define STORMKIT_RENDERER_MULTITHREADED
+import stormkit.Engine;
+
+import stormkit.engine.render.Renderer;
+import stormkit.engine.render.core.ShaderCache;
+
+import stormkit.engine.render.framegraph.BakedFrameGraph;
+import stormkit.engine.render.framegraph.GraphTaskBuilder;
+
+// #define STORMKIT_RENDERER_MULTITHREADED
 
 #ifdef STORMKIT_RENDERER_MULTITHREADED
     #define LOCK(mutex) auto lock = std::unique_lock { mutex };
@@ -85,7 +91,8 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto FrameGraphBuilder::allocateFrameGraph(BakedFrameGraph *old) -> BakedFrameGraphOwnedPtr {
+    auto FrameGraphBuilder::allocateFrameGraph(BakedFrameGraph *old)
+        -> std::unique_ptr<BakedFrameGraph> {
 #ifdef STORMKIT_RENDERER_MULTITHREADED
         if (m_bake_future.valid()) [[unlikely]]
             m_bake_future.wait();
@@ -245,11 +252,11 @@ namespace stormkit::engine {
             return core::is<GraphImage>(resource);
         });
         auto reads   = core::copyIf(task.reads(), [this](const auto id) noexcept {
-            const auto  &resource = getResource(id);
+            const auto& resource = getResource(id);
             return core::is<GraphImage>(resource);
         });
         auto writes  = core::copyIf(task.writes(), [this](const auto id) noexcept {
-            const auto &resource = getResource(id);
+            const auto& resource = getResource(id);
             return core::is<GraphImage>(resource);
         });
 
@@ -416,10 +423,10 @@ namespace stormkit::engine {
                     LOCK_BUFFER
                     auto& buffer =
                         output.buffers.emplace_back(device.createBuffer(info.create_info));
-                    device.setObjectName(buffer, core::format("FrameGraph:{}", info.name));
+                    device.setObjectName(buffer, std::format("FrameGraph:{}", info.name));
                 }
 
-                auto extent      = core::ExtentU {};
+                auto extent      = core::math::ExtentU {};
                 auto attachments = std::vector<gpu::ImageViewConstRef> {};
                 for (const auto& info : pass.images) {
                     LOCK_BUFFER
@@ -428,9 +435,9 @@ namespace stormkit::engine {
                     extent.height = std::max(info.create_info.extent.height, extent.height);
 
                     auto& image = output.images.emplace_back(device.createImage(info.create_info));
-                    device.setObjectName(image, core::format("FrameGraph:{}", info.name));
+                    device.setObjectName(image, std::format("FrameGraph:{}", info.name));
                     auto& image_view = output.image_views.emplace_back(image.createView());
-                    device.setObjectName(image_view, core::format("FrameGraph:{}View", info.name));
+                    device.setObjectName(image_view, std::format("FrameGraph:{}View", info.name));
 
                     attachments.emplace_back(std::cref(image_view));
 
@@ -439,11 +446,10 @@ namespace stormkit::engine {
 
                 if (pass.description) { // TODO support of async Compute and Transfert queue
                     task.renderpass = device.allocateRenderPass(*pass.description);
-                    device.setObjectName(*task.renderpass,
-                                         core::format("{}:RenderPass", pass.name));
+                    device.setObjectName(*task.renderpass, std::format("{}:RenderPass", pass.name));
                     task.framebuffer = task.renderpass->allocateFramebuffer(extent, attachments);
                     device.setObjectName(*task.framebuffer,
-                                         core::format("{}:FrameBuffer", pass.name));
+                                         std::format("{}:FrameBuffer", pass.name));
 
                     {
                         LOCK_GRAPHICS_QUEUE
@@ -459,7 +465,7 @@ namespace stormkit::engine {
                 }
 
                 device.setObjectName(*task.commandbuffer,
-                                     core::format("FrameGraph:{}:CommandBuffer", pass.name));
+                                     std::format("FrameGraph:{}:CommandBuffer", pass.name));
 
                 auto& graph_task = getTask(pass.id);
 

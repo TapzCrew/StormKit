@@ -2,78 +2,81 @@ name: Windows
 
 on:
   push:
-    branches: [ develop ]
+    branches: [ main ]
+    paths-ignore:
+      - '.github/workflows/Archlinux.yml'
+      - '.github/workflows/Ubuntu.yml'
+      - '.github/workflows/Fedora.yml'
+      - '.github/workflows/macOS.yml'
+      - '.github/workflows/iOS.yml'
+      - '.github/workflows/Android.yml'
+      - '.gitignore'
+      - 'LICENSE'
+      - 'README.md'
   pull_request:
-    branches: [ develop ]
+    branches: [ main ]
+    paths-ignore:
+      - '.github/workflows/Archlinux.yml'
+      - '.github/workflows/Ubuntu.yml'
+      - '.github/workflows/Fedora.yml'
+      - '.github/workflows/macOS.yml'
+      - '.github/workflows/iOS.yml'
+      - '.github/workflows/Android.yml'
+      - '.gitignore'
+      - 'LICENSE'
+      - 'README.md'
 
 jobs:
   build:
-    name: ${{ matrix.os.name }} ( ${{matrix.os.compiler }} ${{ matrix.kind }}, ${{ matrix.mode }} )
-    runs-on: ${{ matrix.os.value }}
+    name: ${{ matrix.os }}-${{ matrix.arch }} ( ${{ matrix.kind }}-${{ matrix.mode }}-${{ matrix.vs_runtime }} )
+
     strategy:
       fail-fast: false
       matrix:
-        os:
-        - {
-           name: "Windows",
-           compiler: "MSVC",
-           value: windows-latest,
-           triplet: "x64-windows"
-        }
-        - {
-           name: "Windows",
-           compiler: "MinGW",
-           value: windows-latest,
-           triplet: "x64-windows"
-        }
-            
+        os: [windows-2022]
         kind: [static, shared]
         mode: [release, debug, asan]
+        vs_runtime: [MT, MD]
+        arch: [x64, arm64]
+
+    runs-on: ${{ matrix.os }}
+
+    concurrency:
+      group: ${{ github.ref }}-${{ github.base_ref }}-${{ github.head_ref }}-Windows-${{ matrix.kind }}-${{ matrix.mode }}-${{ matrix.vs_runtime }}
+
     steps:
-        - name: Install msvc
-          uses: ilammy/msvc-dev-cmd@v1
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
-        - name: Install xmake
-          uses: xmake-io/github-action-setup-xmake@v1
+      - name: Install xmake
+        uses: xmake-io/github-action-setup-xmake@v1
+        with:
+          xmake-version: branch@dev
 
-        - name: Checkout
-          uses: actions/checkout@v2
-          with:
-            fetch-depth: 0
+      - name: Update xmake repository
+        run: xmake repo --update
 
-        - name: Configure & Build
-          id: confandbuild
-          run: |
-            $VS_RUNTIME = "MD"
-            if("${{ matrix.kind }}" -eq "static") {
-                $VS_RUNTIME = "MT"
-            }
+      - name: Configure Pagefile
+        uses: al-cheb/configure-pagefile-action@v1.3
+        with:
+          minimum-size: 8GB
+          maximum-size: 32GB
+          disk-root: "D:"
 
-            if("${{ matrix.os.compiler }}" -eq "MinGW") {
-              xrepo install --yes llvm-mingw
-              $MINGW_INSTALL_DIR = xrepo info llvm-mingw | Out-String
-              $MINGW_INSTALL_DIR -match 'installdir.+'
-              $Matches[0] -match '(C.+)'
-              $MINGW_INSTALL_DIR = $Matches[0]
-              $MINGW_INSTALL_DIR = $MINGW_INSTALL_DIR -replace '\x1b\[[0-9;]*m','' -replace "`n","" -replace "`r",""
-              xmake g --mingw="$MINGW_INSTALL_DIR"
+      - name: Configure & Build
+        id: build
+        run: |
+          xmake f -D --yes -a ${{ matrix.arch }} -m ${{ matrix.mode }} -k ${{ matrix.kind }} --vs_runtime=${{ matrix.vs_runtime }}
+          xmake b -D
 
-              xmake f --unity_build=y -v --yes -m ${{ matrix.mode }} -k ${{ matrix.kind }} -p mingw
-            } else {
-              xmake f --unity_build=y -v --yes -m ${{ matrix.mode }} -k ${{ matrix.kind }} --vs_runtime=$VS_RUNTIME 
-            }
-            xmake b -v
+      - name: Installation
+        run: xmake install -D --installdir="${{ runner.workspace }}/output"
 
-        - name: Install
-          id: install
-          run: |
-            xmake install -v --installdir="${{ runner.workspace }}/StormKit_Output"
-
-            
-        - name: Upload artifacts
-          id: upload
-          uses: actions/upload-artifact@v1
-          with:
-            name: ${{ matrix.os.name }}-${{ matrix.os.compiler }}-${{ matrix.kind }}-${{ matrix.mode }}
-            path: ${{ runner.workspace }}/StormKit_Output
- 
+      - name: Upload artifacts
+        id: upload
+        uses: actions/upload-artifact@v1
+        with:
+          name: ${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.kind }}-${{ matrix.mode }}-${{ matrix.vs_runtime }}
+          path: ${{ runner.workspace }}/output

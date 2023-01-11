@@ -23,17 +23,17 @@ BreakBeforeConceptDeclarations: 'true'
 EmptyLineBeforeAccessModifier: LogicalBlock
 IndentExternBlock: Indent
 IndentGotoLabels: 'false'
-#IndentRequiresClause: 'true'
-#InsertBraces: 'false'
+IndentRequiresClause: 'true'
+InsertBraces: 'false'
 InsertTrailingCommas: Wrapped
 LambdaBodyIndentation: Signature
 PPIndentWidth: 4
-#QualifierAlignment: Left
+QualifierAlignment: Left
 #QualifierOrder: [ 'static', 'volatile', 'restrict', 'constexpr', 'inline', 'const', 'type' ]
 ReferenceAlignment: Left
 #RemoveBracesLLVM: 'true'
-#RequiresClausePosition: OwnLine
-#SeparateDefinitionBlocks: Always
+RequiresClausePosition: OwnLine
+SeparateDefinitionBlocks: Always
 SpaceAfterLogicalNot: 'false'
 SpaceAroundPointerQualifiers: After
 SpaceBeforeCaseColon: 'false'

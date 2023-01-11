@@ -1,0 +1,288 @@
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+#ifndef STORMKIT_NO_MODULES
+export module stormkit.Gpu:Surface;
+
+import std;
+
+import stormkit.Core;
+
+import stormkit.Gpu:Core;
+import stormkit.Gpu:Resource;
+
+    #if STORMKIT_WSI_ENABLED
+import stormkit.Wsi;
+    #endif
+export {
+#else
+    #include <stormkit/std.hpp>
+
+    #include <stormkit/Core.hpp>
+
+    #ifdef STORMKIT_WSI_ENABLED
+        #include <stormkit/Wsi.hpp>
+    #endif
+
+    #include <stormkit/gpu/Core.hpp>
+    #include <stormkit/gpu/Resource.hpp>
+#endif
+
+#if not STORMKIT_WSI_ENABLED
+    namespace stormkit::wsi {
+        class Window;
+
+        DECLARE_PTR_AND_REF(Window);
+    } // namespace stormkit::wsi
+#endif
+
+    namespace stormkit::gpu {
+        class STORMKIT_API Surface: public InstanceObject {
+          public:
+            static constexpr auto DEBUG_TYPE = DebugObjectType::Surface;
+
+            enum class Buffering {
+                Simple,
+                Double,
+                Triple,
+                Swapchain
+            };
+
+            struct Frame {
+                core::UInt32 current_frame;
+                core::UInt32 image_index;
+
+                const Semaphore *image_available;
+                const Semaphore *render_finished;
+                Fence *in_flight;
+            };
+
+            Surface(const Instance& instance, Buffering buffering = Buffering::Triple);
+            virtual ~Surface();
+
+            Surface(const Surface&)                    = delete;
+            auto operator=(const Surface&) -> Surface& = delete;
+
+            Surface(Surface&&) noexcept;
+            auto operator=(Surface&&) noexcept -> Surface&;
+
+            virtual auto initialize(const Device& device) -> void = 0;
+            virtual auto recreate() -> void                       = 0;
+            virtual auto destroy() -> void                        = 0;
+
+            virtual auto acquireNextFrame() -> Expected<Frame> = 0;
+            virtual auto present(const Frame& frame) -> void   = 0;
+
+            [[nodiscard]] auto images() noexcept -> std::span<Image>;
+            [[nodiscard]] auto images() const noexcept -> std::span<const Image>;
+
+            [[nodiscard]] auto pixelFormat() const noexcept -> PixelFormat;
+            [[nodiscard]] auto bufferingCount() const noexcept -> core::UInt32;
+            [[nodiscard]] auto imageCount() const noexcept -> core::UInt32;
+
+            [[nodiscard]] auto needRecreate() const noexcept -> bool;
+
+            [[nodiscard]] auto extent() const noexcept -> const core::math::ExtentU&;
+
+            std::function<void(const Fence& fence)> onSwapchainFenceSignaled;
+
+            [[nodiscard]] auto device() const noexcept -> const Device&;
+
+            [[nodiscard]] virtual auto
+                isPhysicalDeviceSupported(const PhysicalDevice& device,
+                                          core::Int32 family_index) const noexcept -> bool = 0;
+
+          protected:
+            const Device *m_device = nullptr;
+            core::DeferredAlloc<Queue> m_raster_queue;
+
+            std::vector<VkImage> m_vk_images = {};
+
+            core::math::ExtentU m_extent = {};
+            PixelFormat m_pixel_format   = PixelFormat::Undefined;
+            core::UInt32 m_image_count   = 1;
+
+            Buffering m_buffering          = Buffering::Swapchain;
+            core::UInt32 m_buffering_count = 0;
+
+            std::vector<Image> m_images = {};
+
+            std::vector<Semaphore> m_image_availables = {};
+            std::vector<Semaphore> m_render_finisheds = {};
+            std::vector<Fence> m_in_flight_fences     = {};
+
+            bool m_need_recreate = false;
+
+            core::UInt32 m_current_frame = 0;
+        };
+
+        DECLARE_PTR_AND_REF(Surface);
+
+        class STORMKIT_API OffscreenSurface final: public Surface {
+          public:
+            OffscreenSurface(const core::math::ExtentU& extent,
+                             const Instance& instance,
+                             Buffering buffering = Buffering::Triple);
+            ~OffscreenSurface() override;
+
+            OffscreenSurface(const OffscreenSurface&)                    = delete;
+            auto operator=(const OffscreenSurface&) -> OffscreenSurface& = delete;
+
+            OffscreenSurface(OffscreenSurface&&) noexcept;
+            auto operator=(OffscreenSurface&&) noexcept -> OffscreenSurface&;
+
+            auto initialize(const Device& device) -> void override;
+            auto recreate() -> void override;
+            auto destroy() -> void override;
+
+            auto acquireNextFrame() -> Expected<Frame> override;
+            auto present(const Frame& frame) -> void override;
+
+            [[nodiscard]] auto isPhysicalDeviceSupported(const PhysicalDevice& device,
+                                                         core::Int32 family_index) const noexcept
+                -> bool override;
+        };
+
+        DECLARE_PTR_AND_REF(OffscreenSurface);
+
+        class STORMKIT_API WindowSurface final: public Surface {
+          public:
+            static constexpr auto DEBUG_TYPE = DebugObjectType::Surface;
+
+            WindowSurface(const wsi::Window& window,
+                          const Instance& instance,
+                          Buffering buffering = Buffering::Swapchain);
+            ~WindowSurface() override;
+
+            WindowSurface(const WindowSurface&)                    = delete;
+            auto operator=(const WindowSurface&) -> WindowSurface& = delete;
+
+            WindowSurface(WindowSurface&&) noexcept;
+            auto operator=(WindowSurface&&) noexcept -> WindowSurface&;
+
+            auto initialize(const Device& device) -> void override;
+            auto recreate() -> void override;
+            auto destroy() -> void override;
+
+            auto setExclusiveFullscreenEnabled(bool enabled) noexcept -> void;
+
+            [[nodiscard]] auto acquireNextFrame() -> Expected<Frame> override;
+            auto present(const Frame& frame) -> void override;
+
+            [[nodiscard]] operator VkSurfaceKHR() const noexcept;
+            [[nodiscard]] auto vkHandle() const noexcept -> VkSurfaceKHR;
+
+            [[nodiscard]] auto isPhysicalDeviceSupported(const PhysicalDevice& device,
+                                                         core::Int32 family_index) const noexcept
+                -> bool override;
+
+          private:
+            auto createSwapchain() -> void;
+            auto destroySwapchain() -> void;
+
+            auto chooseSwapSurfaceFormat(std::span<const VkSurfaceFormatKHR> formats) noexcept
+                -> VkSurfaceFormatKHR;
+            auto chooseSwapPresentMode(std::span<const VkPresentModeKHR> present_modes) noexcept
+                -> VkPresentModeKHR;
+            auto chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities) noexcept
+                -> VkExtent2D;
+            auto chooseImageCount(const VkSurfaceCapabilitiesKHR& capabilities) noexcept
+                -> core::UInt32;
+
+            const wsi::Window *m_window = nullptr;
+
+            bool m_initialized                  = false;
+            bool m_exclusive_fullscreen_enabled = false;
+
+            VkSurfaceKHR m_surface         = VK_NULL_HANDLE;
+            VkSwapchainKHR m_swapchain     = VK_NULL_HANDLE;
+            VkSwapchainKHR m_old_swapchain = VK_NULL_HANDLE;
+        };
+
+        DECLARE_PTR_AND_REF(WindowSurface);
+    } // namespace stormkit::gpu
+
+#ifndef STORMKIT_NO_MODULES
+}
+#endif
+
+////////////////////////////////////////////////////////////////////
+///                      IMPLEMENTATION                          ///
+////////////////////////////////////////////////////////////////////
+
+namespace stormkit::gpu {
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Surface::device() const noexcept -> const Device& {
+        core::expects(m_device);
+        return *m_device;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Surface::images() noexcept -> std::span<Image> {
+        return m_images;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Surface::images() const noexcept -> std::span<const Image> {
+        return m_images;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Surface::pixelFormat() const noexcept -> PixelFormat {
+        return m_pixel_format;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Surface::bufferingCount() const noexcept -> core::UInt32 {
+        return m_buffering_count;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Surface::imageCount() const noexcept -> core::UInt32 {
+        return m_image_count;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Surface::needRecreate() const noexcept -> bool {
+        return m_need_recreate;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Surface::extent() const noexcept -> const core::math::ExtentU& {
+        return m_extent;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto OffscreenSurface::isPhysicalDeviceSupported(const PhysicalDevice& device,
+                                                            core::Int32 family_index) const noexcept
+        -> bool {
+        const auto& families = device.queueFamilies();
+        core::expects(std::size(families) >= family_index);
+
+        return core::checkFlag(families[family_index].flags, QueueFlag::Graphics);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline WindowSurface::operator VkSurfaceKHR() const noexcept {
+        return vkHandle();
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto WindowSurface::vkHandle() const noexcept -> VkSurfaceKHR {
+        core::expects(m_surface);
+
+        return m_surface;
+    }
+} // namespace stormkit::gpu

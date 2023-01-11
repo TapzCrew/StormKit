@@ -1,7 +1,8 @@
 target("model_loader")
     set_kind("binary")
     set_languages("cxxlatest", "clatest")
-    add_rules("utils.nzsl2spv")
+    add_rules("stormkit.utils.nzsl2spv")
+    add_rules("c++.build.modules")
 
     if is_mode("debug") then
         set_suffixname("-d")
@@ -9,6 +10,7 @@ target("model_loader")
 
     add_files("src/*.cpp")
     add_headerfiles("src/*.hpp")
+    add_files("src/*.mpp")
 
     if is_plat("windows") then
         add_files("win32/*.manifest")

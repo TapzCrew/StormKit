@@ -1,0 +1,32 @@
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+export module IFC:IFCFile;
+
+import std;
+
+import :Types;
+
+import stormkit.Core;
+
+using namespace stormkit;
+
+export {
+    struct IFCFile {
+        struct Partition {
+            std::string name;
+        };
+
+        std::string src_path;
+        core::UInt32 major_version;
+        core::UInt32 minor_version;
+        core::UInt32 abi;
+        Architecture arch;
+        LanguageVersion dialect;
+        UnitIndex unit;
+        bool internal;
+
+        std::vector<Partition> partitions;
+    };
+}

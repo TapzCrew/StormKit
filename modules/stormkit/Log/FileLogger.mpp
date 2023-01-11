@@ -1,0 +1,37 @@
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+export module stormkit.Log:FileLogger;
+
+import std;
+
+import stormkit.Core;
+
+import <stormkit/Core/PlatformMacro.hpp>;
+
+import :Logger;
+import :Severity;
+
+export namespace stormkit::log {
+    class STORMKIT_API FileLogger final: public Logger {
+      public:
+        FileLogger(LogClock::time_point start, std::filesystem::path path);
+        FileLogger(LogClock::time_point start, std::filesystem::path path, Severity log_level);
+        ~FileLogger() override;
+
+        FileLogger(const FileLogger&)                    = delete;
+        auto operator=(const FileLogger&) -> FileLogger& = delete;
+
+        FileLogger(FileLogger&&);
+        auto operator=(FileLogger&&) -> FileLogger&;
+
+        auto write(Severity severity, const Module& module, const char *string) -> void override;
+        auto flush() -> void override;
+
+      private:
+        core::StringHashMap<std::ofstream> m_streams;
+
+        std::filesystem::path m_base_path;
+    };
+} // namespace stormkit::log

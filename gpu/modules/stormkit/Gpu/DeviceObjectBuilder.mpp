@@ -1,0 +1,1002 @@
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+#ifndef STORMKIT_NO_MODULES
+export module stormkit.Gpu:DeviceObjectBuilder;
+
+import std;
+
+import stormkit.Core;
+
+import stormkit.Gpu:Core;
+import stormkit.Gpu:Resource;
+import stormkit.Gpu:Execution;
+import stormkit.Gpu:Graphics;
+import stormkit.Gpu:Compute;
+
+export {
+#else
+    #include <stormkit/std.hpp>
+
+    #include <stormkit/Core.hpp>
+
+    #include <stormkit/gpu/Compute.hpp>
+    #include <stormkit/gpu/Core.hpp>
+    #include <stormkit/gpu/Execution.hpp>
+    #include <stormkit/gpu/Graphics.hpp>
+    #include <stormkit/gpu/Resource.hpp>
+#endif
+
+    namespace stormkit::gpu {
+        class STORMKIT_API DeviceObjectBuilder: public DeviceObject {
+          public:
+            explicit DeviceObjectBuilder(const Device& device) noexcept;
+            ~DeviceObjectBuilder() noexcept;
+
+            DeviceObjectBuilder(const DeviceObjectBuilder&)                    = default;
+            auto operator=(const DeviceObjectBuilder&) -> DeviceObjectBuilder& = default;
+
+            DeviceObjectBuilder(DeviceObjectBuilder&&) noexcept                    = default;
+            auto operator=(DeviceObjectBuilder&&) noexcept -> DeviceObjectBuilder& = default;
+
+            [[nodiscard]] auto createQueue(const Device::QueueEntry& entry) const -> Queue;
+            [[nodiscard]] auto allocateShader(const Device::QueueEntry& entry) const
+                -> std::unique_ptr<Queue>;
+            [[nodiscard]] auto allocateRefCountedShader(const Device::QueueEntry& entry) const
+                -> std::shared_ptr<Queue>;
+
+            [[nodiscard]] auto createShader(std::filesystem::path filepath,
+                                            ShaderStageFlag type) const -> Shader;
+            [[nodiscard]] auto allocateShader(std::filesystem::path filepath,
+                                              ShaderStageFlag type) const
+                -> std::unique_ptr<Shader>;
+            [[nodiscard]] auto allocateRefCountedShader(std::filesystem::path filepath,
+                                                        ShaderStageFlag type) const
+                -> std::shared_ptr<Shader>;
+
+            [[nodiscard]] auto createShader(std::span<const core::Byte> data,
+                                            ShaderStageFlag type) const -> Shader;
+            [[nodiscard]] auto allocateShader(std::span<const core::Byte> data,
+                                              ShaderStageFlag type) const
+                -> std::unique_ptr<Shader>;
+            [[nodiscard]] auto allocateRefCountedShader(std::span<const core::Byte> data,
+                                                        ShaderStageFlag type) const
+                -> std::shared_ptr<Shader>;
+
+            [[nodiscard]] auto createShader(std::span<const SpirvID> data,
+                                            ShaderStageFlag type) const -> Shader;
+            [[nodiscard]] auto allocateShader(std::span<const SpirvID> data,
+                                              ShaderStageFlag type) const
+                -> std::unique_ptr<Shader>;
+            [[nodiscard]] auto allocateRefCountedShader(std::span<const SpirvID> data,
+                                                        ShaderStageFlag type) const
+                -> std::shared_ptr<Shader>;
+
+            [[nodiscard]] auto createRasterPipeline(const PipelineCache *cache = nullptr) const
+                -> RasterPipeline;
+            [[nodiscard]] auto allocateRasterPipeline(const PipelineCache *cache = nullptr) const
+                -> std::unique_ptr<RasterPipeline>;
+            [[nodiscard]] auto
+                allocateRefCountedRasterPipeline(const PipelineCache *cache = nullptr) const
+                -> std::shared_ptr<RasterPipeline>;
+
+            [[nodiscard]] auto createComputePipeline(const PipelineCache *cache = nullptr) const
+                -> ComputePipeline;
+            [[nodiscard]] auto allocateComputePipeline(const PipelineCache *cache = nullptr) const
+                -> std::unique_ptr<ComputePipeline>;
+            [[nodiscard]] auto
+                allocateRefCountedComputePipeline(const PipelineCache *cache = nullptr) const
+                -> std::shared_ptr<ComputePipeline>;
+
+            [[nodiscard]] auto createPipelineCache(std::filesystem::path path = "") const
+                -> PipelineCache;
+            [[nodiscard]] auto allocatePipelineCache(std::filesystem::path path = "") const
+                -> std::unique_ptr<PipelineCache>;
+            [[nodiscard]] auto
+                allocateRefCountedPipelineCache(std::filesystem::path path = "") const
+                -> std::shared_ptr<PipelineCache>;
+
+            [[nodiscard]] auto createRenderPass(const RenderPassDescription& description) const
+                -> RenderPass;
+            [[nodiscard]] auto allocateRenderPass(const RenderPassDescription& description) const
+                -> std::unique_ptr<RenderPass>;
+            [[nodiscard]] auto
+                allocateRefCountedRenderPass(const RenderPassDescription& description) const
+                -> std::shared_ptr<RenderPass>;
+
+            [[nodiscard]] auto createFence(bool signaled = false) const -> Fence;
+            [[nodiscard]] auto allocateFence(bool signaled = false) const -> std::unique_ptr<Fence>;
+            [[nodiscard]] auto allocateRefCountedFence(bool signaled = false) const
+                -> std::shared_ptr<Fence>;
+
+            [[nodiscard]] auto createSemaphore() const -> Semaphore;
+            [[nodiscard]] auto allocateSemaphore() const -> std::unique_ptr<Semaphore>;
+            [[nodiscard]] auto allocateRefCountedSemaphore() const -> std::shared_ptr<Semaphore>;
+
+            [[nodiscard]] auto createBuffer(const Buffer::CreateInfo& info) const -> Buffer;
+            [[nodiscard]] auto allocateBuffer(const Buffer::CreateInfo& info) const
+                -> std::unique_ptr<Buffer>;
+            [[nodiscard]] auto allocateRefCountedBuffer(const Buffer::CreateInfo& info) const
+                -> std::shared_ptr<Buffer>;
+
+            [[nodiscard]] auto createBuffers(core::RangeExtent count,
+                                             const Buffer::CreateInfo& info) const
+                -> std::vector<Buffer>;
+            [[nodiscard]] auto allocateBuffers(core::RangeExtent count,
+                                               const Buffer::CreateInfo& info) const
+                -> std::vector<std::unique_ptr<Buffer>>;
+            [[nodiscard]] auto allocateRefCountedBuffers(core::RangeExtent count,
+                                                         const Buffer::CreateInfo& info) const
+                -> std::vector<std::shared_ptr<Buffer>>;
+
+            [[nodiscard]] auto createDescriptorSetLayout() const -> DescriptorSetLayout;
+            [[nodiscard]] auto allocateDescriptorSetLayout() const
+                -> std::unique_ptr<DescriptorSetLayout>;
+            [[nodiscard]] auto allocateRefCountedDescriptorSetLayout() const
+                -> std::shared_ptr<DescriptorSetLayout>;
+
+            [[nodiscard]] auto createDescriptorPool(std::span<const DescriptorPool::Size> sizes,
+                                                    core::UInt32 max_sets) const -> DescriptorPool;
+            [[nodiscard]] auto allocateDescriptorPool(std::span<const DescriptorPool::Size> sizes,
+                                                      core::UInt32 max_sets) const
+                -> std::unique_ptr<DescriptorPool>;
+            [[nodiscard]] auto
+                allocateRefCountedDescriptorPool(std::span<const DescriptorPool::Size> sizes,
+                                                 core::UInt32 max_sets) const
+                -> std::shared_ptr<DescriptorPool>;
+
+            [[nodiscard]] auto createImage(const Image::CreateInfo& info) const -> Image;
+            [[nodiscard]] auto allocateImage(const Image::CreateInfo& info) const
+                -> std::unique_ptr<Image>;
+            [[nodiscard]] auto allocateRefCountedImage(const Image::CreateInfo& info) const
+                -> std::shared_ptr<Image>;
+
+            [[nodiscard]] auto
+                createSampler(Sampler::Settings settings = Sampler::Settings {}) const -> Sampler;
+            [[nodiscard]] auto
+                allocateSampler(Sampler::Settings settings = Sampler::Settings {}) const
+                -> std::unique_ptr<Sampler>;
+            [[nodiscard]] auto
+                allocateRefCountedSampler(Sampler::Settings settings = Sampler::Settings {}) const
+                -> std::shared_ptr<Sampler>;
+
+            [[nodiscard]] auto createVertexBuffer(
+                core::RangeExtent size,
+                MemoryPropertyFlag property = MemoryPropertyFlag::Device_Local) const -> Buffer;
+            [[nodiscard]] auto allocateVertexBuffer(
+                core::RangeExtent size,
+                MemoryPropertyFlag property = MemoryPropertyFlag::Device_Local) const
+                -> std::unique_ptr<Buffer>;
+            [[nodiscard]] auto allocateRefCountedVertexBuffer(
+                core::RangeExtent size,
+                MemoryPropertyFlag property = MemoryPropertyFlag::Device_Local) const
+                -> std::shared_ptr<Buffer>;
+
+            [[nodiscard]] auto createVertexBuffers(
+                core::RangeExtent count,
+                core::RangeExtent size,
+                MemoryPropertyFlag property = MemoryPropertyFlag::Device_Local) const
+                -> std::vector<Buffer>;
+            [[nodiscard]] auto allocateVertexBuffers(
+                core::RangeExtent count,
+                core::RangeExtent size,
+                MemoryPropertyFlag property = MemoryPropertyFlag::Device_Local) const
+                -> std::vector<std::unique_ptr<Buffer>>;
+            [[nodiscard]] auto allocateRefCountedVertexBuffers(
+                core::RangeExtent count,
+                core::RangeExtent size,
+                MemoryPropertyFlag property = MemoryPropertyFlag::Device_Local) const
+                -> std::vector<std::shared_ptr<Buffer>>;
+
+            [[nodiscard]] auto createIndexBuffer(
+                core::RangeExtent size,
+                MemoryPropertyFlag property = MemoryPropertyFlag::Device_Local) const -> Buffer;
+            [[nodiscard]] auto allocateIndexBuffer(
+                core::RangeExtent size,
+                MemoryPropertyFlag property = MemoryPropertyFlag::Device_Local) const
+                -> std::unique_ptr<Buffer>;
+            [[nodiscard]] auto allocateRefCountedIndexBuffer(
+                core::RangeExtent size,
+                MemoryPropertyFlag property = MemoryPropertyFlag::Device_Local) const
+                -> std::shared_ptr<Buffer>;
+
+            [[nodiscard]] auto createIndexBuffers(
+                core::RangeExtent count,
+                core::RangeExtent size,
+                MemoryPropertyFlag property = MemoryPropertyFlag::Device_Local) const
+                -> std::vector<Buffer>;
+            [[nodiscard]] auto allocateIndexBuffers(
+                core::RangeExtent count,
+                core::RangeExtent size,
+                MemoryPropertyFlag property = MemoryPropertyFlag::Device_Local) const
+                -> std::vector<std::unique_ptr<Buffer>>;
+            [[nodiscard]] auto allocateRefCountedIndexBuffers(
+                core::RangeExtent count,
+                core::RangeExtent size,
+                MemoryPropertyFlag property = MemoryPropertyFlag::Device_Local) const
+                -> std::vector<std::shared_ptr<Buffer>>;
+
+            [[nodiscard]] auto createUniformBuffer(
+                core::RangeExtent size,
+                MemoryPropertyFlag property = MemoryPropertyFlag::Host_Visible |
+                                              MemoryPropertyFlag::Host_Coherent) const -> Buffer;
+            [[nodiscard]] auto allocateUniformBuffer(
+                core::RangeExtent size,
+                MemoryPropertyFlag property = MemoryPropertyFlag::Host_Visible |
+                                              MemoryPropertyFlag::Host_Coherent) const
+                -> std::unique_ptr<Buffer>;
+            [[nodiscard]] auto allocateRefCountedUniformBuffer(
+                core::RangeExtent size,
+                MemoryPropertyFlag property = MemoryPropertyFlag::Host_Visible |
+                                              MemoryPropertyFlag::Host_Coherent) const
+                -> std::shared_ptr<Buffer>;
+
+            [[nodiscard]] auto createUniformBuffers(
+                core::RangeExtent count,
+                core::RangeExtent size,
+                MemoryPropertyFlag property = MemoryPropertyFlag::Host_Visible |
+                                              MemoryPropertyFlag::Host_Coherent) const
+                -> std::vector<Buffer>;
+            [[nodiscard]] auto allocateUniformBuffers(
+                core::RangeExtent count,
+                core::RangeExtent size,
+                MemoryPropertyFlag property = MemoryPropertyFlag::Host_Visible |
+                                              MemoryPropertyFlag::Host_Coherent) const
+                -> std::vector<std::unique_ptr<Buffer>>;
+            [[nodiscard]] auto allocateRefCountedUniformBuffers(
+                core::RangeExtent count,
+                core::RangeExtent size,
+                MemoryPropertyFlag property = MemoryPropertyFlag::Host_Visible |
+                                              MemoryPropertyFlag::Host_Coherent) const
+                -> std::vector<std::shared_ptr<Buffer>>;
+
+            [[nodiscard]] auto createStagingBuffer(
+                core::RangeExtent size,
+                MemoryPropertyFlag property = MemoryPropertyFlag::Host_Visible |
+                                              MemoryPropertyFlag::Host_Coherent) const -> Buffer;
+            [[nodiscard]] auto allocateStagingBuffer(
+                core::RangeExtent size,
+                MemoryPropertyFlag property = MemoryPropertyFlag::Host_Visible |
+                                              MemoryPropertyFlag::Host_Coherent) const
+                -> std::unique_ptr<Buffer>;
+            [[nodiscard]] auto allocateRefCountedStagingBuffer(
+                core::RangeExtent size,
+                MemoryPropertyFlag property = MemoryPropertyFlag::Host_Visible |
+                                              MemoryPropertyFlag::Host_Coherent) const
+                -> std::shared_ptr<Buffer>;
+
+            [[nodiscard]] auto createStagingBuffers(
+                core::RangeExtent count,
+                core::RangeExtent size,
+                MemoryPropertyFlag property = MemoryPropertyFlag::Host_Visible |
+                                              MemoryPropertyFlag::Host_Coherent) const
+                -> std::vector<Buffer>;
+            [[nodiscard]] auto allocateStagingBuffers(
+                core::RangeExtent count,
+                core::RangeExtent size,
+                MemoryPropertyFlag property = MemoryPropertyFlag::Host_Visible |
+                                              MemoryPropertyFlag::Host_Coherent) const
+                -> std::vector<std::unique_ptr<Buffer>>;
+            [[nodiscard]] auto allocateRefCountedStagingBuffers(
+                core::RangeExtent count,
+                core::RangeExtent size,
+                MemoryPropertyFlag property = MemoryPropertyFlag::Host_Visible |
+                                              MemoryPropertyFlag::Host_Coherent) const
+                -> std::vector<std::shared_ptr<Buffer>>;
+        };
+
+        DECLARE_PTR_AND_REF(DeviceObjectBuilder);
+    } // namespace stormkit::gpu
+
+#ifndef STORMKIT_NO_MODULES
+}
+#endif
+
+////////////////////////////////////////////////////////////////////
+///                      IMPLEMENTATION                          ///
+////////////////////////////////////////////////////////////////////
+
+namespace stormkit::gpu {
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline DeviceObjectBuilder::DeviceObjectBuilder(const Device& device) noexcept
+        : DeviceObject { device } {
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    auto DeviceObjectBuilder::createQueue(const Device::QueueEntry& entry) const -> Queue {
+        return { device(), entry };
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    auto DeviceObjectBuilder::allocateShader(const Device::QueueEntry& entry) const
+        -> std::unique_ptr<Queue> {
+        return std::make_unique<Queue>(device(), entry);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    auto DeviceObjectBuilder::allocateRefCountedShader(const Device::QueueEntry& entry) const
+        -> std::shared_ptr<Queue> {
+        return std::make_shared<Queue>(device(), entry);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DeviceObjectBuilder::createShader(std::filesystem::path filepath,
+                                                  ShaderStageFlag type) const -> Shader {
+        return { std::move(filepath), type, device() };
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DeviceObjectBuilder::allocateShader(std::filesystem::path filepath,
+                                                    ShaderStageFlag type) const
+        -> std::unique_ptr<Shader> {
+        return std::make_unique<Shader>(std::move(filepath), type, device());
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DeviceObjectBuilder::allocateRefCountedShader(std::filesystem::path filepath,
+                                                              ShaderStageFlag type) const
+        -> std::shared_ptr<Shader> {
+        return std::make_shared<Shader>(std::move(filepath), type, device());
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DeviceObjectBuilder::createShader(std::span<const core::Byte> data,
+                                                  ShaderStageFlag type) const -> Shader {
+        return Shader { data, type, device() };
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DeviceObjectBuilder::allocateShader(std::span<const core::Byte> data,
+                                                    ShaderStageFlag type) const
+        -> std::unique_ptr<Shader> {
+        return std::make_unique<Shader>(data, type, device());
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DeviceObjectBuilder::allocateRefCountedShader(std::span<const core::Byte> data,
+                                                              ShaderStageFlag type) const
+        -> std::shared_ptr<Shader> {
+        return std::make_shared<Shader>(data, type, device());
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DeviceObjectBuilder::createShader(std::span<const SpirvID> data,
+                                                  ShaderStageFlag type) const -> Shader {
+        return Shader { data, type, device() };
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DeviceObjectBuilder::allocateShader(std::span<const SpirvID> data,
+                                                    ShaderStageFlag type) const
+        -> std::unique_ptr<Shader> {
+        return std::make_unique<Shader>(data, type, device());
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DeviceObjectBuilder::allocateRefCountedShader(std::span<const SpirvID> data,
+                                                              ShaderStageFlag type) const
+        -> std::shared_ptr<Shader> {
+        return std::make_shared<Shader>(data, type, device());
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DeviceObjectBuilder::createRasterPipeline(const PipelineCache *cache) const
+        -> RasterPipeline {
+        return RasterPipeline { device(), cache };
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DeviceObjectBuilder::allocateRasterPipeline(const PipelineCache *cache) const
+        -> std::unique_ptr<RasterPipeline> {
+        return std::make_unique<RasterPipeline>(device(), cache);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto
+        DeviceObjectBuilder::allocateRefCountedRasterPipeline(const PipelineCache *cache) const
+        -> std::shared_ptr<RasterPipeline> {
+        return std::make_shared<RasterPipeline>(device(), cache);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DeviceObjectBuilder::createComputePipeline(const PipelineCache *cache) const
+        -> ComputePipeline {
+        return ComputePipeline { device(), cache };
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DeviceObjectBuilder::allocateComputePipeline(const PipelineCache *cache) const
+        -> std::unique_ptr<ComputePipeline> {
+        return std::make_unique<ComputePipeline>(device(), cache);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto
+        DeviceObjectBuilder::allocateRefCountedComputePipeline(const PipelineCache *cache) const
+        -> std::shared_ptr<ComputePipeline> {
+        return std::make_shared<ComputePipeline>(device(), cache);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DeviceObjectBuilder::createPipelineCache(std::filesystem::path path) const
+        -> PipelineCache {
+        return PipelineCache { device(), std::move(path) };
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DeviceObjectBuilder::allocatePipelineCache(std::filesystem::path path) const
+        -> std::unique_ptr<PipelineCache> {
+        return std::make_unique<PipelineCache>(device(), std::move(path));
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto
+        DeviceObjectBuilder::allocateRefCountedPipelineCache(std::filesystem::path path) const
+        -> std::shared_ptr<PipelineCache> {
+        return std::make_shared<PipelineCache>(device(), std::move(path));
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto
+        DeviceObjectBuilder::createRenderPass(const RenderPassDescription& description) const
+        -> RenderPass {
+        return RenderPass { device(), description };
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto
+        DeviceObjectBuilder::allocateRenderPass(const RenderPassDescription& description) const
+        -> std::unique_ptr<RenderPass> {
+        return std::make_unique<RenderPass>(device(), description);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DeviceObjectBuilder::allocateRefCountedRenderPass(
+        const RenderPassDescription& description) const -> std::shared_ptr<RenderPass> {
+        return std::make_shared<RenderPass>(device(), description);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DeviceObjectBuilder::createFence(bool signaled) const -> Fence {
+        return Fence { device(), signaled };
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DeviceObjectBuilder::allocateFence(bool signaled) const -> std::unique_ptr<Fence> {
+        return std::make_unique<Fence>(device(), signaled);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DeviceObjectBuilder::allocateRefCountedFence(bool signaled) const
+        -> std::shared_ptr<Fence> {
+        return std::make_shared<Fence>(device(), signaled);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DeviceObjectBuilder::createSemaphore() const -> Semaphore {
+        return Semaphore { device() };
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DeviceObjectBuilder::allocateSemaphore() const -> std::unique_ptr<Semaphore> {
+        return std::make_unique<Semaphore>(device());
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DeviceObjectBuilder::allocateRefCountedSemaphore() const
+        -> std::shared_ptr<Semaphore> {
+        return std::make_shared<Semaphore>(device());
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DeviceObjectBuilder::createBuffer(const Buffer::CreateInfo& info) const -> Buffer {
+        return Buffer { device(), info };
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DeviceObjectBuilder::allocateBuffer(const Buffer::CreateInfo& info) const
+        -> std::unique_ptr<Buffer> {
+        return std::make_unique<Buffer>(device(), info);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DeviceObjectBuilder::allocateRefCountedBuffer(const Buffer::CreateInfo& info) const
+        -> std::shared_ptr<Buffer> {
+        return std::make_shared<Buffer>(device(), info);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DeviceObjectBuilder::createBuffers(core::RangeExtent count,
+                                                   const Buffer::CreateInfo& info) const
+        -> std::vector<Buffer> {
+        auto buffers = std::vector<Buffer> {};
+        buffers.reserve(count);
+        for ([[maybe_unused]] auto i : core::range(count)) buffers.emplace_back(createBuffer(info));
+
+        return buffers;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DeviceObjectBuilder::allocateBuffers(core::RangeExtent count,
+                                                     const Buffer::CreateInfo& info) const
+        -> std::vector<std::unique_ptr<Buffer>> {
+        auto buffers = std::vector<std::unique_ptr<Buffer>> {};
+        buffers.reserve(count);
+
+        for ([[maybe_unused]] auto i : core::range(count))
+            buffers.emplace_back(allocateBuffer(info));
+
+        return buffers;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DeviceObjectBuilder::allocateRefCountedBuffers(core::RangeExtent count,
+                                                               const Buffer::CreateInfo& info) const
+        -> std::vector<std::shared_ptr<Buffer>> {
+        auto buffers = std::vector<std::shared_ptr<Buffer>> {};
+        buffers.reserve(count);
+
+        for ([[maybe_unused]] auto i : core::range(count))
+            buffers.emplace_back(allocateRefCountedBuffer(info));
+
+        return buffers;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DeviceObjectBuilder::createDescriptorSetLayout() const -> DescriptorSetLayout {
+        return DescriptorSetLayout { device() };
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DeviceObjectBuilder::allocateDescriptorSetLayout() const
+        -> std::unique_ptr<DescriptorSetLayout> {
+        return std::make_unique<DescriptorSetLayout>(device());
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DeviceObjectBuilder::allocateRefCountedDescriptorSetLayout() const
+        -> std::shared_ptr<DescriptorSetLayout> {
+        return std::make_shared<DescriptorSetLayout>(device());
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto
+        DeviceObjectBuilder::createDescriptorPool(std::span<const DescriptorPool::Size> sizes,
+                                                  core::UInt32 max_sets) const -> DescriptorPool {
+        return DescriptorPool { device(), sizes, max_sets };
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto
+        DeviceObjectBuilder::allocateDescriptorPool(std::span<const DescriptorPool::Size> sizes,
+                                                    core::UInt32 max_sets) const
+        -> std::unique_ptr<DescriptorPool> {
+        return std::make_unique<DescriptorPool>(device(), sizes, max_sets);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DeviceObjectBuilder::allocateRefCountedDescriptorPool(
+        std::span<const DescriptorPool::Size> sizes,
+        core::UInt32 max_sets) const -> std::shared_ptr<DescriptorPool> {
+        return std::make_shared<DescriptorPool>(device(), sizes, max_sets);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DeviceObjectBuilder::createImage(const Image::CreateInfo& info) const -> Image {
+        return Image { device(), info };
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DeviceObjectBuilder::allocateImage(const Image::CreateInfo& info) const
+        -> std::unique_ptr<Image> {
+        return std::make_unique<Image>(device(), info);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DeviceObjectBuilder::allocateRefCountedImage(const Image::CreateInfo& info) const
+        -> std::shared_ptr<Image> {
+        return std::make_shared<Image>(device(), info);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DeviceObjectBuilder::createSampler(Sampler::Settings settings) const -> Sampler {
+        return Sampler { std::move(settings), device() };
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DeviceObjectBuilder::allocateSampler(Sampler::Settings settings) const
+        -> std::unique_ptr<Sampler> {
+        return std::make_unique<Sampler>(std::move(settings), device());
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DeviceObjectBuilder::allocateRefCountedSampler(Sampler::Settings settings) const
+        -> std::shared_ptr<Sampler> {
+        return std::make_shared<Sampler>(std::move(settings), device());
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DeviceObjectBuilder::createVertexBuffer(core::RangeExtent size,
+                                                        MemoryPropertyFlag property) const
+        -> Buffer {
+        const auto use_staging = !core::checkFlag(property, MemoryPropertyFlag::Host_Visible);
+
+        constexpr auto with_staging_buffer_usage =
+            BufferUsageFlag::Vertex | BufferUsageFlag::Transfert_Dst;
+        return createBuffer({ (use_staging) ? with_staging_buffer_usage : BufferUsageFlag::Vertex,
+                              size,
+                              property });
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DeviceObjectBuilder::allocateVertexBuffer(core::RangeExtent size,
+                                                          MemoryPropertyFlag property) const
+        -> std::unique_ptr<Buffer> {
+        const auto use_staging = !core::checkFlag(property, MemoryPropertyFlag::Host_Visible);
+
+        constexpr auto with_staging_buffer_usage =
+            BufferUsageFlag::Vertex | BufferUsageFlag::Transfert_Dst;
+        return allocateBuffer({ (use_staging) ? with_staging_buffer_usage : BufferUsageFlag::Vertex,
+                                size,
+                                property });
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto
+        DeviceObjectBuilder::allocateRefCountedVertexBuffer(core::RangeExtent size,
+                                                            MemoryPropertyFlag property) const
+        -> std::shared_ptr<Buffer> {
+        const auto use_staging = !core::checkFlag(property, MemoryPropertyFlag::Host_Visible);
+
+        constexpr auto with_staging_buffer_usage =
+            BufferUsageFlag::Vertex | BufferUsageFlag::Transfert_Dst;
+        return allocateRefCountedBuffer(
+            { (use_staging) ? with_staging_buffer_usage : BufferUsageFlag::Vertex,
+              size,
+              property });
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DeviceObjectBuilder::createVertexBuffers(core::RangeExtent count,
+                                                         core::RangeExtent size,
+                                                         MemoryPropertyFlag property) const
+        -> std::vector<Buffer> {
+        auto buffers = std::vector<Buffer> {};
+        buffers.reserve(count);
+        for ([[maybe_unused]] auto i : core::range(count))
+            buffers.emplace_back(createVertexBuffer(size, property));
+
+        return buffers;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DeviceObjectBuilder::allocateVertexBuffers(core::RangeExtent count,
+                                                           core::RangeExtent size,
+                                                           MemoryPropertyFlag property) const
+        -> std::vector<std::unique_ptr<Buffer>> {
+        auto buffers = std::vector<std::unique_ptr<Buffer>> {};
+        buffers.reserve(count);
+        for ([[maybe_unused]] auto i : core::range(count))
+            buffers.emplace_back(allocateVertexBuffer(size, property));
+
+        return buffers;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto
+        DeviceObjectBuilder::allocateRefCountedVertexBuffers(core::RangeExtent count,
+                                                             core::RangeExtent size,
+                                                             MemoryPropertyFlag property) const
+        -> std::vector<std::shared_ptr<Buffer>> {
+        auto buffers = std::vector<std::shared_ptr<Buffer>> {};
+        buffers.reserve(count);
+        for ([[maybe_unused]] auto i : core::range(count))
+            buffers.emplace_back(allocateRefCountedVertexBuffer(size, property));
+
+        return buffers;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DeviceObjectBuilder::createIndexBuffer(core::RangeExtent size,
+                                                       MemoryPropertyFlag property) const
+        -> Buffer {
+        const auto use_staging = !core::checkFlag(property, MemoryPropertyFlag::Host_Visible);
+
+        constexpr auto with_staging_buffer_usage =
+            BufferUsageFlag::Index | BufferUsageFlag::Transfert_Dst;
+        return createBuffer(
+            { (use_staging) ? with_staging_buffer_usage : BufferUsageFlag::Index, size, property });
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DeviceObjectBuilder::allocateIndexBuffer(core::RangeExtent size,
+                                                         MemoryPropertyFlag property) const
+        -> std::unique_ptr<Buffer> {
+        const auto use_staging = !core::checkFlag(property, MemoryPropertyFlag::Host_Visible);
+
+        constexpr auto with_staging_buffer_usage =
+            BufferUsageFlag::Index | BufferUsageFlag::Transfert_Dst;
+        return allocateBuffer(
+            { (use_staging) ? with_staging_buffer_usage : BufferUsageFlag::Index, size, property });
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto
+        DeviceObjectBuilder::allocateRefCountedIndexBuffer(core::RangeExtent size,
+                                                           MemoryPropertyFlag property) const
+        -> std::shared_ptr<Buffer> {
+        const auto use_staging = !core::checkFlag(property, MemoryPropertyFlag::Host_Visible);
+
+        constexpr auto with_staging_buffer_usage =
+            BufferUsageFlag::Index | BufferUsageFlag::Transfert_Dst;
+        return allocateRefCountedBuffer(
+            { (use_staging) ? with_staging_buffer_usage : BufferUsageFlag::Index, size, property });
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DeviceObjectBuilder::createIndexBuffers(core::RangeExtent count,
+                                                        core::RangeExtent size,
+                                                        MemoryPropertyFlag property) const
+        -> std::vector<Buffer> {
+        auto buffers = std::vector<Buffer> {};
+        buffers.reserve(count);
+        for ([[maybe_unused]] auto i : core::range(count))
+            buffers.emplace_back(createIndexBuffer(size, property));
+
+        return buffers;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DeviceObjectBuilder::allocateIndexBuffers(core::RangeExtent count,
+                                                          core::RangeExtent size,
+                                                          MemoryPropertyFlag property) const
+        -> std::vector<std::unique_ptr<Buffer>> {
+        auto buffers = std::vector<std::unique_ptr<Buffer>> {};
+        buffers.reserve(count);
+
+        for ([[maybe_unused]] auto i : core::range(count))
+            buffers.emplace_back(allocateIndexBuffer(size, property));
+
+        return buffers;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto
+        DeviceObjectBuilder::allocateRefCountedIndexBuffers(core::RangeExtent count,
+                                                            core::RangeExtent size,
+                                                            MemoryPropertyFlag property) const
+        -> std::vector<std::shared_ptr<Buffer>> {
+        auto buffers = std::vector<std::shared_ptr<Buffer>> {};
+        buffers.reserve(count);
+
+        for ([[maybe_unused]] auto i : core::range(count))
+            buffers.emplace_back(allocateRefCountedIndexBuffer(size, property));
+
+        return buffers;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DeviceObjectBuilder::createUniformBuffer(core::RangeExtent size,
+                                                         MemoryPropertyFlag property) const
+        -> Buffer {
+        const auto use_staging = !core::checkFlag(property, MemoryPropertyFlag::Host_Visible);
+
+        constexpr auto with_staging_buffer_usage =
+            BufferUsageFlag::Uniform | BufferUsageFlag::Transfert_Dst;
+        return createBuffer({ (use_staging) ? with_staging_buffer_usage : BufferUsageFlag::Uniform,
+                              size,
+                              property });
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DeviceObjectBuilder::allocateUniformBuffer(core::RangeExtent size,
+                                                           MemoryPropertyFlag property) const
+        -> std::unique_ptr<Buffer> {
+        const auto use_staging = !core::checkFlag(property, MemoryPropertyFlag::Host_Visible);
+
+        constexpr auto with_staging_buffer_usage =
+            BufferUsageFlag::Uniform | BufferUsageFlag::Transfert_Dst;
+        return allocateBuffer(
+            { (use_staging) ? with_staging_buffer_usage : BufferUsageFlag::Uniform,
+              size,
+              property });
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto
+        DeviceObjectBuilder::allocateRefCountedUniformBuffer(core::RangeExtent size,
+                                                             MemoryPropertyFlag property) const
+        -> std::shared_ptr<Buffer> {
+        const auto use_staging = !core::checkFlag(property, MemoryPropertyFlag::Host_Visible);
+
+        constexpr auto with_staging_buffer_usage =
+            BufferUsageFlag::Uniform | BufferUsageFlag::Transfert_Dst;
+        return allocateRefCountedBuffer(
+            { (use_staging) ? with_staging_buffer_usage : BufferUsageFlag::Uniform,
+              size,
+              property });
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DeviceObjectBuilder::createUniformBuffers(core::RangeExtent count,
+                                                          core::RangeExtent size,
+                                                          MemoryPropertyFlag property) const
+        -> std::vector<Buffer> {
+        auto buffers = std::vector<Buffer> {};
+        buffers.reserve(count);
+
+        for ([[maybe_unused]] auto i : core::range(count))
+            buffers.emplace_back(createUniformBuffer(size, property));
+
+        return buffers;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DeviceObjectBuilder::allocateUniformBuffers(core::RangeExtent count,
+                                                            core::RangeExtent size,
+                                                            MemoryPropertyFlag property) const
+        -> std::vector<std::unique_ptr<Buffer>> {
+        auto buffers = std::vector<std::unique_ptr<Buffer>> {};
+        buffers.reserve(count);
+
+        for ([[maybe_unused]] auto i : core::range(count))
+            buffers.emplace_back(allocateUniformBuffer(size, property));
+
+        return buffers;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto
+        DeviceObjectBuilder::allocateRefCountedUniformBuffers(core::RangeExtent count,
+                                                              core::RangeExtent size,
+                                                              MemoryPropertyFlag property) const
+        -> std::vector<std::shared_ptr<Buffer>> {
+        auto buffers = std::vector<std::shared_ptr<Buffer>> {};
+        buffers.reserve(count);
+
+        for ([[maybe_unused]] auto i : core::range(count))
+            buffers.emplace_back(allocateRefCountedUniformBuffer(size, property));
+
+        return buffers;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DeviceObjectBuilder::createStagingBuffer(core::RangeExtent size,
+                                                         MemoryPropertyFlag property) const
+        -> Buffer {
+        return createBuffer({ BufferUsageFlag::Transfert_Src, size, property });
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DeviceObjectBuilder::allocateStagingBuffer(core::RangeExtent size,
+                                                           MemoryPropertyFlag property) const
+        -> std::unique_ptr<Buffer> {
+        return allocateBuffer({ BufferUsageFlag::Transfert_Src, size, property });
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto
+        DeviceObjectBuilder::allocateRefCountedStagingBuffer(core::RangeExtent size,
+                                                             MemoryPropertyFlag property) const
+        -> std::shared_ptr<Buffer> {
+        return allocateRefCountedBuffer({ BufferUsageFlag::Transfert_Src, size, property });
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DeviceObjectBuilder::createStagingBuffers(core::RangeExtent count,
+                                                          core::RangeExtent size,
+                                                          MemoryPropertyFlag property) const
+        -> std::vector<Buffer> {
+        auto buffers = std::vector<Buffer> {};
+        buffers.reserve(count);
+
+        for ([[maybe_unused]] auto i : core::range(count))
+            buffers.emplace_back(createStagingBuffer(size, property));
+
+        return buffers;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DeviceObjectBuilder::allocateStagingBuffers(core::RangeExtent count,
+                                                            core::RangeExtent size,
+                                                            MemoryPropertyFlag property) const
+        -> std::vector<std::unique_ptr<Buffer>> {
+        auto buffers = std::vector<std::unique_ptr<Buffer>> {};
+        buffers.reserve(count);
+
+        for ([[maybe_unused]] auto i : core::range(count))
+            buffers.emplace_back(allocateStagingBuffer(size, property));
+
+        return buffers;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto
+        DeviceObjectBuilder::allocateRefCountedStagingBuffers(core::RangeExtent count,
+                                                              core::RangeExtent size,
+                                                              MemoryPropertyFlag property) const
+        -> std::vector<std::shared_ptr<Buffer>> {
+        auto buffers = std::vector<std::shared_ptr<Buffer>> {};
+        buffers.reserve(count);
+
+        for ([[maybe_unused]] auto i : core::range(count))
+            buffers.emplace_back(allocateRefCountedStagingBuffer(size, property));
+
+        return buffers;
+    }
+
+} // namespace stormkit::gpu
