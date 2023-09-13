@@ -39,7 +39,7 @@ export namespace stormkit::gpu {
         auto submit(std::span<core::NakedRef<const CommandBuffer>> commandbuffers,
                     std::span<core::NakedRef<const Semaphore>> wait_semaphores   = {},
                     std::span<core::NakedRef<const Semaphore>> signal_semaphores = {},
-                    Fence *fence = nullptr) const noexcept -> void;
+                    const Fence *fence = nullptr) const noexcept -> void;
 
         [[nodiscard]] auto entry() const noexcept -> const Device::QueueEntry&;
 
@@ -59,6 +59,7 @@ export namespace stormkit::gpu {
     };
 
     class CommandPool;
+
     class CommandPoolObject: public ParentRef<CommandPool> {
       public:
         using ParentRef<CommandPool>::ParentRef;
@@ -276,13 +277,19 @@ export namespace stormkit::gpu {
 namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
+    inline auto Queue::waitIdle() const noexcept -> void {
+        m_vk_queue->waitIdle();
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
     inline auto Queue::entry() const noexcept -> const Device::QueueEntry& {
         return m_entry;
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto Queue::vkHandle() const noexcept -> const vk::raii::Queue & {
+    inline auto Queue::vkHandle() const noexcept -> const vk::raii::Queue& {
         return m_vk_queue;
     }
 

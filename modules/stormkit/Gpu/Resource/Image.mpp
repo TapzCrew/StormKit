@@ -199,6 +199,12 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
+    inline auto ImageObject::image() const noexcept -> const Image& {
+        return ParentRef<Image>::parent();
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
     inline auto ImageView::type() const noexcept -> ImageViewType {
         return m_type;
     }

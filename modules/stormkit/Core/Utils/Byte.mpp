@@ -16,10 +16,10 @@ export namespace stormkit::core {
 
     [[nodiscard]] constexpr auto asByteView(std::ranges::range auto& container);
 
-    [[nodiscard]] constexpr auto asByteView(IsRawPointer auto ptr, RangeExtent size);
+    [[nodiscard]] constexpr auto asByteView(IsPointer auto ptr, RangeExtent size = 1);
 
     template<class T>
-        requires(not std::ranges::range<T> and not IsRawPointer<T>)
+        requires(not std::ranges::range<T> and not IsPointer<T>)
     [[nodiscard]] constexpr auto asByteView(T& value);
 
     [[nodiscard]] constexpr auto makeStaticByteArray(auto... bytes) noexcept -> decltype(auto);
@@ -60,38 +60,33 @@ namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
     constexpr auto asByteView(std::ranges::range auto& container) {
-        using T = decltype(container);
-
-        using ByteType  = std::conditional_t<IsConst<T>, const Byte, Byte>;
-        using ValueType = typename PureType<T>::value_type;
-
-        return std::span<ByteType> { std::bit_cast<ByteType *>(std::data(container)),
-                                     std::size(container) * sizeof(ValueType) };
+        return asByteView(std::data(container), std::size(container));
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    constexpr auto asByteView(IsRawPointer auto ptr, RangeExtent size) {
-        using Ptr = decltype(ptr);
+    constexpr auto asByteView(IsPointer auto ptr, RangeExtent size) {
+        auto raw_ptr = std::to_address(ptr);
 
-        using value_type = std::decay_t<Ptr>;
-        using ByteType   = std::conditional_t<IsConst<Ptr>, const Byte, Byte>;
+        using PtrType   = decltype(raw_ptr);
+        using ValueType = std::decay_t<PtrType>;
+        using ByteType  = LikeCVType<ValueType, core::Byte>;
 
         constexpr auto byte_count = []() {
-            if constexpr (Is<value_type, void>) return 1;
+            if constexpr (Is<ValueType, void>) return 1;
             else
-                return sizeof(value_type);
+                return sizeof(ValueType);
         }();
 
-        return std::span<Byte> { std::bit_cast<ByteType *>(ptr), size * byte_count };
+        return std::span<ByteType> { std::bit_cast<ByteType *>(ptr), size * byte_count };
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<class T>
-        requires(not std::ranges::range<T> and not IsRawPointer<T>)
+        requires(not std::ranges::range<T> and not IsPointer<T>)
     constexpr auto asByteView(T& value) {
-        return asByteView(std::to_address(value), 1);
+        return asByteView(&value, 1);
     }
 
     /////////////////////////////////////

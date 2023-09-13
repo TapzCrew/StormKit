@@ -24,7 +24,7 @@ export {
           public:
             using ParentRef<RenderPass>::ParentRef;
 
-            [[nodiscard]] auto image() const noexcept -> const RenderPass&;
+            [[nodiscard]] auto renderpass() const noexcept -> const RenderPass&;
         };
 
         class STORMKIT_API FrameBuffer: public DeviceObject, public RenderPassObject {
@@ -110,6 +110,8 @@ export {
             auto operator=(RenderPass&&) noexcept -> RenderPass&;
 
             [[nodiscard]] auto isCompatible(const RenderPass& render_pass) const noexcept -> bool;
+            [[nodiscard]] auto isCompatible(const RenderPassDescription& description) const noexcept
+                -> bool;
 
             [[nodiscard]] auto description() const noexcept -> const RenderPassDescription&;
 
@@ -144,6 +146,12 @@ export {
 ////////////////////////////////////////////////////////////////////
 
 namespace stormkit::gpu {
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto RenderPassObject::renderpass() const noexcept -> const RenderPass& {
+        return ParentRef<RenderPass>::parent();
+    }
+
     /////////////////////////////////////
     /////////////////////////////////////
     inline auto FrameBuffer::extent() const noexcept -> const core::math::ExtentU& {

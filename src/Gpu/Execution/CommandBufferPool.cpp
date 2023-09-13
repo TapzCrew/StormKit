@@ -2,27 +2,23 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#ifdef STORMKIT_BUILD_MODULES
-module stormkit.Gpu:Execution;
+module stormkit.Gpu;
 
-import :CommandBufferPool;
-import :CommandBuffer;
-#else
-    #include <stormkit/std.hpp>
+import std;
 
-    #include <stormkit/Core.hpp>
-    #include <stormkit/Gpu.hpp>
-#endif
+import stormkit.Core;
+
+import :Execution.CommandBuffer;
+
+import vulkan;
 
 namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     CommandBufferPool::CommandBufferPool(const Device& device, const Queue& queue)
         : DeviceObject { device }, m_queue { &queue } {
-        const auto create_info =
-            VkCommandPoolCreateInfo { .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
-                                      .flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT |
-                                               VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT };
+        const auto create_info = vk::CommandPoolCreateInfo {}.setFlags(
+            vk::CommandPoolBits::eCreateTransient | vk::CommandPoolBits::eCreateResetCommandBuffer);
 
         const auto& vk = this->device().table();
 

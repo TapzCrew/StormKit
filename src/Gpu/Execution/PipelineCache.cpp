@@ -2,18 +2,18 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#ifdef STORMKIT_BUILD_MODULES
-module stormkit.Gpu:Execution;
+module stormkit.Gpu;
 
-import :PipelineCache;
-import :Pipeline;
-#else
-    #include <stormkit/std.hpp>
+import std;
 
-    #include <stormkit/Core.hpp>
-    #include <stormkit/Gpu.hpp>
-    #include <stormkit/Log.hpp>
-#endif
+import stormkit.Core;
+import stormkit.Log;
+
+import <stormkit/Log/LogMacro.hpp>;
+
+import :Execution.Pipeline;
+
+import vulkan;
 
 namespace stormkit::gpu {
     NAMED_LOGGER(pipeline_cache_logger, "stormkit.Gpu:core.PipelineCache")
@@ -30,40 +30,20 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     PipelineCache::~PipelineCache() {
-        if (m_pipeline_cache != VK_NULL_HANDLE) [[likely]] {
-            const auto& vk = device().table();
-
-            saveCache();
-
-            vk.vkDestroyPipelineCache(device(), m_pipeline_cache, nullptr);
-        }
+        saveCache();
     };
 
     /////////////////////////////////////
     /////////////////////////////////////
-    PipelineCache::PipelineCache(PipelineCache&& other) noexcept
-        : DeviceObject { std::move(other) }, m_path { std::exchange(other.m_path, {}) },
-          m_pipeline_cache { std::exchange(other.m_pipeline_cache, VK_NULL_HANDLE) } {
-    }
+    PipelineCache::PipelineCache(PipelineCache&& other) noexcept = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto PipelineCache::operator=(PipelineCache&& other) noexcept -> PipelineCache& {
-        if (&other == this) [[unlikely]]
-            return *this;
-
-        DeviceObject::operator=(std::move(other));
-        m_path           = std::exchange(other.m_path, {});
-        m_pipeline_cache = std::exchange(other.m_pipeline_cache, VK_NULL_HANDLE);
-
-        return *this;
-    }
+    auto PipelineCache::operator=(PipelineCache&& other) noexcept -> PipelineCache& = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
     auto PipelineCache::createNewPipelineCache() -> void {
-        const auto& vk = device().table();
-
         pipeline_cache_logger.ilog("Creating new pipeline cache at {}", m_path.string());
 
         const auto physical_device_infos = device().physicalDevice().info();
@@ -79,26 +59,27 @@ namespace stormkit::gpu {
         std::ranges::copy(physical_device_infos.pipeline_cache_uuid,
                           std::ranges::begin(m_serialized.uuid.value));
 
-        const auto create_info =
-            VkPipelineCacheCreateInfo { .sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO };
+        const auto create_info = vk::PipelineCacheCreateInfo {};
 
-        CHECK_VK_ERROR(
-            vk.vkCreatePipelineCache(device(), &create_info, nullptr, &m_pipeline_cache));
+        try {
+            m_vk_pipeline_cache =
+                vk::raii::PipelineCache { this->device().vkHandle(), create_info };
+        } catch (const vk::SystemError& err) {
+            throw std::unexpected { core::as<Result>(err.code().value()) };
+        }
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     auto PipelineCache::readPipelineCache() -> void {
-        const auto& vk = device().table();
-
         const auto physical_device_infos = device().physicalDevice().info();
 
         pipeline_cache_logger.ilog("Loading pipeline cache {}", m_path.string());
 
         auto stream = std::ifstream { m_path.string(), std::ios::binary };
-        core::read(stream, core::toByteSpan(m_serialized.guard));
-        core::read(stream, core::toByteSpan(m_serialized.infos));
-        core::read(stream, core::toByteSpan(m_serialized.uuid.value));
+        core::read(stream, core::asByteView(m_serialized.guard));
+        core::read(stream, core::asByteView(m_serialized.infos));
+        core::read(stream, core::asByteView(m_serialized.uuid.value));
 
         if (m_serialized.guard.magic != MAGIC) {
             pipeline_cache_logger.elog("Invalid pipeline cache magic number, have {}, expected: {}",
@@ -138,9 +119,9 @@ namespace stormkit::gpu {
             return;
         }
 
-        if (!std::equal(std::cbegin(m_serialized.uuid.value),
-                        std::cend(m_serialized.uuid.value),
-                        std::cbegin(physical_device_infos.pipeline_cache_uuid))) {
+        if (not std::equal(std::cbegin(m_serialized.uuid.value),
+                           std::cend(m_serialized.uuid.value),
+                           std::cbegin(physical_device_infos.pipeline_cache_uuid))) {
             pipeline_cache_logger.elog("Mismatch pipeline cache device UUID");
 
             createNewPipelineCache();
@@ -148,37 +129,26 @@ namespace stormkit::gpu {
         }
 
         const auto data = core::read(stream, m_serialized.guard.data_size);
-
         const auto create_info =
-            VkPipelineCacheCreateInfo { .sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO,
-                                        .initialDataSize = std::size(data),
-                                        .pInitialData    = std::data(data) };
+            vk::PipelineCacheCreateInfo {}.setInitialData(vk::ArrayProxyNoTemporaries(data));
 
-        CHECK_VK_ERROR(
-            vk.vkCreatePipelineCache(device(), &create_info, nullptr, &m_pipeline_cache));
+        try {
+            m_vk_pipeline_cache =
+                vk::raii::PipelineCache { this->device().vkHandle(), create_info };
+        } catch (const vk::SystemError& err) {
+            throw std::unexpected { core::as<Result>(err.code().value()) };
+        }
     } // namespace stormkit::gpu
 
     /////////////////////////////////////
     /////////////////////////////////////
     auto PipelineCache::saveCache() -> void {
-        const auto& vk = device().table();
-
-        const auto data = [&] {
-            auto size = core::RangeExtent { 0 };
-            CHECK_VK_ERROR(vk.vkGetPipelineCacheData(device(), m_pipeline_cache, &size, nullptr));
-            auto d = std::vector<core::Byte> { size };
-            CHECK_VK_ERROR(
-                vk.vkGetPipelineCacheData(device(), m_pipeline_cache, &size, std::data(d)));
-
-            return d;
-        }();
+        const auto data = m_vk_pipeline_cache->getData();
 
         pipeline_cache_logger.ilog("Saving pipeline cache at {}", m_path.string());
 
         m_serialized.guard.data_size = std::size(data);
-        m_serialized.guard.data_hash = 0u;
-
-        for (auto v : data) core::hashCombine(m_serialized.guard.data_hash, v);
+        m_serialized.guard.data_hash = core::hashCombine(data);
 
         auto stream = std::ofstream { m_path.string(), std::ios::binary | std::ios::trunc };
         core::write(stream, core::asByteView(m_serialized.guard));
