@@ -1,0 +1,297 @@
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+export module stormkit.Gpu:Core.Instance;
+
+import std;
+
+import stormkit.Core;
+
+import <stormkit/Core/PlatformMacro.hpp>;
+
+import <stormkit/Gpu/Core/VulkanMacro.hpp>;
+
+import vulkan;
+
+import :Core.Types;
+import :Core.Device;
+import :Core.Vulkan.Utils;
+
+export namespace stormkit::gpu {
+    class PhysicalDevice;
+
+    class STORMKIT_API Instance {
+      public:
+        enum class Error {
+            No_Physical_Device_Found,
+            No_Present_Compatible_Physical_Device_Found
+        };
+
+        template<typename T>
+        using ErrorExpected = std::expected<T, Error>;
+
+        static constexpr auto DEBUG_TYPE = DebugObjectType::Instance;
+
+        explicit Instance(std::string app_name = "");
+
+        auto create(std::string_view app_name) noexcept -> ResultExpected<Instance>;
+        auto allocate(std::string_view app_name) noexcept
+            -> ResultExpected<std::unique_ptr<Instance>>;
+
+        ~Instance();
+
+        Instance(const Instance&)                    = delete;
+        auto operator=(const Instance&) -> Instance& = delete;
+
+        Instance(Instance&&) noexcept;
+        auto operator=(Instance&&) noexcept -> Instance&;
+
+        [[nodiscard]] auto physicalDevices() const noexcept -> const std::vector<PhysicalDevice>&;
+
+        [[nodiscard]] auto vkHandle() const noexcept -> const vk::raii::Instance&;
+
+        // #ifdef STORMKIT_WSI_ENABLED
+        //[[nodiscard]] auto createWindowSurface(
+        // const wsi::Window& window,
+        // Surface::Buffering buffering = Surface::Buffering::Swapchain) const
+        //-> WindowSurface;
+        //[[nodiscard]] auto allocateWindowSurface(
+        // const wsi::Window& window,
+        // Surface::Buffering buffering = Surface::Buffering::Swapchain) const
+        //-> std::unique_ptr<WindowSurface>;
+        //[[nodiscard]] auto allocateRefCountedWindowSurface(
+        // const wsi::Window& window,
+        // Surface::Buffering buffering = Surface::Buffering::Swapchain) const
+        //-> std::shared_ptr<WindowSurface>;
+        // #endif
+
+        //[[nodiscard]] auto createOffscreenSurface(
+        // const core::math::ExtentU& extent,
+        // Surface::Buffering buffering = Surface::Buffering::Triple) const
+        //-> OffscreenSurface;
+        //[[nodiscard]] auto allocateOffscreenSurface(
+        // const core::math::ExtentU& extent,
+        // Surface::Buffering buffering = Surface::Buffering::Triple) const
+        //-> std::unique_ptr<OffscreenSurface>;
+        //[[nodiscard]] auto allocateRefCountedOffscreenSurface(
+        // const core::math::ExtentU& extent,
+        // Surface::Buffering buffering = Surface::Buffering::Triple) const
+        //-> std::shared_ptr<OffscreenSurface>;
+
+        [[nodiscard]] auto pickPhysicalDevice() const noexcept
+            -> ErrorExpected<core::NakedRef<const PhysicalDevice>>;
+        //[[nodiscard]] auto pickPhysicalDevice(const WindowSurface& surface) noexcept
+        //-> ResultExpected<core::NakedRef<PhysicalDevice>>;
+
+      private:
+        auto createInstance() noexcept -> void;
+        auto createDebugReportCallback() noexcept -> void;
+        auto retrievePhysicalDevices() noexcept -> void;
+
+        auto checkValidationLayerSupport(bool enable_validation) noexcept -> bool;
+        auto checkExtensionSupport(std::string_view extention) const noexcept -> bool;
+        auto checkExtensionSupport(std::span<const std::string_view> extentions) const noexcept
+            -> bool;
+        auto checkExtensionSupport(std::span<const core::CZString> extentions) const noexcept
+            -> bool;
+
+        static inline bool s_has_instance = 0;
+
+        std::unique_ptr<vk::raii::Context> m_vk_context;
+        vk::DynamicLoader m_vk_loader;
+        std::unique_ptr<vk::raii::Instance> m_vk_instance;
+        std::unique_ptr<vk::raii::DebugUtilsMessengerEXT> m_vk_messenger;
+
+        std::vector<PhysicalDevice> m_physical_devices;
+
+        std::string m_app_name;
+
+        std::vector<std::string> m_extensions;
+    };
+
+    class STORMKIT_API PhysicalDevice: public InstanceObject {
+      public:
+        static constexpr auto DEBUG_TYPE = DebugObjectType::Physical_Device;
+
+        ~PhysicalDevice();
+
+        PhysicalDevice(const PhysicalDevice&)                    = delete;
+        auto operator=(const PhysicalDevice&) -> PhysicalDevice& = delete;
+
+        PhysicalDevice(PhysicalDevice&&) noexcept;
+        auto operator=(PhysicalDevice&&) noexcept -> PhysicalDevice&;
+
+        [[nodiscard]] auto checkExtensionSupport(std::string_view extension) const noexcept -> bool;
+        [[nodiscard]] auto
+            checkExtensionSupport(std::span<const std::string_view> extensions) const noexcept
+            -> bool;
+        [[nodiscard]] auto
+            checkExtensionSupport(std::span<const core::CZString> extensions) const noexcept
+            -> bool;
+
+        [[nodiscard]] auto info() const noexcept -> const PhysicalDeviceInfo&;
+        [[nodiscard]] auto capabilities() const noexcept -> const RenderCapabilities&;
+        [[nodiscard]] auto memoryProperties() const noexcept -> std::span<const MemoryPropertyFlag>;
+
+        [[nodiscard]] auto queueFamilies() const noexcept -> std::span<const QueueFamily>;
+
+        [[nodiscard]] auto createLogicalDevice() const -> Device;
+        [[nodiscard]] auto allocateLogicalDevice() const -> std::unique_ptr<Device>;
+
+        [[nodiscard]] auto vkHandle() const noexcept -> const vk::raii::PhysicalDevice&;
+
+      private:
+        PhysicalDevice(vk::raii::PhysicalDevice physical_device, const Instance& instance);
+
+        vk::raii::PhysicalDevice m_vk_physical_device;
+
+        PhysicalDeviceInfo m_device_info;
+        RenderCapabilities m_capabilities;
+        std::vector<MemoryPropertyFlag> m_memory_properties;
+
+        std::vector<QueueFamily> m_queue_families;
+        vk::PhysicalDeviceMemoryProperties m_vk_memory_properties;
+
+        std::vector<std::string> m_extensions;
+
+        friend class Instance;
+    };
+
+    auto toString(Instance::Error data) noexcept -> std::string;
+    constexpr auto toStringView(Instance::Error data) noexcept -> std::string_view;
+} // namespace stormkit::gpu
+
+////////////////////////////////////////////////////////////////////
+///                      IMPLEMENTATION                          ///
+////////////////////////////////////////////////////////////////////
+
+namespace stormkit::gpu {
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Instance::physicalDevices() const noexcept -> const std::vector<PhysicalDevice>& {
+        return m_physical_devices;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Instance::vkHandle() const noexcept -> const vk::raii::Instance& {
+        core::expects(m_vk_instance != nullptr);
+
+        return *m_vk_instance;
+    }
+
+    // #ifdef STORMKIT_WSI_ENABLED
+    // /////////////////////////////////////
+    // /////////////////////////////////////
+    // inline auto Instance::createWindowSurface(const wsi::Window& window,
+    // Surface::Buffering buffering) const
+    // -> WindowSurface {
+    // return WindowSurface { window, instance(), buffering };
+    // }
+
+    // /////////////////////////////////////
+    // /////////////////////////////////////
+    // inline auto Instance::allocateWindowSurface(const wsi::Window& window,
+    // Surface::Buffering buffering) const
+    // -> std::unique_ptr<WindowSurface> {
+    // return std::make_unique<WindowSurface>(window, instance(), buffering);
+    // }
+
+    // /////////////////////////////////////
+    // /////////////////////////////////////
+    // inline auto
+    // Instance::allocateRefCountedWindowSurface(const wsi::Window& window,
+    // Surface::Buffering buffering) const
+    // -> std::shared_ptr<WindowSurface> {
+    // return std::make_shared<WindowSurface>(window, instance(), buffering);
+    // }
+    // #endif
+
+    // /////////////////////////////////////
+    // /////////////////////////////////////
+    // inline auto Instance::createOffscreenSurface(const core::math::ExtentU& extent,
+    // Surface::Buffering buffering) const
+    // -> OffscreenSurface {
+    // return OffscreenSurface { extent, instance(), buffering };
+    // }
+
+    // /////////////////////////////////////
+    // /////////////////////////////////////
+    // inline auto Instance::allocateOffscreenSurface(const core::math::ExtentU& extent,
+    // Surface::Buffering buffering) const
+    // -> std::unique_ptr<OffscreenSurface> {
+    // return std::make_unique<OffscreenSurface>(extent, instance(), buffering);
+    // }
+
+    // /////////////////////////////////////
+    // /////////////////////////////////////
+    // inline auto Instance::allocateRefCountedOffscreenSurface(
+    // const core::math::ExtentU& extent,
+    // Surface::Buffering buffering) const -> std::shared_ptr<OffscreenSurface> {
+    // return std::make_shared<OffscreenSurface>(extent, instance(), buffering);
+    // }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto PhysicalDevice::info() const noexcept -> const PhysicalDeviceInfo& {
+        return m_device_info;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto PhysicalDevice::capabilities() const noexcept -> const RenderCapabilities& {
+        return m_capabilities;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto PhysicalDevice::memoryProperties() const noexcept
+        -> std::span<const MemoryPropertyFlag> {
+        return m_memory_properties;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto PhysicalDevice::queueFamilies() const noexcept -> std::span<const QueueFamily> {
+        return m_queue_families;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto PhysicalDevice::createLogicalDevice() const -> Device {
+        return Device { *this, instance() };
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto PhysicalDevice::allocateLogicalDevice() const -> std::unique_ptr<Device> {
+        return std::make_unique<Device>(*this, instance());
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto PhysicalDevice::vkHandle() const noexcept -> const vk::raii::PhysicalDevice& {
+        return m_vk_physical_device;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    auto toString(Instance::Error data) noexcept -> std::string {
+        return std::string { toStringView(data) };
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    constexpr auto toStringView(Instance::Error data) noexcept -> std::string_view {
+        switch (data) {
+            case Instance::Error::No_Physical_Device_Found: return "No_Physical_Device_Found";
+            case Instance::Error::No_Present_Compatible_Physical_Device_Found:
+                return "No_Present_Compatible_Physical_Device_Found";
+        }
+
+        core::expects(false);
+
+        return "Unknow";
+    }
+} // namespace stormkit::gpu

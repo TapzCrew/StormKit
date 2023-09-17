@@ -1,0 +1,83 @@
+name: Archlinux
+
+on:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - '.github/workflows/Ubuntu.yml'
+      - '.github/workflows/Windows.yml'
+      - '.github/workflows/Fedora.yml'
+      - '.github/workflows/macOS.yml'
+      - '.github/workflows/iOS.yml'
+      - '.github/workflows/Android.yml'
+      - '.gitignore'
+      - 'LICENSE'
+      - 'README.md'
+  pull_request:
+    branches: [ main ]
+    paths-ignore:
+      - '.github/workflows/Ubuntu.yml'
+      - '.github/workflows/Windows.yml'
+      - '.github/workflows/Fedora.yml'
+      - '.github/workflows/macOS.yml'
+      - '.github/workflows/iOS.yml'
+      - '.github/workflows/Android.yml'
+      - '.gitignore'
+      - 'LICENSE'
+      - 'README.md'
+
+jobs:
+  build:
+    name: archlinux-latest-x64 ( ${{ matrix.kind }}-${{ matrix.mode }} )
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        kind: [static, shared]
+        mode: [release, debug, asan]
+
+    runs-on: ${{ matrix.os }}
+    container:
+      image: archlinux:base-devel
+      volumes:
+        - /output:/output
+
+    concurrency:
+      group: ${{ github.ref }}-${{ github.base_ref }}-${{ github.head_ref }}-Archlinux-${{ matrix.kind }}-${{ matrix.mode }}
+
+    steps:
+      - name: Dependencies bootstrap
+        run: |
+          pacman -Syu --noconfirm --needed openssl
+          pacman -Sy --noconfirm --needed glibc git base-devel perl make unzip p7zip
+          pacman -Sy --noconfirm --needed mesa gcc-fortran glu
+
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Install xmake
+        uses: xmake-io/github-action-setup-xmake@v1
+        with:
+          xmake-version: branch@dev
+
+      - name: Update xmake repository
+        run: sudo xmake repo --root -vD --update
+
+      - name: Configure & Build
+        id: build
+        run: |
+          sudo xmake f --root -vD --yes -m ${{ matrix.mode }} -k ${{ matrix.kind }}
+          sudo xmake b --root -vD
+
+      - name: Installation
+        run: sudo /__t/xmake/dev/x64/bin/xmake install --root -vD --installdir="/output"
+
+      - name: Upload artifacts
+        id: upload
+        uses: actions/upload-artifact@v1
+        with:
+          name: Archlinux-x64-${{ matrix.kind }}-${{ matrix.mode }}
+          path: /output

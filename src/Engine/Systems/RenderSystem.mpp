@@ -1,0 +1,65 @@
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+export module stormkit.Engine:Systems.RenderSystem;
+
+import std;
+
+import stormkit.Core;
+import stormkit.Entities;
+
+import :Renderer;
+
+namespace stormkit::engine {
+    class RenderSystem final: public entities::System {
+      public:
+        RenderSystem(entities::EntityManager& manager);
+        ~RenderSystem() final;
+
+        RenderSystem(const RenderSystem&)                    = delete;
+        auto operator=(const RenderSystem&) -> RenderSystem& = delete;
+
+        RenderSystem(RenderSystem&&) noexcept;
+        auto operator=(RenderSystem&&) noexcept -> RenderSystem&;
+
+        auto update(core::Secondf delta) -> void override;
+
+      private:
+        auto onMessageReceived(const entities::Message& message) -> void override;
+    };
+} // namespace stormkit::engine
+
+////////////////////////////////////////////////////////////////////
+///                      IMPLEMENTATION                          ///
+////////////////////////////////////////////////////////////////////
+
+namespace stormkit::engine {
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline RenderSystem::RenderSystem(entities::EntityManager& manager)
+        : System { manager, 0, {} } {
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline RenderSystem::~RenderSystem() = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline RenderSystem::RenderSystem(RenderSystem&&) noexcept = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto RenderSystem::operator=(RenderSystem&&) noexcept -> RenderSystem& = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto RenderSystem::update(core::Secondf delta) -> void {
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto RenderSystem::onMessageReceived(const entities::Message& message) -> void {
+    }
+} // namespace stormkit::gpu

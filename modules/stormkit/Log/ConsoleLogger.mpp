@@ -1,0 +1,27 @@
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+export module stormkit.Log:ConsoleLogger;
+
+import std;
+
+import stormkit.Core;
+
+import <stormkit/Core/PlatformMacro.hpp>;
+
+import :Logger;
+import :Severity;
+
+export namespace stormkit::log {
+    class STORMKIT_API ConsoleLogger final: public Logger {
+      public:
+        explicit ConsoleLogger(LogClock::time_point start) noexcept;
+        ConsoleLogger(LogClock::time_point start, Severity log_level) noexcept;
+
+        ~ConsoleLogger() override;
+
+        auto write(Severity severity, const Module& module, const char *string) -> void override;
+        auto flush() noexcept -> void override;
+    };
+} // namespace stormkit::log

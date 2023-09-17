@@ -1,0 +1,295 @@
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+export module stormkit.Engine:Renderer.Vulkan.Utils;
+
+import std;
+
+import stormkit.Core;
+import stormkit.Log;
+
+import vulkan;
+
+import <stormkit/Core/PlatformMacro.hpp>;
+
+// clang-format off
+// clang-format on
+
+export {
+    namespace stormkit::engine {
+        inline constexpr auto INSTANCE_BASE_EXTENSIONS =
+            std::array { "VK_KHR_get_physical_device_properties2" };
+
+        inline constexpr auto SURFACE_EXTENSIONS = std::array {
+            "VK_KHR_surface",
+#ifdef STORMKIT_OS_WINDOWS
+            "VK_KHR_WIN32_surface",
+#elif defined(STORMKIT_OS_LINUX)
+            "VK_KHR_xcb_surface",
+            "VK_KHR_wayland_surface",
+#elif defined(STORMKIT_OS_MACOS)
+            "VK_MVK_MACOS_surface",
+#elif defined(STORMKIT_OS_IOS)
+            "VK_MVK_IOS_surface",
+#endif
+        };
+
+        template<std::integral T>
+        constexpr auto vkMakeVersion(T major, T minor, T patch) noexcept -> core::UInt32;
+
+        constexpr auto vkVersionMajor(std::integral auto version) noexcept -> core::UInt32;
+
+        constexpr auto vkVersionMinor(std::integral auto version) noexcept -> core::UInt32;
+
+        constexpr auto vkVersionPatch(std::integral auto version) noexcept -> core::UInt32;
+
+#if defined(STORMKIT_RENDER_SAFE_VULKAN) or defined(STORMKIT_ENABLE_VALIDATION_LAYERS)
+        inline constexpr auto ENABLE_VALIDATION = true;
+#else
+        inline constexpr auto ENABLE_VALIDATION = false;
+#endif
+
+        auto checkVkError(vk::Result result,
+                          std::string_view line,
+                          const std::source_location& location =
+                              std::source_location::current()) noexcept -> void;
+
+        constexpr auto toString(vk::Result error) -> std::string_view;
+
+        template<class T>
+        concept VulkanObject = requires(const T& t) { t.vkHandle(); };
+
+        template<class T>
+        concept VulkanFlagsType = vk::FlagTraits<T>::isBitmask;
+
+        template<VulkanFlagsType T>
+        constexpr auto checkFlag(vk::Flags<T> value, T flag) noexcept -> bool;
+
+        template<typename T>
+        using VulkanExpected = std::expected<T, vk::Result>;
+
+        template<typename T>
+        class ParentRef {
+          public:
+            explicit ParentRef(const T& parent) noexcept;
+            ~ParentRef() noexcept;
+
+            ParentRef(const ParentRef&) noexcept;
+            auto operator=(const ParentRef&) noexcept -> ParentRef&;
+
+            ParentRef(ParentRef&&) noexcept;
+            auto operator=(ParentRef&&) noexcept -> ParentRef&;
+
+            [[nodiscard]] auto parent() const noexcept -> const T&;
+
+          private:
+            const T *m_parent;
+        };
+    } // namespace stormkit::engine
+
+    namespace std {
+        template<class CharT>
+        struct std::formatter<vk::Result, CharT>
+            : std::formatter<std::basic_string_view<CharT>, CharT> {
+            template<class FormatContext>
+            auto format(const vk::Result& result, FormatContext& ctx) const -> decltype(ctx.out()) {
+                auto&& out = ctx.out();
+                return format_to(out, "{}", stormkit::engine::toString(result));
+            }
+        };
+    } // namespace std
+}
+
+////////////////////////////////////////////////////////////////////
+///                      IMPLEMENTATION                          ///
+////////////////////////////////////////////////////////////////////
+
+namespace stormkit::engine {
+    namespace {
+        constexpr auto VK_RESULT_TO_STRING = [] {
+            using namespace std::literals;
+
+            return core::makeFrozenMap<vk::Result, std::string_view>({
+                { vk::Result::eSuccess, "eSuccess"sv },
+                { vk::Result::eNotReady, "eNotReady"sv },
+                { vk::Result::eTimeout, "eTimeout"sv },
+                { vk::Result::eEventSet, "eEventSet"sv },
+                { vk::Result::eEventReset, "eEventReset"sv },
+                { vk::Result::eIncomplete, "eIncomplete"sv },
+                { vk::Result::eErrorOutOfHostMemory, "eErrorOutOfHostMemory"sv },
+                { vk::Result::eErrorOutOfDeviceMemory, "eErrorOutOfDeviceMemory"sv },
+                { vk::Result::eErrorInitializationFailed, "eErrorInitializationFailed"sv },
+                { vk::Result::eErrorDeviceLost, "eErrorDeviceLost"sv },
+                { vk::Result::eErrorMemoryMapFailed, "eErrorMemoryMapFailed"sv },
+                { vk::Result::eErrorLayerNotPresent, "eErrorLayerNotPresent"sv },
+                { vk::Result::eErrorExtensionNotPresent, "eErrorExtensionNotPresent"sv },
+                { vk::Result::eErrorFeatureNotPresent, "eErrorFeatureNotPresent"sv },
+                { vk::Result::eErrorIncompatibleDriver, "eErrorIncompatibleDriver"sv },
+                { vk::Result::eErrorTooManyObjects, "eErrorTooManyObjects"sv },
+                { vk::Result::eErrorFormatNotSupported, "eErrorFormatNotSupported"sv },
+                { vk::Result::eErrorFragmentedPool, "eErrorFragmentedPool"sv },
+                { vk::Result::eErrorUnknown, "eErrorUnknown"sv },
+                { vk::Result::eErrorOutOfPoolMemory, "eErrorOutOfPoolMemory"sv },
+                { vk::Result::eErrorInvalidExternalHandle, "eErrorInvalidExternalHandle"sv },
+                { vk::Result::eErrorFragmentation, "eErrorFragmentation"sv },
+                { vk::Result::eErrorInvalidOpaqueCaptureAddress,
+                  "eErrorInvalidOpaqueCaptureAddress"sv },
+                { vk::Result::ePipelineCompileRequired, "ePipelineCompileRequired"sv },
+                { vk::Result::eErrorSurfaceLostKHR, "eErrorSurfaceLostKHR"sv },
+                { vk::Result::eErrorNativeWindowInUseKHR, "eErrorNativeWindowInUseKHR"sv },
+                { vk::Result::eSuboptimalKHR, "eSuboptimalKHR"sv },
+                { vk::Result::eErrorOutOfDateKHR, "eErrorOutOfDateKHR"sv },
+                { vk::Result::eErrorIncompatibleDisplayKHR, "eErrorIncompatibleDisplayKHR"sv },
+                { vk::Result::eErrorValidationFailedEXT, "eErrorValidationFailedEXT"sv },
+                { vk::Result::eErrorInvalidShaderNV, "eErrorInvalidShaderNV"sv },
+                { vk::Result::eErrorImageUsageNotSupportedKHR,
+                  "eErrorImageUsageNotSupportedKHR"sv },
+                { vk::Result::eErrorVideoPictureLayoutNotSupportedKHR,
+                  "eErrorVideoPictureLayoutNotSupportedKHR"sv },
+                { vk::Result::eErrorVideoProfileOperationNotSupportedKHR,
+                  "eErrorVideoProfileOperationNotSupportedKHR"sv },
+                { vk::Result::eErrorVideoProfileFormatNotSupportedKHR,
+                  "eErrorVideoProfileFormatNotSupportedKHR"sv },
+                { vk::Result::eErrorVideoProfileCodecNotSupportedKHR,
+                  "eErrorVideoProfileCodecNotSupportedKHR"sv },
+                { vk::Result::eErrorVideoStdVersionNotSupportedKHR,
+                  "eErrorVideoStdVersionNotSupportedKHR"sv },
+                { vk::Result::eErrorInvalidDrmFormatModifierPlaneLayoutEXT,
+                  "eErrorInvalidDrmFormatModifierPlaneLayoutEXT"sv },
+                { vk::Result::eErrorNotPermittedKHR, "eErrorNotPermittedKHR"sv },
+#if defined(VK_USE_PLATFORM_WIN32_KHR)
+                { vk::Result::eErrorFullScreenExclusiveModeLostEX,
+                  "eErrorFullScreenExclusiveModeLostEX"sv },
+#endif
+                { vk::Result::eThreadIdleKHR, "eThreadIdleKHR"sv },
+                { vk::Result::eThreadDoneKHR, "eThreadDoneKHR"sv },
+                { vk::Result::eOperationDeferredKHR, "eOperationDeferredKHR"sv },
+                { vk::Result::eOperationNotDeferredKHR, "eOperationNotDeferredKHR"sv },
+#if defined(VK_ENABLE_BETA_EXTENSIONS)
+                { vk::Result::eErrorInvalidVideoStdParameter, "eErrorInvalidVideoStdParameter"sv },
+#endif
+                { vk::Result::eErrorCompressionExhaustedEXT, "eErrorCompressionExhaustedEXT"sv },
+                { vk::Result::eErrorIncompatibleShaderBinaryEXT,
+                  "eErrorIncompatibleShaderBinaryEXT"sv },
+            });
+        }();
+    } // namespace
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<std::integral T>
+    constexpr auto vkMakeVersion(T major, T minor, T patch) noexcept -> core::UInt32 {
+        return vkVersionMajor(major) | vkVersionMinor(minor) | vkVersionPatch(patch);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    constexpr auto vkVersionMajor(std::integral auto version) noexcept -> core::UInt32 {
+        return core::as<core::UInt32>(version >> 22u);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    constexpr auto vkVersionMinor(std::integral auto version) noexcept -> core::UInt32 {
+        return core::as<core::UInt32>((version >> 12u) & 0x3ffu);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    constexpr auto vkVersionPatch(std::integral auto version) noexcept -> core::UInt32 {
+        return core::as<core::UInt32>(version & 0xfffu);
+    }
+
+    [[noreturn]] auto doAbort(vk::Result result,
+                              std::string_view line,
+                              const std::source_location& location) noexcept -> void {
+        using log::operator"" _module;
+
+        const auto m = "Vulkan"_module;
+
+        log::Logger::flog(m,
+                          "[%s] failed in \n"
+                          "    > file:     %s\n"
+                          "      line:     %s\n"
+                          "      function: %s\n"
+                          "      return_code:  %s",
+                          line,
+                          location.file_name(),
+                          location.line(),
+                          location.function_name(),
+                          result);
+
+        std::quick_exit(-1);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto checkVkError(vk::Result result,
+                             std::string_view line,
+                             const std::source_location& location) noexcept -> void {
+        if (result == vk::Result::eSuccess) [[likely]]
+            return;
+
+        doAbort(result, line, location);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    constexpr auto toString(vk::Result error) -> std::string_view {
+        using namespace std::literals;
+
+        if (const auto it = VK_RESULT_TO_STRING.find(error);
+            it != std::ranges::cend(VK_RESULT_TO_STRING)) [[likely]]
+            return it->second;
+
+        return "Unknow error"sv;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<VulkanFlagsType T>
+    constexpr auto checkFlag(vk::Flags<T> value, T flag) noexcept -> bool {
+        return (value & flag) == flag;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<typename T>
+    ParentRef<T>::ParentRef(const T& parent) noexcept : m_parent { &parent } {
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<typename T>
+    ParentRef<T>::~ParentRef() noexcept = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<typename T>
+    ParentRef<T>::ParentRef(const ParentRef&) noexcept = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<typename T>
+    auto ParentRef<T>::operator=(const ParentRef&) noexcept -> ParentRef& = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<typename T>
+    ParentRef<T>::ParentRef(ParentRef&&) noexcept = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<typename T>
+    auto ParentRef<T>::operator=(ParentRef&&) noexcept -> ParentRef& = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<typename T>
+    inline auto ParentRef<T>::parent() const noexcept -> const T& {
+        core::expects(m_parent != nullptr);
+
+        return *m_parent;
+    }
+} // namespace stormkit::engine

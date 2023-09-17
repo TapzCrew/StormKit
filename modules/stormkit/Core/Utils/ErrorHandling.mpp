@@ -1,0 +1,111 @@
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+export module stormkit.Core:Utils.ErrorHandling;
+
+import std;
+
+import :Meta.Concepts;
+import :Meta.Traits;
+
+import :Utils.Descriptors;
+
+import <stormkit/Core/PlatformMacro.hpp>;
+
+export namespace stormkit::core {
+    constexpr auto errorString(auto&& value) noexcept -> decltype(auto);
+
+    [[nodiscard]] constexpr auto
+        expectsWithMessage(std::string&& message,
+                           std::source_location location = std::source_location {}) noexcept
+        -> decltype(auto);
+
+    [[nodiscard]] constexpr auto
+        expects(std::source_location location = std::source_location {}) noexcept -> decltype(auto);
+
+    [[nodiscard]] constexpr auto throwError() noexcept -> decltype(auto);
+} // namespace stormkit::core
+
+////////////////////////////////////////////////////////////////////
+///                      IMPLEMENTATION                          ///
+////////////////////////////////////////////////////////////////////
+
+namespace stormkit::core {
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    constexpr auto errorString(auto&& value) noexcept -> decltype(auto) {
+        return std::format("{}", std::forward<decltype(value)>(value));
+    }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    constexpr auto expectsWithMessage(std::string&& message, std::source_location location) noexcept
+        -> decltype(auto) {
+        return [message = std::move(message), location = std::move(location)] [[noreturn]] (
+                   auto&& error) -> std::expected<void, PureType<decltype(error)>> {
+            auto stderr = getSTDErr();
+
+            std::println(stderr,
+                         "[Expects] failed in \n"
+                         "    > file:     {}\n"
+                         "      line:     {}\n"
+                         "      function: {}\n"
+                         "      reason:  {}",
+                         location.file_name(),
+                         location.line(),
+                         location.function_name(),
+                         message);
+
+            std::println(stderr, "================= CALLSTACK =================");
+
+#if defined(__cpp_lib_stacktrace) and __cpp_lib_stacktrace >= 202011L
+            auto st = std::stacktrace::current();
+            std::println(stderr, "{}", std::to_string(st));
+#else
+            std::println(stderr, "No stacktrace support");
+#endif
+
+            std::terminate();
+        };
+    }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    constexpr auto expects(std::source_location location) noexcept -> decltype(auto) {
+        return [location = std::move(location)] [[noreturn]] (
+                   auto&& error) -> std::expected<void, PureType<decltype(error)>> {
+            auto stderr = getSTDErr();
+
+            std::println(stderr,
+                         "[Expects] failed in\n"
+                         "    > file:     {}\n"
+                         "      line:     {}\n"
+                         "      function: {}\n"
+                         "      reason:  {}",
+                         location.file_name(),
+                         location.line(),
+                         location.function_name(),
+                         errorString(std::forward<decltype(error)>(error)));
+
+            std::println(stderr, "================= CALLSTACK =================");
+
+#if defined(__cpp_lib_stacktrace) and __cpp_lib_stacktrace >= 202011L
+            auto st = std::stacktrace::current();
+            std::println(stderr, "{}", std::to_string(st));
+#else
+            std::println(stderr, "No stacktrace support");
+#endif
+
+            std::terminate();
+        };
+    }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    constexpr auto throwError() noexcept -> decltype(auto) {
+        return [] [[noreturn]] (auto&& error) -> std::expected<void, PureType<decltype(error)>> {
+            throw std::forward<decltype(error)>(error);
+        };
+    }
+} // namespace stormkit::core

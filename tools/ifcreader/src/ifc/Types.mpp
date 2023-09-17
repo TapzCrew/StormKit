@@ -1,0 +1,143 @@
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+export module IFC:Types;
+
+import std;
+
+import stormkit.Core;
+
+using namespace stormkit;
+
+export {
+    using ByteOffset    = core::UInt32;
+    using Cardinality   = core::UInt32;
+    using TextOffset    = core::UInt32;
+    using EntitySize    = core::UInt32;
+    using Index         = core::UInt32;
+    using SentenceIndex = core::UInt32;
+    using WordIndex     = core::UInt32;
+
+    struct alignas(4) SHA256 {
+        core::ByteStaticArray<256 / 8> data;
+    };
+
+    using Version = core::Byte;
+    using Abi     = core::Byte;
+
+    enum class Architecture : core::UInt8 {
+        Unknown        = 0x00,
+        x86            = 0x01,
+        x64            = 0x02,
+        arm32          = 0x03,
+        arm64          = 0x04,
+        Hybridx86arm64 = 0x05,
+    };
+
+    using LanguageVersion = core::UInt32;
+
+    enum class UnitSort : core::UInt8 {
+        Source     = 0x00,
+        Primary    = 0x01,
+        Partition  = 0x02,
+        Header     = 0x03,
+        ExportedTU = 0x04,
+    };
+
+    template<core::Size N>
+    struct AbstractReference {
+        core::UInt32 sort: N;
+        core::UInt32 index: 32 - N;
+    };
+
+    using UnitIndex = AbstractReference<3>;
+
+    using ScopeIndex = core::UInt32;
+    using DeclIndex  = core::UInt32;
+
+    constexpr auto toStringView(UnitSort unitsort) noexcept -> std::string_view;
+    constexpr auto toString(UnitSort unitsort)->std::string;
+    constexpr auto toStringView(Architecture architecture) noexcept -> std::string_view;
+    constexpr auto toString(Architecture architecture)->std::string;
+
+    /*template<class CharT>
+    struct std::formatter<Architecture, CharT>: formatter<basic_string_view<CharT>, CharT> {
+        constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
+            return formatter<basic_string_view<CharT>, CharT>::parse(ctx);
+        };
+        constexpr auto format(Architecture data, format_context& ctx) const -> decltype(ctx.out()) {
+            return formatter<basic_string_view<CharT>, CharT>::format(toStringView(data), ctx);
+        }
+    };*/
+
+    /*template<class CharT>
+    struct std::formatter<UnitSort, CharT>: formatter<basic_string_view<CharT>, CharT> {
+        constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
+            return formatter<basic_string_view<CharT>, CharT>::parse(ctx);
+        };
+        constexpr auto format(UnitSort data, format_context& ctx) const -> decltype(ctx.out()) {
+            return formatter<basic_string_view<CharT>, CharT>::format(toStringView(data), ctx);
+        }
+    };*/
+
+    using Signature                     = core::UInt32;
+    inline constexpr auto IFC_SIGNATURE = 0x1A455154;
+}
+
+namespace details {
+    constexpr auto ARCHITECTURE_TO_STRING = [] {
+        using namespace std::literals;
+
+        return core::makeFrozenMap<Architecture, std::string_view>({
+            { Architecture::Unknown, "Unknown"sv },
+            { Architecture::x86, "x86"sv },
+            { Architecture::x64, "x64"sv },
+            { Architecture::arm32, "arm32"sv },
+            { Architecture::arm64, "arm64"sv },
+            { Architecture::Hybridx86arm64, "Hybridx86arm64"sv },
+        });
+    }();
+
+    constexpr auto UNITSORT_TO_STRING = [] {
+        using namespace std::literals;
+
+        return core::makeFrozenMap<UnitSort, std::string_view>({
+            { UnitSort::Source, "Source"sv },
+            { UnitSort::Primary, "Primary"sv },
+            { UnitSort::Partition, "Partition"sv },
+            { UnitSort::Header, "Header"sv },
+            { UnitSort::ExportedTU, "ExportedTU"sv },
+        });
+    }();
+} // namespace details
+
+/////////////////////////////////////
+/////////////////////////////////////
+constexpr auto toStringView(Architecture architecture) noexcept -> std::string_view {
+    const auto it = details::ARCHITECTURE_TO_STRING.find(architecture);
+    core::ensures(it != std::ranges::cend(details::ARCHITECTURE_TO_STRING));
+
+    return it->second;
+}
+
+/////////////////////////////////////
+/////////////////////////////////////
+constexpr auto toString(Architecture architecture) -> std::string {
+    return std::string { toStringView(architecture) };
+}
+
+/////////////////////////////////////
+/////////////////////////////////////
+constexpr auto toStringView(UnitSort unitsort) noexcept -> std::string_view {
+    const auto it = details::UNITSORT_TO_STRING.find(unitsort);
+    core::expects(it != std::ranges::cend(details::UNITSORT_TO_STRING));
+
+    return it->second;
+}
+
+/////////////////////////////////////
+/////////////////////////////////////
+constexpr auto toString(UnitSort unitsort) -> std::string {
+    return std::string { toStringView(unitsort) };
+}

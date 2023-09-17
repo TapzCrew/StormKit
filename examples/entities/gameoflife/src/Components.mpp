@@ -1,0 +1,28 @@
+
+
+#ifdef STORMKIT_BUILD_MODULES
+export module Components;
+
+import std;
+
+import stormkit.Core;
+import stormkit.Entities;
+
+export {
+#else
+    #include <stormkit/std.hpp>
+
+    #include <stormkit/Core.hpp>
+    #include <stormkit/Entities.hpp>
+#endif
+
+    struct PositionComponent: public stormkit::entities::Component {
+        stormkit::core::UInt32 x;
+        stormkit::core::UInt32 y;
+
+        static constexpr Type TYPE = stormkit::entities::componentHash("PositionComponent");
+    };
+
+#ifdef STORMKIT_BUILD_MODULES
+}
+#endif

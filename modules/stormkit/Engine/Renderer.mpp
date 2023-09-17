@@ -1,0 +1,115 @@
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+export module stormkit.Engine:Renderer;
+
+import std;
+
+import <stormkit/Core/PlatformMacro.hpp>;
+
+import stormkit.Core;
+
+import vulkan;
+
+import :Renderer.Vulkan.Utils;
+
+export namespace stormkit::engine {
+    enum class RendererError {
+        FailedToInitializeRenderBackend
+    };
+
+    constexpr auto errorString(RendererError err) {
+        if (err == RendererError::FailedToInitializeRenderBackend)
+            return "Failed to render backend";
+
+        std::unreachable();
+
+        return "";
+    }
+
+    class STORMKIT_API Renderer {
+        struct PrivateTag {};
+
+        template<typename T>
+        using Expected = std::expected<T, RendererError>;
+
+      public:
+        Renderer(std::string_view application_name, PrivateTag);
+        ~Renderer();
+
+        Renderer(const Renderer&)                    = delete;
+        auto operator=(const Renderer&) -> Renderer& = delete;
+
+        Renderer(Renderer&&) noexcept;
+        auto operator=(Renderer&&) noexcept -> Renderer&;
+
+        static auto create(std::string_view application_name) noexcept -> Expected<Renderer>;
+        static auto allocate(std::string_view application_name) noexcept
+            -> Expected<std::unique_ptr<Renderer>>;
+
+      private:
+        auto doInitVulkan(std::string_view) noexcept -> Expected<void>;
+        auto doInitInstance(std::string_view) noexcept -> VulkanExpected<void>;
+        auto doInitDebugReportCallback() noexcept -> VulkanExpected<void>;
+        auto doInitDevice() noexcept -> VulkanExpected<void>;
+
+        bool m_vk_validation_layers_enabled = false;
+        core::DeferInit<vk::raii::Context> m_vk_context;
+        core::DeferInit<vk::raii::Instance> m_vk_instance;
+        core::DeferInit<vk::raii::DebugUtilsMessengerEXT> m_vk_messenger;
+        core::DeferInit<vk::raii::PhysicalDevice> m_vk_physical_device;
+        core::DeferInit<vk::raii::Device> m_vk_device;
+    };
+} // namespace stormkit::engine
+
+////////////////////////////////////////////////////////////////////
+///                      IMPLEMENTATION                          ///
+////////////////////////////////////////////////////////////////////
+
+namespace stormkit::engine {
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline Renderer::Renderer(std::string_view application_name, PrivateTag) {
+        doInitVulkan(application_name).transform_error(core::throwError());
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline Renderer::~Renderer() = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline Renderer::Renderer(Renderer&&) noexcept = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Renderer::operator=(Renderer&&) noexcept -> Renderer& = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Renderer::create(std::string_view application_name) noexcept
+        -> Expected<Renderer> try {
+        return std::move(Renderer { application_name, PrivateTag {} });
+    } catch (RendererError err) { return std::unexpected { err }; }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Renderer::allocate(std::string_view application_name) noexcept
+        -> Expected<std::unique_ptr<Renderer>> try {
+        return std::make_unique<Renderer>(application_name, PrivateTag {});
+    } catch (RendererError err) { return std::unexpected { err }; }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Renderer::doInitVulkan(std::string_view application_name) noexcept
+        -> Expected<void> {
+        return doInitInstance(application_name)
+            .and_then([this] { return doInitDebugReportCallback(); })
+            .and_then([this] { return doInitDevice(); })
+            .transform_error([this]([[maybe_unused]] auto&& error) {
+                return RendererError::FailedToInitializeRenderBackend;
+            });
+    }
+
+} // namespace stormkit::engine

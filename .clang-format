@@ -16,7 +16,33 @@ AllowShortFunctionsOnASingleLine: InlineOnly
 AllowShortIfStatementsOnASingleLine: Always
 AllowShortLoopsOnASingleLine: 'true'
 AllowShortLambdasOnASingleLine: 'true'
+AllowShortEnumsOnASingleLine: 'false'
+AlignConsecutiveMacros: Consecutive
+BitFieldColonSpacing: After
+BreakBeforeConceptDeclarations: 'true'
+EmptyLineBeforeAccessModifier: LogicalBlock
+IndentExternBlock: Indent
+IndentGotoLabels: 'false'
+IndentRequiresClause: 'true'
+InsertBraces: 'false'
+InsertTrailingCommas: Wrapped
+LambdaBodyIndentation: Signature
+PPIndentWidth: 4
+QualifierAlignment: Left
+#QualifierOrder: [ 'static', 'volatile', 'restrict', 'constexpr', 'inline', 'const', 'type' ]
+ReferenceAlignment: Left
+#RemoveBracesLLVM: 'true'
+RequiresClausePosition: OwnLine
+SeparateDefinitionBlocks: Always
+SpaceAfterLogicalNot: 'false'
+SpaceAroundPointerQualifiers: After
+SpaceBeforeCaseColon: 'false'
 AlwaysBreakAfterDefinitionReturnType: None
+SpaceBeforeSquareBrackets: 'false'
+SpaceInEmptyBlock: 'false'
+SpacesInLineCommentPrefix:
+    Minimum: '1'
+    Maximum: '4'
 AlwaysBreakAfterReturnType: None
 AlwaysBreakBeforeMultilineStrings: 'false'
 AlwaysBreakTemplateDeclarations: 'Yes'

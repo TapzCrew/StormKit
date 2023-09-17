@@ -1,0 +1,22 @@
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+export module stormkit.Core;
+
+// clang-format off
+export import <stormkit/Core/FlagsMacro.hpp>;
+export import <stormkit/Core/HashMacro.hpp>;
+export import <stormkit/Core/MemoryMacro.hpp>;
+export import <stormkit/Core/PlatformMacro.hpp>;
+export import <stormkit/Core/PimplImplMacro.hpp>;
+// clang-format on
+
+export import :Configuration;
+export import :Containers;
+export import :Coroutines;
+export import :Hash;
+export import :Meta;
+export import :Parallelism;
+export import :String;
+export import :Utils;

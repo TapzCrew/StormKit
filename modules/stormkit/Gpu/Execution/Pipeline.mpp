@@ -1,0 +1,130 @@
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+export module stormkit.Gpu:Execution.Pipeline;
+
+import std;
+
+import <stormkit/Core/PlatformMacro.hpp>;
+
+import stormkit.Core;
+
+import :Core;
+
+import vulkan;
+
+export namespace stormkit::gpu {
+    class CommandBuffer;
+
+    class STORMKIT_API PipelineCache: public DeviceObject {
+      public:
+        static constexpr auto DEBUG_TYPE = DebugObjectType::Pipeline_Cache;
+
+        explicit PipelineCache(const Device& device,
+                               std::filesystem::path cache_path = "./pipeline_cache.bin");
+        ~PipelineCache();
+
+        PipelineCache(const PipelineCache&)                    = delete;
+        auto operator=(const PipelineCache&) -> PipelineCache& = delete;
+
+        PipelineCache(PipelineCache&&) noexcept;
+        auto operator=(PipelineCache&&) noexcept -> PipelineCache&;
+
+        [[nodiscard]] auto vkHandle() const noexcept -> const vk::raii::PipelineCache&;
+
+      private:
+        auto createNewPipelineCache() -> void;
+        auto readPipelineCache() -> void;
+        auto saveCache() -> void;
+
+        static constexpr auto MAGIC   = core::UInt32 { 0xDEADBEEF };
+        static constexpr auto VERSION = core::UInt32 { 1u };
+
+        struct SerializedCache {
+            struct {
+                core::UInt32 magic;
+                core::RangeExtent data_size;
+                core::UInt64 data_hash;
+            } guard;
+
+            struct {
+                core::UInt32 version;
+                core::UInt64 vendor_id;
+                core::UInt64 device_id;
+            } infos;
+
+            struct {
+                std::array<core::UInt8, vk::UuidSize> value;
+            } uuid;
+        } m_serialized;
+
+        std::filesystem::path m_path = {};
+
+        core::DeferInit<vk::raii::PipelineCache> m_vk_pipeline_cache;
+    };
+
+    class STORMKIT_API Pipeline: public DeviceObject {
+      public:
+        static constexpr auto DEBUG_TYPE = DebugObjectType::Pipeline;
+
+        Pipeline(const Device& device, const PipelineCache *cache = nullptr) noexcept;
+        virtual ~Pipeline();
+
+        Pipeline(const Pipeline&)                    = delete;
+        auto operator=(const Pipeline&) -> Pipeline& = delete;
+
+        Pipeline(Pipeline&&) noexcept;
+        auto operator=(Pipeline&&) noexcept -> Pipeline&;
+
+        [[nodiscard]] auto baked() const noexcept -> bool;
+        virtual auto bake() -> void = 0;
+
+        [[nodiscard]] auto vkHandle() const noexcept -> const vk::raii::Pipeline&;
+        [[nodiscard]] auto vkLayout() const noexcept -> const vk::raii::PipelineLayout&;
+
+      protected:
+        virtual auto bind(CommandBuffer& commandbuffer) const noexcept -> void = 0;
+        friend class CommandBuffer;
+
+        const PipelineCache *m_pipeline_cache = nullptr;
+
+        bool m_is_baked = false;
+
+        core::DeferInit<vk::raii::Pipeline> m_vk_pipeline;
+        core::DeferInit<vk::raii::PipelineLayout> m_vk_pipeline_layout;
+
+      private:
+        Pipeline() = delete;
+    };
+} // namespace stormkit::gpu
+
+////////////////////////////////////////////////////////////////////
+///                      IMPLEMENTATION                          ///
+////////////////////////////////////////////////////////////////////
+
+namespace stormkit::gpu {
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto PipelineCache::vkHandle() const noexcept -> const vk::raii::PipelineCache& {
+        return m_vk_pipeline_cache;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Pipeline::baked() const noexcept -> bool {
+        return m_is_baked;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Pipeline::vkHandle() const noexcept -> const vk::raii::Pipeline& {
+        return m_vk_pipeline;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto Pipeline::vkLayout() const noexcept -> const vk::raii::PipelineLayout& {
+        return m_vk_pipeline_layout;
+    }
+} // namespace stormkit::gpu

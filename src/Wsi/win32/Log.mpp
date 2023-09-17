@@ -1,0 +1,16 @@
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+export module stormkit.Wsi:Win32.Log;
+
+import std;
+
+import stormkit.Core;
+import stormkit.Log;
+
+import <stormkit/Log/LogMacro.hpp>;
+
+export namespace stormkit::wsi::win32 {
+    IN_MODULE_LOGGER("StormKit.Wsi.Win32Backend")
+} // namespace stormkit::wsi::win32

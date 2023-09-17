@@ -2,108 +2,72 @@ name: macOS
 
 on:
   push:
-    branches: [ master, dev ]
+    branches: [ main ]
+    paths-ignore:
+      - '.github/workflows/Archlinux.yml'
+      - '.github/workflows/Windows.yml'
+      - '.github/workflows/Fedora.yml'
+      - '.github/workflows/iOS.yml'
+      - '.github/workflows/Android.yml'
+      - '.github/workflows/Ubuntu.yml'
+      - '.gitignore'
+      - 'LICENSE'
+      - 'README.md'
   pull_request:
-    branches: [ master, dev ]
+    branches: [ main ]
+    paths-ignore:
+      - '.github/workflows/Archlinux.yml'
+      - '.github/workflows/Windows.yml'
+      - '.github/workflows/Fedora.yml'
+      - '.github/workflows/iOS.yml'
+      - '.github/workflows/Android.yml'
+      - '.github/workflows/Ubuntu.yml'
+      - '.gitignore'
+      - 'LICENSE'
+      - 'README.md'
 
 jobs:
   build:
-    name: ${{ matrix.os.name }} ( ${{matrix.os.compiler }} ${{ matrix.library_type }}, ${{ matrix.build_type }} )
-    runs-on: ${{ matrix.os.value }}
+    name: ${{ matrix.os }}-x64 ( ${{ matrix.kind }}-${{ matrix.mode }} )
+
     strategy:
       fail-fast: false
       matrix:
-        os:
-        #- {
-        #   name: "macOS 11",
-        #   compiler: "LLVM 13",
-        #   value: macos-11.0,
-        #   triplet: "x64-macos"
-        #}
+        os: [macOS-latest]
+        kind: [static, shared]
+        mode: [release, debug, asan]
 
-        - {
-           name: "macOS 10.15",
-           compiler: "LLVM 13",
-           value: macos-10.15,
-           triplet: "x64-osx"
-        }
-            
-        library_type: [static, shared]
-        build_type: [release, debug]
-    env:
-      VCPKG_FEATURE_FLAGS: "binarycaching"
+    runs-on: ${{ matrix.os }}
+
+    concurrency:
+      group: ${{ github.ref }}-${{ github.base_ref }}-${{ github.head_ref }}-macOS-${{ matrix.kind }}-${{ matrix.mode }}
+
     steps:
-        - name: Checkout
-          uses: actions/checkout@v2
-          with:
-            lfs: true
-            fetch-depth: 0
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
-        - name: Install python
-          uses: actions/setup-python@v2
-          with:
-            python-version: '3.9'
-            architecture: 'x64'
+      - name: Install xmake
+        uses: xmake-io/github-action-setup-xmake@v1
+        with:
+          xmake-version: branch@dev
 
-        - name: Install meson and ninja
-          run: |
-            pip3 install meson ninja
+      - name: Update xmake repository
+        run: xmake repo --update
 
-        - name: Install brew dependencies
-          run: |
-            brew update
-            brew tap apenngrace/homebrew-vulkan
-            brew install vulkan-sdk wget p7zip
+      - name: Configure & Build
+        id: build
+        run: |
+          xmake f -D --yes -m ${{ matrix.mode }} -k ${{ matrix.kind }}
+          xmake b -D
 
-        - name: Retrieve and Extract LLVM13
-          run: |
-            wget -q https://gitlab.com/Arthapz/llvm13-macos/-/raw/master/LLVM13.7z?inline=false -O ${{ runner.workspace }}/LLVM13.7z
-            7z x ${{ runner.workspace }}/LLVM13.7z
-            ls ${{ runner.workspace }}
+      - name: Installation
+        run: xmake install -D --installdir="${{ runner.workspace }}/output"
 
-        - name: Configure native file
-          run: |
-            cp ${{ runner.workspace }}/StormKit/macos-llvm13-clang.ini.sample ${{ runner.workspace }}/StormKit/macos-llvm13-clang.ini
-            sed -i -e 's|%TOOLCHAIN_PATH%|${{ runner.workspace }}/StormKit/LLVM13.0.0git.xctoolchain/usr|g' ${{ runner.workspace }}/StormKit/macos-llvm13-clang.ini
-
-        - uses: lukka/get-cmake@latest
-        - name: Setup vcpkg
-          uses: lukka/run-vcpkg@v6
-          id: runvcpkg
-          with:
-            vcpkgArguments: libpng libjpeg-turbo glm gli fmt rapidjson range-v3 ms-gsl
-            vcpkgDirectory: ${{ runner.workspace }}/vcpkg/
-            vcpkgGitCommitId: fddf97411017bfcd7dd988d754b25efc3d6a1c3e
-            vcpkgTriplet: ${{ matrix.os.triplet }}
-            
-        - name: Configure & Build
-          id: confandbuild
-          run: |
-            meson builddir  \
-              --native-file ${{ runner.workspace }}/StormKit/macos-llvm13-clang.ini \
-              -Denable_examples=true \
-              -Dexamples_data_dir="../share/" \
-              -Dbuildtype=${{ matrix.build_type }} \
-              -Dlibrary_type=${{ matrix.library_type }} \
-              --cmake-prefix-path=${{ runner.workspace }}/vcpkg/installed/${{ matrix.os.triplet }}/ \
-              --prefix=${{ runner.workspace }}/StormKit_Output
-            ninja -C builddir -j7
-
-        - uses: actions/upload-artifact@v1
-          if: failure()
-          with:
-            name: fail-${{ matrix.os.name }}-{{ matrix.library_type }}-${{ matrix.build_type }}-meson-log
-            path: builddir/meson-logs/testlog.txt
-
-        - name: Install
-          id: install
-          run: |
-            ninja -C builddir install -j7
-
-        - name: Upload artifacts
-          id: upload
-          uses: actions/upload-artifact@v1
-          with:
-            name: ${{ matrix.os.name }}-${{ matrix.os.compiler }}-${{ matrix.library_type }}-${{ matrix.build_type }}
-            path: ${{ runner.workspace }}/StormKit_Output
- 
+      - name: Upload artifacts
+        id: upload
+        uses: actions/upload-artifact@v1
+        with:
+          name: ${{ matrix.os }}-x64-${{ matrix.kind }}-${{ matrix.mode }}
+          path: ${{ runner.workspace }}/output

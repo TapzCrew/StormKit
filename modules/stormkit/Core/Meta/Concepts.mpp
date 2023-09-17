@@ -1,0 +1,140 @@
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+export module stormkit.Core:Meta.Concepts;
+
+import std;
+
+namespace stormkit::core {
+    namespace details {
+        template<class T>
+        concept IsBooleanTestable = std::convertible_to<T, bool>;
+    } // namespace details
+
+    export {
+        template<class T>
+        concept IsHashable = requires(std::remove_cvref_t<T>& a) {
+            { std::hash<std::remove_cvref_t<T>> {}(a) } -> std::convertible_to<std::size_t>;
+        };
+
+        template<class T>
+        concept IsFancyPointer = requires(T& a) {
+            a.operator->();
+            a.operator*();
+            a.get();
+        };
+
+        template<class T>
+        concept IsRawPointer = std::is_pointer_v<T>;
+
+        template<class T>
+        concept IsPointer = IsRawPointer<T> or IsFancyPointer<T>;
+
+        // clang-format off
+        template<class T>
+        concept IsNotPointer = not IsPointer<T>;
+        // clang-format on
+
+        template<class T>
+        concept IsLValueReference = std::is_lvalue_reference_v<T>;
+
+        template<class T>
+        concept IsRValueReference = std::is_rvalue_reference_v<T>;
+
+        template<class T>
+        concept IsReference = IsLValueReference<T> or IsRValueReference<T>;
+
+        // clang-format off
+        template<class T>
+        concept IsNotReference = not IsReference<T>;
+        // clang-format on
+
+        template<class T>
+        concept IsIndirection = IsReference<T> or IsPointer<T>;
+
+        // clang-format off
+        template<class T>
+        concept IsNotIndirection = not IsIndirection<T>;
+        // clang-format on
+
+        // clang-format off
+        template<class T>
+        concept IsArithmetic = (std::integral<std::remove_cvref_t<T>>
+                                    or std::floating_point<std::remove_cvref_t<T>>)
+                                   and not IsPointer<T>;
+        // clang-format on
+
+        template<class T>
+        concept IsPreIncrementable = requires(T& a) { a.operator--(); };
+
+        template<class T, class U>
+        concept Is = std::same_as<std::remove_cvref_t<T>, std::remove_cvref_t<U>> or
+                     std::derived_from<std::remove_cvref_t<T>, std::remove_cvref_t<U>>;
+
+        template<class T, class... U>
+        concept IsOneOf = (Is<T, U> or ...);
+
+        // clang-format off
+        template<class T, class U>
+        concept IsNot = not Is<T, U>;
+        // clang-format on
+
+        template<class T>
+        concept IsStringLike = std::convertible_to<T, std::string_view>;
+
+        template<class T>
+        concept IsBooleanTestable = details::IsBooleanTestable<T> && requires(T&& t) {
+            { not std::forward<T>(t) } -> details::IsBooleanTestable;
+        };
+
+        template<class T, class... Args>
+        concept IsPredicate = std::predicate<T, Args...>;
+
+        template<class T, class U>
+        concept IsUnaryPredicate = IsPredicate<T, const U&>;
+
+        template<class T, class U>
+        concept IsBinaryPredicate = IsPredicate<T, const U&, const U&>;
+
+        template<class T, class U>
+        concept IsHashFunc = std::regular_invocable<T, U> and
+                             std::convertible_to<std::invoke_result_t<T, U>, std::uint64_t>;
+
+        // doesn't work atm
+        template<class T, class CharT>
+        concept IsFormattable =
+            true; // requires(std::formatter<T, CharT> f, T val) { f.format("{}", val); };
+
+        template<class T>
+        concept IsCharacter =
+            IsOneOf<T, char, signed char, unsigned char, wchar_t, char8_t, char16_t, char32_t>;
+
+        template<class T>
+        concept IsColorComponent = Is<T, float> or Is<T, std::uint8_t>;
+
+        template<class T>
+        concept IsByte = Is<T, std::byte>;
+
+        // clang-format off
+        template<class T>
+        concept IsNotByte = not IsByte<T>;
+        // clang-format on
+
+        // clang-format off
+        template<class T>
+        concept IsEnumeration = std::is_enum_v<T> and not Is<T, std::byte>;
+        // clang-format on
+
+        template<class T>
+        concept IsConst = std::is_const_v<T>;
+
+        // clang-format off
+        template<class T>
+        concept IsNotConst = std::is_const_v<T>;
+        // clang-format on
+    } // namespace stormkit::core
+
+#ifndef STORMKIT_NO_MODULES
+}
+#endif
