@@ -10,25 +10,20 @@ import stormkit.Core;
 
 import <stormkit/Core/PlatformMacro.hpp>;
 
-import :Event;
+import :Types;
 import :Window;
 
 export namespace stormkit::wsi {
-    class STORMKIT_API EventHandler {
-      public:
+    struct STORMKIT_API EventHandler {
         using Callback = std::function<void(const Event&)>;
 
-        explicit EventHandler(Window& window);
-
-        auto update() -> void;
+        auto update(Window& window) -> void;
 
         auto setCallback(EventType event_type, Callback callback) -> void;
         auto setCallbacks(std::vector<std::pair<EventType, Callback>> callbacks) -> void;
         auto clearCallbacks(EventType event_type) -> void;
 
       private:
-        core::NakedRef<Window> m_window;
-
         core::HashMap<EventType, std::vector<Callback>> m_callback;
     };
 } // namespace stormkit::wsi
@@ -38,6 +33,20 @@ export namespace stormkit::wsi {
 ////////////////////////////////////////////////////////////////////
 
 namespace stormkit::wsi {
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto EventHandler::update(Window& window) -> void {
+        auto event = Event {};
+
+        while (window.pollEvent(event)) {
+            const auto event_type = event.type;
+
+            if (m_callback.find(event_type) == std::ranges::cend(m_callback)) continue;
+
+            for (auto&& callback : m_callback.at(event_type)) callback(event);
+        }
+    }
+
     /////////////////////////////////////
     /////////////////////////////////////
     inline auto EventHandler::setCallback(EventType event_type, Callback callback) -> void {

@@ -13,6 +13,7 @@ import std;
 import stormkit.Core;
 
 import :Window;
+import :Types;
 
 #if defined(STORMKIT_OS_WINDOWS)
 import :Win32.WindowImpl;

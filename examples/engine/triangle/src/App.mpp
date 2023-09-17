@@ -1,0 +1,43 @@
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+export module App;
+
+import std;
+
+import stormkit.Core;
+import stormkit.Engine;
+
+import Constants;
+
+export class App: public stormkit::core::App {
+  public:
+    App();
+
+    auto run(std::span<const std::string_view> args) -> stormkit::core::Int override;
+
+  private:
+    auto doInitEngine() noexcept -> void;
+
+    stormkit::core::DeferInit<stormkit::engine::Application> m_application;
+
+    bool m_fullscreen_enabled = false;
+
+    // std::unique_ptr<stormkit::gpu::Surface> m_surface;
+    // const stormkit::gpu::Queue *m_queue = nullptr;
+    // std::vector<stormkit::gpu::ImageView> m_surface_views;
+
+    // std::unique_ptr<stormkit::gpu::Shader> m_vertex_shader;
+    // std::unique_ptr<stormkit::gpu::Shader> m_fragment_shader;
+
+    // std::unique_ptr<stormkit::gpu::RenderPass> m_render_pass;
+    // std::unique_ptr<stormkit::gpu::RasterPipeline> m_pipeline;
+
+    // struct Frame {
+    // stormkit::gpu::FrameBuffer framebuffer;
+    // stormkit::gpu::CommandBuffer commandbuffer;
+    // };
+
+    // std::vector<Frame> m_frame_datas;
+};

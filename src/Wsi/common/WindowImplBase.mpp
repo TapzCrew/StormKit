@@ -8,9 +8,6 @@ import std;
 
 import stormkit.Core;
 
-import :Event;
-import :Key;
-import :MouseButton;
 import :Types;
 
 export namespace stormkit::wsi::common {

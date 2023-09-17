@@ -11,9 +11,7 @@ import stormkit.Core;
 namespace stormkit::entities {
     /////////////////////////////////////
     /////////////////////////////////////
-    EntityManager::EntityManager() {
-        m_message_bus = std::make_unique<MessageBus>();
-    }
+    EntityManager::EntityManager() = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
@@ -41,7 +39,7 @@ namespace stormkit::entities {
 
         m_added_entities.emplace(entity);
         m_updated_entities.emplace(entity);
-        m_message_bus->push(Message { ADDED_ENTITY_MESSAGE_ID, { entity } });
+        m_message_bus.push(Message { ADDED_ENTITY_MESSAGE_ID, { entity } });
 
         return entity;
     }
@@ -53,7 +51,7 @@ namespace stormkit::entities {
 
         if (hasEntity(entity)) {
             m_removed_entities.emplace(entity);
-            m_message_bus->push(Message { REMOVED_ENTITY_MESSAGE_ID, { entity } });
+            m_message_bus.push(Message { REMOVED_ENTITY_MESSAGE_ID, { entity } });
         }
     }
 
@@ -62,7 +60,7 @@ namespace stormkit::entities {
     auto EntityManager::destroyAllEntities() -> void {
         for (auto&& e : entities()) {
             m_removed_entities.emplace(e);
-            m_message_bus->push(Message { REMOVED_ENTITY_MESSAGE_ID, { e } });
+            m_message_bus.push(Message { REMOVED_ENTITY_MESSAGE_ID, { e } });
         }
     }
 
@@ -117,9 +115,9 @@ namespace stormkit::entities {
                               [this](auto&& entity) { purposeToSystems(entity); });
         m_updated_entities.clear();
 
-        while (!m_message_bus->empty()) {
-            for (auto& system : m_systems) system->onMessageReceived(m_message_bus->top());
-            m_message_bus->pop();
+        while (!m_message_bus.empty()) {
+            for (auto& system : m_systems) system->onMessageReceived(m_message_bus.top());
+            m_message_bus.pop();
         }
 
         for (auto& system : m_systems) system->preUpdate();

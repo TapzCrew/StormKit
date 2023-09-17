@@ -27,12 +27,7 @@ import <stormkit/Core/MemoryMacro.hpp>;
 
 import stormkit.Core;
 
-import :Monitor;
-import :WindowStyle;
-import :Event;
-import :MouseButton;
 import :Types;
-import :Key;
 
 import :Common.WindowImplBase;
 import :Linux.Common.XKB;

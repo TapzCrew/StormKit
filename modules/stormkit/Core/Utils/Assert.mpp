@@ -68,10 +68,6 @@ export namespace stormkit::core {
 ///                      IMPLEMENTATION                          ///
 ////////////////////////////////////////////////////////////////////
 
-#ifndef EXIT_FAILURE
-constexpr inline auto EXIT_FAILURE = 1;
-#endif
-
 namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
@@ -109,14 +105,14 @@ namespace stormkit::core {
 
                 std::println(stderr, "================= CALLSTACK =================");
 
-#ifndef STORMKIT_COMPILER_CLANG
+#if defined(__cpp_lib_stacktrace) and __cpp_lib_stacktrace >= 202011L
                 auto st = std::stacktrace::current();
                 std::println(stderr, "{}", std::to_string(st));
 #else
                 std::println(stderr, "No stacktrace support");
 #endif
 
-                std::exit(EXIT_FAILURE);
+                std::terminate();
             }
         }
     }

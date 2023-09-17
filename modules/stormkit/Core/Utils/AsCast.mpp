@@ -15,7 +15,10 @@ export namespace stormkit::core {
     [[nodiscard]] constexpr auto is(const std::variant<Args...>& variant) noexcept -> bool;
 
     template<IsNotIndirection To>
-    [[nodiscard]] constexpr auto is(IsIndirection auto&& value) noexcept -> bool;
+    [[nodiscard]] constexpr auto is(IsPointer auto&& value) noexcept -> bool;
+
+    template<IsNotIndirection To>
+    [[nodiscard]] constexpr auto is(IsLValueReference auto&& value) noexcept -> bool;
 
     template<IsNotReference To, typename... Args>
     [[nodiscard]] constexpr auto as(std::variant<Args...>& variant) noexcept -> auto&&;
@@ -103,10 +106,17 @@ namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
     template<IsNotIndirection To>
-    constexpr auto is(IsIndirection auto&& value) noexcept -> bool {
+    constexpr auto is(IsPointer auto&& value) noexcept -> bool {
         using Type = std::conditional_t<IsConst<decltype(value)>, const To *, To *>;
 
         return dynamic_cast<Type>(std::to_address(value));
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<IsNotIndirection To>
+    constexpr auto is(IsLValueReference auto&& value) noexcept -> bool {
+        return is<To>(&value);
     }
 
     /////////////////////////////////////

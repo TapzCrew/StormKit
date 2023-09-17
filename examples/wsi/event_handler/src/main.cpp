@@ -34,7 +34,7 @@ auto main(std::span<const std::string_view> args) -> int {
     auto fullscreen        = false;
     auto toggle_fullscreen = false;
 
-    auto event_handler = wsi::EventHandler { window };
+    auto event_handler = wsi::EventHandler {};
     event_handler.setCallbacks(
         { { wsi::EventType::Closed,
             [&]([[maybe_unused]] const wsi::Event& event) { window.close(); } },
@@ -89,7 +89,7 @@ auto main(std::span<const std::string_view> args) -> int {
            } } });
 
     while (window.isOpen()) {
-        event_handler.update();
+        event_handler.update(window);
 
         logger.flush();
 

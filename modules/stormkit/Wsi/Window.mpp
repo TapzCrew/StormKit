@@ -10,9 +10,6 @@ import stormkit.Core;
 
 import <stormkit/Core/PlatformMacro.hpp>;
 
-import :Event;
-import :Monitor;
-import :WindowStyle;
 import :Types;
 
 namespace stormkit::wsi {

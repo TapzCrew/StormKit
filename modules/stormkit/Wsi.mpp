@@ -4,11 +4,6 @@
 
 export module stormkit.Wsi;
 
-export import :Event;
 export import :EventHandler;
-export import :Key;
-export import :Monitor;
-export import :MouseButton;
 export import :Types;
 export import :Window;
-export import :WindowStyle;

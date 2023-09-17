@@ -16,6 +16,9 @@ export namespace stormkit::core {
         DeferInit();
         ~DeferInit();
 
+        DeferInit(const DeferInit& other)                    = delete;
+        auto operator=(const DeferInit& other) -> DeferInit& = delete;
+
         DeferInit(DeferInit&& other) noexcept(noexcept(std::is_nothrow_move_constructible_v<T>));
         auto operator=(DeferInit&& other) noexcept(noexcept(std::is_nothrow_move_assignable_v<T>))
             -> DeferInit&;
@@ -29,7 +32,8 @@ export namespace stormkit::core {
         auto constructWithNarrowing(Args&&...args) noexcept(
             noexcept(std::is_nothrow_constructible_v<T, Args...>)) -> void;
 
-        auto operator=(T&& value) noexcept(std::is_nothrow_move_constructible_v<T>) -> void;
+        auto operator=(T&& value) noexcept(noexcept(std::is_nothrow_move_constructible_v<T>))
+            -> void;
 
         [[nodiscard]] constexpr auto get(this auto&& self) noexcept -> decltype(auto);
         [[nodiscard]] constexpr auto operator->(this auto&& self) noexcept -> decltype(auto);
@@ -43,6 +47,7 @@ export namespace stormkit::core {
         auto reset() noexcept -> void;
 
         bool m_initialized = false;
+
         alignas(T) std::array<std::byte, sizeof(T)> m_data;
     };
 } // namespace stormkit::core
@@ -68,13 +73,32 @@ namespace stormkit::core {
     ////////////////////////////////////////
     template<typename T>
     inline DeferInit<T>::DeferInit(DeferInit&& other) noexcept(
-        noexcept(std::is_nothrow_move_constructible_v<T>)) = default;
+        noexcept(std::is_nothrow_move_constructible_v<T>)) {
+        reset();
+
+        if (other.m_initialized) [[likely]]
+            new (std::data(m_data)) T { std::move(other.get()) };
+
+        m_initialized = std::exchange(other.m_initialized, false);
+    }
 
     ////////////////////////////////////////
     ////////////////////////////////////////
     template<typename T>
     inline auto DeferInit<T>::operator=(DeferInit&& other) noexcept(
-        noexcept(std::is_nothrow_move_assignable_v<T>)) -> DeferInit& = default;
+        noexcept(std::is_nothrow_move_assignable_v<T>)) -> DeferInit& {
+        if (&other == this) [[unlikely]]
+            return *this;
+
+        reset();
+
+        if (other.m_initialized) [[likely]]
+            new (std::data(m_data)) T { std::move(other.get()) };
+
+        m_initialized = std::exchange(other.m_initialized, false);
+
+        return *this;
+    }
 
     ////////////////////////////////////////
     ////////////////////////////////////////
@@ -82,6 +106,8 @@ namespace stormkit::core {
     template<typename... Args>
     auto DeferInit<T>::construct(Args&&...args) noexcept(
         noexcept(std::is_nothrow_constructible_v<T, Args...>)) -> void {
+        reset();
+
         new (std::data(m_data)) T { std::forward<Args>(args)... };
 
         m_initialized = true;
@@ -93,6 +119,8 @@ namespace stormkit::core {
     template<typename... Args>
     auto DeferInit<T>::constructWithNarrowing(Args&&...args) noexcept(
         noexcept(std::is_nothrow_constructible_v<T, Args...>)) -> void {
+        reset();
+
         new (std::data(m_data)) T(std::forward<Args>(args)...);
 
         m_initialized = true;
@@ -101,8 +129,8 @@ namespace stormkit::core {
     ////////////////////////////////////////
     ////////////////////////////////////////
     template<typename T>
-    auto DeferInit<T>::operator=(T&& value) noexcept(std::is_nothrow_move_constructible_v<T>)
-        -> void {
+    auto DeferInit<T>::operator=(T&& value) noexcept(
+        noexcept(std::is_nothrow_move_constructible_v<T>)) -> void {
         reset();
 
         new (std::data(m_data)) T { std::move(value) };

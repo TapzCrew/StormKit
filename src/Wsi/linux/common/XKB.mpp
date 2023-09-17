@@ -17,7 +17,7 @@ import stormkit.Log;
 import <stormkit/Core/MemoryMacro.hpp>;
 import <stormkit/Log/LogMacro.hpp>;
 
-import :Key;
+import :Types;
 
 #define STORMKIT_XKB_SCOPED(name, type)                                \
     struct name##Scoped {                                              \

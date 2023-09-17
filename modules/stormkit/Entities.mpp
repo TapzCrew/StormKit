@@ -162,28 +162,28 @@ export namespace stormkit::entities {
         template<IsComponentTypeOrFail T>
         auto entitiesWithComponent() const -> std::vector<Entity>;
 
-        template<class Self, IsComponentTypeOrFail T>
+        template<IsComponentTypeOrFail T, class Self>
         auto getComponent(this Self& self, Entity entity) -> core::LikeType<Self, T&>;
 
         template<class Self>
         auto components(this Self& self, Entity entity)
             -> std::vector<core::NakedRef<core::LikeType<Self, Component>>>;
 
-        template<class Self, IsComponentTypeOrFail T>
+        template<IsComponentTypeOrFail T, class Self>
         auto componentsOfType(this Self& self) noexcept
             -> std::vector<core::NakedRef<core::LikeType<Self, T>>>;
 
-        template<std::derived_from<System> T, typename... Args>
+        template<core::Is<System> T, typename... Args>
         auto addSystem(Args&&...args) -> T&;
 
-        template<std::derived_from<System> T>
+        template<core::Is<System> T>
         auto hasSystem() const noexcept -> bool;
 
         template<class Self>
         auto systems(this Self& self) noexcept
             -> std::vector<core::NakedRef<core::LikeType<Self, System>>>;
 
-        template<class Self, std::derived_from<System> T>
+        template<core::Is<System> T, class Self>
         auto getSystem(this Self& self) noexcept -> core::LikeType<Self, T&>;
 
         auto step(core::Secondf delta) -> void;
@@ -218,7 +218,7 @@ export namespace stormkit::entities {
         std::set<std::unique_ptr<System>, System::Predicate> m_systems;
         core::HashMap<ComponentKey, std::unique_ptr<Component>> m_components;
 
-        std::unique_ptr<MessageBus> m_message_bus;
+        MessageBus m_message_bus;
     };
 } // namespace stormkit::entities
 
@@ -350,7 +350,7 @@ namespace stormkit::entities {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    template<class Self, IsComponentTypeOrFail T>
+    template<IsComponentTypeOrFail T, class Self>
     auto EntityManager::getComponent(this Self& self, Entity entity) -> core::LikeType<Self, T&> {
         core::expects(self.template hasComponent<T>(entity));
         core::expects(self.hasEntity(entity));
@@ -378,7 +378,7 @@ namespace stormkit::entities {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    template<class Self, IsComponentTypeOrFail T>
+    template<IsComponentTypeOrFail T, class Self>
     auto EntityManager::componentsOfType(this Self& self) noexcept
         -> std::vector<core::NakedRef<core::LikeType<Self, T>>> {
         return self.m_entities |
@@ -391,7 +391,7 @@ namespace stormkit::entities {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    template<std::derived_from<System> T, typename... Args>
+    template<core::Is<System> T, typename... Args>
     auto EntityManager::addSystem(Args&&...args) -> T& {
         m_systems.emplace(std::make_unique<T>(std::forward<Args>(args)..., *this));
 
@@ -404,7 +404,7 @@ namespace stormkit::entities {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    template<std::derived_from<System> T>
+    template<core::Is<System> T>
     auto EntityManager::hasSystem() const noexcept -> bool {
         for (auto& system : m_systems) {
             if (auto system_ptr = dynamic_cast<const T *>(system.get()); system_ptr != nullptr)
@@ -427,12 +427,14 @@ namespace stormkit::entities {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    template<class Self, std::derived_from<System> T>
+    template<core::Is<System> T, class Self>
     auto EntityManager::getSystem(this Self& self) noexcept -> core::LikeType<Self, T&> {
         core::expects(self.template hasSystem<T>());
 
-        auto it = std::find_first_of(self.systems(),
-                                     [](auto&& system) { return core::is<T>(system.get()); });
+        auto&& systems = self.systems();
+
+        auto it =
+            std::ranges::find_if(systems, [](auto&& system) { return core::is<T>(system.get()); });
 
         return core::as<T&>(it->get());
     }

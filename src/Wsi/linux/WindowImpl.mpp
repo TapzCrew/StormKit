@@ -8,10 +8,7 @@ import std;
 
 import stormkit.Core;
 
-import :Event;
-import :Monitor;
 import :Window;
-import :WindowStyle;
 import :Types;
 
 import :Common.WindowImplBase;
@@ -73,11 +70,11 @@ export namespace stormkit::wsi::linux {
       private:
         struct Sentinelle {};
 
-        using BackendWindowImpl = std::variant<x11::WindowImpl, wayland::WindowImpl, Sentinelle>;
+        using BackendWindowImpl = std::variant<x11::WindowImpl, wayland::WindowImpl>;
 
         WM m_wm;
 
-        BackendWindowImpl m_impl;
+        core::DeferInit<BackendWindowImpl> m_impl;
     };
 } // namespace stormkit::wsi::linux
 
@@ -86,14 +83,14 @@ export namespace stormkit::wsi::linux {
 ////////////////////////////////////////////////////////////////////
 
 #define CASE_DO(case_, namespace_, work) \
-    case case_: core::as<namespace_::WindowImpl>(m_impl).work; break
+    case case_: core::as<namespace_::WindowImpl>(m_impl.get()).work; break
 #define CASE_DO_RETURN(case_, namespace_, work) \
-    case case_: return core::as<namespace_::WindowImpl>(m_impl).work
+    case case_: return core::as<namespace_::WindowImpl>(m_impl.get()).work
 
 namespace stormkit::wsi::linux {
     /////////////////////////////////////
     /////////////////////////////////////
-    inline WindowImpl::WindowImpl(WM wm) : m_wm { wm }, m_impl { Sentinelle {} } {
+    inline WindowImpl::WindowImpl(WM wm) : m_wm { wm } {
         if (m_wm == WM::X11) m_impl = x11::WindowImpl {};
         else if (m_wm == WM::Wayland)
             m_impl = wayland::WindowImpl {};
@@ -109,7 +106,7 @@ namespace stormkit::wsi::linux {
                                   std::string title,
                                   const core::math::ExtentU& extent,
                                   WindowStyle style)
-        : m_wm { wm }, m_impl { Sentinelle {} } {
+        : m_wm { wm } {
         if (m_wm == WM::X11) m_impl = x11::WindowImpl { std::move(title), extent, style };
         else if (m_wm == WM::Wayland)
             m_impl = wayland::WindowImpl { title, extent, style };

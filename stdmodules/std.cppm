@@ -9,8 +9,6 @@
 
 module;
 
-#include <__config>
-
 // TODO MODULES This could be generated
 
 // The headers of Table 24: C++ library headers [tab:headers.cpp]
@@ -104,49 +102,49 @@ module;
 // *** Headers disabled by a feature ***
 
 #ifndef _LIBCPP_HAS_NO_LOCALIZATION
-#  include <clocale>
-#  include <codecvt>
-#  include <fstream>
-#  include <iomanip>
-#  include <ios>
-#  include <iostream>
-#  include <istream>
-#  include <locale>
-#  include <ostream>
-#  include <regex>
-#  include <sstream>
-#  include <streambuf>
-#  include <strstream>
+    #include <clocale>
+    #include <codecvt>
+    #include <fstream>
+    #include <iomanip>
+    #include <ios>
+    #include <iostream>
+    #include <istream>
+    #include <locale>
+    #include <ostream>
+    #include <regex>
+    #include <sstream>
+    #include <streambuf>
+    #include <strstream>
 #endif // _LIBCPP_HAS_NO_LOCALIZATION
 #ifndef _LIBCPP_HAS_NO_WIDE_CHARACTERS
-#  include <cwchar>
-#  include <cwctype>
+    #include <cwchar>
+    #include <cwctype>
 #endif // _LIBCPP_HAS_NO_WIDE_CHARACTERS
 
 // *** Headers not yet available ***
 #if __has_include(<generator>)
-#  error "include <generator> unconditionally"
-#  include <generator>
+    #error "include <generator> unconditionally"
+    #include <generator>
 #endif //   __has_include(<generator>)
 #if __has_include(<hazard_pointer>)
-#  error "include <hazard_pointer> unconditionally"
-#  include <hazard_pointer>
+    #error "include <hazard_pointer> unconditionally"
+    #include <hazard_pointer>
 #endif //   __has_include(<hazard_pointer>)
 #if __has_include(<flat_map>)
-#  error "include <flat_map> unconditionally"
-#  include <flat_map>
+    #error "include <flat_map> unconditionally"
+    #include <flat_map>
 #endif // __has_include(<flat_map>)
 #if __has_include(<flat_set>)
-#  error "include <flat_set> unconditionally"
-#  include <flat_set>
+    #error "include <flat_set> unconditionally"
+    #include <flat_set>
 #endif //  __has_include(<flat_set>)
 #if __has_include(<rcu>)
-#  error "include <rcu> unconditionally"
-#  include <rcu>
+    #error "include <rcu> unconditionally"
+    #include <rcu>
 #endif //   __has_include(<rcu>)
 #if __has_include(<text_encoding>)
-#  error "include <text_encoding> unconditionally"
-#  include <text_encoding>
+    #error "include <text_encoding> unconditionally"
+    #include <text_encoding>
 #endif //   __has_include(<text_encoding>)
 
 export module std;
@@ -261,4 +259,3 @@ export module std;
 #include "std/variant.inc"
 #include "std/vector.inc"
 #include "std/version.inc"
-
