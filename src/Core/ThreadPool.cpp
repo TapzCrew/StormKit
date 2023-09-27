@@ -9,23 +9,6 @@ import std;
 namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
-    ThreadPool::ThreadPool(Int worker_count) : m_worker_count { worker_count } {
-        m_workers.reserve(m_worker_count);
-
-        for (const auto i : range(m_worker_count)) {
-            auto& thread = m_workers.emplace_back([this] { workerMain(); });
-            setThreadName(thread, std::format("StormKit:WorkerThread:{}", i));
-        }
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    ThreadPool::~ThreadPool() {
-        joinAll();
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
     ThreadPool::ThreadPool(ThreadPool&& other) noexcept {
         auto lock = std::scoped_lock { other.m_mutex };
 

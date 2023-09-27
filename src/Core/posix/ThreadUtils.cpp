@@ -28,4 +28,11 @@ namespace stormkit::core {
         const auto id = thread.native_handle();
         details::setThreadName(id, name);
     }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    auto setThreadName(std::jthread& thread, std::string_view name) -> void {
+        const auto id = thread.native_handle();
+        details::setThreadName(id, name);
+    }
 } // namespace stormkit::core
