@@ -27,7 +27,7 @@ export namespace stormkit::core {
     auto utf8ToAscii(std::u8string_view) -> std::string;
 
 #ifdef STORMKIT_COMPILER_MSVC
-    auto toNativeEncoding(std::string_view) -> std::wstring;
+    auto toNativeEncoding(std::string_view) -> std::u16string;
 #else
     auto toNativeEncoding(std::string_view) -> std::u8string;
 #endif
@@ -160,8 +160,8 @@ namespace stormkit::core {
 #ifdef STORMKIT_COMPILER_MSVC
     ////////////////////////////////////////
     ////////////////////////////////////////
-    inline auto toNativeEncoding(std::string_view input) -> std::wstring {
-        return asciiToWide(input);
+    inline auto toNativeEncoding(std::string_view input) -> std::u16string {
+        return asciiToUtf16(input);
     }
 #else
     ////////////////////////////////////////
