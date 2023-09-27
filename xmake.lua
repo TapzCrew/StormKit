@@ -407,7 +407,7 @@ for name, module in pairs(modules) do
 				remove_files(path.join(src_path, plat, "**"))
 				remove_headerfiles(path.join(src_path, plat, "**"))
 			end
-		elseif is_plat("macos") then
+		elseif is_plat("macosx") then
 			for _, plat in ipairs({ "linux", "win32", "iOS", "BSD", "Android" }) do
 				remove_files(path.join(src_path, plat, "**"))
 				remove_headerfiles(path.join(src_path, plat, "**"))
