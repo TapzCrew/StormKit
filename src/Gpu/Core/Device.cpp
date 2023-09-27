@@ -234,8 +234,7 @@ namespace stormkit::gpu {
                                const std::chrono::milliseconds            & timeout) const noexcept
         -> Expected<Result> {
         const auto vk_fences =
-            fences | std::views::transform([](auto&& fence) { return *fence->vkHandle(); }) |
-            std::ranges::to<std::vector>();
+            fences | std::views::transform(toVkHandle()) | std::ranges::to<std::vector>();
 
         return vkCall(*m_vk_device,
                       &vk::raii::Device::waitForFences,
@@ -251,8 +250,7 @@ namespace stormkit::gpu {
     auto Device::resetFences(std::span<const core::NakedRef<const Fence>> fences) const noexcept
         -> Expected<void> {
         const auto vk_fences =
-            fences | std::views::transform([](auto&& fence) { return *fence->vkHandle(); }) |
-            std::ranges::to<std::vector>();
+            fences | std::views::transform(toVkHandle()) | std::ranges::to<std::vector>();
 
         return vkCall(*m_vk_device, &vk::raii::Device::resetFences, vk_fences)
             .transform_error(core::as<Result>());
