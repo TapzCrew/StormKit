@@ -23,20 +23,25 @@
     #define STORMKIT_IMPORT        __declspec(dllimport)
     #define STORMKIT_RESTRICT      __restrict
     #define STORMKIT_PRIVATE
+    #define STORMKIT_FORCE_INLINE __forceinline inline
 #elif defined(__MINGW32__)
     #define STORMKIT_EXPORT __declspec(dllexport)
     #define STORMKIT_IMPORT __declspec(dllimport)
     #define STORMKIT_PRIVATE
+    #define STORMKIT_RESTRICT     __restrict inline
+    #define STORMKIT_FORCE_INLINE [[gnu::always_inline]] inline
 #else
-    #define STORMKIT_IMPORT  [[gnu::visibility("default")]]
-    #define STORMKIT_EXPORT  [[gnu::visibility("default")]]
-    #define STORMKIT_PRIVATE [[gnu::visibility("hidden")]]
+    #define STORMKIT_IMPORT       [[gnu::visibility("default")]]
+    #define STORMKIT_EXPORT       [[gnu::visibility("default")]]
+    #define STORMKIT_PRIVATE      [[gnu::visibility("hidden")]]
+    #define STORMKIT_RESTRICT     __restrict
+    #define STORMKIT_FORCE_INLINE [[gnu::always_inline]] inline
 #endif
 
 #if defined(__MINGW32__)
     #define STORMKIT_COMPILER STORMKIT_COMPILER_MINGW
     #if defined(__clang__)
-        #define STORMKIT_COMPILER_CLANG std::string{"MinGW Clang "} + __clang_version__
+        #define STORMKIT_COMPILER_CLANG std::string { "MinGW Clang " } + __clang_version__
         #define STORMKIT_COMPILER       STORMKIT_COMPILER_CLANG
     #elif defined(__GNUC__) or defined(__GNUG__)
         #define STORMKIT_COMPILER_GCC                                                              \
@@ -45,17 +50,14 @@
         #define STORMKIT_COMPILER_MINGW STORMKIT_COMPILER_GCC
     #endif
     #define STORMKIT_COMPILER_MINGW STORMKIT_COMPILER
-    #define STORMKIT_RESTRICT      __restrict
 #elif defined(__clang__)
-    #define STORMKIT_COMPILER_CLANG std::string{"Clang "} + __clang_version__
+    #define STORMKIT_COMPILER_CLANG std::string { "Clang " } + __clang_version__
     #define STORMKIT_COMPILER       STORMKIT_COMPILER_CLANG
-    #define STORMKIT_RESTRICT      __restrict
 #elif defined(__GNUC__) or defined(__GNUG__)
     #define STORMKIT_COMPILER_GCC                                                              \
         "GCC " + std::to_string(__GNUC__) + "." + std::to_string(__GNUC_MINOR__) + "." + "." + \
             std::to_string(__GNUC_PATCHLEVEL__)
     #define STORMKIT_COMPILER STORMKIT_COMPILER_GCC
-    #define STORMKIT_RESTRICT __restrict
 #endif
 
 #if defined(__SWITCH__)
