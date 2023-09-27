@@ -10,15 +10,17 @@ import stormkit.Core;
 
 import <stormkit/Core/PlatformMacro.hpp>;
 
-import vulkan;
+import :Vulkan;
 
 import :Core.Types;
 import :Core.Device;
-import :Core.Vulkan.Utils;
 
 export namespace stormkit::gpu {
     class Device;
+
     class STORMKIT_API Fence: public DeviceObject {
+        struct Tag {};
+
       public:
         static constexpr auto DEBUG_TYPE = DebugObjectType::Fence;
 
@@ -27,7 +29,7 @@ export namespace stormkit::gpu {
             Unsignaled
         };
 
-        explicit Fence(const Device& device, bool signaled = false);
+        Fence(const Device& device, bool signaled, Tag);
         ~Fence();
 
         Fence(const Fence&)                    = delete;
@@ -36,12 +38,20 @@ export namespace stormkit::gpu {
         Fence(Fence&&) noexcept;
         auto operator=(Fence&&) noexcept -> Fence&;
 
-        auto
-            wait(const std::chrono::milliseconds& wait_for = std::chrono::milliseconds::max()) const
-            -> Result;
-        auto reset() -> Result;
+        [[nodiscard]] static auto create(const Device& device, bool signaled = false) noexcept
+            -> Expected<Fence>;
+        [[nodiscard]] static auto createSignaled(const Device& device) noexcept -> Expected<Fence>;
+        [[nodiscard]] static auto allocate(const Device& device, bool signaled = false) noexcept
+            -> Expected<std::unique_ptr<Fence>>;
+        [[nodiscard]] static auto allocateSignaled(const Device& device) noexcept
+            -> Expected<std::unique_ptr<Fence>>;
 
-        [[nodiscard]] auto status() const noexcept -> Status;
+        [[nodiscard]] auto
+            wait(const std::chrono::milliseconds& wait_for = std::chrono::milliseconds::max()) const
+            -> Expected<Result>;
+        [[nodiscard]] auto reset() -> Expected<void>;
+
+        [[nodiscard]] auto status() const noexcept -> Expected<Status>;
 
         [[nodiscard]] auto vkHandle() const noexcept -> const vk::raii::Fence&;
 
@@ -50,10 +60,12 @@ export namespace stormkit::gpu {
     };
 
     class STORMKIT_API Semaphore: public DeviceObject {
+        struct Tag {};
+
       public:
         static constexpr auto DEBUG_TYPE = DebugObjectType::Semaphore;
 
-        explicit Semaphore(const Device& device);
+        Semaphore(const Device& device, Tag);
         ~Semaphore();
 
         Semaphore(const Semaphore&)                    = delete;
@@ -61,6 +73,10 @@ export namespace stormkit::gpu {
 
         Semaphore(Semaphore&&) noexcept;
         auto operator=(Semaphore&&) noexcept -> Semaphore&;
+
+        [[nodiscard]] auto create(const Device& device) noexcept -> Expected<Semaphore>;
+        [[nodiscard]] auto allocate(const Device& device) noexcept
+            -> Expected<std::unique_ptr<Semaphore>>;
 
         [[nodiscard]] auto vkHandle() const noexcept -> const vk::raii::Semaphore&;
 
@@ -76,42 +92,132 @@ export namespace stormkit::gpu {
 namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto Fence::wait(const std::chrono::milliseconds& wait_for) const -> Result {
+    STORMKIT_FORCE_INLINE Fence::Fence(const Device& device, bool signaled, Tag)
+        : DeviceObject { device } {
+        const auto flags =
+            (signaled) ? vk::FenceCreateFlagBits::eSignaled : vk::FenceCreateFlags {};
+
+        const auto create_info = vk::FenceCreateInfo {}.setFlags(flags);
+
+        vkCreate<vk::raii::Fence>(this->device().vkHandle(), create_info)
+            .transform(core::set(m_vk_fence))
+            .transform_error(core::map(core::as<Result>(), core::throwError()));
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE Fence::~Fence() = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE Fence::Fence(Fence&& other) noexcept = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Fence::operator=(Fence&& other) noexcept -> Fence& = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Fence::status() const noexcept -> Expected<Status> {
+        return vkCall(*m_vk_fence, &vk::raii::Fence::getStatus)
+            .transform([](auto&& status) noexcept {
+                if (status == vk::Result::eSuccess) return Status::Signaled;
+                else if (status == vk::Result::eNotReady)
+                    return Status::Unsignaled;
+
+                std::unreachable();
+            })
+            .transform_error(core::as<Result>());
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Fence::create(const Device& device, bool signaled) noexcept
+        -> Expected<Fence> try {
+        return Fence { device, signaled, Tag {} };
+    } catch (const Result& result) { return std::unexpected(result); }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Fence::createSignaled(const Device& device) noexcept
+        -> Expected<Fence> {
+        return create(device, true);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Fence::allocate(const Device& device, bool signaled) noexcept
+        -> Expected<std::unique_ptr<Fence>> try {
+        return std::make_unique<Fence>(device, signaled, Tag {});
+    } catch (const Result& result) { return std::unexpected(result); }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Fence::allocateSignaled(const Device& device) noexcept
+        -> Expected<std::unique_ptr<Fence>> {
+        return allocate(device, true);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Fence::wait(const std::chrono::milliseconds& wait_for) const
+        -> Expected<Result> {
         return device().waitForFence(*this, wait_for);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto Fence::reset() -> Result {
+    STORMKIT_FORCE_INLINE auto Fence::reset() -> Expected<void> {
         return device().resetFence(*this);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto Fence::vkHandle() const noexcept -> const vk::raii::Fence& {
+    STORMKIT_FORCE_INLINE auto Fence::vkHandle() const noexcept -> const vk::raii::Fence& {
         return m_vk_fence.get();
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto Semaphore::vkHandle() const noexcept -> const vk::raii::Semaphore& {
+    STORMKIT_FORCE_INLINE Semaphore::Semaphore(const Device& device, Tag)
+        : DeviceObject { device } {
+        const auto create_info = vk::SemaphoreCreateInfo {};
+
+        vkCreate<vk::raii::Semaphore>(this->device().vkHandle(), create_info)
+            .transform(core::set(m_vk_semaphore))
+            .transform_error(core::map(core::as<Result>(), core::throwError()));
+    };
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE Semaphore::~Semaphore() = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE Semaphore::Semaphore(Semaphore&& other) noexcept = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Semaphore::operator=(Semaphore&& other) noexcept
+        -> Semaphore& = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Semaphore::create(const Device& device) noexcept
+        -> Expected<Semaphore> try {
+        return Semaphore { device, Tag {} };
+    } catch (const Result& result) { return std::unexpected(result); }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Semaphore::allocate(const Device& device) noexcept
+        -> Expected<std::unique_ptr<Semaphore>> try {
+        return std::make_unique<Semaphore>(device, Tag {});
+    } catch (const Result& result) { return std::unexpected(result); }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Semaphore::vkHandle() const noexcept -> const vk::raii::Semaphore& {
         return m_vk_semaphore.get();
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    inline auto createFence(const Device& device) noexcept -> Expected<Fence> try {
-        return Fence { device };
-    } catch (const vk::SystemError& err) {
-        return std::unexpected { core::as<Result>(err.code().value()) };
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    inline auto allocateFence(const Device& device) noexcept
-        -> Expected<std::unique_ptr<Fence>> try {
-        return std::make_unique<Fence>(device);
-    } catch (const vk::SystemError& err) {
-        return std::unexpected { core::as<Result>(err.code().value()) };
     }
 } // namespace stormkit::gpu

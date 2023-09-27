@@ -1,0 +1,166 @@
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+export module stormkit.Engine:Renderer.RenderSurface;
+
+import std;
+
+import stormkit.Core;
+import stormkit.Wsi;
+
+import <stormkit/Core/PlatformMacro.hpp>;
+
+import vulkan_hpp;
+
+import :Vulkan.Utils;
+
+export namespace stormkit::engine {
+    class RenderSurface final {
+        struct PrivateTag {};
+
+      public:
+        struct Frame {
+            core::UInt32 current_frame;
+            core::UInt32 image_index;
+
+            core::NakedRef<const vk::raii::Semaphore> image_available;
+            core::NakedRef<const vk::raii::Semaphore> render_finished;
+            core::NakedRef<const vk::raii::Fence>     in_flight;
+        };
+
+        RenderSurface(const vk::raii::Instance                       & instance,
+                      const vk::raii::PhysicalDevice                 & physical_device,
+                      const vk::raii::Device                         & device,
+                      std::optional<core::NakedRef<const wsi::Window>> window,
+                      PrivateTag);
+        ~RenderSurface();
+
+        RenderSurface(const RenderSurface&)                    = delete;
+        auto operator=(const RenderSurface&) -> RenderSurface& = delete;
+
+        RenderSurface(RenderSurface&&) noexcept;
+        auto operator=(RenderSurface&&) noexcept -> RenderSurface&;
+
+        static auto create(const vk::raii::Instance                       & instance,
+                           const vk::raii::PhysicalDevice                 & physical_device,
+                           const vk::raii::Device                         & device,
+                           std::optional<core::NakedRef<const wsi::Window>> window) noexcept
+            -> VulkanExpected<RenderSurface>;
+        static auto allocate(const vk::raii::Instance                       & instance,
+                             const vk::raii::PhysicalDevice                 & physical_device,
+                             const vk::raii::Device                         & device,
+                             std::optional<core::NakedRef<const wsi::Window>> window) noexcept
+            -> VulkanExpected<std::unique_ptr<RenderSurface>>;
+
+        [[nodiscard]] auto acquireNextFrame() noexcept -> VulkanExpected<Frame>;
+        [[nodiscard]] auto images() const noexcept -> const std::vector<vk::Image>&;
+        [[nodiscard]] auto present(const Frame& frame) const noexcept -> VulkanExpected<void>;
+
+      private:
+        auto doInit(const vk::raii::Instance&,
+                    const vk::raii::PhysicalDevice&,
+                    const vk::raii::Device&,
+                    std::optional<core::NakedRef<const wsi::Window>>) noexcept
+            -> VulkanExpected<void>;
+        auto doInitSurface(const vk::raii::Instance&,
+                           std::optional<core::NakedRef<const wsi::Window>>) noexcept
+            -> VulkanExpected<core::math::ExtentU>;
+        auto doInitSwapchain(const core::math::ExtentU& extent,
+                             const vk::raii::PhysicalDevice&,
+                             const vk::raii::Device&) noexcept -> VulkanExpected<void>;
+        auto doInitSynchronizationObjects(const vk::raii::Device&) noexcept -> VulkanExpected<void>;
+
+        core::DeferInit<vk::raii::SurfaceKHR>   m_surface;
+        core::DeferInit<vk::raii::SwapchainKHR> m_swapchain;
+
+        std::vector<vk::Image>           m_images;
+        std::vector<vk::raii::Semaphore> m_image_availables;
+        std::vector<vk::raii::Semaphore> m_render_finished;
+        std::vector<vk::raii::Fence>     m_in_flight_fences;
+        core::RangeOffset                m_current_frame = 0;
+    };
+} // namespace stormkit::engine
+
+////////////////////////////////////////////////////////////////////
+///                      IMPLEMENTATION                          ///
+////////////////////////////////////////////////////////////////////
+
+namespace stormkit::engine {
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE RenderSurface::RenderSurface(const vk::raii::Instance      & instance,
+                                        const vk::raii::PhysicalDevice& physical_device,
+                                        const vk::raii::Device        & device,
+                                        std::optional<core::NakedRef<const wsi::Window>> window,
+                                        PrivateTag) {
+        doInit(instance, physical_device, device, std::move(window))
+            .transform_error(core::throwError());
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE RenderSurface::~RenderSurface() = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE RenderSurface::RenderSurface(RenderSurface&&) noexcept = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto RenderSurface::operator=(RenderSurface&&) noexcept -> RenderSurface& = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto
+        RenderSurface::create(const vk::raii::Instance                       & instance,
+                              const vk::raii::PhysicalDevice                 & physical_device,
+                              const vk::raii::Device                         & device,
+                              std::optional<core::NakedRef<const wsi::Window>> window) noexcept
+        -> VulkanExpected<RenderSurface> try {
+        return std::move(
+            RenderSurface { instance, physical_device, device, std::move(window), PrivateTag {} });
+    } catch (vk::Result err) { return std::unexpected { err }; }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto
+        RenderSurface::allocate(const vk::raii::Instance                       & instance,
+                                const vk::raii::PhysicalDevice                 & physical_device,
+                                const vk::raii::Device                         & device,
+                                std::optional<core::NakedRef<const wsi::Window>> window) noexcept
+        -> VulkanExpected<std::unique_ptr<RenderSurface>> try {
+        return std::make_unique<RenderSurface>(instance,
+                                               physical_device,
+                                               device,
+                                               std::move(window),
+                                               PrivateTag {});
+    } catch (vk::Result err) { return std::unexpected { err }; }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto RenderSurface::images() const noexcept
+        -> const std::vector<vk::Image>& {
+        return m_images;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto
+        RenderSurface::doInit(const vk::raii::Instance                       & instance,
+                              const vk::raii::PhysicalDevice                 & physical_device,
+                              const vk::raii::Device                         & device,
+                              std::optional<core::NakedRef<const wsi::Window>> window) noexcept
+        -> VulkanExpected<void> {
+        using namespace std::placeholders;
+        return doInitSurface(instance, std::move(window))
+            .and_then(std::bind(&RenderSurface::doInitSwapchain,
+                                this,
+                                _1,
+                                std::cref(physical_device),
+                                std::cref(device)))
+            .and_then(std::bind_front(&RenderSurface::doInitSynchronizationObjects,
+                                      this,
+                                      std::cref(device)));
+    }
+} // namespace stormkit::engine

@@ -1,0 +1,130 @@
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+export module stormkit.Engine:Renderer.GraphTaskBuilder;
+
+import std;
+
+import stormkit.Core;
+
+import <stormkit/Core/PlatformMacro.hpp>;
+
+import :Renderer.GraphTask;
+import :Renderer.GraphResource;
+import :Renderer.FrameGraphBuilder;
+
+export namespace stormkit::engine {
+    class STORMKIT_API GraphTaskBuilder {
+      public:
+        GraphTaskBuilder(GraphTask& task, FrameGraphBuilder& framegraph) noexcept;
+        ~GraphTaskBuilder() noexcept;
+
+        GraphTaskBuilder(const GraphTaskBuilder&) noexcept;
+        auto operator=(const GraphTaskBuilder&) noexcept -> GraphTaskBuilder&;
+
+        GraphTaskBuilder(GraphTaskBuilder&&) noexcept;
+        auto operator=(GraphTaskBuilder&&) noexcept -> GraphTaskBuilder&;
+
+        template<ResourceDescriptionType Description>
+        auto create(std::string name, Description&& description) -> GraphResource<Description>&;
+
+        template<ResourceDescriptionType Description>
+        auto read(GraphResource<Description>& resource) -> GraphResource<Description>&;
+
+        template<ResourceDescriptionType Description>
+        auto write(GraphResource<Description>& resource) -> GraphResource<Description>&;
+
+        template<ResourceDescriptionType Description>
+        auto readwrite(GraphResource<Description>& resource) -> GraphResource<Description>&;
+
+      private:
+        core::NakedRef<GraphTask> m_task       = nullptr;
+        FrameGraphBuilder        *m_framegraph = nullptr;
+    };
+} // namespace stormkit::engine
+
+////////////////////////////////////////////////////////////////////
+///                      IMPLEMENTATION                          ///
+////////////////////////////////////////////////////////////////////
+
+namespace stormkit::engine {
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE GraphTaskBuilder::GraphTaskBuilder(GraphTask        & task,
+                                                             FrameGraphBuilder& framegraph) noexcept
+        : m_task { task }, m_framegraph { &framegraph } {
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE GraphTaskBuilder::~GraphTaskBuilder() noexcept = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE
+        GraphTaskBuilder::GraphTaskBuilder(const GraphTaskBuilder& other) noexcept = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto GraphTaskBuilder::operator=(const GraphTaskBuilder& other) noexcept
+        -> GraphTaskBuilder& = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE
+        GraphTaskBuilder::GraphTaskBuilder(GraphTaskBuilder&& other) noexcept = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto GraphTaskBuilder::operator=(GraphTaskBuilder&& other) noexcept
+        -> GraphTaskBuilder& = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<ResourceDescriptionType Description>
+    STORMKIT_FORCE_INLINE auto GraphTaskBuilder::create(std::string name, Description&& description)
+        -> GraphResource<Description>& {
+        const auto& resource =
+            m_framegraph->m_resources.emplace(std::move(name),
+                                              m_task->id(),
+                                              std::forward<Description>(description));
+
+        m_task->m_creates.emplace_back(resource->id());
+
+        return core::as<GraphResource<Description>>(*resource);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<ResourceDescriptionType Description>
+    STORMKIT_FORCE_INLINE auto GraphTaskBuilder::read(GraphResource<Description>& resource)
+        -> GraphResource<Description>& {
+        resource.m_readers.emplace_back(m_task->id());
+        m_task->m_reads.emplace_back(resource.id());
+
+        return resource;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<ResourceDescriptionType Description>
+    STORMKIT_FORCE_INLINE auto GraphTaskBuilder::write(GraphResource<Description>& resource)
+        -> GraphResource<Description>& {
+        resource.m_writers.emplace_back(m_task->id());
+        m_task->m_writes.emplace_back(resource.id());
+
+        return resource;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<ResourceDescriptionType Description>
+    STORMKIT_FORCE_INLINE auto GraphTaskBuilder::readwrite(GraphResource<Description>& resource)
+        -> GraphResource<Description>& {
+        [[maybe_unused]] const auto _1 = read(resource);
+        [[maybe_unused]] const auto _2 = write(resource);
+
+        return resource;
+    }
+} // namespace stormkit::engine

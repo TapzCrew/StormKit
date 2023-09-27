@@ -11,12 +11,14 @@ modules = {
 			set_configdir("$(buildir)/.gens/modules/stormkit/Core")
 			add_filegroups("generated", { rootdir = "$(buildir)/.gens/modules" })
 
-			add_configfiles("modules/stormkit/Core/(**.mpp.in)")
+			if not os.exists("$(buildir)/.gens/modules/stormkit/Core/Configuration.mpp") then
+				add_configfiles("modules/stormkit/Core/(**.mpp.in)")
+			end
 
 			add_files("modules/stormkit/Core.mpp")
 			add_files("$(buildir)/.gens/modules/stormkit/Core/Configuration.mpp", { always_added = true })
 
-			on_load(function(target)
+			on_config(function(target)
 				local output, errors = os.iorunv("git", { "rev-parse", "--abbrev-ref", "HEAD" })
 
 				if not errors == "" then
@@ -94,8 +96,24 @@ modules = {
 	engine = {
 		modulename = "Engine",
 		has_headers = true,
-		public_deps = { "stormkit-core", "stormkit-log", "stormkit-wsi", "stormkit-image", "stormkit-entities" },
+		public_deps = {
+			"stormkit-core",
+			"stormkit-log",
+			"stormkit-wsi",
+			"stormkit-image",
+			"stormkit-entities",
+			"stormkit-gpu",
+		},
+	},
+	gpu = {
+		modulename = "Gpu",
+		has_headers = true,
+		public_deps = { "stormkit-core", "stormkit-log", "stormkit-wsi", "stormkit-image" },
 		public_packages = { "vulkan-headers", "vulkan-memory-allocator", "vulkan-memory-allocator-hpp" },
+		private_packages = {
+			"libxcb",
+			"wayland",
+		},
 		defines = {
 			"VK_NO_PROTOTYPES",
 			"VMA_DYNAMIC_VULKAN_FUNCTIONS=1",
@@ -103,22 +121,20 @@ modules = {
 			"VULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1",
 			"VULKAN_HPP_NO_STRUCT_CONSTRUCTORS",
 			"VULKAN_HPP_STORAGE_SHARED",
+			-- "VULKAN_HPP_NO_EXCEPTIONS", uncomment when vk::raii is supported without exceptions
 		},
+		custom = function()
+      remove_files("src/Gpu/Execution/**.cpp")
+      remove_files("modules/stormkit/Gpu/Execution.mpp")
+      remove_files("modules/stormkit/Gpu/Execution/**.mpp")
+			if is_plat("linux") then
+				add_defines("VK_USE_PLATFORM_XCB_KHR")
+				add_defines("VK_USE_PLATFORM_WAYLAND_KHR")
+			elseif is_plat("windows") then
+				add_defines("VK_USE_PLATFORM_WIN32_KHR")
+			end
+		end,
 	},
-	--[[
-    gpu = {
-        modulename = "Gpu",
-        has_headers = true,
-        public_deps = {"stormkit-core", "stormkit-log", "stormkit-wsi", "stormkit-image"},
-        public_packages = {"vulkan-headers", "vulkan-memory-allocator", "vulkan-memory-allocator-hpp"},
-        defines = {"VK_NO_PROTOTYPES", 
-                   "VMA_DYNAMIC_VULKAN_FUNCTIONS=0",
-                   "VMA_STATIC_VULKAN_FUNCTIONS=0",
-                   "VULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1",
-                   "VULKAN_HPP_NO_STRUCT_CONSTRUCTORS",
-                   "VULKAN_HPP_FLAGS_MASK_TYPE_AS_PUBLIC"},
-        cxxflags = {"clang::-fconstexpr-steps=1000000000"}
-    },  ]]
 }
 
 package("vulkan-memory-allocator")
@@ -220,7 +236,8 @@ option("enable_entities", { default = true, category = "root menu/modules" })
 option("enable_log", { default = true, category = "root menu/modules" })
 option("enable_image", { default = true, category = "root menu/modules" })
 option("enable_wsi", { default = true, category = "root menu/modules" })
-option("enable_engine", { default = true, category = "root menu/modules" })
+option("enable_gpu", { default = true, category = "root menu/modules" })
+option("enable_engine", { default = false, category = "root menu/modules" })
 
 ---------------------------- global config ----------------------------
 set_allowedmodes(allowedmodes)
@@ -253,6 +270,8 @@ add_cxflags(
 	{ tools = { "msvc", "clang-cl" } }
 )
 
+add_cxflags("-fstrict-aliasing", "-Wstrict-aliasing", { tools = { "clang", "gcc" } })
+
 add_cxxflags(
 	"-std=c++2b", -- for clangd
 	"-Wno-missing-field-initializers",
@@ -272,14 +291,14 @@ else
 	add_cxxflags("-ggdb3")
 end
 
--- set_fpmodels("fast")
--- add_vectorexts("mmx")
--- add_vectorexts("neon")
--- add_vectorexts("avx", "avx2")
--- add_vectorexts("sse", "sse2", "sse3", "ssse3", "sse4.2")
+set_fpmodels("fast")
+add_vectorexts("mmx")
+add_vectorexts("neon")
+add_vectorexts("avx", "avx2")
+add_vectorexts("sse", "sse2", "sse3", "ssse3", "sse4.2")
 
 -- set_policy("build.optimization.lto", true)
--- set_warnings("allextra", "error")
+set_warnings("all", "pedantic", "extra")
 
 option("libc++")
 set_default(false)
@@ -450,7 +469,7 @@ end
 if has_config("enable_examples") then
 	for name, _ in pairs(modules) do
 		local example_dir = path.join("examples", name)
-		if os.exists(example_dir) then
+		if os.exists(example_dir) and has_config("enable_" .. name) then
 			includes(path.join(example_dir, "**", "xmake.lua"))
 		end
 	end

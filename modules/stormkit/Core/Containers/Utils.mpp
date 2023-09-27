@@ -54,7 +54,6 @@ export namespace stormkit::core {
 
         for (; first2 != last2; ++first2) {
             auto found = false;
-            std::println("AAA");
             for (auto i = first1; i != last1; ++i) {
                 if (std::invoke(pred, std::invoke(proj1, *i), std::invoke(proj2, *first2))) {
                     found = true;

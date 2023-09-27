@@ -12,9 +12,7 @@ import <stormkit/Core/FlagsMacro.hpp>;
 import <stormkit/Core/HashMacro.hpp>;
 import <stormkit/Core/PlatformMacro.hpp>;
 
-import :Core.Vulkan.Utils;
-
-import vulkan;
+import :Vulkan;
 
 export {
     namespace stormkit::gpu {
@@ -754,112 +752,112 @@ export {
             } features;
 
             struct {
-                core::UInt32 max_image_dimension_1D;
-                core::UInt32 max_image_dimension_2D;
-                core::UInt32 max_image_dimension_3D;
-                core::UInt32 max_image_dimension_cube;
-                core::UInt32 max_image_array_layers;
-                core::UInt32 max_texel_buffer_elements;
-                core::UInt32 max_uniform_buffer_range;
+                core::UInt32                max_image_dimension_1D;
+                core::UInt32                max_image_dimension_2D;
+                core::UInt32                max_image_dimension_3D;
+                core::UInt32                max_image_dimension_cube;
+                core::UInt32                max_image_array_layers;
+                core::UInt32                max_texel_buffer_elements;
+                core::UInt32                max_uniform_buffer_range;
                 std::optional<core::UInt32> max_storage_buffer_range;
-                core::UInt32 max_push_constants_size;
+                core::UInt32                max_push_constants_size;
                 std::optional<core::UInt32> max_memory_allocation_count;
                 std::optional<core::UInt32> max_sampler_allocation_count;
                 std::optional<core::UInt64> buffer_image_granularity;
                 std::optional<core::UInt64> sparse_address_space_size;
                 std::optional<core::UInt32> max_bound_descriptor_sets;
-                core::UInt32 max_per_stage_descriptor_samplers;
-                core::UInt32 max_per_stage_descriptor_uniform_buffers;
-                core::UInt32 max_per_stage_descriptor_storage_buffers;
-                core::UInt32 max_per_stage_descriptor_sampled_images;
-                core::UInt32 max_per_stage_descriptor_storage_images;
+                core::UInt32                max_per_stage_descriptor_samplers;
+                core::UInt32                max_per_stage_descriptor_uniform_buffers;
+                core::UInt32                max_per_stage_descriptor_storage_buffers;
+                core::UInt32                max_per_stage_descriptor_sampled_images;
+                core::UInt32                max_per_stage_descriptor_storage_images;
                 std::optional<core::UInt32> max_per_stage_descriptor_input_attachments;
                 std::optional<core::UInt32> max_per_stage_resources;
-                core::UInt32 max_descriptor_set_samplers;
-                core::UInt32 max_descriptor_set_uniform_buffers;
-                core::UInt32 max_descriptor_set_uniform_buffers_dynamic;
-                core::UInt32 max_descriptor_set_storage_buffers;
-                core::UInt32 max_descriptor_set_storage_buffers_dynamic;
-                core::UInt32 max_descriptor_set_sampled_images;
-                core::UInt32 max_descriptor_set_storage_images;
+                core::UInt32                max_descriptor_set_samplers;
+                core::UInt32                max_descriptor_set_uniform_buffers;
+                core::UInt32                max_descriptor_set_uniform_buffers_dynamic;
+                core::UInt32                max_descriptor_set_storage_buffers;
+                core::UInt32                max_descriptor_set_storage_buffers_dynamic;
+                core::UInt32                max_descriptor_set_sampled_images;
+                core::UInt32                max_descriptor_set_storage_images;
                 std::optional<core::UInt32> max_descriptor_set_input_attachments;
-                core::UInt32 max_vertex_input_attributes;
-                core::UInt32 max_vertex_input_bindings;
-                core::UInt32 max_vertex_input_attribute_offset;
+                core::UInt32                max_vertex_input_attributes;
+                core::UInt32                max_vertex_input_bindings;
+                core::UInt32                max_vertex_input_attribute_offset;
                 std::optional<core::UInt32> max_vertex_input_binding_stride;
-                core::UInt32 max_vertex_output_components;
-                core::UInt32 max_tessellation_generation_level;
-                core::UInt32 max_tessellation_patch_size;
-                core::UInt32 max_tessellation_control_per_vertex_input_components;
-                core::UInt32 max_tessellation_control_per_vertex_output_components;
-                core::UInt32 max_tessellation_control_per_patch_output_components;
-                core::UInt32 max_tessellation_control_total_output_components;
-                core::UInt32 max_tessellation_evaluation_input_components;
-                core::UInt32 max_tessellation_evaluation_output_components;
-                core::UInt32 max_geometry_shader_invocations;
-                core::UInt32 max_geometry_input_components;
-                core::UInt32 max_geometry_output_components;
-                core::UInt32 max_geometry_output_vertices;
-                core::UInt32 max_geometry_total_output_components;
-                core::UInt32 max_fragment_input_components;
-                core::UInt32 max_fragment_output_attachments;
-                core::UInt32 max_fragment_dual_src_attachments;
-                core::UInt32 max_fragment_combined_output_resources;
-                core::UInt32 max_compute_shared_memory_size;
+                core::UInt32                max_vertex_output_components;
+                core::UInt32                max_tessellation_generation_level;
+                core::UInt32                max_tessellation_patch_size;
+                core::UInt32                max_tessellation_control_per_vertex_input_components;
+                core::UInt32                max_tessellation_control_per_vertex_output_components;
+                core::UInt32                max_tessellation_control_per_patch_output_components;
+                core::UInt32                max_tessellation_control_total_output_components;
+                core::UInt32                max_tessellation_evaluation_input_components;
+                core::UInt32                max_tessellation_evaluation_output_components;
+                core::UInt32                max_geometry_shader_invocations;
+                core::UInt32                max_geometry_input_components;
+                core::UInt32                max_geometry_output_components;
+                core::UInt32                max_geometry_output_vertices;
+                core::UInt32                max_geometry_total_output_components;
+                core::UInt32                max_fragment_input_components;
+                core::UInt32                max_fragment_output_attachments;
+                core::UInt32                max_fragment_dual_src_attachments;
+                core::UInt32                max_fragment_combined_output_resources;
+                core::UInt32                max_compute_shared_memory_size;
                 std::array<core::UInt32, 3> max_compute_work_group_count;
-                core::UInt32 max_compute_work_group_invocations;
+                core::UInt32                max_compute_work_group_invocations;
                 std::array<core::UInt32, 3> max_compute_work_group_size;
                 std::optional<core::UInt32> sub_pixel_precision_bits;
                 std::optional<core::UInt32> sub_texel_precision_bits;
                 std::optional<core::UInt32> mipmap_precision_bits;
-                core::UInt32 max_draw_indexed_index_value;
+                core::UInt32                max_draw_indexed_index_value;
                 std::optional<core::UInt32> max_draw_indirect_count;
-                float max_sampler_lod_bias;
-                float max_sampler_anisotropy;
-                core::UInt32 max_viewports;
+                float                       max_sampler_lod_bias;
+                float                       max_sampler_anisotropy;
+                core::UInt32                max_viewports;
                 std::array<core::UInt32, 2> max_viewport_dimensions;
-                std::array<float, 2> viewport_bounds_range;
+                std::array<float, 2>        viewport_bounds_range;
                 std::optional<core::UInt32> viewport_sub_pixel_bits;
                 std::optional<core::RangeExtent> min_memory_map_alignment;
-                std::optional<core::UInt64> min_texel_buffer_offset_alignment;
-                core::UInt64 min_uniform_buffer_offset_alignment;
-                core::UInt64 min_storage_buffer_offset_alignment;
-                core::Int32 min_texel_offset;
-                core::UInt32 max_texel_offset;
-                core::Int32 min_texel_gather_offset;
-                core::UInt32 max_texel_gather_offset;
-                float min_interpolation_offset;
-                float max_interpolation_offset;
-                std::optional<core::UInt32> sub_pixel_interpolation_offset_bits;
-                core::UInt32 max_framebuffer_width;
-                core::UInt32 max_framebuffer_height;
-                core::UInt32 max_framebuffer_layers;
-                SampleCountFlag framebuffer_color_sample_counts;
-                SampleCountFlag framebuffer_depth_sample_counts;
-                SampleCountFlag framebuffer_stencil_sample_counts;
-                SampleCountFlag framebuffer_no_attachments_sample_counts;
-                core::UInt32 max_color_attachments;
-                SampleCountFlag sampled_image_color_sample_counts;
-                SampleCountFlag sampled_image_integer_sample_counts;
-                SampleCountFlag sampled_image_depth_sample_counts;
-                SampleCountFlag sampled_image_stencil_sample_counts;
-                SampleCountFlag storage_image_sample_counts;
-                core::UInt32 max_sample_mask_words;
-                bool timestamp_compute_and_engine;
-                float timestamp_period;
-                core::UInt32 max_clip_distances;
-                core::UInt32 max_cull_distances;
-                core::UInt32 max_combined_clip_and_cull_distances;
-                core::UInt32 discrete_queue_priorities;
-                std::array<float, 2> point_size_range;
-                std::array<float, 2> line_width_range;
-                float point_size_granularity;
-                float line_width_granularity;
-                bool strict_lines;
-                bool standard_sample_locations;
-                std::optional<core::UInt64> optimal_buffer_copy_offset_alignment;
-                std::optional<core::UInt64> optimal_buffer_copy_row_pitch_alignment;
-                core::UInt64 non_coherent_atom_size;
+                std::optional<core::UInt64>      min_texel_buffer_offset_alignment;
+                core::UInt64                     min_uniform_buffer_offset_alignment;
+                core::UInt64                     min_storage_buffer_offset_alignment;
+                core::Int32                      min_texel_offset;
+                core::UInt32                     max_texel_offset;
+                core::Int32                      min_texel_gather_offset;
+                core::UInt32                     max_texel_gather_offset;
+                float                            min_interpolation_offset;
+                float                            max_interpolation_offset;
+                std::optional<core::UInt32>      sub_pixel_interpolation_offset_bits;
+                core::UInt32                     max_framebuffer_width;
+                core::UInt32                     max_framebuffer_height;
+                core::UInt32                     max_framebuffer_layers;
+                SampleCountFlag                  framebuffer_color_sample_counts;
+                SampleCountFlag                  framebuffer_depth_sample_counts;
+                SampleCountFlag                  framebuffer_stencil_sample_counts;
+                SampleCountFlag                  framebuffer_no_attachments_sample_counts;
+                core::UInt32                     max_color_attachments;
+                SampleCountFlag                  sampled_image_color_sample_counts;
+                SampleCountFlag                  sampled_image_integer_sample_counts;
+                SampleCountFlag                  sampled_image_depth_sample_counts;
+                SampleCountFlag                  sampled_image_stencil_sample_counts;
+                SampleCountFlag                  storage_image_sample_counts;
+                core::UInt32                     max_sample_mask_words;
+                bool                             timestamp_compute_and_engine;
+                float                            timestamp_period;
+                core::UInt32                     max_clip_distances;
+                core::UInt32                     max_cull_distances;
+                core::UInt32                     max_combined_clip_and_cull_distances;
+                core::UInt32                     discrete_queue_priorities;
+                std::array<float, 2>             point_size_range;
+                std::array<float, 2>             line_width_range;
+                float                            point_size_granularity;
+                float                            line_width_granularity;
+                bool                             strict_lines;
+                bool                             standard_sample_locations;
+                std::optional<core::UInt64>      optimal_buffer_copy_offset_alignment;
+                std::optional<core::UInt64>      optimal_buffer_copy_row_pitch_alignment;
+                core::UInt64                     non_coherent_atom_size;
             } limits;
         };
 
@@ -882,7 +880,7 @@ export {
 
         struct Viewport {
             core::math::Vector2F position;
-            core::math::ExtentF extent;
+            core::math::ExtentF  extent;
             core::math::Vector2F depth;
 
             constexpr operator vk::Viewport() const noexcept;
@@ -890,7 +888,7 @@ export {
 
         struct Scissor {
             core::math::Vector2I offset;
-            core::math::ExtentU extent;
+            core::math::ExtentU  extent;
 
             constexpr operator vk::Rect2D() const noexcept;
         };
@@ -900,7 +898,7 @@ export {
         };
 
         struct ClearDepthStencil {
-            float depth          = 1.f;
+            float        depth   = 1.f;
             core::UInt32 stencil = 0;
         };
 
@@ -914,7 +912,7 @@ export {
             ImageSubresourceLayers subresource_layers;
 
             core::math::Vector3I offset;
-            core::math::ExtentU extent;
+            core::math::ExtentU  extent;
         };
 
         struct BlitRegion {
@@ -926,16 +924,16 @@ export {
         };
 
         struct PushConstantRange {
-            ShaderStageFlag stages;
-            core::UInt32 offset;
+            ShaderStageFlag   stages;
+            core::UInt32      offset;
             core::RangeExtent size;
         };
 
         struct PhysicalDeviceInfo {
             core::UInt64 device_id;
-            std::string device_name;
+            std::string  device_name;
             core::UInt64 vendor_id;
-            std::string vendor_name;
+            std::string  vendor_name;
 
             core::UInt32 api_major_version;
             core::UInt32 api_minor_version;
@@ -951,7 +949,7 @@ export {
         };
 
         struct QueueFamily {
-            QueueFlag flags;
+            QueueFlag    flags;
             core::UInt32 count;
         };
 
@@ -961,10 +959,39 @@ export {
         template<class T>
         using Expected = std::expected<T, Result>;
 
-        constexpr auto toStringView(PhysicalDeviceType type) -> std::string_view;
-        constexpr auto toString(PhysicalDeviceType type) -> std::string;
-        constexpr auto toStringView(Result result) -> std::string_view;
-        constexpr auto toString(Result result) -> std::string;
+        template<typename T>
+        class ParentRef {
+          public:
+            explicit ParentRef(const T& parent) noexcept;
+            ~ParentRef() noexcept;
+
+            ParentRef(const ParentRef&) noexcept;
+            auto operator=(const ParentRef&) noexcept -> ParentRef&;
+
+            ParentRef(ParentRef&&) noexcept;
+            auto operator=(ParentRef&&) noexcept -> ParentRef&;
+
+            [[nodiscard]] auto parent() const noexcept -> const T&;
+
+          private:
+            core::NakedRef<const T> m_parent;
+        };
+
+        class Instance;
+        class InstanceObject: public ParentRef<Instance> {
+          public:
+            using ParentRef<Instance>::ParentRef;
+
+            [[nodiscard]] auto instance() const noexcept -> const Instance&;
+        };
+
+        class Device;
+        class DeviceObject: public ParentRef<Device> {
+          public:
+            using ParentRef<Device>::ParentRef;
+
+            [[nodiscard]] auto device() const noexcept -> const Device&;
+        };
 
         constexpr auto isDepthOnlyFormat(PixelFormat format) noexcept -> bool;
         constexpr auto isDepthStencilFormat(PixelFormat format) noexcept -> bool;
@@ -975,14 +1002,11 @@ export {
 
         auto computeMipLevel(const core::math::ExtentU& extent) noexcept -> core::UInt32;
         constexpr auto
-            computeUniformBufferOffsetAlignement(core::RangeExtent size,
+            computeUniformBufferOffsetAlignement(core::RangeExtent         size,
                                                  const RenderCapabilities& capabilities) noexcept
             -> core::RangeExtent;
 
         auto toString(const PhysicalDeviceInfo& data) noexcept;
-
-        template<typename T>
-        using ResultExpected = std::expected<T, Result>;
     } // namespace stormkit::gpu
 
     FLAG_ENUM(stormkit::gpu::QueueFlag)
@@ -1009,70 +1033,81 @@ export {
 ////////////////////////////////////////////////////////////////////
 
 namespace stormkit::gpu {
-    namespace {
-        STORMKIT_API constexpr auto PHYSICAL_DEVICE_TO_STRING = [] {
-            using namespace std::literals;
-
-            return core::makeFrozenMap<PhysicalDeviceType, std::string_view>({
-                { PhysicalDeviceType::CPU, "CPU"sv },
-                { PhysicalDeviceType::Virtual_GPU, "Virtual_GPU"sv },
-                { PhysicalDeviceType::Discrete_GPU, "Discrete_GPU"sv },
-                { PhysicalDeviceType::Integrated_GPU, "Integrated_GPU"sv },
-                { PhysicalDeviceType::Other, "Other"sv },
-            });
-        }();
-    } // namespace
-
     /////////////////////////////////////
     /////////////////////////////////////
-    constexpr auto toStringView(PhysicalDeviceType type) -> std::string_view {
-        const auto it = PHYSICAL_DEVICE_TO_STRING.find(type);
-        core::expects(it != std::ranges::cend(PHYSICAL_DEVICE_TO_STRING));
-
-        return it->second;
+    template<typename T>
+    STORMKIT_FORCE_INLINE ParentRef<T>::ParentRef(const T& parent) noexcept : m_parent { &parent } {
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    constexpr auto toString(PhysicalDeviceType type) -> std::string {
-        return std::string { toStringView(type) };
+    template<typename T>
+    STORMKIT_FORCE_INLINE ParentRef<T>::~ParentRef() noexcept = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<typename T>
+    STORMKIT_FORCE_INLINE ParentRef<T>::ParentRef(const ParentRef&) noexcept = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<typename T>
+    STORMKIT_FORCE_INLINE auto ParentRef<T>::operator=(const ParentRef&) noexcept
+        -> ParentRef& = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<typename T>
+    STORMKIT_FORCE_INLINE ParentRef<T>::ParentRef(ParentRef&&) noexcept = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<typename T>
+    STORMKIT_FORCE_INLINE auto ParentRef<T>::operator=(ParentRef&&) noexcept -> ParentRef& = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<typename T>
+    STORMKIT_FORCE_INLINE auto ParentRef<T>::parent() const noexcept -> const T& {
+        return m_parent.get();
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    constexpr auto toStringView(Result result) -> std::string_view {
-        return toString(core::as<vk::Result>(result));
+    STORMKIT_FORCE_INLINE auto InstanceObject::instance() const noexcept -> const Instance& {
+        return ParentRef<Instance>::parent();
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    constexpr auto toString(Result result) -> std::string {
-        return std::string { toStringView(result) };
+    STORMKIT_FORCE_INLINE auto DeviceObject::device() const noexcept -> const Device& {
+        return ParentRef<Device>::parent();
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    constexpr auto isDepthOnlyFormat(PixelFormat format) noexcept -> bool {
+    STORMKIT_FORCE_INLINE constexpr auto isDepthOnlyFormat(PixelFormat format) noexcept -> bool {
         return format == PixelFormat::Depth16 or format == PixelFormat::Depth24 or
                format == PixelFormat::Depth32F;
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    constexpr auto isDepthStencilFormat(PixelFormat format) noexcept -> bool {
+    STORMKIT_FORCE_INLINE constexpr auto isDepthStencilFormat(PixelFormat format) noexcept -> bool {
         return format == PixelFormat::Depth16_Stencil8 or format == PixelFormat::Depth24_Stencil8 or
                format == PixelFormat::Depth32F_Stencil8;
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    constexpr auto isDepthFormat(PixelFormat format) noexcept -> bool {
+    STORMKIT_FORCE_INLINE constexpr auto isDepthFormat(PixelFormat format) noexcept -> bool {
         return isDepthOnlyFormat(format) or isDepthStencilFormat(format);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    constexpr auto getChannelCountFor(PixelFormat format) noexcept -> core::UInt8 {
+    STORMKIT_FORCE_INLINE constexpr auto getChannelCountFor(PixelFormat format) noexcept
+        -> core::UInt8 {
         switch (format) {
             case PixelFormat::R8_SNorm:
             case PixelFormat::R8_UNorm:
@@ -1148,7 +1183,8 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    constexpr auto getArraySizeByChannelFor(PixelFormat format) noexcept -> core::UInt8 {
+    STORMKIT_FORCE_INLINE constexpr auto getArraySizeByChannelFor(PixelFormat format) noexcept
+        -> core::UInt8 {
         switch (format) {
             case PixelFormat::R8_SNorm:
             case PixelFormat::R8_UNorm:
@@ -1213,7 +1249,7 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    constexpr Viewport::operator vk::Viewport() const noexcept {
+    STORMKIT_FORCE_INLINE constexpr Viewport::operator vk::Viewport() const noexcept {
         return { .x        = position.x,
                  .y        = position.y,
                  .width    = extent.width,
@@ -1224,14 +1260,15 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    constexpr Scissor::operator vk::Rect2D() const noexcept {
+    STORMKIT_FORCE_INLINE constexpr Scissor::operator vk::Rect2D() const noexcept {
         return vk::Rect2D { .offset = { offset.x, offset.y },
                             .extent = { extent.width, extent.height } };
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto computeMipLevel(const core::math::ExtentU& extent) noexcept -> core::UInt32 {
+    STORMKIT_FORCE_INLINE auto computeMipLevel(const core::math::ExtentU& extent) noexcept
+        -> core::UInt32 {
         const auto as_float = core::math::ExtentF { extent };
 
         return core::as<core::UInt32>(core::math::floor(
@@ -1241,8 +1278,8 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    constexpr auto
-        computeUniformBufferOffsetAlignement(core::RangeExtent size,
+    STORMKIT_FORCE_INLINE constexpr auto
+        computeUniformBufferOffsetAlignement(core::RangeExtent         size,
                                              const RenderCapabilities& capabilities) noexcept
         -> core::RangeExtent {
         const auto min_ubo_align = capabilities.limits.min_uniform_buffer_offset_alignment;
@@ -1254,7 +1291,7 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto toString(const PhysicalDeviceInfo& data) noexcept {
+    STORMKIT_FORCE_INLINE auto toString(const PhysicalDeviceInfo& data) noexcept {
         return std::format("[PhysicalDeviceInfo:\n"
                            "   .device_id      = {:#06x},\n"
                            "   .device_name    = {},\n"
@@ -1273,6 +1310,6 @@ namespace stormkit::gpu {
                            data.driver_major_version,
                            data.driver_minor_version,
                            data.driver_patch_version,
-                           toString(data.type));
+                           data.type);
     }
 } // namespace stormkit::gpu

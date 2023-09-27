@@ -1,0 +1,27 @@
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+module;
+
+#include <vulkan/vulkan_hpp_macros.hpp>
+
+export module stormkit.Engine:Vulkan.Buffer;
+
+import std;
+
+import stormkit.Core;
+
+import <stormkit/Core/PlatformMacro.hpp>;
+
+import vulkan_hpp;
+
+export namespace stormkit::engine {
+    auto 
+
+    auto createCommandBuffer(const vk::raii::Device     & device,
+                             const vk::raii::CommandPool& pool,
+                             vk::CommandBufferLevel       level = vk::CommandBufferLevel::ePrimary)
+        -> decltype(auto);
+}
+

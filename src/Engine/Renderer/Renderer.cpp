@@ -5,15 +5,16 @@ module;
 module stormkit.Engine;
 
 import std;
-import vulkan;
+import vulkan_hpp;
 
 import stormkit.Core;
 import stormkit.Log;
+import stormkit.Wsi;
 
 import <stormkit/Log/LogMacro.hpp>;
 
 import :Renderer;
-import :Renderer.Vulkan.Utils;
+import :Vulkan.Utils;
 
 using namespace std::literals;
 
@@ -22,19 +23,19 @@ namespace stormkit::engine {
 
     namespace {
         constexpr auto VALIDATION_LAYERS = std::array {
-            "VK_LAYER_KHRONOS_validation",
+            "LAYER_KHRONOS_validation",
 #ifdef STORMKIT_OS_LINUX
-            "VK_LAYER_MESA_overlay",
+            "LAYER_MESA_overlay",
 #endif
         };
+
         constexpr auto VALIDATION_FEATURES =
             std::array { vk::ValidationFeatureEnableEXT::eBestPractices,
                          vk::ValidationFeatureEnableEXT::eGpuAssisted };
 
-        constexpr auto STORMKIT_VK_VERSION =
-            vkMakeVersion<core::Int32>(core::STORMKIT_MAJOR_VERSION,
-                                       core::STORMKIT_MINOR_VERSION,
-                                       core::STORMKIT_PATCH_VERSION);
+        constexpr auto STORMKIT_VERSION = vkMakeVersion<core::Int32>(core::STORMKIT_MAJOR_VERSION,
+                                                                     core::STORMKIT_MINOR_VERSION,
+                                                                     core::STORMKIT_PATCH_VERSION);
 
         constexpr auto RAYTRACING_EXTENSIONS =
             std::array { "VK_KHR_ray_tracing_pipeline"sv,  "VK_KHR_acceleration_structure"sv,
@@ -48,10 +49,10 @@ namespace stormkit::engine {
 
         /////////////////////////////////////
         /////////////////////////////////////
-        auto debugCallback(vk::DebugUtilsMessageSeverityFlagsEXT severity,
-                           vk::DebugUtilsMessageTypeFlagsEXT type,
+        auto debugCallback(vk::DebugUtilsMessageSeverityFlagsEXT         severity,
+                           vk::DebugUtilsMessageTypeFlagsEXT             type,
                            const vk::DebugUtilsMessengerCallbackDataEXT& callback_data,
-                           [[maybe_unused]] void *user_data) -> bool {
+                           [[maybe_unused]] void                        *user_data) -> bool {
             auto message = std::format("[{}] {}", vk::to_string(severity), callback_data.pMessage);
 
             if (checkFlag(severity, vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo)) ilog(message);
@@ -82,11 +83,11 @@ namespace stormkit::engine {
 
         /////////////////////////////////////
         /////////////////////////////////////
-        auto checkValidationLayerSupport(const vk::raii::Context& vk_context,
-                                         bool vk_validation_layers_enabled) noexcept -> bool {
-            if (!vk_validation_layers_enabled) return vk_validation_layers_enabled;
+        auto checkValidationLayerSupport(const vk::raii::Context& context,
+                                         bool validation_layers_enabled) noexcept -> bool {
+            if (!validation_layers_enabled) return validation_layers_enabled;
 
-            const auto layers = vk_context.enumerateInstanceLayerProperties();
+            const auto layers = context.enumerateInstanceLayerProperties();
             for (const auto& layer_name : std::as_const(VALIDATION_LAYERS)) {
                 auto layer_found = false;
 
@@ -103,12 +104,12 @@ namespace stormkit::engine {
                 }
             }
 
-            return vk_validation_layers_enabled;
+            return validation_layers_enabled;
         }
 
         /////////////////////////////////////
         /////////////////////////////////////
-        auto checkExtensionSupport(std::span<const std::string> supported_extensions,
+        auto checkExtensionSupport(std::span<const std::string>      supported_extensions,
                                    std::span<const std::string_view> extensions) noexcept -> bool {
             auto required_extensions =
                 core::HashSet<std::string_view> { std::ranges::begin(extensions),
@@ -121,7 +122,7 @@ namespace stormkit::engine {
 
         /////////////////////////////////////
         /////////////////////////////////////
-        auto checkExtensionSupport(std::span<const std::string> supported_extensions,
+        auto checkExtensionSupport(std::span<const std::string>    supported_extensions,
                                    std::span<const core::CZString> extensions) noexcept -> bool {
             const auto ext = extensions | std::views::transform([](const auto& extension) noexcept {
                                  return std::string_view { extension };
@@ -234,9 +235,9 @@ namespace stormkit::engine {
 
         VULKAN_HPP_DEFAULT_DISPATCHER.init();
 
-        m_vk_context = vk::raii::Context {};
+        m_context = vk::raii::Context {};
 
-        const auto exts       = m_vk_context->enumerateInstanceExtensionProperties();
+        const auto exts       = m_context->enumerateInstanceExtensionProperties();
         const auto extensions = exts | std::views::transform([](auto&& extension) noexcept {
                                     return std::string { extension.extensionName };
                                 }) |
@@ -248,9 +249,9 @@ namespace stormkit::engine {
 
         const auto validation_layers = [this]() noexcept {
             auto output = std::vector<core::CZString> {};
-            m_vk_validation_layers_enabled =
-                checkValidationLayerSupport(m_vk_context, m_vk_validation_layers_enabled);
-            if (m_vk_validation_layers_enabled) {
+            m_validation_layers_enabled =
+                checkValidationLayerSupport(m_context, m_validation_layers_enabled);
+            if (m_validation_layers_enabled) {
                 dlog("Validation layers enabled");
                 dlog("enabling layers: -----------");
                 for (const auto& str : VALIDATION_LAYERS) dlog("	{}", str);
@@ -265,7 +266,7 @@ namespace stormkit::engine {
         const auto instance_extensions = [this]() noexcept {
             auto e = core::concat(INSTANCE_BASE_EXTENSIONS, SURFACE_EXTENSIONS);
 
-            if (m_vk_validation_layers_enabled) core::merge(e, std::array { "VK_EXT_debug_utils" });
+            if (m_validation_layers_enabled) core::merge(e, std::array { "EXT_debug_utils" });
 
             return e;
         }();
@@ -277,7 +278,7 @@ namespace stormkit::engine {
         const auto app_info = vk::ApplicationInfo {}
                                   .setPApplicationName(std::data(application_name))
                                   .setPEngineName(ENGINE_NAME)
-                                  .setEngineVersion(STORMKIT_VK_VERSION)
+                                  .setEngineVersion(STORMKIT_VERSION)
                                   .setApiVersion(vkMakeVersion<core::Int32>(1, 0, 0));
 
         const auto create_info = vk::InstanceCreateInfo {}
@@ -286,12 +287,12 @@ namespace stormkit::engine {
                                      .setPEnabledLayerNames(validation_layers);
 
         try {
-            m_vk_instance = vk::raii::Instance { m_vk_context, create_info };
+            m_instance = vk::raii::Instance { m_context, create_info };
         } catch (const vk::SystemError& err) {
             return std::unexpected { core::as<vk::Result>(err.code().value()) };
         }
 
-        VULKAN_HPP_DEFAULT_DISPATCHER.init(*m_vk_instance.get());
+        VULKAN_HPP_DEFAULT_DISPATCHER.init(*m_instance.get());
 
         return {};
     }
@@ -299,7 +300,7 @@ namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     auto Renderer::doInitDebugReportCallback() noexcept -> VulkanExpected<void> {
-        if (!m_vk_validation_layers_enabled) return {};
+        if (!m_validation_layers_enabled) return {};
 
         constexpr auto severity = vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose |
                                   vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning |
@@ -317,32 +318,27 @@ namespace stormkit::engine {
                     std::bit_cast<decltype(vk::DebugUtilsMessengerCreateInfoEXT::pfnUserCallback)>(
                         &debugCallback));
 
-        try {
-            m_vk_messenger = vk::raii::DebugUtilsMessengerEXT { m_vk_instance, create_info };
-        } catch (const vk::SystemError& err) {
-            return std::unexpected { core::as<vk::Result>(err.code().value()) };
-        }
-
-        return {};
+        return vkCreate<vk::raii::DebugUtilsMessengerEXT>(m_instance, create_info)
+            .transform(core::set(m_messenger));
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     auto Renderer::doInitDevice() noexcept -> VulkanExpected<void> {
-        const auto vk_physical_devices = m_vk_instance->enumeratePhysicalDevices();
+        const auto physical_devices = m_instance->enumeratePhysicalDevices();
 
-        auto vk_physical_device = pickPhysicalDevice(vk_physical_devices)
-                                      .or_else(core::expectsWithMessage<vk::raii::PhysicalDevice>(
-                                          "No compatible physical device found !"))
-                                      .value();
+        m_physical_device = pickPhysicalDevice(physical_devices)
+                                .or_else(core::expectsWithMessage<vk::raii::PhysicalDevice>(
+                                    "No compatible physical device found !"))
+                                .value();
 
-        const auto& properties = vk_physical_device.getProperties();
+        const auto& properties = m_physical_device->getProperties();
 
         ilog("Using PhysicalDevice {} ({:#06x})",
              std::string_view { properties.deviceName },
              properties.deviceID);
 
-        const auto extensions = vk_physical_device.enumerateDeviceExtensionProperties() |
+        const auto extensions = m_physical_device->enumerateDeviceExtensionProperties() |
                                 std::views::transform([](auto&& extention) noexcept {
                                     return std::string_view { extention.extensionName };
                                 }) |
@@ -356,11 +352,11 @@ namespace stormkit::engine {
 
         ilog("Raytracing {}", support_raytracing ? "supported !" : "not supported !");
 
-        const auto& queue_families = vk_physical_device.getQueueFamilyProperties();
+        const auto& queue_families = m_physical_device->getQueueFamilyProperties();
 
         struct QueueFamily {
-            core::UInt32 id      = 0u;
-            core::UInt32 count   = 0u;
+            core::UInt32   id    = 0u;
+            core::UInt32   count = 0u;
             vk::QueueFlags flags = {};
         };
 
@@ -426,8 +422,8 @@ namespace stormkit::engine {
                 priority);
         });
 
-        const auto& features        = vk_physical_device.getFeatures();
-        const auto enabled_features = vk::PhysicalDeviceFeatures {}
+        const auto& features         = m_physical_device->getFeatures();
+        const auto  enabled_features = vk::PhysicalDeviceFeatures {}
                                           .setSampleRateShading(features.sampleRateShading)
                                           .setMultiDrawIndirect(features.multiDrawIndirect)
                                           .setFillModeNonSolid(features.fillModeNonSolid)
@@ -458,14 +454,68 @@ namespace stormkit::engine {
                                      .setPEnabledFeatures(&enabled_features);
 
         try {
-            m_vk_device = vk::raii::Device { vk_physical_device, create_info };
+            m_device = vk::raii::Device { m_physical_device, create_info };
         } catch (const vk::SystemError& err) {
             return std::unexpected { core::as<vk::Result>(err.code().value()) };
         }
 
-        VULKAN_HPP_DEFAULT_DISPATCHER.init(*m_vk_device.get());
+        VULKAN_HPP_DEFAULT_DISPATCHER.init(*m_device.get());
         dlog("enabled device extensions: {}", enabled_extensions);
 
+        m_raster_queue = m_device->getQueue(raster_queue.id, 0);
+
+        if (transfert_queue) m_transfert_queue = m_device->getQueue(transfert_queue->id, 0);
+
+        if (compute_queue) m_compute_queue = m_device->getQueue(compute_queue->id, 0);
+
         return {};
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    auto Renderer::threadLoop(std::stop_token token) noexcept -> void {
+        const auto create_info = vk::CommandPoolCreateInfo {}.setFlags(
+            vk::CommandPoolCreateFlagBits::eTransient |
+            vk::CommandPoolCreateFlagBits::eResetCommandBuffer);
+        auto command_pool = vk::raii::CommandPool { m_device, create_info };
+
+        const auto& images     = m_render_surface->images();
+        auto&& command_buffers = createCommandBuffers(m_device, command_pool, std::size(images));
+
+        for (const auto i : core::range(std::size(images))) {
+            const auto& image          = images[i];
+            auto      & command_buffer = command_buffers[i];
+
+            command_buffer.begin(vk::CommandBufferBeginInfo {}.setFlags(
+                vk::CommandBufferUsageFlagBits::eOneTimeSubmit));
+
+            transitionImageLayout(command_buffer,
+                                  image,
+                                  vk::ImageLayout::eUndefined,
+                                  vk::ImageLayout::ePresentSrcKHR);
+
+            command_buffer.end();
+        }
+
+        auto fence = vk::raii::Fence { m_device,
+                                       vk::FenceCreateInfo {}.setFlags(
+                                           vk::FenceCreateFlagBits::eSignaled) };
+
+        submit(m_raster_queue, command_buffers, {}, {}, *fence);
+
+//        fence.wait();
+
+        for (;;) {
+            if (token.stop_requested()) return;
+
+            m_render_surface->acquireNextFrame()
+                .transform([this](auto&& frame) { m_render_surface->present(frame); })
+                .transform_error([](auto&& error) {
+                    elog("Failed to acquire frame, reason: {}", error);
+                    return std::forward<decltype(error)>(error);
+                });
+        }
+
+        m_device->waitIdle();
     }
 } // namespace stormkit::engine
