@@ -2,6 +2,10 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
+module; 
+
+#include "magic_enum.hpp"
+
 export module stormkit.Core:String.Format;
 
 import std;
@@ -32,6 +36,12 @@ export namespace std {
 
     template<stormkit::core::math::IsExtentType T, typename CharT>
     struct formatter<T, CharT>: public formatter<basic_string<CharT>, CharT> {
+        template<class FormatContext>
+        auto format(const T& data, FormatContext& ctx) const -> decltype(ctx.out());
+    };
+
+    template<stormkit::core::IsEnumeration T, typename CharT>
+    struct formatter<T, CharT>: public formatter<basic_string_view<CharT>, CharT> {
         template<class FormatContext>
         auto format(const T& data, FormatContext& ctx) const -> decltype(ctx.out());
     };
@@ -77,5 +87,14 @@ namespace std {
     auto formatter<T, CharT>::format(const T& data, FormatContext& ctx) const
         -> decltype(ctx.out()) {
         return formatter<basic_string<CharT>, CharT>::format(stormkit::core::toString(data), ctx);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<stormkit::core::IsEnumeration T, typename CharT>
+    template<class FormatContext>
+    auto formatter<T, CharT>::format(const T& data, FormatContext& ctx) const
+        -> decltype(ctx.out()) {
+        return formatter<basic_string_view<CharT>, CharT>::format(magic_enum::enum_name(data), ctx);
     }
 } // namespace std

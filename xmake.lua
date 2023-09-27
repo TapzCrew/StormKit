@@ -1,6 +1,6 @@
 modules = {
 	core = {
-		public_packages = { "glm", "frozen", "unordered_dense" },
+		public_packages = { "glm", "frozen", "unordered_dense", "magic_enum" },
 		modulename = "Core",
 		has_headers = true,
 		custom = function()

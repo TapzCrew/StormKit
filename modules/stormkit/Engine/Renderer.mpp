@@ -14,54 +14,66 @@ import vulkan;
 
 import :Renderer.Vulkan.Utils;
 
-export namespace stormkit::engine {
-    enum class RendererError {
-        FailedToInitializeRenderBackend
-    };
+export {
+    namespace stormkit::engine {
+        enum class RendererErrorType {
+            FailedToInitializeRenderBackend
+        };
 
-    constexpr auto errorString(RendererError err) {
-        if (err == RendererError::FailedToInitializeRenderBackend)
-            return "Failed to render backend";
+        struct RendererError {
+            RendererErrorType type;
+            std::string reason;
+        };
 
-        std::unreachable();
+        class STORMKIT_API Renderer {
+            struct PrivateTag {};
 
-        return "";
-    }
+            template<typename T>
+            using Expected = std::expected<T, RendererError>;
 
-    class STORMKIT_API Renderer {
-        struct PrivateTag {};
+          public:
+            Renderer(std::string_view application_name, PrivateTag);
+            ~Renderer();
 
-        template<typename T>
-        using Expected = std::expected<T, RendererError>;
+            Renderer(const Renderer&)                    = delete;
+            auto operator=(const Renderer&) -> Renderer& = delete;
 
-      public:
-        Renderer(std::string_view application_name, PrivateTag);
-        ~Renderer();
+            Renderer(Renderer&&) noexcept;
+            auto operator=(Renderer&&) noexcept -> Renderer&;
 
-        Renderer(const Renderer&)                    = delete;
-        auto operator=(const Renderer&) -> Renderer& = delete;
+            static auto create(std::string_view application_name) noexcept -> Expected<Renderer>;
+            static auto allocate(std::string_view application_name) noexcept
+                -> Expected<std::unique_ptr<Renderer>>;
 
-        Renderer(Renderer&&) noexcept;
-        auto operator=(Renderer&&) noexcept -> Renderer&;
+          private:
+            auto doInitVulkan(std::string_view) noexcept -> Expected<void>;
+            auto doInitInstance(std::string_view) noexcept -> VulkanExpected<void>;
+            auto doInitDebugReportCallback() noexcept -> VulkanExpected<void>;
+            auto doInitDevice() noexcept -> VulkanExpected<void>;
 
-        static auto create(std::string_view application_name) noexcept -> Expected<Renderer>;
-        static auto allocate(std::string_view application_name) noexcept
-            -> Expected<std::unique_ptr<Renderer>>;
+            bool m_vk_validation_layers_enabled = false;
+            core::DeferInit<vk::raii::Context> m_vk_context;
+            core::DeferInit<vk::raii::Instance> m_vk_instance;
+            core::DeferInit<vk::raii::DebugUtilsMessengerEXT> m_vk_messenger;
+            core::DeferInit<vk::raii::PhysicalDevice> m_vk_physical_device;
+            core::DeferInit<vk::raii::Device> m_vk_device;
 
-      private:
-        auto doInitVulkan(std::string_view) noexcept -> Expected<void>;
-        auto doInitInstance(std::string_view) noexcept -> VulkanExpected<void>;
-        auto doInitDebugReportCallback() noexcept -> VulkanExpected<void>;
-        auto doInitDevice() noexcept -> VulkanExpected<void>;
+            core::DeferInit<vk::raii::Queue> m_vk_raster_queue;
+            core::DeferInit<vk::raii::Queue> m_vk_compute_queue;
+            core::DeferInit<vk::raii::Queue> m_vk_transfert_queue;
+        };
+    } // namespace stormkit::engine
 
-        bool m_vk_validation_layers_enabled = false;
-        core::DeferInit<vk::raii::Context> m_vk_context;
-        core::DeferInit<vk::raii::Instance> m_vk_instance;
-        core::DeferInit<vk::raii::DebugUtilsMessengerEXT> m_vk_messenger;
-        core::DeferInit<vk::raii::PhysicalDevice> m_vk_physical_device;
-        core::DeferInit<vk::raii::Device> m_vk_device;
-    };
-} // namespace stormkit::engine
+    namespace std {
+        template<typename CharT>
+        struct formatter<stormkit::engine::RendererError, CharT>
+            : public formatter<basic_string<CharT>, CharT> {
+            template<class FormatContext>
+            auto format(const stormkit::engine::RendererError& data, FormatContext& ctx) const
+                -> decltype(ctx.out());
+        };
+    } // namespace std
+}
 
 ////////////////////////////////////////////////////////////////////
 ///                      IMPLEMENTATION                          ///
@@ -105,11 +117,31 @@ namespace stormkit::engine {
     inline auto Renderer::doInitVulkan(std::string_view application_name) noexcept
         -> Expected<void> {
         return doInitInstance(application_name)
-            .and_then([this] { return doInitDebugReportCallback(); })
-            .and_then([this] { return doInitDevice(); })
-            .transform_error([this]([[maybe_unused]] auto&& error) {
-                return RendererError::FailedToInitializeRenderBackend;
+            .and_then([this]() noexcept { return doInitDebugReportCallback(); })
+            .and_then([this]() noexcept { return doInitDevice(); })
+            .transform_error([this]([[maybe_unused]] auto&& error) noexcept {
+                return RendererError { RendererErrorType::FailedToInitializeRenderBackend,
+                                       vk::to_string(error) };
             });
     }
 
 } // namespace stormkit::engine
+
+namespace std {
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<class CharT>
+    template<class FormatContext>
+    auto formatter<stormkit::engine::RendererError, CharT>::format(
+        const stormkit::engine::RendererError& data,
+        FormatContext& ctx) const -> decltype(ctx.out()) {
+        auto out = std::string { "(" };
+        out += std::format("{}",data.type);
+        out += ", ";
+        out += data.reason;
+        out += ")";
+
+        return formatter<basic_string<CharT>, CharT>::format(out, ctx);
+    }
+
+} // namespace std

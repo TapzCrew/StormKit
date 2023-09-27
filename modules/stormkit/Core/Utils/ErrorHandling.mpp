@@ -14,15 +14,25 @@ import :Utils.Descriptors;
 import <stormkit/Core/PlatformMacro.hpp>;
 
 export namespace stormkit::core {
-    constexpr auto errorString(auto&& value) noexcept -> decltype(auto);
+    template<typename T>
+    [[nodiscard]] constexpr auto
+        expectsWithMessage(std::string&& message,
+                           std::source_location location = std::source_location::current()) noexcept
+        -> decltype(auto); // optional overload
+
+    template<typename T>
+    [[nodiscard]] constexpr auto
+        expects(std::source_location location = std::source_location::current()) noexcept
+        -> decltype(auto); // optional overload
 
     [[nodiscard]] constexpr auto
         expectsWithMessage(std::string&& message,
-                           std::source_location location = std::source_location {}) noexcept
+                           std::source_location location = std::source_location::current()) noexcept
         -> decltype(auto);
 
     [[nodiscard]] constexpr auto
-        expects(std::source_location location = std::source_location {}) noexcept -> decltype(auto);
+        expects(std::source_location location = std::source_location::current()) noexcept
+        -> decltype(auto);
 
     [[nodiscard]] constexpr auto throwError() noexcept -> decltype(auto);
 } // namespace stormkit::core
@@ -34,8 +44,64 @@ export namespace stormkit::core {
 namespace stormkit::core {
     ////////////////////////////////////////
     ////////////////////////////////////////
-    constexpr auto errorString(auto&& value) noexcept -> decltype(auto) {
-        return std::format("{}", std::forward<decltype(value)>(value));
+    template<typename T>
+    constexpr auto expectsWithMessage(std::string&& message, std::source_location location) noexcept
+        -> decltype(auto) {
+        return [message  = std::move(message),
+                location = std::move(location)] [[noreturn]] () -> std::optional<T> {
+            auto stderr = getSTDErr();
+
+            std::println(stderr,
+                         "[Expects] failed in \n"
+                         "    > file:     {}\n"
+                         "      line:     {}\n"
+                         "      function: {}\n"
+                         "      reason:   {}",
+                         location.file_name(),
+                         location.line(),
+                         location.function_name(),
+                         message);
+
+            std::println(stderr, "================= CALLSTACK =================");
+
+#if defined(__cpp_lib_stacktrace) and __cpp_lib_stacktrace >= 202011L
+            auto st = std::stacktrace::current();
+            std::println(stderr, "{}", std::to_string(st));
+#else
+            std::println(stderr, "No stacktrace support");
+#endif
+
+            std::terminate();
+        };
+    }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    template<typename T>
+    constexpr auto expects(std::source_location location) noexcept -> decltype(auto) {
+        return [location = std::move(location)] [[noreturn]] (auto&& error) -> std::optional<T> {
+            auto stderr = getSTDErr();
+
+            std::println(stderr,
+                         "[Expects] failed in\n"
+                         "    > file:     {}\n"
+                         "      line:     {}\n"
+                         "      function: {}\n",
+                         location.file_name(),
+                         location.line(),
+                         location.function_name());
+
+            std::println(stderr, "================= CALLSTACK =================");
+
+#if defined(__cpp_lib_stacktrace) and __cpp_lib_stacktrace >= 202011L
+            auto st = std::stacktrace::current();
+            std::println(stderr, "{}", std::to_string(st));
+#else
+            std::println(stderr, "No stacktrace support");
+#endif
+
+            std::terminate();
+        };
     }
 
     ////////////////////////////////////////
@@ -48,14 +114,16 @@ namespace stormkit::core {
 
             std::println(stderr,
                          "[Expects] failed in \n"
-                         "    > file:     {}\n"
-                         "      line:     {}\n"
-                         "      function: {}\n"
-                         "      reason:  {}",
+                         "    > file:        {}\n"
+                         "      line:        {}\n"
+                         "      function:    {}\n"
+                         "      reason:      {}\n"
+                         "      error value: {}",
                          location.file_name(),
                          location.line(),
                          location.function_name(),
-                         message);
+                         message,
+                         error);
 
             std::println(stderr, "================= CALLSTACK =================");
 
@@ -79,14 +147,14 @@ namespace stormkit::core {
 
             std::println(stderr,
                          "[Expects] failed in\n"
-                         "    > file:     {}\n"
-                         "      line:     {}\n"
-                         "      function: {}\n"
-                         "      reason:  {}",
+                         "    > file:        {}\n"
+                         "      line:        {}\n"
+                         "      function:    {}\n"
+                         "      error value: {}",
                          location.file_name(),
                          location.line(),
                          location.function_name(),
-                         errorString(std::forward<decltype(error)>(error)));
+                         std::forward<decltype(error)>(error));
 
             std::println(stderr, "================= CALLSTACK =================");
 
