@@ -10,6 +10,7 @@ import <stormkit/Core/PlatformMacro.hpp>;
 
 import :Utils.Algorithms;
 import :Utils.Numerics;
+import :Parallelism.ThreadUtils;
 
 export namespace stormkit::core {
     class STORMKIT_API ThreadPool {
@@ -21,7 +22,6 @@ export namespace stormkit::core {
         using Callback = std::function<T()>;
 
         ThreadPool(Int worker_count = std::thread::hardware_concurrency() / 2);
-
         ~ThreadPool();
 
         ThreadPool(const ThreadPool&)                    = delete;
@@ -40,6 +40,8 @@ export namespace stormkit::core {
 
         auto joinAll() -> void;
 
+        auto setName(std::string_view name) noexcept -> void;
+
       private:
         struct Task {
             enum class Type {
@@ -55,7 +57,7 @@ export namespace stormkit::core {
             Task(Task&&) noexcept                    = default;
             auto operator=(Task&&) noexcept -> Task& = default;
 
-            Type type;
+            Type                  type;
             std::function<void()> work;
         };
 
@@ -71,9 +73,9 @@ export namespace stormkit::core {
 
         std::vector<std::thread> m_workers;
 
-        mutable std::mutex m_mutex;
+        mutable std::mutex      m_mutex;
         std::condition_variable m_work_signal;
-        std::queue<Task> m_tasks;
+        std::queue<Task>        m_tasks;
     };
 
     template<std::ranges::range Range, std::invocable<class Range::element_type&> F>
@@ -83,7 +85,7 @@ export namespace stormkit::core {
     auto parallelTransform(ThreadPool& pool, Range&& range, F&& f)
         -> std::future<std::invoke_result_t<F, typename Range::element_type&>>;
 
-    template<std::ranges::range Range,
+    template<std::ranges::range                         Range,
              std::predicate<class Range::element_type&> Predicate,
              std::invocable<class Range::element_type&> F>
     auto parallelTransformIf(ThreadPool& pool, Range&& range, Predicate&& predicate, F&& f)
@@ -95,23 +97,51 @@ export namespace stormkit::core {
 ////////////////////////////////////////////////////////////////////
 
 namespace stormkit::core {
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE ThreadPool::ThreadPool(Int worker_count)
+        : m_worker_count { worker_count } {
+        m_workers.reserve(m_worker_count);
+
+        for (const auto i : range(m_worker_count)) {
+            auto& worker = m_workers.emplace_back([this] { workerMain(); });
+            setThreadName(worker, std::format("StormKit:WorkerThread:{}", i));
+        }
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE ThreadPool::~ThreadPool() {
+        joinAll();
+    }
+
     ////////////////////////////////////////
     ////////////////////////////////////////
-    inline auto ThreadPool::workerCount() const noexcept {
+    STORMKIT_FORCE_INLINE auto ThreadPool::workerCount() const noexcept {
         return m_worker_count;
     }
 
     ////////////////////////////////////////
     ////////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto ThreadPool::setName(std::string_view name) noexcept -> void {
+        //for (auto&& [i, worker] : m_workers | std::views::enumerate) {
+        auto i = 0;
+        for (auto&& worker : m_workers) {
+            setThreadName(worker, std::format("{}:{}", name, i++));
+        }
+    }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
     template<class T>
-    auto ThreadPool::postTask(Callback<T> callback) {
+    STORMKIT_FORCE_INLINE auto ThreadPool::postTask(Callback<T> callback) {
         return postTask<T>(Task::Type::Standard, std::move(callback));
     }
 
     ////////////////////////////////////////
     ////////////////////////////////////////
     template<class T>
-    auto ThreadPool::postTask(Callback<T> callback, NoFutureType t) {
+    STORMKIT_FORCE_INLINE auto ThreadPool::postTask(Callback<T> callback, NoFutureType t) {
         postTask<T>(Task::Type::Standard, std::move(callback), t);
     }
 
@@ -213,7 +243,7 @@ namespace stormkit::core {
 
     ////////////////////////////////////////
     ////////////////////////////////////////
-    template<std::ranges::range Range,
+    template<std::ranges::range                         Range,
              std::predicate<class Range::element_type&> Predicate,
              std::invocable<class Range::element_type&> F>
     auto parallelTransformIf(ThreadPool& pool, Range&& range, Predicate&& predicate, F&& f)
