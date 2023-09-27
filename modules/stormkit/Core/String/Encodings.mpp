@@ -47,7 +47,7 @@ namespace stormkit::core {
 
         auto len      = 0ull;
         auto input_it = std::data(input);
-        while ((len = std::mbrtoc16(reinterpret_cast<char16_t *>(std::data(output)),
+        while ((len = std::mbrtoc16(std::bit_cast<char16_t *>(std::data(output)),
                                     input_it,
                                     MB_CUR_MAX,
                                     &state)) > 0ull)
@@ -64,7 +64,7 @@ namespace stormkit::core {
         output.resize(std::size(input));
 
         for (const auto& c : input)
-            std::c16rtomb(reinterpret_cast<char *>(std::data(output)), c, &state);
+            std::c16rtomb(std::bit_cast<char *>(std::data(output)), c, &state);
 
         return output;
     }
@@ -80,13 +80,13 @@ namespace stormkit::core {
         auto input_it = std::data(input);
         auto i        = 0;
 #ifdef STORMKIT_COMPILER_MSVC
-        while ((len = std::mbrtoc16(reinterpret_cast<char16_t *>(std::data(output)) + i++,
+        while ((len = std::mbrtoc16(std::bit_cast<char16_t *>(std::data(output)) + i++,
                                     input_it,
                                     MB_CUR_MAX,
                                     &state)) > 0u)
             input_it += len;
 #else
-        while ((len = std::mbrtoc8(reinterpret_cast<char8_t *>(std::data(output)) + i++,
+        while ((len = std::mbrtoc8(std::bit_cast<char8_t *>(std::data(output)) + i++,
                                    input_it,
                                    MB_CUR_MAX,
                                    &state)) > 0ull)
@@ -126,7 +126,7 @@ namespace stormkit::core {
         auto len      = 0ull;
         auto input_it = std::data(input);
         auto i        = 0;
-        while ((len = std::mbrtoc8(reinterpret_cast<char8_t *>(std::data(output)) + i++,
+        while ((len = std::mbrtoc8(std::bit_cast<char8_t *>(std::data(output)) + i++,
                                    input_it,
                                    MB_CUR_MAX,
                                    &state)) > 0ull)
