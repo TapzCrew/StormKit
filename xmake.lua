@@ -58,17 +58,17 @@ modules = {
 		modulename = "Wsi",
 		public_deps = { "stormkit-core" },
 		deps = { "stormkit-log" },
-		public_packages = is_plat("linux") and {
-			"libxkbcommon",
-			"libxkbcommon-x11",
-			"libxcb",
-			"xcb-util-keysyms",
-			"xcb-util",
-			"xcb-util-wm",
-			"xcb-util-errors",
-			"wayland",
-			"wayland-protocols",
-		} or nil,
+		packages = is_plat("linux") and { "libxkbcommon",
+            "libxkbcommon-x11",
+            "libxcb",
+            "xcb-util-keysyms",
+            "xcb-util",
+            "xcb-util-wm",
+            "xcb-util-errors",
+            "wayland",
+            "wayland-protocols",
+          } or nil,
+    frameworks = is_plat("macosx") and {"CoreFoundation", "Foundation", "AppKit", "Metal", "IOKit", "QuartzCore" } or nil,
 		custom = function()
 			if is_plat("linux") then
 				add_rules("wayland.protocols")
@@ -271,14 +271,18 @@ add_cxflags(
 )
 
 add_cxflags("-fstrict-aliasing", "-Wstrict-aliasing", { tools = { "clang", "gcc" } })
+add_mxflags("-fstrict-aliasing", "-Wstrict-aliasing", { tools = { "clang", "gcc" } })
 
 add_cxxflags(
-	"-std=c++2b", -- for clangd
+	"-Wno-missing-field-initializers",
+	{ tools = { "clang" } }
+)
+add_mxxflags(
 	"-Wno-missing-field-initializers",
 	{ tools = { "clang" } }
 )
 
-if not is_plat("windows") then
+if not is_plat("windows") and not is_plat("macosx") then
 	add_syslinks("stdc++_libbacktrace")
 end
 
@@ -288,7 +292,8 @@ if is_mode("release") then
 else
 	set_symbols("debug", "hidden")
 	add_defines("_GLIBCXX_DEBUG")
-	add_cxxflags("-ggdb3")
+	add_cxflags("-ggdb3")
+	add_mxflags("-ggdb3")
 end
 
 set_fpmodels("fast")
@@ -315,6 +320,7 @@ if get_config("libc++") then
 		add_sysincludedirs("C:/Dev/llvm/include/c++/v1")
 	end
 	add_cxxflags("-stdlib=libc++", "-fexperimental-library")
+	add_mxxflags("-stdlib=libc++", "-fexperimental-library")
 	set_policy("build.c++.clang.fallbackscanner", true)
 	target("stdmodules")
 	set_kind("object")
@@ -378,6 +384,12 @@ for name, module in pairs(modules) do
 		for _, file in ipairs(os.files(path.join(src_path, "**.cpp"))) do
 			add_files(file)
 		end
+		for _, file in ipairs(os.files(path.join(src_path, "**.mm"))) do
+			add_files(file)
+		end
+		for _, file in ipairs(os.files(path.join(src_path, "**.m"))) do
+			add_files(file)
+		end
 		for _, file in ipairs(os.files(path.join(src_path, "**.inl"))) do
 			add_files(file)
 		end
@@ -403,7 +415,7 @@ for name, module in pairs(modules) do
 		end
 
 		if is_plat("windows") or is_plat("mingw") then
-			for _, plat in ipairs({ "posix", "linux", "macOS", "iOS", "BSD", "Android" }) do
+			for _, plat in ipairs({ "posix", "linux", "darwin", "macOS", "iOS", "BSD", "Android" }) do
 				remove_files(path.join(src_path, plat, "**"))
 				remove_headerfiles(path.join(src_path, plat, "**"))
 			end
@@ -418,12 +430,12 @@ for name, module in pairs(modules) do
 				remove_headerfiles(path.join(src_path, plat, "**"))
 			end
 		elseif is_plat("android") then
-			for _, plat in ipairs({ "linux", "macOS", "iOS", "BSD", "win32" }) do
+			for _, plat in ipairs({ "linux", "darwin", "macOS", "iOS", "BSD", "win32" }) do
 				remove_files(path.join(src_path, plat, "**"))
 				remove_headerfiles(path.join(src_path, plat, "**"))
 			end
 		elseif is_plat("linux") then
-			for _, plat in ipairs({ "win32", "macOS", "iOS", "BSD", "Android" }) do
+			for _, plat in ipairs({ "win32", "darwin", "macOS", "iOS", "BSD", "Android" }) do
 				remove_files(path.join(src_path, plat, "**"))
 				remove_headerfiles(path.join(src_path, plat, "**"))
 			end
@@ -437,6 +449,7 @@ for name, module in pairs(modules) do
 
 		if module.cxxflags then
 			add_cxxflags(module.cxxflags)
+			add_mxxflags(module.cxxflags)
 		end
 
 		if module.public_deps then
@@ -444,7 +457,7 @@ for name, module in pairs(modules) do
 		end
 
 		if module.deps then
-			add_deps(module.deps)
+			add_deps(module.deps, { public = is_kind("static") })
 		end
 
 		if module.public_packages then
@@ -452,9 +465,12 @@ for name, module in pairs(modules) do
 		end
 
 		if module.packages then
-			add_packages(module.packages)
+			add_packages(module.packages, { public = is_kind("static") })
 		end
 
+		if module.frameworks then
+			add_frameworks(module.frameworks, { public = is_kind("static") })
+		end
 		if module.custom then
 			module.custom()
 		end

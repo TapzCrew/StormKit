@@ -3,9 +3,30 @@
 // found in the top-level of this distribution
 
 /////////// - StormKit::Window - ///////////
-#import "StormApplicationDelegate.h"
+#import "StormKitApplication.h"
 
-@implementation StormApplicationDelegate
+@implementation StormKitApplication
+
+/////////////////////////////////////
+/////////////////////////////////////
++ (void)processEvent {
+    [StormKitApplication sharedApplication];
+
+    NSEvent *event = nil;
+
+    do {
+        event = [NSApp nextEventMatchingMask:NSEventMaskAny
+                                   untilDate:[NSDate distantPast]
+                                      inMode:NSDefaultRunLoopMode
+                                     dequeue:YES];
+
+        [NSApp sendEvent:event];
+    } while (event != nil);
+}
+
+@end
+
+@implementation StormKitApplicationDelegate
 
 /////////////////////////////////////
 /////////////////////////////////////

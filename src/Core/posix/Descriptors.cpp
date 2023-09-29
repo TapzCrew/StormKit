@@ -1,6 +1,8 @@
-module stormkit.Core;
+module;
 
 #include <cstdio>
+
+module stormkit.Core;
 
 namespace stormkit::core {
     /////////////////////////////////////

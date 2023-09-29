@@ -2,251 +2,369 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-/////////// - StormKit::window - ///////////
-#include "Utils.hpp"
+#include "Utils.hpp"    
 
-/////////// - STL - ///////////
-#include <iostream>
+#include <cstdint>
+#include <utility>
 
-/////////// - AppKit - ///////////
 #import <AppKit/NSEvent.h>
 
-/////////// - Carbon - ///////////
 #import <Carbon/Carbon.h>
 
-/////////// - IOKit - ///////////
 #import <IOKit/hid/IOHIDDevice.h>
 #import <IOKit/hid/IOHIDManager.h>
 
-namespace storm::window::details {
+namespace stormkit::wsi::macos {
+        enum class Key {
+            A = 0,
+            B,
+            C,
+            D,
+            E,
+            F,
+            G,
+            H,
+            I,
+            J,
+            K,
+            L,
+            M,
+            N,
+            O,
+            P,
+            Q,
+            R,
+            S,
+            T,
+            U,
+            V,
+            W,
+            X,
+            Y,
+            Z,
+            Num0,
+            Num1,
+            Num2,
+            Num3,
+            Num4,
+            Num5,
+            Num6,
+            Num7,
+            Num8,
+            Num9,
+            Escape,
+            L_Control,
+            L_Shift,
+            L_Alt,
+            L_System,
+            R_Control,
+            R_Shift,
+            R_Alt,
+            R_System,
+            Menu,
+            L_Bracket,
+            R_Bracket,
+            Semi_Colon,
+            Comma,
+            Period,
+            Quote,
+            Slash,
+            Back_Slash,
+            Tilde,
+            Equal,
+            Hyphen,
+            Space,
+            Enter,
+            Back_Space,
+            Tab,
+            Page_Up,
+            Page_Down,
+            Begin,
+            End,
+            Home,
+            Insert,
+            Delete,
+            Add,
+            Substract,
+            Multiply,
+            Divide,
+            Left,
+            Right,
+            Up,
+            Down,
+            Numpad0,
+            Numpad1,
+            Numpad2,
+            Numpad3,
+            Numpad4,
+            Numpad5,
+            Numpad6,
+            Numpad7,
+            Numpad8,
+            Numpad9,
+            F1,
+            F2,
+            F3,
+            F4,
+            F5,
+            F6,
+            F7,
+            F8,
+            F9,
+            F10,
+            F11,
+            F12,
+            F13,
+            F14,
+            F15,
+            Pause,
+            KeyCount,
+            Unknow = std::numeric_limits<std::uint8_t>::max(),
+        };
+
+        enum class MouseButton {
+            Left = 0,
+            Right,
+            Middle,
+            Button1,
+            Button2,
+            ButtonCount,
+            Unknow = std::numeric_limits<std::uint8_t>::max(),
+        };
     /////////////////////////////////////
     /////////////////////////////////////
-    auto toStormMouseButton(int button) noexcept -> MouseButton {
+    auto mouseButton(int button) noexcept -> int {
         switch (button) {
-            case 0: return MouseButton::Left;
-            case 1: return MouseButton::Right;
-            case 2: return MouseButton::Middle;
-            case 3: return MouseButton::Button1;
-            case 4: return MouseButton::Button2;
+            case 0: return static_cast<int>(MouseButton::Left);
+            case 1: return static_cast<int>(MouseButton::Right);
+            case 2: return static_cast<int>(MouseButton::Middle);
+            case 3: return static_cast<int>(MouseButton::Button1);
+            case 4: return static_cast<int>(MouseButton::Button2);
+            default:
+        return static_cast<int>(MouseButton::Unknow);
         }
 
-        return MouseButton::Unknow;
+        std::unreachable();
+
+        return static_cast<int>(MouseButton::Unknow);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto localizedKeyToStormKey(char code) noexcept -> Key {
+    auto localizedKey(char code) noexcept -> int {
         switch (code) {
-            case 'a':
-            case 'A': return Key::A;
-            case 'b':
-            case 'B': return Key::B;
-            case 'c':
-            case 'C': return Key::C;
-            case 'd':
-            case 'D': return Key::D;
-            case 'e':
-            case 'E': return Key::E;
-            case 'f':
-            case 'F': return Key::F;
-            case 'g':
-            case 'G': return Key::G;
-            case 'h':
-            case 'H': return Key::H;
-            case 'i':
-            case 'I': return Key::I;
-            case 'j':
-            case 'J': return Key::J;
-            case 'k':
-            case 'K': return Key::K;
-            case 'l':
-            case 'L': return Key::L;
-            case 'm':
-            case 'M': return Key::M;
-            case 'n':
-            case 'N': return Key::N;
-            case 'o':
-            case 'O': return Key::O;
-            case 'p':
-            case 'P': return Key::P;
-            case 'q':
-            case 'Q': return Key::Q;
-            case 'r':
-            case 'R': return Key::R;
-            case 's':
-            case 'S': return Key::S;
-            case 't':
-            case 'T': return Key::T;
-            case 'u':
-            case 'U': return Key::U;
-            case 'v':
-            case 'V': return Key::V;
-            case 'w':
-            case 'W': return Key::W;
-            case 'x':
-            case 'X': return Key::X;
-            case 'y':
-            case 'Y': return Key::Y;
-            case 'z':
-            case 'Z': return Key::Z;
+            case 'a': [[fallthrough]];
+            case 'A': return static_cast<int>(Key::A);
+            case 'b':[[fallthrough]];
+            case 'B': return static_cast<int>(Key::B);
+            case 'c':[[fallthrough]];
+            case 'C': return static_cast<int>(Key::C);
+            case 'd':[[fallthrough]];
+            case 'D': return static_cast<int>(Key::D);
+            case 'e':[[fallthrough]];
+            case 'E': return static_cast<int>(Key::E);
+            case 'f':[[fallthrough]];
+            case 'F': return static_cast<int>(Key::F);
+            case 'g':[[fallthrough]];
+            case 'G': return static_cast<int>(Key::G);
+            case 'h':[[fallthrough]];
+            case 'H': return static_cast<int>(Key::H);
+            case 'i':[[fallthrough]];
+            case 'I': return static_cast<int>(Key::I);
+            case 'j':[[fallthrough]];
+            case 'J': return static_cast<int>(Key::J);
+            case 'k':[[fallthrough]];
+            case 'K': return static_cast<int>(Key::K);
+            case 'l':[[fallthrough]];
+            case 'L': return static_cast<int>(Key::L);
+            case 'm':[[fallthrough]];
+            case 'M': return static_cast<int>(Key::M);
+            case 'n':[[fallthrough]];
+            case 'N': return static_cast<int>(Key::N);
+            case 'o':[[fallthrough]];
+            case 'O': return static_cast<int>(Key::O);
+            case 'p':[[fallthrough]];
+            case 'P': return static_cast<int>(Key::P);
+            case 'q':[[fallthrough]];
+            case 'Q': return static_cast<int>(Key::Q);
+            case 'r':[[fallthrough]];
+            case 'R': return static_cast<int>(Key::R);
+            case 's':[[fallthrough]];
+            case 'S': return static_cast<int>(Key::S);
+            case 't':[[fallthrough]];
+            case 'T': return static_cast<int>(Key::T);
+            case 'u':[[fallthrough]];
+            case 'U': return static_cast<int>(Key::U);
+            case 'v':[[fallthrough]];
+            case 'V': return static_cast<int>(Key::V);
+            case 'w':[[fallthrough]];
+            case 'W': return static_cast<int>(Key::W);
+            case 'x':[[fallthrough]];
+            case 'X': return static_cast<int>(Key::X);
+            case 'y':[[fallthrough]];
+            case 'Y': return static_cast<int>(Key::Y);
+            case 'z':[[fallthrough]];
+            case 'Z': return static_cast<int>(Key::Z);
         }
 
-        return Key::Unknow;
+        return static_cast<int>(Key::Unknow);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto nonLocalizedKeytoStormKey(unsigned short code) noexcept -> Key {
+    auto nonLocalizedKey(unsigned short code) noexcept -> int {
         switch (code) {
-            case kVK_ANSI_A: return Key::A;
-            case kVK_ANSI_B: return Key::B;
-            case kVK_ANSI_C: return Key::C;
-            case kVK_ANSI_D: return Key::D;
-            case kVK_ANSI_E: return Key::E;
-            case kVK_ANSI_F: return Key::F;
-            case kVK_ANSI_G: return Key::G;
-            case kVK_ANSI_H: return Key::H;
-            case kVK_ANSI_I: return Key::I;
-            case kVK_ANSI_J: return Key::J;
-            case kVK_ANSI_K: return Key::K;
-            case kVK_ANSI_L: return Key::L;
-            case kVK_ANSI_M: return Key::M;
-            case kVK_ANSI_N: return Key::N;
-            case kVK_ANSI_O: return Key::O;
-            case kVK_ANSI_P: return Key::P;
-            case kVK_ANSI_Q: return Key::Q;
-            case kVK_ANSI_R: return Key::R;
-            case kVK_ANSI_S: return Key::S;
-            case kVK_ANSI_T: return Key::T;
-            case kVK_ANSI_U: return Key::U;
-            case kVK_ANSI_V: return Key::V;
-            case kVK_ANSI_W: return Key::W;
-            case kVK_ANSI_X: return Key::X;
-            case kVK_ANSI_Y: return Key::Y;
-            case kVK_ANSI_Z: return Key::Z;
+            case kVK_ANSI_A: return static_cast<int>(Key::A);
+            case kVK_ANSI_B: return static_cast<int>(Key::B);
+            case kVK_ANSI_C: return static_cast<int>(Key::C);
+            case kVK_ANSI_D: return static_cast<int>(Key::D);
+            case kVK_ANSI_E: return static_cast<int>(Key::E);
+            case kVK_ANSI_F: return static_cast<int>(Key::F);
+            case kVK_ANSI_G: return static_cast<int>(Key::G);
+            case kVK_ANSI_H: return static_cast<int>(Key::H);
+            case kVK_ANSI_I: return static_cast<int>(Key::I);
+            case kVK_ANSI_J: return static_cast<int>(Key::J);
+            case kVK_ANSI_K: return static_cast<int>(Key::K);
+            case kVK_ANSI_L: return static_cast<int>(Key::L);
+            case kVK_ANSI_M: return static_cast<int>(Key::M);
+            case kVK_ANSI_N: return static_cast<int>(Key::N);
+            case kVK_ANSI_O: return static_cast<int>(Key::O);
+            case kVK_ANSI_P: return static_cast<int>(Key::P);
+            case kVK_ANSI_Q: return static_cast<int>(Key::Q);
+            case kVK_ANSI_R: return static_cast<int>(Key::R);
+            case kVK_ANSI_S: return static_cast<int>(Key::S);
+            case kVK_ANSI_T: return static_cast<int>(Key::T);
+            case kVK_ANSI_U: return static_cast<int>(Key::U);
+            case kVK_ANSI_V: return static_cast<int>(Key::V);
+            case kVK_ANSI_W: return static_cast<int>(Key::W);
+            case kVK_ANSI_X: return static_cast<int>(Key::X);
+            case kVK_ANSI_Y: return static_cast<int>(Key::Y);
+            case kVK_ANSI_Z: return static_cast<int>(Key::Z);
 
-            case kVK_ANSI_0: return Key::Num0;
-            case kVK_ANSI_1: return Key::Num1;
-            case kVK_ANSI_2: return Key::Num2;
-            case kVK_ANSI_3: return Key::Num3;
-            case kVK_ANSI_4: return Key::Num4;
-            case kVK_ANSI_5: return Key::Num5;
-            case kVK_ANSI_6: return Key::Num6;
-            case kVK_ANSI_7: return Key::Num7;
-            case kVK_ANSI_8: return Key::Num8;
-            case kVK_ANSI_9: return Key::Num9;
+            case kVK_ANSI_0: return static_cast<int>(Key::Num0);
+            case kVK_ANSI_1: return static_cast<int>(Key::Num1);
+            case kVK_ANSI_2: return static_cast<int>(Key::Num2);
+            case kVK_ANSI_3: return static_cast<int>(Key::Num3);
+            case kVK_ANSI_4: return static_cast<int>(Key::Num4);
+            case kVK_ANSI_5: return static_cast<int>(Key::Num5);
+            case kVK_ANSI_6: return static_cast<int>(Key::Num6);
+            case kVK_ANSI_7: return static_cast<int>(Key::Num7);
+            case kVK_ANSI_8: return static_cast<int>(Key::Num8);
+            case kVK_ANSI_9: return static_cast<int>(Key::Num9);
 
-            case kVK_ANSI_Keypad0: return Key::Numpad0;
-            case kVK_ANSI_Keypad1: return Key::Numpad1;
-            case kVK_ANSI_Keypad2: return Key::Numpad2;
-            case kVK_ANSI_Keypad3: return Key::Numpad3;
-            case kVK_ANSI_Keypad4: return Key::Numpad4;
-            case kVK_ANSI_Keypad5: return Key::Numpad5;
-            case kVK_ANSI_Keypad6: return Key::Numpad6;
-            case kVK_ANSI_Keypad7: return Key::Numpad7;
-            case kVK_ANSI_Keypad8: return Key::Numpad8;
-            case kVK_ANSI_Keypad9: return Key::Numpad9;
+            case kVK_ANSI_Keypad0: return static_cast<int>(Key::Numpad0);
+            case kVK_ANSI_Keypad1: return static_cast<int>(Key::Numpad1);
+            case kVK_ANSI_Keypad2: return static_cast<int>(Key::Numpad2);
+            case kVK_ANSI_Keypad3: return static_cast<int>(Key::Numpad3);
+            case kVK_ANSI_Keypad4: return static_cast<int>(Key::Numpad4);
+            case kVK_ANSI_Keypad5: return static_cast<int>(Key::Numpad5);
+            case kVK_ANSI_Keypad6: return static_cast<int>(Key::Numpad6);
+            case kVK_ANSI_Keypad7: return static_cast<int>(Key::Numpad7);
+            case kVK_ANSI_Keypad8: return static_cast<int>(Key::Numpad8);
+            case kVK_ANSI_Keypad9: return static_cast<int>(Key::Numpad9);
 
-            case kVK_ANSI_KeypadPlus: return Key::Add;
-            case kVK_ANSI_KeypadMinus: return Key::Substract;
-            case kVK_ANSI_KeypadMultiply: return Key::Multiply;
-            case kVK_ANSI_KeypadDivide: return Key::Divide;
+            case kVK_ANSI_KeypadPlus: return static_cast<int>(Key::Add);
+            case kVK_ANSI_KeypadMinus: return static_cast<int>(Key::Substract);
+            case kVK_ANSI_KeypadMultiply: return static_cast<int>(Key::Multiply);
+            case kVK_ANSI_KeypadDivide: return static_cast<int>(Key::Divide);
             case kVK_ANSI_KeypadEquals:
-            case kVK_ANSI_Equal: return Key::Equal;
+            case kVK_ANSI_Equal: return static_cast<int>(Key::Equal);
 
-            case kVK_ANSI_Slash: return Key::Slash;
-            case kVK_ANSI_Backslash: return Key::Back_Slash;
-            case kVK_ANSI_Minus: return Key::Hyphen;
+            case kVK_ANSI_Slash: return static_cast<int>(Key::Slash);
+            case kVK_ANSI_Backslash: return static_cast<int>(Key::Back_Slash);
+            case kVK_ANSI_Minus: return static_cast<int>(Key::Hyphen);
             case kVK_ANSI_KeypadDecimal:
-            case kVK_ANSI_Period: return Key::Period;
-            case kVK_ANSI_Comma: return Key::Comma;
-            case kVK_ANSI_Semicolon: return Key::Semi_Colon;
-            case kVK_ANSI_Quote: return Key::Quote;
-            case kVK_ANSI_LeftBracket: return Key::L_Bracket;
-            case kVK_ANSI_RightBracket: return Key::R_Bracket;
-            case kVK_Tab: return Key::Tab;
+            case kVK_ANSI_Period: return static_cast<int>(Key::Period);
+            case kVK_ANSI_Comma: return static_cast<int>(Key::Comma);
+            case kVK_ANSI_Semicolon: return static_cast<int>(Key::Semi_Colon);
+            case kVK_ANSI_Quote: return static_cast<int>(Key::Quote);
+            case kVK_ANSI_LeftBracket: return static_cast<int>(Key::L_Bracket);
+            case kVK_ANSI_RightBracket: return static_cast<int>(Key::R_Bracket);
+            case kVK_Tab: return static_cast<int>(Key::Tab);
             case kVK_ANSI_KeypadEnter:
-            case kVK_Return: return Key::Enter;
-            case kVK_Space: return Key::Space;
-            case kVK_ISO_Section: return Key::Tilde;
+            case kVK_Return: return static_cast<int>(Key::Enter);
+            case kVK_Space: return static_cast<int>(Key::Space);
+            case kVK_ISO_Section: return static_cast<int>(Key::Tilde);
 
             case NSF1FunctionKey:
-            case kVK_F1: return Key::F1;
+            case kVK_F1: return static_cast<int>(Key::F1);
             case NSF2FunctionKey:
-            case kVK_F2: return Key::F2;
+            case kVK_F2: return static_cast<int>(Key::F2);
             case NSF3FunctionKey:
-            case kVK_F3: return Key::F3;
+            case kVK_F3: return static_cast<int>(Key::F3);
             case NSF4FunctionKey:
-            case kVK_F4: return Key::F4;
+            case kVK_F4: return static_cast<int>(Key::F4);
             case NSF5FunctionKey:
-            case kVK_F5: return Key::F5;
+            case kVK_F5: return static_cast<int>(Key::F5);
             case NSF6FunctionKey:
-            case kVK_F6: return Key::F6;
+            case kVK_F6: return static_cast<int>(Key::F6);
             case NSF7FunctionKey:
-            case kVK_F7: return Key::F7;
+            case kVK_F7: return static_cast<int>(Key::F7);
             case NSF8FunctionKey:
-            case kVK_F8: return Key::F8;
+            case kVK_F8: return static_cast<int>(Key::F8);
             case NSF9FunctionKey:
-            case kVK_F9: return Key::F9;
+            case kVK_F9: return static_cast<int>(Key::F9);
             case NSF10FunctionKey:
-            case kVK_F10: return Key::F10;
+            case kVK_F10: return static_cast<int>(Key::F10);
             case NSF11FunctionKey:
-            case kVK_F11: return Key::F11;
+            case kVK_F11: return static_cast<int>(Key::F11);
             case NSF12FunctionKey:
-            case kVK_F12: return Key::F12;
+            case kVK_F12: return static_cast<int>(Key::F12);
             case NSF13FunctionKey:
-            case kVK_F13: return Key::F13;
+            case kVK_F13: return static_cast<int>(Key::F13);
             case NSF14FunctionKey:
-            case kVK_F14: return Key::F14;
+            case kVK_F14: return static_cast<int>(Key::F14);
             case NSF15FunctionKey:
-            case kVK_F15: return Key::F15;
+            case kVK_F15: return static_cast<int>(Key::F15);
 
             case NSUpArrowFunctionKey:
-            case kVK_UpArrow: return Key::Up;
+            case kVK_UpArrow: return static_cast<int>(Key::Up);
             case NSDownArrowFunctionKey:
-            case kVK_DownArrow: return Key::Down;
+            case kVK_DownArrow: return static_cast<int>(Key::Down);
             case NSLeftArrowFunctionKey:
-            case kVK_LeftArrow: return Key::Left;
+            case kVK_LeftArrow: return static_cast<int>(Key::Left);
             case NSRightArrowFunctionKey:
-            case kVK_RightArrow: return Key::Right;
+            case kVK_RightArrow: return static_cast<int>(Key::Right);
 
-            case kVK_Control: return Key::L_Control;
-            case kVK_RightControl: return Key::R_Control;
-            case kVK_Shift: return Key::L_Shift;
-            case kVK_RightShift: return Key::R_Shift;
-            case kVK_Option: return Key::L_Alt;
-            case kVK_RightOption: return Key::R_Alt;
-            case kVK_Command: return Key::L_System;
-            case kVK_RightCommand: return Key::R_System;
+            case kVK_Control: return static_cast<int>(Key::L_Control);
+            case kVK_RightControl: return static_cast<int>(Key::R_Control);
+            case kVK_Shift: return static_cast<int>(Key::L_Shift);
+            case kVK_RightShift: return static_cast<int>(Key::R_Shift);
+            case kVK_Option: return static_cast<int>(Key::L_Alt);
+            case kVK_RightOption: return static_cast<int>(Key::R_Alt);
+            case kVK_Command: return static_cast<int>(Key::L_System);
+            case kVK_RightCommand: return static_cast<int>(Key::R_System);
 
-            case kVK_Escape: return Key::Escape;
+            case kVK_Escape: return static_cast<int>(Key::Escape);
 
             case NSMenuFunctionKey:
-            case 0x7f: return Key::Menu;
+            case 0x7f: return static_cast<int>(Key::Menu);
             case NSPageUpFunctionKey:
-            case kVK_PageUp: return Key::Page_Up;
+            case kVK_PageUp: return static_cast<int>(Key::Page_Up);
             case NSPageDownFunctionKey:
-            case kVK_PageDown: return Key::Page_Down;
+            case kVK_PageDown: return static_cast<int>(Key::Page_Down);
             case NSEndFunctionKey:
-            case kVK_End: return Key::End;
+            case kVK_End: return static_cast<int>(Key::End);
             case NSHomeFunctionKey:
-            case kVK_Home: return Key::Home;
+            case kVK_Home: return static_cast<int>(Key::Home);
             case NSInsertFunctionKey:
-            case kVK_Help: return Key::Insert;
+            case kVK_Help: return static_cast<int>(Key::Insert);
             case NSDeleteFunctionKey:
-            case kVK_ForwardDelete: return Key::Delete;
+            case kVK_ForwardDelete: return static_cast<int>(Key::Delete);
 
-            case NSBeginFunctionKey: return Key::Begin;
-            case NSPauseFunctionKey: return Key::Pause;
-            default: return Key::Unknow;
+            case NSBeginFunctionKey: return static_cast<int>(Key::Begin);
+            case NSPauseFunctionKey: return static_cast<int>(Key::Pause);
+            default: return static_cast<int>(Key::Unknow);
         }
 
-        return Key::Unknow;
+        std::unreachable();
+
+        return static_cast<int>(Key::Unknow);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto usageToVirtualCode(core::UInt32 usage) noexcept -> core::UInt8 {
+    auto usageToVirtualCode(int usage) noexcept -> int {
         switch (usage) {
             case kHIDUsage_KeyboardErrorRollOver: return 0xff;
             case kHIDUsage_KeyboardPOSTFail: return 0xff;
@@ -440,23 +558,9 @@ namespace storm::window::details {
             case kHIDUsage_Keyboard_Reserved: return 0xff;
             default: return 0xff;
         }
-    }
 
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto toStormVec(NSPoint point) noexcept -> core::math::Vector2U {
-        return { static_cast<core::UInt16>(point.x), static_cast<core::UInt16>(point.y) };
-    }
+        std::unreachable();
 
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto fromStormVec(const storm::core::math::Vector2U &point) noexcept -> NSPoint {
-        return CGPointMake(point.x, point.y);
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto toStormVec(CGSize size) noexcept -> core::Extentu {
-        return { static_cast<core::UInt32>(size.width), static_cast<core::UInt32>(size.height) };
+        return 0xff;
     }
 }

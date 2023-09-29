@@ -2,41 +2,37 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
+#ifndef STORMKIT_WINDOW_CONTROLLER_HPP
+#define STORMKIT_WINDOW_CONTROLLER_HPP
 
+#include <string>
+#include <cstdint>
 
-/////////// - AppKit - ///////////
 #import <AppKit/NSWindow.h>
 
-/////////// - STL - ///////////
-#include <string>
-
-/////////// - StormKit::window - ///////////
-#include <storm/window/VideoSettings.hpp>
-#include <storm/window/WindowStyle.hpp>
-
-namespace storm::window::details {
+namespace stormkit::wsi::macos {
     class macOSWindow;
 }
 
-@class StormView;
-@interface StormWindowController: NSResponder<NSWindowDelegate>
-- (id)initWithSettings:(storm::window::VideoSettings)settings
-             withStyle:(storm::window::WindowStyle)style
+@class StormKitView;
+@interface StormKitWindowController: NSResponder<NSWindowDelegate>
+- (id)initWithWidth:(std::uint32_t)width 
+             withHeight:(std::uint32_t)height
+             withStyle:(int)style
              withTitle:(std::string)title
-         withRequester:(storm::window::details::macOSWindow *)_requester;
+         withRequester:(stormkit::wsi::macos::macOSWindow *)_requester;
 - (void)dealloc;
 
-- (void)setRequester:(storm::window::details::macOSWindow *)requester;
+- (void)setRequester:(stormkit::wsi::macos::macOSWindow *)requester;
 
 - (void)close;
-- (BOOL)isOpen;
 - (BOOL)isVisible;
 
 - (void)showWindow;
 - (void)hideWindow;
 
 - (void)processEvent;
-- (StormView *)nativeHandle;
+- (StormKitView *)nativeHandle;
 
 - (NSSize)size;
 
@@ -53,3 +49,11 @@ namespace storm::window::details {
 
 - (NSPoint)convertPoint:(NSPoint)point;
 @end
+
+@interface StormKitWindow : NSWindow
+	- (BOOL) acceptsFirstResponder;
+	- (BOOL) canBecomeKeyWindow;
+	- (void) performClose: (id)sender;
+@end
+
+#endif

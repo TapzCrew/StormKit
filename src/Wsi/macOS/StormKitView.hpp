@@ -2,22 +2,20 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-
+#ifndef STORMKIT_VIEW_HPP
+#define STORMKIT_VIEW_HPP
 
 /////////// - AppKit - ///////////
 #import <AppKit/NSView.h>
 
-/////////// - StormKit::core - ///////////
-#include <storm/core/Platform.hpp>
-
-namespace storm::window::details {
+namespace stormkit::wsi::macos {
     class macOSWindow;
 }
 
-@interface StormView: NSView
+@interface StormKitView: NSView
 - (BOOL)acceptsFirstResponder;
 - (id)initWithFrame:(NSRect)frame
-      withRequester:(storm::window::details::macOSWindow *)_requester
+      withRequester:(stormkit::wsi::macos::macOSWindow *)_requester
          withWindow:(NSWindow *)window;
 
 - (NSWindow *)myWindow;
@@ -44,8 +42,10 @@ namespace storm::window::details {
 
 - (void)updateTrackingAreas;
 
-- (void)setRequester:(storm::window::details::macOSWindow *)_requester;
+- (void)setRequester:(stormkit::wsi::macos::macOSWindow *)_requester;
 
 - (NSPoint)relativeToGlobal:(NSPoint)point;
 - (void)setNativeEventRetriever:(void *)native_event;
 @end
+
+#endif
