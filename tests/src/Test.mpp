@@ -90,7 +90,7 @@ namespace test {
                 colorifyEnd();
 
                 std::println(" on {} \n"
-                             "          > line:     {}",
+                             "          > line: {}",
                              message,
                              location.line());
             }
