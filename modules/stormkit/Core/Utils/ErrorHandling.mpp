@@ -16,7 +16,7 @@ import <stormkit/Core/PlatformMacro.hpp>;
 export namespace stormkit::core {
     template<typename T>
     [[nodiscard]] constexpr auto
-        expectsWithMessage(std::string&& message,
+        expectsWithMessage(std::string       && message,
                            std::source_location location = std::source_location::current()) noexcept
         -> decltype(auto); // optional overload
 
@@ -26,12 +26,15 @@ export namespace stormkit::core {
         -> decltype(auto); // optional overload
 
     [[nodiscard]] constexpr auto
-        expectsWithMessage(std::string&& message,
+        expectsWithMessage(std::string       && message,
                            std::source_location location = std::source_location::current()) noexcept
         -> decltype(auto);
 
     [[nodiscard]] constexpr auto
         expects(std::source_location location = std::source_location::current()) noexcept
+        -> decltype(auto);
+
+    [[nodiscard]] constexpr auto log(std::invocable auto&& logger, std::string&& message) noexcept
         -> decltype(auto);
 
     [[nodiscard]] constexpr auto throwError() noexcept -> decltype(auto);
@@ -167,6 +170,18 @@ namespace stormkit::core {
 
             std::terminate();
         };
+    }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    constexpr auto log(std::invocable auto&& logger, std::string&& message) noexcept -> decltype(auto) {
+        return
+            [logger = std::forward<decltype(logger)>, message = std::move(message)] [[noreturn]] (
+                auto&& error) -> std::expected<void, PureType<decltype(error)>> {
+                logger(message, error);
+
+                return {};
+            };
     }
 
     ////////////////////////////////////////
