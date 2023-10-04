@@ -143,13 +143,11 @@ modules = {
 			"VMA_STATIC_VULKAN_FUNCTIONS=0",
 			"VULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1",
 			"VULKAN_HPP_NO_STRUCT_CONSTRUCTORS",
+      "VULKAN_HPP_NO_UNION_CONSTRUCTORS",
 			"VULKAN_HPP_STORAGE_SHARED",
 			-- "VULKAN_HPP_NO_EXCEPTIONS", uncomment when vk::raii is supported without exceptions
 		},
 		custom = function()
-			remove_files("src/Gpu/Execution/**.cpp")
-			remove_files("modules/stormkit/Gpu/Execution.mpp")
-			remove_files("modules/stormkit/Gpu/Execution/**.mpp")
 			if is_plat("linux") then
 				add_defines("VK_USE_PLATFORM_XCB_KHR")
 				add_defines("VK_USE_PLATFORM_WAYLAND_KHR")

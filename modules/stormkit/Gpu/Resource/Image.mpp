@@ -236,7 +236,7 @@ namespace stormkit::gpu {
                 .setUnnormalizedCoordinates(m_settings.unnormalized_coordinates);
 
         vkCreate<vk::raii::Sampler>(this->device().vkHandle(), std::move(create_info))
-            .transform_error(core::map(core::as<Result>(), core::throwError()));
+            .transform_error(core::monadic::map(core::monadic::as<Result>(), core::throwError()));
     }
 
     /////////////////////////////////////
@@ -316,8 +316,8 @@ namespace stormkit::gpu {
                                      .setSubresourceRange(vk_subresource_range);
 
         vkCreate<vk::raii::ImageView>(this->device().vkHandle(), create_info)
-            .transform(core::set(m_vk_image_view))
-            .transform_error(core::map(core::as<Result>(), core::throwError()));
+            .transform(core::monadic::set(m_vk_image_view))
+            .transform_error(core::monadic::map(core::monadic::as<Result>(), core::throwError()));
     }
 
     /////////////////////////////////////
@@ -404,7 +404,7 @@ namespace stormkit::gpu {
                                      .setInitialLayout(vk::ImageLayout::eUndefined);
 
         vkCreate<vk::raii::Image>(this->device().vkHandle(), create_info)
-            .transform(core::set(m_vk_image))
+            .transform(core::monadic::set(m_vk_image))
             .transform([this, &info]() noexcept -> VulkanExpected<void> {
                 const auto requirements = m_vk_image->getMemoryRequirements();
 
@@ -421,7 +421,7 @@ namespace stormkit::gpu {
                 }
                 return {};
             })
-            .transform_error(core::map(core::as<Result>(), core::throwError()));
+            .transform_error(core::monadic::map(core::monadic::as<Result>(), core::throwError()));
     }
 
     /////////////////////////////////////

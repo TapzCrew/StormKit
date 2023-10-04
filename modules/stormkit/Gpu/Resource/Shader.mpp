@@ -192,8 +192,8 @@ namespace stormkit::gpu {
         const auto create_info = vk::ShaderModuleCreateInfo {}.setCode(m_source);
 
         vkCreate<vk::raii::ShaderModule>(this->device().vkHandle(), create_info)
-            .transform(core::set(m_vk_shader_module))
-            .transform_error(core::map(core::as<Result>(), core::throwError()));
+            .transform(core::monadic::set(m_vk_shader_module))
+            .transform_error(core::monadic::map(core::monadic::as<Result>(), core::throwError()));
     }
 
     /////////////////////////////////////

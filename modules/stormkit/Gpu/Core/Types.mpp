@@ -578,6 +578,7 @@ export {
             Pipeline_Layout       = core::as<core::UInt32>(vk::ObjectType::ePipelineLayout),
             Render_Pass           = core::as<core::UInt32>(vk::ObjectType::eRenderPass),
             Pipeline              = core::as<core::UInt32>(vk::ObjectType::ePipeline),
+            PipelineLayout        = core::as<core::UInt32>(vk::ObjectType::ePipelineLayout),
             Descriptor_Set_Layout = core::as<core::UInt32>(vk::ObjectType::eDescriptorSetLayout),
             Sampler               = core::as<core::UInt32>(vk::ObjectType::eSampler),
             Descriptor_Pool       = core::as<core::UInt32>(vk::ObjectType::eDescriptorPool),
@@ -978,6 +979,7 @@ export {
         };
 
         class Instance;
+
         class InstanceObject: public ParentRef<Instance> {
           public:
             using ParentRef<Instance>::ParentRef;
@@ -986,6 +988,7 @@ export {
         };
 
         class Device;
+
         class DeviceObject: public ParentRef<Device> {
           public:
             using ParentRef<Device>::ParentRef;
@@ -1008,6 +1011,24 @@ export {
 
         auto toString(const PhysicalDeviceInfo& data) noexcept;
     } // namespace stormkit::gpu
+
+    namespace stormkit::core {
+        template<>
+        constexpr auto as<vk::Extent3D, const core::math::ExtentU&>(
+            const core::math::ExtentU& extent) noexcept;
+
+        template<>
+        constexpr auto as<vk::Extent2D, const core::math::ExtentU&>(
+            const core::math::ExtentU& extent) noexcept;
+
+        template<>
+        constexpr auto as<vk::Offset2D, const core::math::Vector2I&>(
+            const core::math::Vector2I& offset) noexcept;
+
+        template<>
+        constexpr auto as<vk::Offset2D, const core::math::Vector2I&>(
+            const core::math::Vector3I& offset) noexcept;
+    } // namespace stormkit::core
 
     FLAG_ENUM(stormkit::gpu::QueueFlag)
     FLAG_ENUM(stormkit::gpu::ShaderStageFlag)
@@ -1063,7 +1084,8 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     template<typename T>
-    STORMKIT_FORCE_INLINE auto ParentRef<T>::operator=(ParentRef&&) noexcept -> ParentRef& = default;
+    STORMKIT_FORCE_INLINE auto ParentRef<T>::operator=(ParentRef&&) noexcept
+        -> ParentRef& = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
@@ -1313,3 +1335,37 @@ namespace stormkit::gpu {
                            data.type);
     }
 } // namespace stormkit::gpu
+
+namespace stormkit::core {
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<>
+    STORMKIT_FORCE_INLINE constexpr auto
+        as<vk::Extent3D>(const core::math::ExtentU& extent) noexcept {
+        return vk::Extent3D { extent.width, extent.height, extent.depth };
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<>
+    STORMKIT_FORCE_INLINE constexpr auto
+        as<vk::Extent2D>(const core::math::ExtentU& extent) noexcept {
+        return vk::Extent2D { extent.width, extent.height };
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<>
+    STORMKIT_FORCE_INLINE constexpr auto
+        as<vk::Offset3D>(const core::math::Vector3I& extent) noexcept {
+        return vk::Offset3D { extent.x, extent.y, extent.z };
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<>
+    STORMKIT_FORCE_INLINE constexpr auto
+        as<vk::Offset2D>(const core::math::Vector2I& extent) noexcept {
+        return vk::Offset2D { extent.x, extent.y };
+    }
+} // namespace stormkit::core

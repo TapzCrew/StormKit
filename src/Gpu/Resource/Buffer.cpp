@@ -58,8 +58,7 @@ namespace stormkit::gpu {
         -> core::UInt {
         for (auto i : core::range(mem_properties.memoryTypeCount)) {
             if ((type_filter & (1 << i)) and
-                (checkFlag(mem_properties.memoryTypes[i].propertyFlags,
-                           properties)))
+                (checkFlag(mem_properties.memoryTypes[i].propertyFlags, properties)))
                 return i;
         }
 

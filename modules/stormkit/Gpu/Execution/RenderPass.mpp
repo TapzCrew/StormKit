@@ -13,8 +13,7 @@ import stormkit.Core;
 
 import :Core;
 import :Resource;
-
-import vulkan;
+import :Vulkan;
 
 export {
     namespace stormkit::gpu {
@@ -24,16 +23,19 @@ export {
           public:
             using ParentRef<RenderPass>::ParentRef;
 
-            [[nodiscard]] auto renderpass() const noexcept -> const RenderPass&;
+            [[nodiscard]] auto renderPass() const noexcept -> const RenderPass&;
         };
 
         class STORMKIT_API FrameBuffer: public DeviceObject, public RenderPassObject {
+            struct Tag {};
+
           public:
             static constexpr auto DEBUG_TYPE = DebugObjectType::FrameBuffer;
 
-            FrameBuffer(const RenderPass& render_pass,
-                        const core::math::ExtentU& size,
-                        std::vector<core::NakedRef<ImageView>> attachments);
+            FrameBuffer(const RenderPass                           & render_pass,
+                        const core::math::ExtentU                  & size,
+                        std::vector<core::NakedRef<const ImageView>> attachments,
+                        Tag);
             ~FrameBuffer();
 
             FrameBuffer(const FrameBuffer&)                    = delete;
@@ -42,27 +44,38 @@ export {
             FrameBuffer(FrameBuffer&&) noexcept;
             auto operator=(FrameBuffer&&) noexcept -> FrameBuffer&;
 
+            [[nodiscard]] static auto
+                create(const RenderPass                           & render_pass,
+                       const core::math::ExtentU                  & size,
+                       std::vector<core::NakedRef<const ImageView>> attachments) noexcept
+                -> Expected<FrameBuffer>;
+            [[nodiscard]] static auto
+                allocate(const RenderPass                           & render_pass,
+                         const core::math::ExtentU                  & size,
+                         std::vector<core::NakedRef<const ImageView>> attachments) noexcept
+                -> Expected<std::unique_ptr<FrameBuffer>>;
+
             [[nodiscard]] auto extent() const noexcept -> const core::math::ExtentU&;
             [[nodiscard]] auto attachments() const noexcept
-                -> const std::vector<core::NakedRef<ImageView>>&;
+                -> const std::vector<core::NakedRef<const ImageView>>&;
 
             [[nodiscard]] auto vkHandle() const noexcept -> const vk::raii::Framebuffer&;
 
           private:
-            core::math::ExtentU m_extent = { 0, 0 };
-            std::vector<core::NakedRef<ImageView>> m_attachments;
+            core::math::ExtentU                          m_extent = { 0, 0 };
+            std::vector<core::NakedRef<const ImageView>> m_attachments;
 
             core::DeferInit<vk::raii::Framebuffer> m_vk_framebuffer;
         };
 
         struct AttachmentDescription {
-            PixelFormat format;
+            PixelFormat     format;
             SampleCountFlag samples = SampleCountFlag::C1;
 
-            AttachmentLoadOperation load_op   = AttachmentLoadOperation::Clear;
+            AttachmentLoadOperation  load_op  = AttachmentLoadOperation::Clear;
             AttachmentStoreOperation store_op = AttachmentStoreOperation::Store;
 
-            AttachmentLoadOperation stencil_load_op   = AttachmentLoadOperation::Dont_Care;
+            AttachmentLoadOperation  stencil_load_op  = AttachmentLoadOperation::Dont_Care;
             AttachmentStoreOperation stencil_store_op = AttachmentStoreOperation::Dont_Care;
 
             ImageLayout source_layout      = ImageLayout::Undefined;
@@ -81,26 +94,25 @@ export {
             };
 
             PipelineBindPoint bind_point;
-            std::vector<Ref> attachment_refs;
+            std::vector<Ref>  attachment_refs;
         };
 
         using Subpasses = std::vector<Subpass>;
 
         struct RenderPassDescription {
             AttachmentDescriptions attachments;
-            Subpasses subpasses;
+            Subpasses              subpasses;
 
             auto isCompatible(const RenderPassDescription& description) const noexcept -> bool;
         };
 
-        class Device;
-
         class STORMKIT_API RenderPass: public DeviceObject {
+            struct Tag {};
+
           public:
             static constexpr auto DEBUG_TYPE = DebugObjectType::Render_Pass;
 
-            // RenderPass(const Device &device, vk::RenderPass render_pass);
-            RenderPass(const Device& device, const RenderPassDescription& description);
+            RenderPass(const Device& device, const RenderPassDescription& description, Tag);
             ~RenderPass();
 
             RenderPass(const RenderPass&)                    = delete;
@@ -108,6 +120,22 @@ export {
 
             RenderPass(RenderPass&&) noexcept;
             auto operator=(RenderPass&&) noexcept -> RenderPass&;
+
+            [[nodiscard]] static auto create(const Device               & device,
+                                             const RenderPassDescription& description) noexcept
+                -> Expected<RenderPass>;
+            [[nodiscard]] static auto allocate(const Device               & device,
+                                               const RenderPassDescription& description) noexcept
+                -> Expected<std::unique_ptr<RenderPass>>;
+
+            [[nodiscard]] auto createFrameBuffer(
+                const core::math::ExtentU                  & size,
+                std::vector<core::NakedRef<const ImageView>> attachments) const noexcept
+                -> Expected<FrameBuffer>;
+            [[nodiscard]] auto allocateFrameBuffer(
+                const core::math::ExtentU                  & size,
+                std::vector<core::NakedRef<const ImageView>> attachments) const noexcept
+                -> Expected<std::unique_ptr<FrameBuffer>>;
 
             [[nodiscard]] auto isCompatible(const RenderPass& render_pass) const noexcept -> bool;
             [[nodiscard]] auto isCompatible(const RenderPassDescription& description) const noexcept
@@ -118,7 +146,7 @@ export {
             [[nodiscard]] auto vkHandle() const noexcept -> const vk::raii::RenderPass&;
 
           private:
-            auto bake() noexcept -> void;
+            auto doInitRenderPass() noexcept -> VulkanExpected<void>;
 
             RenderPassDescription m_description = {};
 
@@ -148,38 +176,164 @@ export {
 namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto RenderPassObject::renderpass() const noexcept -> const RenderPass& {
+    STORMKIT_FORCE_INLINE
+    FrameBuffer::FrameBuffer(const RenderPass                           & render_pass,
+                             const core::math::ExtentU                  & extent,
+                             std::vector<core::NakedRef<const ImageView>> attachments,
+                             Tag)
+        : DeviceObject { render_pass.device() }, RenderPassObject { render_pass },
+          m_extent { std::move(extent) }, m_attachments { std::move(attachments) } {
+        const auto vk_attachments =
+            m_attachments | std::views::transform(toVkHandle()) | std::ranges::to<std::vector>();
+
+        const auto create_info = vk::FramebufferCreateInfo {}
+                                     .setRenderPass(toVkHandle()(renderPass()))
+                                     .setAttachments(vk_attachments)
+                                     .setWidth(m_extent.width)
+                                     .setHeight(m_extent.height)
+                                     .setLayers(1);
+
+        vkCreate<vk::raii::Framebuffer>(toRaiiVkHandle()(device()), create_info)
+            .transform(core::monadic::set(m_vk_framebuffer))
+            .transform_error(core::monadic::map(core::monadic::as<Result>(), core::throwError()));
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto RenderPassObject::renderPass() const noexcept -> const RenderPass& {
         return ParentRef<RenderPass>::parent();
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto FrameBuffer::extent() const noexcept -> const core::math::ExtentU& {
+    STORMKIT_FORCE_INLINE FrameBuffer::~FrameBuffer() = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE FrameBuffer::FrameBuffer(FrameBuffer&& other) noexcept = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto FrameBuffer::operator=(FrameBuffer&& other) noexcept
+        -> FrameBuffer& = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto
+        FrameBuffer::create(const RenderPass                           & render_pass,
+                            const core::math::ExtentU                  & size,
+                            std::vector<core::NakedRef<const ImageView>> attachments) noexcept
+        -> Expected<FrameBuffer> try {
+        return FrameBuffer { render_pass, size, std::move(attachments), Tag {} };
+    } catch (const Result& result) { return std::unexpected(result); }
+
+    ////////////////////////////////////p/
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto
+        FrameBuffer::allocate(const RenderPass                           & render_pass,
+                              const core::math::ExtentU                  & size,
+                              std::vector<core::NakedRef<const ImageView>> attachments) noexcept
+        -> Expected<std::unique_ptr<FrameBuffer>> try {
+        return std::make_unique<FrameBuffer>(render_pass, size, std::move(attachments), Tag {});
+    } catch (const Result& result) { return std::unexpected(result); }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto FrameBuffer::extent() const noexcept -> const core::math::ExtentU& {
         return m_extent;
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto FrameBuffer::attachments() const noexcept
-        -> const std::vector<core::NakedRef<ImageView>>& {
+    STORMKIT_FORCE_INLINE auto FrameBuffer::attachments() const noexcept
+        -> const std::vector<core::NakedRef<const ImageView>>& {
         return m_attachments;
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto FrameBuffer::vkHandle() const noexcept -> const vk::raii::Framebuffer& {
+    STORMKIT_FORCE_INLINE auto FrameBuffer::vkHandle() const noexcept
+        -> const vk::raii::Framebuffer& {
         return m_vk_framebuffer;
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto RenderPass::description() const noexcept -> const RenderPassDescription& {
+    STORMKIT_FORCE_INLINE
+    RenderPass::RenderPass(const Device& device, const RenderPassDescription& description, Tag)
+        : DeviceObject { device }, m_description { description } {
+        doInitRenderPass().transform_error(core::monadic::map(core::monadic::as<Result>(), core::throwError()));
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE RenderPass::~RenderPass() = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE RenderPass::RenderPass(RenderPass&& other) noexcept = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto RenderPass::operator=(RenderPass&& other) noexcept
+        -> RenderPass& = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto RenderPass::create(const Device               & device,
+                                                  const RenderPassDescription& description) noexcept
+        -> Expected<RenderPass> try {
+        return RenderPass { device, description, Tag {} };
+    } catch (const Result& result) { return std::unexpected(result); }
+
+    ////////////////////////////////////p/
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto
+        RenderPass::allocate(const Device               & device,
+                             const RenderPassDescription& description) noexcept
+        -> Expected<std::unique_ptr<RenderPass>> try {
+        return std::make_unique<RenderPass>(device, description, Tag {});
+    } catch (const Result& result) { return std::unexpected(result); }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto RenderPass::createFrameBuffer(
+        const core::math::ExtentU                  & extent,
+        std::vector<core::NakedRef<const ImageView>> attachments) const noexcept
+        -> Expected<FrameBuffer> {
+        return FrameBuffer::create(*this, extent, std::move(attachments));
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto RenderPass::allocateFrameBuffer(
+        const core::math::ExtentU                  & extent,
+        std::vector<core::NakedRef<const ImageView>> attachments) const noexcept
+        -> Expected<std::unique_ptr<FrameBuffer>> {
+        return FrameBuffer::allocate(*this, extent, std::move(attachments));
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto
+        RenderPass::isCompatible(const RenderPass& render_pass) const noexcept -> bool {
+        // TODO implement proper compatibility check
+        // https://www.khronos.org/registry/vulkan/specs/1.1-extensions/html/chap7.html#renderpass-compatibility
+
+        return &render_pass == this;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto RenderPass::description() const noexcept
+        -> const RenderPassDescription& {
         return m_description;
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto RenderPass::vkHandle() const noexcept -> const vk::raii::RenderPass& {
+    STORMKIT_FORCE_INLINE auto RenderPass::vkHandle() const noexcept
+        -> const vk::raii::RenderPass& {
         return m_vk_render_pass;
     }
 } // namespace stormkit::gpu

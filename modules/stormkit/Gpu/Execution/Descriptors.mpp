@@ -13,29 +13,27 @@ import stormkit.Core;
 
 import :Core;
 import :Resource;
-
-import vulkan;
+import :Vulkan;
 
 export {
     namespace stormkit::gpu {
         struct BufferDescriptor {
-            DescriptorType type = DescriptorType::Uniform_Buffer;
-            core::UInt32 binding;
+            DescriptorType               type = DescriptorType::Uniform_Buffer;
+            core::UInt32                 binding;
             core::NakedRef<const Buffer> buffer;
-            core::UInt32 range;
-            core::UInt32 offset;
+            core::UInt32                 range;
+            core::UInt32                 offset;
         };
 
         struct ImageDescriptor {
-            DescriptorType type = DescriptorType::Combined_Image_Sampler;
-            core::UInt32 binding;
-            ImageLayout layout;
+            DescriptorType                  type = DescriptorType::Combined_Image_Sampler;
+            core::UInt32                    binding;
+            ImageLayout                     layout;
             core::NakedRef<const ImageView> image_view;
-            core::NakedRef<const Sampler> sampler;
+            core::NakedRef<const Sampler>   sampler;
         };
 
         using Descriptor = std::variant<BufferDescriptor, ImageDescriptor>;
-
         class DescriptorPool;
 
         class DescriptorPoolObject: public ParentRef<DescriptorPool> {
@@ -46,18 +44,9 @@ export {
         };
 
         class STORMKIT_API DescriptorSet: public DeviceObject, public DescriptorPoolObject {
-            struct Tag {};
-
           public:
             static constexpr auto DEBUG_TYPE = DebugObjectType::Descriptor_Set;
 
-            using Deleter = std::function<void(vk::raii::DescriptorSet&)>;
-
-            DescriptorSet(const DescriptorPool& pool,
-                          std::vector<DescriptorType> type,
-                          vk::raii::DescriptorSet&& sets,
-                          Deleter deleter,
-                          Tag);
             ~DescriptorSet();
 
             DescriptorSet(const DescriptorSet&)                    = delete;
@@ -73,26 +62,40 @@ export {
             [[nodiscard]] auto vkHandle() const noexcept -> const vk::raii::DescriptorSet&;
 
           private:
+            using Deleter = std::function<void(vk::raii::DescriptorSet&)>;
+
+            DescriptorSet(const DescriptorPool      & pool,
+                          std::vector<DescriptorType> type,
+                          vk::raii::DescriptorSet  && sets,
+                          Deleter                     deleter);
+
             std::vector<DescriptorType> m_types;
 
-            core::DeferInit<vk::raii::DescriptorSet> m_vk_descriptor_set;
+            vk::raii::DescriptorSet m_vk_descriptor_set;
 
             Deleter m_deleter;
             friend class DescriptorPool;
         };
 
         struct DescriptorSetLayoutBinding {
-            core::UInt32 binding;
-            DescriptorType type;
-            ShaderStageFlag stages;
+            core::UInt32      binding;
+            DescriptorType    type;
+            ShaderStageFlag   stages;
             core::RangeExtent descriptor_count;
         };
 
         class STORMKIT_API DescriptorSetLayout: public DeviceObject {
+            struct Tag {};
+
           public:
             static constexpr auto DEBUG_TYPE = DebugObjectType::Descriptor_Set_Layout;
 
-            explicit DescriptorSetLayout(const Device& device);
+            DescriptorSetLayout(const Device                            & device,
+                                std::vector<DescriptorSetLayoutBinding>&& bindings,
+                                Tag);
+            DescriptorSetLayout(const Device                              & device,
+                                std::span<const DescriptorSetLayoutBinding> bindings,
+                                Tag);
             ~DescriptorSetLayout();
 
             DescriptorSetLayout(const DescriptorSetLayout&)                    = delete;
@@ -100,10 +103,6 @@ export {
 
             DescriptorSetLayout(DescriptorSetLayout&&) noexcept;
             auto operator=(DescriptorSetLayout&&) noexcept -> DescriptorSetLayout&;
-
-            auto addBinding(const DescriptorSetLayoutBinding& binding) -> void;
-
-            auto bake() -> void;
 
             [[nodiscard]] auto hash() const noexcept -> core::Hash64;
             [[nodiscard]] auto bindings() const noexcept
@@ -114,27 +113,29 @@ export {
             [[nodiscard]] auto operator==(const DescriptorSetLayout& second) const noexcept -> bool;
 
           private:
-            auto updateHash() noexcept -> void;
+            explicit DescriptorSetLayout(const Device& device);
 
             std::vector<DescriptorSetLayoutBinding> m_bindings;
 
-            core::Hash64 m_hash = 0;
-
+            core::Hash64                                   m_hash = 0;
             core::DeferInit<vk::raii::DescriptorSetLayout> m_vk_descriptor_set_layout;
         };
 
         class STORMKIT_API DescriptorPool: public DeviceObject {
+            struct Tag {};
+
           public:
             static constexpr auto DEBUG_TYPE = DebugObjectType::Descriptor_Pool;
 
             struct Size {
                 DescriptorType type;
-                core::UInt32 descriptor_count;
+                core::UInt32   descriptor_count;
             };
 
-            DescriptorPool(const Device& device,
+            DescriptorPool(const Device        & device,
                            std::span<const Size> sizes,
-                           core::UInt32 max_sets);
+                           core::UInt32          max_sets,
+                           Tag);
             ~DescriptorPool();
 
             DescriptorPool(const DescriptorPool&)                    = delete;
@@ -143,10 +144,20 @@ export {
             DescriptorPool(DescriptorPool&&) noexcept;
             auto operator=(DescriptorPool&&) noexcept -> DescriptorPool&;
 
+            [[nodiscard]] static auto create(const Device        & device,
+                                             std::span<const Size> sizes,
+                                             core::UInt32          max_sets) noexcept
+                -> Expected<DescriptorPool>;
+
+            [[nodiscard]] static auto allocate(const Device        & device,
+                                               std::span<const Size> sizes,
+                                               core::UInt32          max_sets) noexcept
+                -> Expected<std::unique_ptr<DescriptorPool>>;
+
             [[nodiscard]] auto vkHandle() const noexcept -> const vk::raii::DescriptorPool&;
 
           private:
-            auto createDescriptorSets(core::RangeExtent count,
+            auto createDescriptorSets(core::RangeExtent          count,
                                       const DescriptorSetLayout& layout) const
                 -> std::pair<std::vector<vk::raii::DescriptorSet>, std::vector<DescriptorType>>;
             auto deleteDescriptorSet(vk::raii::DescriptorSet& set) const -> void;
@@ -203,54 +214,217 @@ export {
 namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto DescriptorSet::types() const noexcept -> const std::vector<DescriptorType>& {
+    STORMKIT_FORCE_INLINE DescriptorSet::DescriptorSet(const DescriptorPool      & pool,
+                                                       std::vector<DescriptorType> type,
+                                                       vk::raii::DescriptorSet  && set,
+                                                       Deleter                     deleter)
+        : DeviceObject { pool.device() }, DescriptorPoolObject { pool },
+          m_types { std::move(type) }, m_vk_descriptor_set { std::move(set) },
+          m_deleter { std::move(deleter) } {
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE DescriptorSet::~DescriptorSet() {
+        if (*m_vk_descriptor_set) [[likely]]
+            m_deleter(m_vk_descriptor_set);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE DescriptorSet::DescriptorSet(DescriptorSet&&) noexcept = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto DescriptorSet::operator=(DescriptorSet&&) noexcept
+        -> DescriptorSet& = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    inline auto DescriptorSet::update(std::span<const Descriptor> descriptors) -> void {
+        const auto [buffers, images] = [&descriptors]() -> decltype(auto) {
+            auto buffers = std::vector<vk::DescriptorBufferInfo> {};
+            auto images  = std::vector<vk::DescriptorImageInfo> {};
+            buffers.reserve(std::size(descriptors));
+            images.reserve(std::size(descriptors));
+
+            std::ranges::for_each(
+                descriptors,
+                core::monadic::either(
+                    [&buffers](const BufferDescriptor& descriptor) noexcept -> decltype(auto) {
+                        buffers.emplace_back(vk::DescriptorBufferInfo {}
+                                                 .setBuffer(toVkHandle()(descriptor.buffer))
+                                                 .setOffset(descriptor.offset)
+                                                 .setRange(descriptor.range));
+                    },
+                    [&images](const ImageDescriptor& descriptor) noexcept -> decltype(auto) {
+                        images.emplace_back(
+                            vk::DescriptorImageInfo {}
+                                .setSampler(toVkHandle()(descriptor.sampler))
+                                .setImageView(toVkHandle()(descriptor.image_view))
+                                .setImageLayout(core::as<vk::ImageLayout>(descriptor.layout)));
+                    }));
+
+            return std::pair { std::move(buffers), std::move(images) };
+        }();
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto DescriptorSet::types() const noexcept
+        -> const std::vector<DescriptorType>& {
         return m_types;
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto DescriptorSet::vkHandle() const noexcept -> const vk::raii::DescriptorSet& {
+    STORMKIT_FORCE_INLINE auto DescriptorSet::vkHandle() const noexcept
+        -> const vk::raii::DescriptorSet& {
         return m_vk_descriptor_set;
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto DescriptorSetLayout::addBinding(const DescriptorSetLayoutBinding& binding) -> void {
-        m_bindings.emplace_back(binding);
+    STORMKIT_FORCE_INLINE DescriptorSetLayout::DescriptorSetLayout(const Device& device)
+        : DeviceObject { device } {
+        const auto vk_bindings =
+            m_bindings | std::views::transform([](auto&& binding) noexcept {
+                return vk::DescriptorSetLayoutBinding {}
+                    .setBinding(binding.binding)
+                    .setDescriptorType(core::as<vk::DescriptorType>(binding.type))
+                    .setDescriptorCount(core::as<core::UInt32>(binding.descriptor_count))
+                    .setStageFlags(core::as<vk::ShaderStageFlagBits>(binding.stages));
+            }) |
+            std::ranges::to<std::vector>();
 
-        updateHash();
+        const auto create_info = vk::DescriptorSetLayoutCreateInfo {}.setBindings(vk_bindings);
+
+        vkCreate<vk::raii::DescriptorSetLayout>(this->device().vkHandle(), create_info)
+            .transform(core::monadic::set(m_vk_descriptor_set_layout))
+            .transform_error(core::monadic::map(core::monadic::as<Result>(), core::throwError()));
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto DescriptorSetLayout::hash() const noexcept -> core::Hash64 {
+    STORMKIT_FORCE_INLINE
+    DescriptorSetLayout::DescriptorSetLayout(const Device                            & device,
+                                             std::vector<DescriptorSetLayoutBinding>&& bindings,
+                                             Tag)
+        : DescriptorSetLayout { device } {
+        m_bindings = std::move(bindings);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE
+    DescriptorSetLayout::DescriptorSetLayout(const Device                              & device,
+                                             std::span<const DescriptorSetLayoutBinding> bindings,
+                                             Tag)
+        : DescriptorSetLayout { device } {
+        m_bindings.reserve(std::ranges::size(bindings));
+        std::ranges::copy(bindings, std::back_inserter(m_bindings));
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE DescriptorSetLayout::~DescriptorSetLayout() = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE
+    DescriptorSetLayout::DescriptorSetLayout(DescriptorSetLayout&& other) noexcept = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto DescriptorSetLayout::operator=(DescriptorSetLayout&& other) noexcept
+        -> DescriptorSetLayout& = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto DescriptorSetLayout::hash() const noexcept -> core::Hash64 {
         return m_hash;
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto DescriptorSetLayout::bindings() const noexcept
+    STORMKIT_FORCE_INLINE auto DescriptorSetLayout::bindings() const noexcept
         -> const std::vector<DescriptorSetLayoutBinding>& {
         return m_bindings;
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto DescriptorSetLayout::vkHandle() const noexcept
+    STORMKIT_FORCE_INLINE auto DescriptorSetLayout::vkHandle() const noexcept
         -> const vk::raii::DescriptorSetLayout& {
-        return m_vk_descriptor_set_layout;
+        return m_vk_descriptor_set_layout.get();
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto DescriptorSetLayout::operator==(const DescriptorSetLayout& second) const noexcept
-        -> bool {
+    STORMKIT_FORCE_INLINE auto
+        DescriptorSetLayout::operator==(const DescriptorSetLayout& second) const noexcept -> bool {
         return m_hash == second.hash();
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto DescriptorPool::vkHandle() const noexcept -> const vk::raii::DescriptorPool& {
+    STORMKIT_FORCE_INLINE DescriptorPool::DescriptorPool(const Device        & device,
+                                                         std::span<const Size> sizes,
+                                                         core::UInt32          max_sets,
+                                                         Tag)
+        : DeviceObject { device } {
+        const auto pool_sizes = sizes | std::views::transform([&](const auto& size) {
+                                    return vk::DescriptorPoolSize {}
+                                        .setType(core::as<vk::DescriptorType>(size.type))
+                                        .setDescriptorCount(size.descriptor_count);
+                                }) |
+                                std::ranges::to<std::vector>();
+
+        const auto create_info = vk::DescriptorPoolCreateInfo {}
+                                     .setFlags(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet)
+                                     .setMaxSets(max_sets)
+                                     .setPoolSizes(pool_sizes);
+
+        vkCreate<vk::raii::DescriptorPool>(this->device().vkHandle(), create_info)
+            .transform(core::monadic::set(m_vk_descriptor_pool))
+            .transform_error(core::monadic::map(core::monadic::as<Result>(), core::throwError()));
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE DescriptorPool::~DescriptorPool() = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE DescriptorPool::DescriptorPool(DescriptorPool&& other) noexcept = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto DescriptorPool::operator=(DescriptorPool&& other) noexcept
+        -> DescriptorPool& = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto DescriptorPool::create(const Device        & device,
+                                                      std::span<const Size> extents,
+                                                      core::UInt32          max_sets) noexcept
+        -> Expected<DescriptorPool> try {
+        return DescriptorPool { device, extents, max_sets, Tag {} };
+    } catch (const Result& result) { return std::unexpected(result); }
+
+    ////////////////////////////////////p/
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto DescriptorPool::allocate(const Device        & device,
+                                                        std::span<const Size> extents,
+                                                        core::UInt32          max_sets) noexcept
+        -> Expected<std::unique_ptr<DescriptorPool>> try {
+        return std::make_unique<DescriptorPool>(device, extents, max_sets, Tag {});
+    } catch (const Result& result) { return std::unexpected(result); }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto DescriptorPool::vkHandle() const noexcept
+        -> const vk::raii::DescriptorPool& {
         return m_vk_descriptor_pool;
     }
 } // namespace stormkit::gpu

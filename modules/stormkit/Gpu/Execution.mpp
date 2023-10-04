@@ -4,7 +4,7 @@
 
 export module stormkit.Gpu:Execution;
 
-export import :Execution.CommandBuffer;
+// export import :Execution.CommandBuffer;
 export import :Execution.Descriptors;
 export import :Execution.Pipeline;
 export import :Execution.RenderPass;
