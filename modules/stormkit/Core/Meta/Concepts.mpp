@@ -19,7 +19,7 @@ namespace stormkit::core {
         };
 
         template<class T>
-        concept IsFancyPointer = requires(T& a) {
+        concept IsFancyPointer = requires(T&& a) {
             a.operator->();
             a.operator*();
             a.get();
@@ -51,7 +51,10 @@ namespace stormkit::core {
         // clang-format on
 
         template<class T>
-        concept IsIndirection = IsReference<T> or IsPointer<T>;
+        concept IsIndirection = IsLValueReference<T> or IsPointer<T>;
+
+        template<class T>
+        concept IsPolymorphic = std::is_polymorphic_v<T>;
 
         // clang-format off
         template<class T>
@@ -86,6 +89,18 @@ namespace stormkit::core {
         template<class T>
         concept IsBooleanTestable = details::IsBooleanTestable<T> && requires(T&& t) {
             { not std::forward<T>(t) } -> details::IsBooleanTestable;
+        };
+
+        template<class T>
+        concept IsOptionalType = requires(T&& t) {
+            t.has_value();
+            { t == std::nullopt } -> details::IsBooleanTestable;
+            { t != std::nullopt } -> details::IsBooleanTestable;
+        };
+
+        template<class T>
+        concept IsVariantType = requires(T&& t) {
+            { std::holds_alternative<int>(t) } -> details::IsBooleanTestable;
         };
 
         template<class T, class... Args>
