@@ -1,0 +1,141 @@
+// Copyright (C) 2021 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+export module Test;
+
+import <stormkit/Core/PlatformMacro.hpp>;
+
+import std;
+
+export namespace test {
+    struct TestFunc {
+        std::string           name;
+        std::function<void()> func;
+    };
+
+    struct TestSuiteHolder {
+        auto                  runTests() noexcept;
+        std::string           name;
+        std::vector<TestFunc> tests;
+        std::source_location  location;
+    };
+
+    struct TestSuite {
+        TestSuite(std::string              && name,
+                  std::vector<TestFunc>    && tests,
+                  const std::source_location& location = std::source_location::current()) noexcept;
+    };
+
+    auto expects(bool                        cond,
+                 std::string_view            message,
+                 const std::source_location& location = std::source_location::current()) noexcept;
+} // namespace test
+
+module :private;
+
+extern "C++" std::vector<std::unique_ptr<test::TestSuiteHolder>> test_suites;
+extern "C++" bool                                                verbose;
+extern "C++" bool                                                failed;
+
+namespace test {
+    enum class State {
+        PASSED,
+        NOTPASSED,
+        FAIL
+    };
+    auto colorifyBegin(State) noexcept -> void;
+    auto colorifyEnd() noexcept -> void;
+
+    auto TestSuiteHolder::runTests() noexcept {
+        if (verbose) { std::println("   > file: {}", location.file_name()); }
+
+        for (auto&& test : tests) {
+            failed = false;
+            std::println("     running test {}", test.name);
+            test.func();
+
+            if (not failed) {
+                std::print("     ");
+                colorifyBegin(State::PASSED);
+                std::print("PASSED");
+                colorifyEnd();
+                std::println("");
+            } else {
+                std::print("     ");
+                colorifyBegin(State::NOTPASSED);
+                std::print("NOT PASSED");
+                colorifyEnd();
+                std::println("");
+            }
+        }
+    }
+
+    TestSuite::TestSuite(std::string              && name,
+                         std::vector<TestFunc>    && tests,
+                         const std::source_location& location) noexcept {
+        test_suites.emplace_back(
+            std::make_unique<TestSuiteHolder>(std::move(name), std::move(tests), location));
+    }
+
+    auto expects(bool                        cond,
+                 std::string_view            message,
+                 const std::source_location& location) noexcept {
+        if (not cond) [[unlikely]] {
+            failed = true;
+            if (verbose) {
+                std::print("       ");
+                colorifyBegin(State::FAIL);
+                std::print("FAILURE");
+                colorifyEnd();
+
+                std::println(" on {} \n"
+                             "          > line:     {}",
+                             message,
+                             location.line());
+            }
+        }
+    } // namespace test
+#ifdef STORMKIT_OS_WINDOWS
+    namespace {
+        constexpr auto KBLA = 0;
+        constexpr auto KRED = 12;
+        constexpr auto KGRN = 2;
+        constexpr auto KWHT = 15;
+    } // namespace
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    auto colorifyBegin(bool fail) noexcept -> void {
+        auto output = GetStdHandle(STD_OUTPUT_HANDLE);
+
+        auto background = (fail) ? KRED : KRGN;
+        auto text       = KBLA;
+
+        SetConsoleTextAttribute(output, (background << 4) + text);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    auto colorifyEnd() noexcept -> void {
+        auto output = GetStdHandle(STD_OUTPUT_HANDLE);
+        SetConsoleTextAttribute(output, (KBLA << 4) + KWHT);
+    }
+#else
+    /////////////////////////////////////
+    /////////////////////////////////////
+    auto colorifyBegin(State state) noexcept -> void {
+        switch (state) {
+            case State::PASSED: std::print("\033[30;42m"); break;
+            case State::FAIL: std::print("\033[30;43m"); break;
+            case State::NOTPASSED: std::print("\033[30;41m"); break;
+        }
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    auto colorifyEnd() noexcept -> void {
+        std::print("\033[0m");
+    }
+#endif
+} // namespace test

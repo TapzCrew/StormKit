@@ -2,6 +2,26 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
+import stormkit.Core;
+
+import std;
+
+import Test;
+
+auto test_suites = std::vector<std::unique_ptr<test::TestSuiteHolder>> {};
+auto verbose     = false;
+auto failed      = false;
+
 auto main(int argc, char **argv) noexcept -> int {
+    for (auto i = 0; i < argc; ++i) {
+        auto arg = std::string_view { argv[i] };
+        if (arg == "--verbose" or arg == "-v") verbose = true;
+    }
+
+    for (auto&& suite : test_suites) {
+        std::println("Running test suite {}", suite->name);
+        suite->runTests();
+    }
+
     return 0;
 }
