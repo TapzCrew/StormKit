@@ -11,11 +11,19 @@ import :Meta.Concepts;
 export namespace stormkit::core {
     template<class T>
     struct PureTypeTrait {
-        using Type = std::remove_pointer_t<std::remove_cvref_t<T>>;
+        using Type = std::remove_cvref_t<T>;
     };
 
     template<class T>
     using PureType = typename PureTypeTrait<T>::Type;
+
+    template<class T>
+    struct RawTypeTrait {
+        using Type = std::remove_pointer_t<PureType<T>>;
+    };
+
+    template<class T>
+    using RawType = typename RawTypeTrait<T>::Type;
 
     template<std::ranges::range Range>
     struct IteratorTypeTrait {
