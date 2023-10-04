@@ -7,3 +7,13 @@ export module stormkit.Core:Meta;
 export import :Meta.Concepts;
 export import :Meta.Traits;
 export import :Meta.NamedType;
+
+export namespace stormkit::core {
+    template<class... Ts>
+    struct Overloaded: Ts... {
+        using Ts::operator()...;
+    };
+
+    template<class... Ts>
+    Overloaded(Ts...) -> Overloaded<Ts...>;
+} // namespace stormkit::core
