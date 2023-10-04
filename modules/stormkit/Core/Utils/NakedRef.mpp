@@ -44,6 +44,9 @@ export namespace stormkit::core {
     };
 
     template<typename T>
+    using OptionalRef = std::optional<NakedRef<T>>;
+
+    template<typename T>
         requires IsRawPointer<T> or IsLValueReference<T>
     constexpr auto makeNakedRef(T&& value) noexcept -> decltype(auto);
 
