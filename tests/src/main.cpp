@@ -19,7 +19,7 @@ auto main(int argc, char **argv) noexcept -> int {
     }
 
     for (auto&& suite : test_suites) {
-        std::println("Running test suite {}", suite->name);
+        std::println("Running test suite {} ({} tests)", suite->name, std::size(suite->tests));
         suite->runTests();
     }
 

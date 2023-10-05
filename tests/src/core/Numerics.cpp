@@ -57,7 +57,7 @@ namespace {
     const auto unsigned_longlongint1 = ulonglongint { 1 };
     const auto unsigned_longlongint2 = ulonglongint { 2 };
 
-    auto is_equal = test::TestSuite {
+    auto _ = test::TestSuite {
         "Core.Numerics",
         { { "isEqual.SameFloatT",
             [] {

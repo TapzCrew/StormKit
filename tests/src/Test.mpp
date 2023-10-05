@@ -42,6 +42,8 @@ namespace test {
     enum class State {
         PASSED,
         NOTPASSED,
+        CHECKMARK,
+        CROSSMARK,
         FAIL
     };
     auto colorifyBegin(State) noexcept -> void;
@@ -50,25 +52,46 @@ namespace test {
     auto TestSuiteHolder::runTests() noexcept {
         if (verbose) { std::println("   > file: {}", location.file_name()); }
 
+        auto passed_tests = 0;
+        auto failed_tests = 0;
         for (auto&& test : tests) {
             failed = false;
-            std::println("     running test {}", test.name);
+            if (verbose) std::println("     running test {}", test.name);
             test.func();
 
             if (not failed) {
-                std::print("     ");
-                colorifyBegin(State::PASSED);
-                std::print("PASSED");
-                colorifyEnd();
-                std::println("");
+                ++passed_tests;
+                if (verbose) {
+                    std::print("     ");
+                    colorifyBegin(State::PASSED);
+                    std::print("PASSED");
+                    colorifyEnd();
+                    std::println("");
+                }
             } else {
-                std::print("     ");
-                colorifyBegin(State::NOTPASSED);
-                std::print("NOT PASSED");
-                colorifyEnd();
-                std::println("");
+                ++failed_tests;
+                if (verbose) {
+                    std::print("     ");
+                    colorifyBegin(State::NOTPASSED);
+                    std::print("NOT PASSED");
+                    colorifyEnd();
+                    std::println("");
+                }
             }
         }
+
+        colorifyBegin(State::CHECKMARK);
+        std::print("✔ ");
+        colorifyEnd();
+        std::print("{} test passed", passed_tests);
+        if (failed_tests > 0) {
+            std::print(", ");
+            colorifyBegin(State::CROSSMARK);
+            std::print("❌");
+            colorifyEnd();
+            std::print("{} test failed", failed_tests);
+        }
+        std::println("");
     }
 
     TestSuite::TestSuite(std::string              && name,
@@ -89,7 +112,7 @@ namespace test {
                 std::print("FAILURE");
                 colorifyEnd();
 
-                std::println(" on {} \n"
+                std::println(" on expression \"{}\" \n"
                              "          > line: {}",
                              message,
                              location.line());
@@ -128,6 +151,8 @@ namespace test {
         switch (state) {
             case State::PASSED: std::print("\033[30;42m"); break;
             case State::FAIL: std::print("\033[30;43m"); break;
+            case State::CHECKMARK: std::print("\033[32m"); break;
+            case State::CROSSMARK: std::print("\033[33m"); break;
             case State::NOTPASSED: std::print("\033[30;41m"); break;
         }
     }
