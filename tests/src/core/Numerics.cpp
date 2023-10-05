@@ -60,7 +60,7 @@ namespace {
     auto is_equal = test::TestSuite {
         "Core.Numerics",
         {
-            { "isEqualSameFloatT",
+            { "isEqual.SameFloatT",
               [] {
                   auto float1 = 0.1f;
                   auto float2 = 0.2f;
@@ -96,7 +96,7 @@ namespace {
                   expects((not isEqual(double1, double2)));
                   expects((not isEqual(longdouble1, longdouble2)));
               } },
-            { "IsEqualDifferentFloatT",
+            { "IsEqual.DifferentFloatT",
               [] {
                   auto float1 = 0.1f;
                   auto float2 = 0.2f;
@@ -156,7 +156,7 @@ namespace {
                   expects((not isEqual(double2, longdouble1)));
                   expects((not isEqual(longdouble1, double2)));
               } },
-            { "isEqualSameIntegerT",
+            { "isEqual.SameIntegerT",
               [] {
                   expects((isEqual(char1, char1)));
 
@@ -192,7 +192,7 @@ namespace {
                   expects((not isEqual(signed_longlongint1, signed_longlongint2)));
                   expects((not isEqual(unsigned_longlongint1, unsigned_longlongint2)));
               } },
-            { "isEqualDifferentIntegerT",
+            { "isEqual.DifferentIntegerT",
               [] {
                   // char
                   expects((isEqual(char1, signed_char1)));
@@ -550,7 +550,119 @@ namespace {
 
                   expects((not isEqual(unsigned_longlongint1, signed_longlongint2)));
               } },
+            { "map", [] { expects((map(10, 0, 20, 0, 10) == 5)); } },
+            { "range",
+              [] {
+                  {
+                      auto rng = range(10);
+                      for (auto i = 0; i < 10; ++i) expects((rng[i] == i));
+                  }
+                  {
+                      auto rng = range(0, 10);
+                      for (auto i = 0; i < 10; ++i) expects((rng[i] == i));
+                  }
+                  {
+                      auto rng = range(5, 10);
+                      for (auto i = 5; i < 10; ++i) expects((rng[i - 5] == i));
+                  }
+                  {
+                      auto rng = range(-5, 10);
+                      for (auto i = -5; i < 10; ++i) expects((rng[i + 5] == i));
+                  }
+                  {
+                      auto rng = range(-5, 10, 2);
+                      auto j   = -5;
+                      for (auto i = 0u; i < std::size(rng); ++i) {
+                          expects((rng[i] == j));
+                          j += 2;
+                      }
+                  }
+                  {
+                      auto rng = range(NumericsRange { -5, 10, 2 });
+                      auto j   = -5;
+                      for (auto i = 0u; i < std::size(rng); ++i) {
+                          expects((rng[i] == j));
+                          j += 2;
+                      }
+                  }
+              } },
+            { "multirange",
+              [] {
+                  const auto multirange_simple = [] {
+                      auto i = 0;
+                      auto j = 0;
 
+                      for (auto [v1, v2] : multiRange(10, 5)) {
+                          if (v1 != i or v2 != j) return false;
+
+                          j += 1;
+                          if (j >= 5) {
+                              j = 0;
+                              i += 1;
+                          }
+                      }
+
+                      return true;
+                  };
+                  expects((multirange_simple()));
+
+                  const auto multirange_different_types = [] {
+                      auto i = 0;
+                      auto j = 0u;
+
+                      for (auto [v1, v2] : multiRange(10, 5u)) {
+                          if (v1 != i or v2 != j or not std::same_as<decltype(v2), decltype(j)>)
+                              return false;
+
+                          j += 1u;
+                          if (j >= 5) {
+                              j = 0u;
+                              i += 1;
+                          }
+                      }
+
+                      return true;
+                  };
+
+                  expects((multirange_simple()));
+                  const auto multirange_custom_start = [] {
+                      auto rng = multiRange(NumericsRange { 5, 10 }, NumericsRange { 2, 5 });
+
+                      auto i = 5;
+                      auto j = 2;
+
+                      for (auto [v1, v2] : rng) {
+                          if (v1 != i or v2 != j) return false;
+
+                          j += 1;
+                          if (j >= 5) {
+                              j = 2;
+                              i += 1;
+                          }
+                      }
+                      return true;
+                  };
+                  expects((multirange_custom_start()));
+
+                  const auto multirange_custom_step = [] {
+                      auto rng = multiRange(NumericsRange { 0, 10, 5 }, NumericsRange { 0, 6, 2 });
+
+                      auto i = 0;
+                      auto j = 0;
+
+                      for (auto [v1, v2] : rng) {
+                          if (v1 != i or v2 != j) return false;
+
+                          j += 2;
+                          if (j >= 5) {
+                              j = 0;
+                              i += 5;
+                          }
+                      }
+                      return true;
+                  };
+                  expects((multirange_custom_step()));
+              } },
         }
     };
 } // namespace
