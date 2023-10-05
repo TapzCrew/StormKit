@@ -127,14 +127,14 @@ namespace {
                   expects((not isEqual(double2, longdouble1)));
                   expects((not isEqual(longdouble1, double2)));
 
-                  float1 = 100.1f;
-                  float2 = 100.2f;
+                  float1 = 1000.1f;
+                  float2 = 1000.2f;
 
                   double1 = 1000.1;
                   double2 = 1000.2;
 
-                  longdouble1 = 10000.1l;
-                  longdouble2 = 10000.2l;
+                  longdouble1 = 1000.1l;
+                  longdouble2 = 1000.2l;
 
                   expects((isEqual(float1, double1)));
                   expects((isEqual(double1, float1)));

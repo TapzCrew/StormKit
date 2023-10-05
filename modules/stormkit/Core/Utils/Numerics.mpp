@@ -31,10 +31,14 @@ export namespace stormkit::core {
     using Secondf = std::chrono::duration<float, std::chrono::seconds::period>;
 
     template<std::floating_point T>
-    [[nodiscard]] constexpr auto isEqual(T a, T b) noexcept -> bool;
+    [[nodiscard]] constexpr auto
+        isEqual(T a, T b, T epsilon = std::numeric_limits<T>::epsilon()) noexcept -> bool;
 
-    [[nodiscard]] constexpr auto isEqual(std::floating_point auto a,
-                                         std::floating_point auto b) noexcept -> bool;
+    template<std::floating_point T,
+             std::floating_point U,
+             std::floating_point V = SafeTypeHelperOtherType<T, U>>
+    [[nodiscard]] constexpr auto
+        isEqual(T a, U b, V epsilon = std::numeric_limits<V>::epsilon()) noexcept -> bool;
 
     template<std::integral T>
     [[nodiscard]] constexpr auto isEqual(T a, T b) noexcept -> bool;
@@ -193,17 +197,26 @@ namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
     template<std::floating_point T>
-    constexpr auto isEqual(T a, T b) noexcept -> bool {
-        return std::abs((a - b) < std::numeric_limits<T>::epsilon());
+    constexpr auto isEqual(T a, T b, T epsilon) noexcept -> bool {
+        const auto diff   = std::abs(a - b);
+        const auto max_ab = std::max(std::abs(a), std::abs(b));
+
+        if (max_ab >= T { 1 }) return diff <= (epsilon * max_ab);
+        else if (max_ab > T { 0 })
+            return (diff / max_ab) <= epsilon;
+
+        return false;
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    constexpr auto isEqual(std::floating_point auto a, std::floating_point auto b) noexcept
-        -> bool {
-        using T = SafeTypeHelperType<decltype(a), decltype(b)>;
+    template<std::floating_point T,
+             std::floating_point U,
+             std::floating_point V = SafeTypeHelperOtherType<T, U>>
+    constexpr auto isEqual(T a, U b, V epsilon) noexcept -> bool {
+        using Type = SafeTypeHelperType<decltype(a), decltype(b)>;
 
-        return std::abs(core::as<T>(a) - core::as<T>(b)) < std::numeric_limits<T>::epsilon();
+        return isEqual<Type>(core::as<Type>(a), core::as<Type>(b), core::as<Type>(epsilon));
     }
 
     /////////////////////////////////////
@@ -218,7 +231,7 @@ namespace stormkit::core {
     constexpr auto isEqual(std::integral auto a, std::integral auto b) noexcept -> bool {
         using T = SafeTypeHelperType<decltype(a), decltype(b)>;
 
-        return core::as<T>(a) == core::as<T>(b);
+        return isEqual<T>(core::as<T>(a), core::as<T>(b));
     }
 
     /////////////////////////////////////
