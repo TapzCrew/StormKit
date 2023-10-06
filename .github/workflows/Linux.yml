@@ -1,0 +1,72 @@
+name: Linux
+
+on:
+  push:
+    branches: [develop]
+    paths-ignore:
+      - '.github/workflows/Windows.yml'
+      - '.github/workflows/macOS.yml'
+      - '.github/workflows/iOS.yml'
+      - '.github/workflows/Android.yml'
+      - '.gitignore'
+      - 'LICENSE'
+      - 'README.md'
+  pull_request:
+    branches: [main, develop]
+    paths-ignore:
+      - '.github/workflows/Windows.yml'
+      - '.github/workflows/macOS.yml'
+      - '.github/workflows/iOS.yml'
+      - '.github/workflows/Android.yml'
+      - '.gitignore'
+      - 'LICENSE'
+      - 'README.md'
+
+jobs:
+  build:
+    name: archlinux-latest-x64 ( ${{ matrix.kind }}-${{ matrix.mode }} )
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [linux]
+        kind: [static, shared]
+        mode: [release, debug, asan]
+
+    runs-on: Linux
+
+    concurrency:
+      group: ${{ github.ref }}-${{ github.base_ref }}-${{ github.head_ref }}-Linux-${{ matrix.kind }}-${{ matrix.mode }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Install v
+        uses: xmake-io/github-action-setup-xmake@v1
+        with:
+          xmake-version: branch@dev
+
+      - name: Update xmake repository
+        run: xmake repo -vD --update
+
+      - name: Configure & Build
+        id: build
+        run: |
+          xmake f -vD --yes -m ${{ matrix.mode }} -k ${{ matrix.kind }} --enable_examples=y --enable_tests=y --enable_gpu=n --libc++=y --toolchain=llvm --sdk=/opt/llvm-git/usr
+          xmake b -vD
+
+      - name: Tests
+        run: xmake run core-tests --verbose
+
+      - name: Installation
+        run: xmake install -vD --installdir="${{ runner.workspace }}/output"
+
+      - name: Upload artifacts
+        id: upload
+        uses: actions/upload-artifact@v1
+        with:
+          name: Linux-x64-${{ matrix.kind }}-${{ matrix.mode }}
+          path: ${{ runner.workspace }}/output
