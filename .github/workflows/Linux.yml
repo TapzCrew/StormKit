@@ -55,7 +55,7 @@ jobs:
       - name: Configure & Build
         id: build
         run: |
-          xmake f -vD --yes -m ${{ matrix.mode }} -k ${{ matrix.kind }} --enable_examples=y --enable_tests=y --enable_gpu=n --libc++=y --toolchain=llvm --sdk=/opt/llvm-git/usr
+          xmake f -vD --yes -m ${{ matrix.mode }} -k ${{ matrix.kind }} --enable_examples=y --enable_tests=y --enable_gpu=n --libc++=y --toolchain=llvm --cxxflags="-L/opt/llvm-git/usr/lib" --sdk=/opt/llvm-git/usr
           xmake b -vD
 
       - name: Tests
