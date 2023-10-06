@@ -27,17 +27,17 @@ export namespace stormkit::core {
                                  const Hasher& hash,
                                  const Equal& equal) noexcept;
 
-    template<IsHashable Key, class Value, RangeExtent N>
-    constexpr auto makeFrozenMap(const std::array<std::pair<Key, Value>, N>& items) noexcept;
-
-    template<IsHashable Key,
-             class Value,
-             RangeExtent N,
-             IsHashFunc<Value> Hasher,
-             IsBinaryPredicate<Value> Equal>
-    constexpr auto makeFrozenMap(const std::array<std::pair<Key, Value>, N>& items,
-                                 const Hasher& hash,
-                                 const Equal& equal) noexcept;
+    // template<IsHashable Key, class Value, RangeExtent N>
+    // constexpr auto makeFrozenMap(const std::array<std::pair<Key, Value>, N>& items) noexcept;
+    //
+    // template<IsHashable Key,
+    //          class Value,
+    //          RangeExtent N,
+    //          IsHashFunc<Value> Hasher,
+    //          IsBinaryPredicate<Value> Equal>
+    // constexpr auto makeFrozenMap(const std::array<std::pair<Key, Value>, N>& items,
+    //                              const Hasher& hash,
+    //                              const Equal& equal) noexcept;
 } // namespace stormkit::core
 
 ////////////////////////////////////////////////////////////////////
@@ -61,19 +61,19 @@ namespace stormkit::core {
         return frozen::make_unordered_map<Key, Value, N, Hasher, Equal>(items, hash, equal);
     }
 
-    template<IsHashable Key, class Value, RangeExtent N>
-    constexpr auto makeFrozenMap(const std::array<std::pair<Key, Value>, N>& items) noexcept {
-        return frozen::make_unordered_map<Key, Value, N>(items);
-    }
-
-    template<IsHashable Key,
-             class Value,
-             RangeExtent N,
-             IsHashFunc<Value> Hasher,
-             IsBinaryPredicate<Value> Equal>
-    constexpr auto makeFrozenMap(const std::array<std::pair<Key, Value>, N>& items,
-                                 const Hasher& hash,
-                                 const Equal& equal) noexcept {
-        return frozen::make_unordered_map<Key, Value, N, Hasher, Equal>(items, hash, equal);
-    }
+    // template<IsHashable Key, class Value, RangeExtent N>
+    // constexpr auto makeFrozenMap(const std::array<std::pair<Key, Value>, N>& items) noexcept {
+    //     return frozen::make_unordered_map<Key, Value, N>(items);
+    // }
+    //
+    // template<IsHashable Key,
+    //          class Value,
+    //          RangeExtent N,
+    //          IsHashFunc<Value> Hasher,
+    //          IsBinaryPredicate<Value> Equal>
+    // constexpr auto makeFrozenMap(const std::array<std::pair<Key, Value>, N>& items,
+    //                              const Hasher& hash,
+    //                              const Equal& equal) noexcept {
+    //     return frozen::make_unordered_map<Key, Value, N, Hasher, Equal>(items, hash, equal);
+    // }
 } // namespace stormkit::core

@@ -35,12 +35,16 @@ export namespace stormkit::core {
 
         [[nodiscard]] constexpr auto get(this auto&& self) noexcept -> decltype(auto);
         [[nodiscard]] constexpr auto operator->(this auto&& self) noexcept -> decltype(auto);
+        [[nodiscard]] constexpr auto operator*(this auto&& self) noexcept -> decltype(auto);
 
         [[nodiscard]] constexpr operator T &(this auto&& self) noexcept;
 
       private:
         PointerType m_value;
     };
+
+    template<typename T>
+    using OptionalRef = std::optional<NakedRef<T>>;
 
     template<typename T>
         requires IsRawPointer<T> or IsLValueReference<T>
@@ -112,6 +116,13 @@ namespace stormkit::core {
     template<typename T>
     constexpr auto NakedRef<T>::operator->(this auto&& self) noexcept -> decltype(auto) {
         return std::forward<decltype(self)>(self).m_value;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<typename T>
+    constexpr auto NakedRef<T>::operator*(this auto&& self) noexcept -> decltype(auto) {
+        return std::forward<decltype(self)>(self).get();
     }
 
     /////////////////////////////////////

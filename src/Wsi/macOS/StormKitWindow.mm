@@ -2,66 +2,65 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-/////////// - StormKit::window - ///////////
-#import "StormWindowController.hpp"
-#import "AutoReleasePoolWrapper.hpp"
-#import "StormApplication.h"
-#import "StormView.hpp"
-#import "StormWindow.h"
-#include "macOSWindow.hpp"
+#import "StormKitWindow.hpp"
+#import "StormKitApplication.h"
+#import "StormKitView.hpp"
+#import "macOSWindow.hpp"
 
-/////////// - Metal - ///////////
 #import <Metal/Metal.h>
 
-/////////// - QuartzCore - ///////////
 #import <QuartzCore/CAMetalLayer.h>
 
-using namespace storm;
-using namespace storm::window;
-using namespace storm::window::details;
+using namespace stormkit::wsi::macos;
 
-STORMKIT_PRIVATE auto fromStdString(const std::string &str) noexcept -> NSString * {
-    return [NSString stringWithCString:str.c_str() encoding:[NSString defaultCStringEncoding]];
+namespace {
+  auto fromStdString(const std::string &str) noexcept -> NSString * {
+      return [NSString stringWithCString:str.c_str() encoding:[NSString defaultCStringEncoding]];
+  }
 }
 
-@implementation StormWindowController {
+@implementation StormKitWindowController {
     macOSWindow *requester;
     NSWindow *window;
-    StormView *view;
-    BOOL is_open;
+    StormKitView *view;
 }
 
 /////////////////////////////////////
 /////////////////////////////////////
-- (id)initWithSettings:(VideoSettings)settings
-             withStyle:(WindowStyle)style
+- (id)initWithWidth:(std::uint32_t)width
+             withHeight:(std::uint32_t)height
+             withStyle:(int)style
              withTitle:(std::string)title
          withRequester:(macOSWindow *)_requester {
-    [super init];
+    self = [super init];
 
     if (self) {
         view   = nil;
         window = nil;
 
-        auto window_style = NSUInteger(NSWindowStyleMaskTitled);
-        if ((style & WindowStyle::Close) == WindowStyle::Close)
+        auto window_style = NSUInteger();
+
+        if ((style & 0b1) == 0b1)
+           window_style |= NSWindowStyleMaskTitled;
+
+        if ((style & 0b10) == 0b10)
             window_style |= NSWindowStyleMaskClosable;
 
-        if ((style & WindowStyle::Resizable) == WindowStyle::Resizable)
-            window_style |= NSWindowStyleMaskResizable;
-
-        if ((style & WindowStyle::Minimizable) == WindowStyle::Minimizable)
+        if ((style & 0b100) == 0b100)
             window_style |= NSWindowStyleMaskMiniaturizable;
 
-        const auto rect = NSMakeRect(0, 0, settings.size.width, settings.size.height);
-        window          = [[StormWindow alloc] initWithContentRect:rect
+        if ((style & 0b1000) == 0b1000)
+            window_style |= NSWindowStyleMaskResizable;
+
+        const auto rect = NSMakeRect(0, 0, width, height);
+        window          = [[StormKitWindow alloc] initWithContentRect:rect
                                                 styleMask:window_style
                                                   backing:NSBackingStoreBuffered
                                                     defer:NO];
 
         auto frame = [window convertRectToBacking:[[window contentView] frame]];
 
-        view = [[StormView alloc] initWithFrame:frame withRequester:_requester withWindow:window];
+        view = [[StormKitView alloc] initWithFrame:frame withRequester:_requester withWindow:window];
         [view setLayer:[CAMetalLayer layer]];
         [view setWantsLayer:YES];
 
@@ -80,8 +79,6 @@ STORMKIT_PRIVATE auto fromStdString(const std::string &str) noexcept -> NSString
         // if (fullscreen) [window toggleFullScreen:self];
 
         requester = _requester;
-
-        is_open = YES;
     }
 
     return self;
@@ -92,10 +89,8 @@ STORMKIT_PRIVATE auto fromStdString(const std::string &str) noexcept -> NSString
 - (void)dealloc {
     [self close];
 
-    [window release];
-    [view release];
-
-    [super dealloc];
+    window = nil;
+    view = nil;
 }
 
 /////////////////////////////////////
@@ -112,12 +107,6 @@ STORMKIT_PRIVATE auto fromStdString(const std::string &str) noexcept -> NSString
     [window setDelegate:nil];
 
     [self setRequester:nullptr];
-}
-
-/////////////////////////////////////
-/////////////////////////////////////
-- (BOOL)isOpen {
-    return is_open;
 }
 
 /////////////////////////////////////
@@ -141,15 +130,14 @@ STORMKIT_PRIVATE auto fromStdString(const std::string &str) noexcept -> NSString
 /////////////////////////////////////
 /////////////////////////////////////
 - (void)processEvent {
-    [StormApplication processEvent];
-    drainThreadPool();
+    [StormKitApplication processEvent];
 
     // CGAssociateMouseAndMouseCursorPosition(TRUE);
 }
 
 /////////////////////////////////////
 /////////////////////////////////////
-- (StormView *)nativeHandle {
+- (StormKitView *)nativeHandle {
     return view;
 }
 
@@ -162,7 +150,6 @@ STORMKIT_PRIVATE auto fromStdString(const std::string &str) noexcept -> NSString
 /////////////////////////////////////
 /////////////////////////////////////
 - (BOOL)windowShouldClose:(id)sender {
-    is_open = NO;
     return YES;
 }
 
@@ -195,7 +182,7 @@ STORMKIT_PRIVATE auto fromStdString(const std::string &str) noexcept -> NSString
 /////////////////////////////////////
 /////////////////////////////////////
 - (void)setMousePosition:(NSPoint)point {
-    [view setMousePosition:point];
+    CGWarpMouseCursorPosition(point);
 }
 
 /////////////////////////////////////
@@ -211,6 +198,28 @@ STORMKIT_PRIVATE auto fromStdString(const std::string &str) noexcept -> NSString
     NSPoint pointInView = [view convertPoint:point fromView:nil];
 
     return pointInView;
+}
+
+@end
+
+@implementation StormKitWindow
+
+/////////////////////////////////////
+/////////////////////////////////////
+- (BOOL)acceptsFirstResponder {
+    return YES;
+}
+
+/////////////////////////////////////
+/////////////////////////////////////
+- (BOOL)canBecomeKeyWindow {
+    return YES;
+}
+
+/////////////////////////////////////
+/////////////////////////////////////
+- (void)performClose:(id)sender {
+    [self close];
 }
 
 @end

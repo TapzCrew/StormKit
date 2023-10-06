@@ -19,18 +19,20 @@ namespace stormkit::engine {
                              const core::math::ExtentU& window_extent,
                              std::string window_title,
                              PrivateTag) {
-        m_renderer = Renderer::create(application_name)
+        m_window = wsi::Window { std::move(window_title), window_extent, wsi::WindowStyle::Close };
+        m_event_handler = wsi::EventHandler {};
+
+        m_renderer = Renderer::create(application_name, m_window.get())
                          .transform_error(core::expectsWithMessage("Failed to initialize renderer"))
                          .value();
 
-        m_window = wsi::Window { std::move(window_title), window_extent, wsi::WindowStyle::Close };
-        m_event_handler = wsi::EventHandler {};
-        m_world         = entities::EntityManager {};
-
-        m_world->addSystem<RenderSystem>();
+        m_world = entities::EntityManager {};
     }
 
     auto Application::update() -> void {
+        m_world->addSystem<RenderSystem>();
+
+        m_renderer->startRendering();
         while (m_window->isOpen()) {
             m_event_handler->update(m_window);
             m_world->step(core::Secondf { 0 });

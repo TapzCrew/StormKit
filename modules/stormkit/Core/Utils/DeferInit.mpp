@@ -37,6 +37,7 @@ export namespace stormkit::core {
 
         [[nodiscard]] constexpr auto get(this auto&& self) noexcept -> decltype(auto);
         [[nodiscard]] constexpr auto operator->(this auto&& self) noexcept -> decltype(auto);
+        [[nodiscard]] constexpr auto operator*(this auto&& self) noexcept -> decltype(auto);
 
         [[nodiscard]] constexpr operator T &() noexcept;
         [[nodiscard]] constexpr operator const T &() const noexcept;
@@ -175,6 +176,13 @@ namespace stormkit::core {
         using U = LikeCVType<decltype(self), T>;
 
         return std::launder(std::bit_cast<U *>(std::data(self.m_data)));
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<typename T>
+    constexpr auto DeferInit<T>::operator*(this auto&& self) noexcept -> decltype(auto) {
+        return std::forward<decltype(self)>(self).get();
     }
 
     /////////////////////////////////////

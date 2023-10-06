@@ -2,7 +2,7 @@ name: Archlinux
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, dev ]
     paths-ignore:
       - '.github/workflows/Ubuntu.yml'
       - '.github/workflows/Windows.yml'
@@ -14,7 +14,7 @@ on:
       - 'LICENSE'
       - 'README.md'
   pull_request:
-    branches: [ main ]
+    branches: [ main, dev ]
     paths-ignore:
       - '.github/workflows/Ubuntu.yml'
       - '.github/workflows/Windows.yml'
@@ -33,47 +33,40 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest]
+        os: [archlinux]
         kind: [static, shared]
         mode: [release, debug, asan]
 
-    runs-on: ${{ matrix.os }}
-    container:
-      image: archlinux:base-devel
-      volumes:
-        - /output:/output
+    runs-on: Archlinux
 
     concurrency:
       group: ${{ github.ref }}-${{ github.base_ref }}-${{ github.head_ref }}-Archlinux-${{ matrix.kind }}-${{ matrix.mode }}
 
     steps:
-      - name: Dependencies bootstrap
-        run: |
-          pacman -Syu --noconfirm --needed openssl
-          pacman -Sy --noconfirm --needed glibc git base-devel perl make unzip p7zip
-          pacman -Sy --noconfirm --needed mesa gcc-fortran glu
-
       - name: Checkout
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      - name: Install xmake
+      - name: Install v
         uses: xmake-io/github-action-setup-xmake@v1
         with:
           xmake-version: branch@dev
 
       - name: Update xmake repository
-        run: sudo xmake repo --root -vD --update
+        run: sudo xmake repo -vD --update
 
       - name: Configure & Build
         id: build
         run: |
-          sudo xmake f --root -vD --yes -m ${{ matrix.mode }} -k ${{ matrix.kind }}
-          sudo xmake b --root -vD
+          xmake f -vD --yes -m ${{ matrix.mode }} -k ${{ matrix.kind }} --toolchain=llvm --sdk=/opt/llvm-git/usr
+          xmake b -vD
+
+      - name: Tests
+        run: xmake run core-tests --verbose
 
       - name: Installation
-        run: sudo /__t/xmake/dev/x64/bin/xmake install --root -vD --installdir="/output"
+        run: xmake install -vD --installdir="/output"
 
       - name: Upload artifacts
         id: upload

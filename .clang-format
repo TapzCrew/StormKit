@@ -4,7 +4,7 @@ BasedOnStyle: LLVM
 Language: Cpp
 AlignAfterOpenBracket: Align
 AlignConsecutiveAssignments: 'true'
-AlignConsecutiveDeclarations: 'false'
+AlignConsecutiveDeclarations: 'true'
 AlignEscapedNewlines: Left
 AlignOperands: 'true'
 AlignTrailingComments: 'true'
@@ -84,7 +84,7 @@ SpacesInAngles: 'false'
 Standard: c++20
 TabWidth: '4'
 UseTab: Never
-PenaltyBreakBeforeFirstCallParameter: 200
+PenaltyBreakBeforeFirstCallParameter: '120'
 ---
 Language: ObjC
 AlignAfterOpenBracket: Align
@@ -143,5 +143,6 @@ SpacesInAngles: 'false'
 Standard: c++20
 TabWidth: '4'
 UseTab: Never
-PenaltyBreakBeforeFirstCallParameter: 200
+PenaltyBreakBeforeFirstCallParameter: '120'
+PenaltyIndentedWhitespace: '1'
 ...

@@ -18,11 +18,12 @@ export namespace stormkit::gpu {
     class CommandBuffer;
 
     class STORMKIT_API PipelineCache: public DeviceObject {
+        struct Tag {};
+
       public:
         static constexpr auto DEBUG_TYPE = DebugObjectType::Pipeline_Cache;
 
-        explicit PipelineCache(const Device& device,
-                               std::filesystem::path cache_path = "./pipeline_cache.bin");
+        PipelineCache(const Device& device, std::filesystem::path cache_path, Tag);
         ~PipelineCache();
 
         PipelineCache(const PipelineCache&)                    = delete;
@@ -30,6 +31,13 @@ export namespace stormkit::gpu {
 
         PipelineCache(PipelineCache&&) noexcept;
         auto operator=(PipelineCache&&) noexcept -> PipelineCache&;
+
+        [[nodiscard]] static auto create(const Device        & device,
+                                         std::filesystem::path cache_path) noexcept
+            -> Expected<PipelineCache>;
+        [[nodiscard]] static auto allocate(const Device        & device,
+                                           std::filesystem::path cache_path) noexcept
+            -> Expected<std::unique_ptr<PipelineCache>>;
 
         [[nodiscard]] auto vkHandle() const noexcept -> const vk::raii::PipelineCache&;
 
@@ -43,9 +51,9 @@ export namespace stormkit::gpu {
 
         struct SerializedCache {
             struct {
-                core::UInt32 magic;
+                core::UInt32      magic;
                 core::RangeExtent data_size;
-                core::UInt64 data_hash;
+                core::UInt64      data_hash;
             } guard;
 
             struct {
@@ -59,7 +67,7 @@ export namespace stormkit::gpu {
             } uuid;
         } m_serialized;
 
-        std::filesystem::path m_path = {};
+        std::filesystem::path m_path;
 
         core::DeferInit<vk::raii::PipelineCache> m_vk_pipeline_cache;
     };
@@ -68,8 +76,9 @@ export namespace stormkit::gpu {
       public:
         static constexpr auto DEBUG_TYPE = DebugObjectType::Pipeline;
 
-        Pipeline(const Device& device, const PipelineCache *cache = nullptr) noexcept;
-        virtual ~Pipeline();
+        Pipeline(const Device                                     & device,
+                 std::optional<core::NakedRef<const PipelineCache>> cache) noexcept;
+        ~Pipeline();
 
         Pipeline(const Pipeline&)                    = delete;
         auto operator=(const Pipeline&) -> Pipeline& = delete;
@@ -78,24 +87,20 @@ export namespace stormkit::gpu {
         auto operator=(Pipeline&&) noexcept -> Pipeline&;
 
         [[nodiscard]] auto baked() const noexcept -> bool;
-        virtual auto bake() -> void = 0;
+        auto               bake() -> void;
 
         [[nodiscard]] auto vkHandle() const noexcept -> const vk::raii::Pipeline&;
         [[nodiscard]] auto vkLayout() const noexcept -> const vk::raii::PipelineLayout&;
 
       protected:
-        virtual auto bind(CommandBuffer& commandbuffer) const noexcept -> void = 0;
-        friend class CommandBuffer;
+        auto bind(CommandBuffer& commandbuffer) const noexcept -> void = 0;
 
-        const PipelineCache *m_pipeline_cache = nullptr;
+        core::NakedRef<const PipelineCache> m_pipeline_cache;
 
         bool m_is_baked = false;
 
-        core::DeferInit<vk::raii::Pipeline> m_vk_pipeline;
+        core::DeferInit<vk::raii::Pipeline>       m_vk_pipeline;
         core::DeferInit<vk::raii::PipelineLayout> m_vk_pipeline_layout;
-
-      private:
-        Pipeline() = delete;
     };
 } // namespace stormkit::gpu
 
@@ -106,25 +111,43 @@ export namespace stormkit::gpu {
 namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto PipelineCache::vkHandle() const noexcept -> const vk::raii::PipelineCache& {
+    STORMKIT_FORCE_INLINE auto PipelineCache::create(const Device        & device,
+                                                     std::filesystem::path cache_path) noexcept
+        -> Expected<PipelineCache> try {
+        return PipelineCache { device, std::move(cache_path), Tag {} };
+    } catch (const Result& result) { return std::unexpected(result); }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto PipelineCache::allocate(const Device        & device,
+                                                       std::filesystem::path cache_path) noexcept
+        -> Expected<std::unique_ptr<PipelineCache>> try {
+        return std::make_unique<PipelineCache>(device, cache_path, Tag {});
+    } catch (const Result& result) { return std::unexpected(result); }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto PipelineCache::vkHandle() const noexcept
+        -> const vk::raii::PipelineCache& {
         return m_vk_pipeline_cache;
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto Pipeline::baked() const noexcept -> bool {
+    STORMKIT_FORCE_INLINE auto Pipeline::baked() const noexcept -> bool {
         return m_is_baked;
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto Pipeline::vkHandle() const noexcept -> const vk::raii::Pipeline& {
+    STORMKIT_FORCE_INLINE auto Pipeline::vkHandle() const noexcept -> const vk::raii::Pipeline& {
         return m_vk_pipeline;
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto Pipeline::vkLayout() const noexcept -> const vk::raii::PipelineLayout& {
+    STORMKIT_FORCE_INLINE auto Pipeline::vkLayout() const noexcept
+        -> const vk::raii::PipelineLayout& {
         return m_vk_pipeline_layout;
     }
 } // namespace stormkit::gpu

@@ -2,7 +2,7 @@ name: Windows
 
 on:
   push:
-    branches: [ main ]
+    branches: [ ]
     paths-ignore:
       - '.github/workflows/Archlinux.yml'
       - '.github/workflows/Ubuntu.yml'
@@ -14,7 +14,7 @@ on:
       - 'LICENSE'
       - 'README.md'
   pull_request:
-    branches: [ main ]
+    branches: [ ]
     paths-ignore:
       - '.github/workflows/Archlinux.yml'
       - '.github/workflows/Ubuntu.yml'

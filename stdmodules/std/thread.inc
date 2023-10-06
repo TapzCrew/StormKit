@@ -10,6 +10,9 @@
 export namespace std {
   // [thread.thread.class], class thread
   using std::thread;
+  using std::jthread;
+
+  using std::stop_token;
 
   using std::swap;
 

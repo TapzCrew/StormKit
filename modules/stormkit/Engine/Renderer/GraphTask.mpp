@@ -1,0 +1,166 @@
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+export module stormkit.Engine:Renderer.GraphTask;
+
+import std;
+
+import stormkit.Core;
+
+import <stormkit/Core/PlatformMacro.hpp>;
+
+import :Renderer.GraphResource;
+import :Renderer.GraphID;
+
+import :Vulkan;
+
+export namespace stormkit::engine {
+    class GraphTaskBuilder;
+
+    class STORMKIT_API GraphTask { 
+      public:
+        enum class Type {
+            Graphics,
+            Compute
+        };
+
+        GraphTask(core::RangeOffset data_id,
+                  std::string       name,
+                  Type              type       = Type::Graphics,
+                  bool              cull_imune = false);
+        virtual ~GraphTask();
+
+        GraphTask(const GraphTask&)                    = delete;
+        auto operator=(const GraphTask&) -> GraphTask& = delete;
+
+        GraphTask(GraphTask&&) noexcept;
+        auto operator=(GraphTask&&) noexcept -> GraphTask&;
+
+        [[nodiscard]] auto id() const noexcept -> GraphID;
+        [[nodiscard]] auto dataID() const noexcept -> core::RangeOffset;
+        [[nodiscard]] auto name() const noexcept -> const std::string&;
+        [[nodiscard]] auto type() const noexcept -> Type;
+        [[nodiscard]] auto cullImune() const noexcept -> bool;
+        [[nodiscard]] auto refCount() const noexcept -> core::RangeExtent;
+
+        [[nodiscard]] auto creates() const noexcept -> const std::vector<GraphID>&;
+        [[nodiscard]] auto writes() const noexcept -> const std::vector<GraphID>&;
+        [[nodiscard]] auto reads() const noexcept -> const std::vector<GraphID>&;
+
+        auto setCullImune(bool imune) noexcept -> void;
+
+        std::function<void(std::byte&, GraphTaskBuilder&)> onSetup;
+        std::function<void(const std::byte&,
+                           std::optional<core::NakedRef<vk::raii::RenderPass>> renderpass,
+                           vk::raii::CommandBuffer                           & cmb)>
+            onExecute;
+
+      private:
+        GraphID           m_id;
+        core::RangeOffset m_data_id;
+        std::string       m_name;
+        Type              m_type;
+        bool              m_cull_imune;
+        core::RangeExtent m_ref_count = 0;
+
+        std::vector<GraphID> m_creates;
+        std::vector<GraphID> m_writes;
+        std::vector<GraphID> m_reads;
+
+        friend class GraphTaskBuilder;  // TODO rework this
+        friend class FrameGraphBuilder; // TODO rework this
+    };
+} // namespace stormkit::engine
+
+////////////////////////////////////////////////////////////////////
+///                      IMPLEMENTATION                          ///
+////////////////////////////////////////////////////////////////////
+
+namespace stormkit::engine {
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE GraphTask::GraphTask(core::RangeOffset data_id,
+                                               std::string       name,
+                                               Type              type,
+                                               bool              cull_imune)
+        : m_data_id { data_id }, m_name { std::move(name) }, m_type { type },
+          m_cull_imune { cull_imune } {
+        static GraphID s_next_id = 0;
+
+        m_id = s_next_id++;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE GraphTask::~GraphTask() = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE GraphTask::GraphTask(GraphTask&& other) noexcept = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto GraphTask::operator=(GraphTask&& other) noexcept
+        -> GraphTask& = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto GraphTask::id() const noexcept -> GraphID {
+        return m_id;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto GraphTask::dataID() const noexcept -> core::RangeOffset {
+        return m_data_id;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto GraphTask::name() const noexcept -> const std::string& {
+        return m_name;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto GraphTask::type() const noexcept -> Type {
+        return m_type;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto GraphTask::cullImune() const noexcept -> bool {
+        return m_cull_imune;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto GraphTask::refCount() const noexcept -> core::RangeExtent {
+        return m_ref_count;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto GraphTask::creates() const noexcept -> const std::vector<GraphID>& {
+        return m_creates;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto GraphTask::writes() const noexcept -> const std::vector<GraphID>& {
+        return m_writes;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto GraphTask::reads() const noexcept -> const std::vector<GraphID>& {
+        return m_reads;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto GraphTask::setCullImune(bool imune) noexcept -> void {
+        m_cull_imune = imune;
+    }
+} // namespace stormkit::engine

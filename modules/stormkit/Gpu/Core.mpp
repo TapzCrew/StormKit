@@ -8,4 +8,3 @@ export import :Core.Device;
 export import :Core.Instance;
 export import :Core.Types;
 export import :Core.Sync;
-export import :Core.Vulkan.Utils;

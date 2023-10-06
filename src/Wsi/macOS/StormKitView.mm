@@ -2,32 +2,29 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-/////////// - StormKit::Window - ///////////
-#import "StormView.hpp"
-#import "Utils.hpp"
+#import "StormKitView.hpp"
 #import "macOSWindow.hpp"
 
-/////////// - AppKit - ///////////
+#include "Utils.hpp"
+
 #import <AppKit/NSScreen.h>
 #import <AppKit/NSTrackingArea.h>
 #import <AppKit/NSWindow.h>
 
-using namespace storm;
-using namespace storm::window;
-using namespace storm::window::details;
+using namespace stormkit::wsi::macos;
 
-@implementation StormView {
-    NSTrackingArea *trackingArea;
+@implementation StormKitView {
+    NSTrackingArea *tracking_area;
     macOSWindow *requester;
-    NSWindow *windowA;
-    BOOL isMouseInside;
-    void *nativeEvent;
+    NSWindow *window_handle;
+    BOOL is_mouse_inside;
+    void *native_event;
 }
 
 /////////////////////////////////////
 /////////////////////////////////////
 - (NSWindow *)myWindow {
-    return windowA;
+    return window_handle;
 }
 /////////////////////////////////////
 /////////////////////////////////////
@@ -42,9 +39,9 @@ using namespace storm::window::details;
          withWindow:(NSWindow *)window {
     self = [super initWithFrame:frame];
 
-    windowA       = window;
-    isMouseInside = NO;
-    nativeEvent   = nullptr;
+    window_handle       = window;
+    is_mouse_inside = NO;
+    native_event   = nullptr;
     requester     = _requester;
 
     return self;
@@ -59,8 +56,8 @@ using namespace storm::window::details;
 /////////////////////////////////////
 /////////////////////////////////////
 - (void)mouseDown:(NSEvent *)event {
-    /*if(nativeEvent)
-     *reinterpret_cast<NSEvent*>(nativeEvent) = *event;*/
+    /*if(native_event)
+     *reinterpret_cast<NSEvent*>(native_event) = *event;*/
 
     [self handleMouseDown:event];
 
@@ -86,9 +83,7 @@ using namespace storm::window::details;
 /////////////////////////////////////
 /////////////////////////////////////
 - (void)handleMouseDown:(NSEvent *)event {
-    auto mouse_key = toStormMouseButton([event buttonNumber]);
-
-    requester->mouseDownEvent(mouse_key, event.locationInWindow.x, event.locationInWindow.y);
+    requester->mouseDownEvent(mouseButton([event buttonNumber]), event.locationInWindow.x, event.locationInWindow.y);
 }
 
 /////////////////////////////////////
@@ -118,9 +113,7 @@ using namespace storm::window::details;
 /////////////////////////////////////
 /////////////////////////////////////
 - (void)handleMouseUp:(NSEvent *)event {
-    auto mouse_key = toStormMouseButton([event buttonNumber]);
-
-    requester->mouseUpEvent(mouse_key, event.locationInWindow.x, event.locationInWindow.y);
+    requester->mouseUpEvent(mouseButton([event buttonNumber]), event.locationInWindow.x, event.locationInWindow.y);
 }
 
 /////////////////////////////////////
@@ -150,10 +143,10 @@ using namespace storm::window::details;
 /////////////////////////////////////
 /////////////////////////////////////
 - (void)handleMouseMove:(NSEvent *)event {
-    if (isMouseInside) {
-        auto point = toStormVec(event.locationInWindow);
+    if (is_mouse_inside) {
+        auto point = event.locationInWindow;
 
-        point.y = requester->videoSettings().size.height - point.y;
+        point.y = requester->height() - point.y;
 
         requester->mouseMoveEvent(point.x, point.y);
     }
@@ -162,7 +155,7 @@ using namespace storm::window::details;
 /////////////////////////////////////
 /////////////////////////////////////
 - (void)mouseEntered:(NSEvent *)event {
-    isMouseInside = YES;
+    is_mouse_inside = YES;
 
     requester->mouseEnteredEvent();
 }
@@ -170,7 +163,7 @@ using namespace storm::window::details;
 /////////////////////////////////////
 /////////////////////////////////////
 - (void)mouseExited:(NSEvent *)event {
-    isMouseInside = NO;
+    is_mouse_inside = NO;
 
     requester->mouseExitedEvent();
 }
@@ -179,11 +172,11 @@ using namespace storm::window::details;
 /////////////////////////////////////
 - (void)keyDown:(NSEvent *)event {
     auto string = [event charactersIgnoringModifiers];
-    auto key    = storm::window::Key::Unknow;
+    auto key    = std::numeric_limits<std::uint8_t>::max();
 
-    if ([string length] > 0) key = localizedKeyToStormKey([string characterAtIndex:0]);
+    if ([string length] > 0) key = localizedKey([string characterAtIndex:0]);
 
-    if (key == storm::window::Key::Unknow) key = nonLocalizedKeytoStormKey(event.keyCode);
+    if (key == std::numeric_limits<std::uint8_t>::max()) key = nonLocalizedKey(event.keyCode);
 
     requester->keyDownEvent(key, [string characterAtIndex:0]);
 }
@@ -192,11 +185,11 @@ using namespace storm::window::details;
 /////////////////////////////////////
 - (void)keyUp:(NSEvent *)event {
     auto string = [event charactersIgnoringModifiers];
-    auto key    = storm::window::Key::Unknow;
+    auto key    = std::numeric_limits<std::uint8_t>::max();
 
-    if ([string length] > 0) key = localizedKeyToStormKey([string characterAtIndex:0]);
+    if ([string length] > 0) key = localizedKey([string characterAtIndex:0]);
 
-    if (key == storm::window::Key::Unknow) key = nonLocalizedKeytoStormKey(event.keyCode);
+    if (key == std::numeric_limits<std::uint8_t>::max()) key = nonLocalizedKey(event.keyCode);
 
     requester->keyUpEvent(key, [string characterAtIndex:0]);
 }
@@ -205,18 +198,18 @@ using namespace storm::window::details;
 /////////////////////////////////////
 - (void)updateTrackingAreas {
     [super updateTrackingAreas];
-    if (trackingArea != nil) {
-        [self removeTrackingArea:trackingArea];
-        [trackingArea release];
+    if (tracking_area != nil) {
+        [self removeTrackingArea:tracking_area];
+        tracking_area = nil;
     }
 
     NSUInteger opts = (NSTrackingMouseEnteredAndExited | NSTrackingActiveAlways |
                        NSTrackingMouseMoved | NSTrackingEnabledDuringMouseDrag);
-    trackingArea    = [[NSTrackingArea alloc] initWithRect:[self bounds]
+    tracking_area    = [[NSTrackingArea alloc] initWithRect:[self bounds]
                                                 options:opts
                                                   owner:self
                                                userInfo:nil];
-    [self addTrackingArea:trackingArea];
+    [self addTrackingArea:tracking_area];
 }
 
 /////////////////////////////////////
@@ -238,8 +231,8 @@ using namespace storm::window::details;
 
     point = [self convertPointToScreen:point];
 
-    const float screenHeight = [[[self window] screen] frame].size.height;
-    point.y                  = screenHeight - point.y;
+    const auto screenHeight = [[[self window] screen] frame].size.height;
+    point.y                 = screenHeight - point.y;
 
     return point;
 }
@@ -247,16 +240,16 @@ using namespace storm::window::details;
 /////////////////////////////////////
 /////////////////////////////////////
 - (CGDirectDisplayID)displayId {
-    NSScreen *screen    = [[self window] screen];
-    NSNumber *displayId = [[screen deviceDescription] objectForKey:@"NSScreenNumber"];
+    auto screen    = [[self window] screen];
+    auto display_id = [[screen deviceDescription] objectForKey:@"NSScreenNumber"];
 
-    return [displayId intValue];
+    return [display_id intValue];
 }
 
 /////////////////////////////////////
 /////////////////////////////////////
 - (void)setNativeEventRetriever:(void *)native_event {
-    nativeEvent = native_event;
+    native_event = native_event;
 }
 
 @end

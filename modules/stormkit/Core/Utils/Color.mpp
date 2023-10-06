@@ -27,11 +27,11 @@ export {
         struct RGBColor {
             using UnderlyingType = T;
 
-            constexpr
-                RGBColor(UnderlyingType red,
-                         UnderlyingType green,
-                         UnderlyingType blue,
-                         UnderlyingType alpha = maxColorComponentValue<UnderlyingType>()) noexcept;
+            constexpr RGBColor(
+                UnderlyingType red,
+                UnderlyingType green,
+                UnderlyingType blue,
+                UnderlyingType alpha = maxColorComponentValue<UnderlyingType>()) noexcept;
 
             constexpr explicit RGBColor(const math::Vector3<UnderlyingType>& vector) noexcept;
 
@@ -54,6 +54,7 @@ export {
 
             constexpr operator math::Vector3<UnderlyingType>() const noexcept;
             constexpr operator math::Vector4<UnderlyingType>() const noexcept;
+            constexpr operator std::array<UnderlyingType, 4>() const noexcept;
 
             UnderlyingType red;
             UnderlyingType green;
@@ -317,5 +318,12 @@ namespace stormkit::core {
     template<IsColorComponent T>
     constexpr RGBColor<T>::operator math::Vector4<UnderlyingType>() const noexcept {
         return toVector4();
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<IsColorComponent T>
+    constexpr RGBColor<T>::operator std::array<UnderlyingType, 4>() const noexcept {
+        return { red, green, blue, alpha };
     }
 } // namespace stormkit::core

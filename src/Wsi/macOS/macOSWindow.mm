@@ -2,73 +2,47 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-/////////// - StormKit::window - ///////////
 #import "macOSWindow.hpp"
-#import "AutoReleasePoolWrapper.hpp"
-#import "StormApplication.h"
-#import "StormApplicationDelegate.h"
-#import "StormWindowController.hpp"
-#import "Utils.hpp"
+#import "StormKitApplication.h"
+#import "StormKitWindow.hpp"
 
-#include <storm/window/VideoSettings.hpp>
-
-/////////// - STL - ///////////
-#include <string>
-
-/////////// - AppKit - ///////////
 #import <AppKit/NSScreen.h>
+#import <IOKit/graphics/IOGraphicsLib.h>
 
-using namespace storm;
-using namespace storm::window;
-using namespace storm::window::details;
+#include <bit>
+#include <string>
+#include <vector>
+#include <cstdint>
 
-static auto is_process_set_as_application = false;
-
-/////////////////////////////////////
-/////////////////////////////////////
-auto modeBitsPerPixel(CGDisplayModeRef mode) noexcept -> core::UInt8 {
-    auto bpp = storm::core::UInt8 { 0 };
-
-    CFStringRef pixEnc = CGDisplayModeCopyPixelEncoding(mode);
-    if (CFStringCompare(pixEnc, CFSTR(IO32BitDirectPixels), kCFCompareCaseInsensitive) ==
-        kCFCompareEqualTo)
-        bpp = 32;
-    else if (CFStringCompare(pixEnc, CFSTR(IO16BitDirectPixels), kCFCompareCaseInsensitive) ==
-             kCFCompareEqualTo)
-        bpp = 16;
-    else if (CFStringCompare(pixEnc, CFSTR(IO8BitIndexedPixels), kCFCompareCaseInsensitive) ==
-             kCFCompareEqualTo)
-        bpp = 8;
-
-    CFRelease(pixEnc);
-
-    return bpp;
+namespace stormkit::wsi::macos {
+namespace {
+   static auto is_process_set_as_application = false;
 }
 
 /////////////////////////////////////
 /////////////////////////////////////
-macOSWindow::macOSWindow() noexcept : AbstractWindow {}, m_controller { nil } {
-    ensureThreadHasPool();
-
+macOSWindow::macOSWindow(std::string title, std::uint32_t width, std::uint32_t height,
+                       int style) noexcept : 
+            m_controller { nil }, 
+            m_handles{ .view = nil }, 
+            m_title{std::move(title)}, 
+            m_width{width}, 
+            m_height{height} {
     initCocoaProcess();
-}
 
-/////////////////////////////////////
-/////////////////////////////////////
-macOSWindow::macOSWindow(std::string title,
-                         const VideoSettings &settings,
-                         WindowStyle style) noexcept
-    : AbstractWindow {} {
-    create(std::move(title), settings, style);
+    m_controller = [[StormKitWindowController alloc] initWithWidth:width
+                                                         withHeight:height
+                                                         withStyle:static_cast<int>(style)
+                                                         withTitle:m_title
+                                                     withRequester:this];
+
+    m_handles.view = [m_controller nativeHandle];
 }
 
 /////////////////////////////////////
 /////////////////////////////////////
 macOSWindow::~macOSWindow() {
     [m_controller close];
-    [m_controller release];
-
-    drainThreadPool();
 }
 
 /////////////////////////////////////
@@ -81,45 +55,14 @@ auto macOSWindow::operator=(macOSWindow &&) noexcept -> macOSWindow & = default;
 
 /////////////////////////////////////
 /////////////////////////////////////
-auto macOSWindow::create(std::string title,
-                         const VideoSettings &settings,
-                         WindowStyle style) noexcept -> void {
-    initCocoaProcess();
-
-    m_title          = std::move(title);
-    m_video_settings = settings;
-    m_style          = style;
-
-    m_controller = [[StormWindowController alloc] initWithSettings:settings
-                                                         withStyle:style
-                                                         withTitle:title
-                                                     withRequester:this];
-
-    m_handles.view = [m_controller nativeHandle];
-}
-
-/////////////////////////////////////
-/////////////////////////////////////
-auto macOSWindow::close() noexcept -> void {
-    [m_controller close];
-
-    drainThreadPool();
-}
-
-/////////////////////////////////////
-/////////////////////////////////////
-auto macOSWindow::pollEvent(Event &event) noexcept -> bool {
+auto macOSWindow::pollEvent() noexcept -> void {
     [m_controller processEvent];
-
-    return AbstractWindow::pollEvent(event);
 }
 
 /////////////////////////////////////
 /////////////////////////////////////
-auto macOSWindow::waitEvent(Event &event) noexcept -> bool {
-    while (!AbstractWindow::waitEvent(event)) [m_controller processEvent];
-
-    return true;
+auto macOSWindow::waitEvent() noexcept -> void {
+    [m_controller processEvent];
 }
 
 /////////////////////////////////////
@@ -132,7 +75,13 @@ auto macOSWindow::setTitle(std::string title) noexcept -> void {
 
 /////////////////////////////////////
 /////////////////////////////////////
+auto macOSWindow::setExtent(std::uint32_t width, std::uint32_t height) noexcept -> void {
+}
+
+/////////////////////////////////////
+/////////////////////////////////////
 auto macOSWindow::setFullscreenEnabled(bool fullscreen) noexcept -> void {
+
 }
 
 /////////////////////////////////////
@@ -157,28 +106,18 @@ auto macOSWindow::unhideMouse() noexcept -> void {
 
 /////////////////////////////////////
 /////////////////////////////////////
-auto macOSWindow::size() const noexcept -> const core::Extentu & {
+auto macOSWindow::width() const noexcept -> std::uint32_t {
     auto size = [m_controller size];
 
-    return toStormVec(size);
+    return size.width;
 }
 
 /////////////////////////////////////
 /////////////////////////////////////
-auto macOSWindow::isOpen() const noexcept -> bool {
-    return [m_controller isOpen] == YES;
-}
+auto macOSWindow::height() const noexcept -> std::uint32_t {
+    auto size = [m_controller size];
 
-/////////////////////////////////////
-/////////////////////////////////////
-auto macOSWindow::isVisible() const noexcept -> bool {
-    return [m_controller isVisible] == YES;
-}
-
-/////////////////////////////////////
-/////////////////////////////////////
-auto macOSWindow::nativeHandle() const noexcept -> NativeHandle {
-    return [m_controller nativeHandle];
+    return size.height;
 }
 
 /////////////////////////////////////
@@ -189,80 +128,73 @@ auto macOSWindow::macOSHandles() const noexcept -> const Handles & {
 
 /////////////////////////////////////
 /////////////////////////////////////
-auto macOSWindow::getDesktopModes() -> std::vector<VideoSettings> {
-    static auto video_settings = std::vector<VideoSettings> {};
-    static auto init           = false;
-
-    if (!init) {
-        NSArray *modes =
-            (__bridge NSArray *)CGDisplayCopyAllDisplayModes(CGMainDisplayID(), nullptr);
-
-        const auto mode_count = [modes count];
-
-        video_settings.reserve(mode_count);
-
-        for (auto i : core::range<CFIndex>(mode_count)) {
-            auto mode = (CGDisplayModeRef)[modes objectAtIndex:i];
-
-            const auto video_setting = storm::window::VideoSettings {
-                .size = { static_cast<storm::core::UInt16>(CGDisplayModeGetWidth(mode)),
-                          static_cast<storm::core::UInt16>(CGDisplayModeGetHeight(mode)) },
-                .bpp  = modeBitsPerPixel(mode)
-            };
-
-            if (core::ranges::find(video_settings, video_setting) ==
-                core::ranges::cend(video_settings))
-                // if (std::find(std::cbegin(video_settings), std::cend(video_settings),
-                // video_setting) ==
-                //   std::cend(video_settings))
-                video_settings.emplace_back(std::move(video_setting));
-        }
-
-        core::ranges::sort(video_settings, std::greater<VideoSettings> {});
-        /*std::sort(std::begin(video_settings),
-                  std::end(video_settings),
-                  std::greater<VideoSettings> {});*/
-        init = true;
-    }
-
-    return video_settings;
+auto macOSWindow::setKeyRepeatEnabled([[maybe_unused]] bool enabled) noexcept -> void {
 }
 
 /////////////////////////////////////
 /////////////////////////////////////
-auto macOSWindow::getDesktopFullscreenSize() -> VideoSettings {
-    static auto video_setting = storm::window::VideoSettings {};
-    static auto init          = false;
+auto macOSWindow::setVirtualKeyboardVisible([[maybe_unused]] bool visible) noexcept -> void {
+}
 
-    if (!init) {
-        const auto modes = getDesktopModes();
+/////////////////////////////////////
+/////////////////////////////////////
+auto macOSWindow::setMousePosition([[maybe_unused]] std::int32_t x, [[maybe_unused]] std::int32_t y) noexcept -> void {
+}
 
-        for (const auto &mode : modes) {
-            video_setting.size.width  = std::max(video_setting.size.width, mode.size.width);
-            video_setting.size.height = std::max(video_setting.size.height, mode.size.height);
-            video_setting.size.depth  = std::max(video_setting.size.depth, mode.size.depth);
-        }
+/////////////////////////////////////
+/////////////////////////////////////
+auto macOSWindow::setMousePositionOnDesktop([[maybe_unused]] std::uint32_t x, [[maybe_unused]] std::uint32_t y) noexcept -> void {
+}
 
-        init = true;
+/////////////////////////////////////
+/////////////////////////////////////
+auto macOSWindow::getMonitorSettings() -> std::vector<Monitor> {
+    // TODO handle multiple monitors
+    auto display_id = CGMainDisplayID();
+    auto modes =
+        (__bridge NSArray *)CGDisplayCopyAllDisplayModes(display_id, nullptr);
+    auto device_info = (__bridge NSDictionary *)IODisplayCreateInfoDictionary(CGDisplayIOServicePort(display_id), kIODisplayOnlyPreferredName);
+
+    const auto mode_count = [modes count];
+
+    auto monitors = std::vector<Monitor>{};
+    auto &monitor = monitors.emplace_back();
+    monitor.extents.reserve(mode_count);
+    monitor.flags = Monitor::Flags::Primary;
+    monitor.handle = (void *)display_id;
+
+    auto screen_name = @"";
+    auto localized_names = [device_info objectForKey:[NSString stringWithUTF8String:kDisplayProductName]];
+    if ([localized_names count] > 0) [[likely]]
+        screen_name = [localized_names objectForKey:[[localized_names allKeys] objectAtIndex:0]];
+
+    monitor.name = [screen_name UTF8String];
+
+    for (auto i = CFIndex{0}; i < mode_count; ++i) {
+        auto mode = (__bridge CGDisplayModeRef)([modes objectAtIndex:i]);
+
+        monitor.extents.emplace_back(CGDisplayModeGetWidth(mode), CGDisplayModeGetHeight(mode));
     }
 
-    return video_setting;
+    return monitors;
 }
+
 /////////////////////////////////////
 /////////////////////////////////////
-auto macOSWindow::initCocoaProcess() -> void {
+auto initCocoaProcess() -> void {
     if (!is_process_set_as_application) {
-        [StormApplication sharedApplication];
+        [StormKitApplication sharedApplication];
 
         [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
         [NSApp activateIgnoringOtherApps:YES];
 
-        if (![[StormApplication sharedApplication] delegate])
-            [[StormApplication sharedApplication]
-                setDelegate:[[StormApplicationDelegate alloc] init]];
+        if (![[StormKitApplication sharedApplication] delegate])
+            [[StormKitApplication sharedApplication]
+                setDelegate:[[StormKitApplicationDelegate alloc] init]];
 
-        [[StormApplication sharedApplication] finishLaunching];
+        [[StormKitApplication sharedApplication] finishLaunching];
 
         is_process_set_as_application = true;
     }
+}
 }

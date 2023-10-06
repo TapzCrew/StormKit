@@ -50,4 +50,11 @@ namespace stormkit::core {
         const auto id = ::GetThreadId(reinterpret_cast<HANDLE>(thread.native_handle()));
         details::setThreadName(id, name);
     }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    auto setThreadName(std::jthread& thread, std::string_view name) -> void {
+        const auto id = ::GetThreadId(reinterpret_cast<HANDLE>(thread.native_handle()));
+        details::setThreadName(id, name);
+    }
 } // namespace stormkit::core

@@ -33,6 +33,39 @@ export namespace stormkit::core {
 
     template<typename T>
     constexpr auto viewAs(std::span<core::LikeCVType<T, core::Byte>> data) -> decltype(auto);
+
+    template<std::ranges::range R1,
+             std::ranges::range R2,
+             class Pred  = std::ranges::equal_to,
+             class Proj1 = std::identity,
+             class Proj2 = std::identity>
+        requires std::indirectly_comparable<std::ranges::iterator_t<R1>,
+                                            std::ranges::iterator_t<R2>,
+                                            Pred,
+                                            Proj1,
+                                            Proj2>
+    constexpr auto
+        findFirstNotOf(R1&& first, R2&& second, Pred pred = {}, Proj1 proj1 = {}, Proj2 proj2 = {})
+            -> decltype(auto) {
+        auto first1 = std::ranges::begin(first);
+        auto last1  = std::ranges::end(first);
+        auto first2 = std::ranges::begin(second);
+        auto last2  = std::ranges::end(second);
+
+        for (; first2 != last2; ++first2) {
+            auto found = false;
+            for (auto i = first1; i != last1; ++i) {
+                if (std::invoke(pred, std::invoke(proj1, *i), std::invoke(proj2, *first2))) {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (not found) return first2;
+        }
+
+        return first2;
+    }
 } // namespace stormkit::core
 
 ////////////////////////////////////////////////////////////////////

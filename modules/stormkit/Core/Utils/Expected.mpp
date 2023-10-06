@@ -6,11 +6,65 @@ export module stormkit.Core:Utils.Expected;
 
 import std;
 
+import <stormkit/Core/PlatformMacro.hpp>;
+
+import :Meta;
+
+import :Utils.AsCast;
+
 export namespace stormkit::core {
-    template<class T>
-    struct Construct {
-        auto operator()() const noexcept -> void {
-            static_assert(true, "Construct<T>() was not specialised for the type T supplied");
-        }
-    };
+    template<typename T>
+    [[nodiscard]] constexpr auto as() noexcept -> decltype(auto);
+    [[nodiscard]] constexpr auto discard() noexcept -> decltype(auto);
+    [[nodiscard]] constexpr auto set(auto& output) noexcept -> decltype(auto);
+    [[nodiscard]] constexpr auto emplaceTo(auto& container) noexcept -> decltype(auto);
+    [[nodiscard]] constexpr auto map(auto&& first, auto&& second) noexcept -> decltype(auto);
+} // namespace stormkit::core
+
+////////////////////////////////////////////////////////////////////
+///                      IMPLEMENTATION                          ///
+////////////////////////////////////////////////////////////////////
+
+namespace stormkit::core {
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<typename T>
+    STORMKIT_FORCE_INLINE constexpr auto as() noexcept -> decltype(auto) {
+        return [](auto&& value) noexcept -> decltype(auto) {
+            return core::as<T>(std::forward<decltype(value)>(value));
+        };
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE constexpr auto discard() noexcept -> decltype(auto) {
+        return []([[maybe_unused]] auto&& value) noexcept -> void {};
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE constexpr auto set(auto& output) noexcept -> decltype(auto) {
+        return [&output](auto&& value) noexcept -> void {
+            output = std::forward<decltype(value)>(value);
+        };
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE constexpr auto emplaceTo(auto& container) noexcept -> decltype(auto) {
+        return [&container](auto&& value) noexcept -> void {
+            container.emplace_back(std::forward<decltype(value)>(value));
+        };
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE constexpr auto map(auto&& first, auto&& second) noexcept
+        -> decltype(auto) {
+        return [first  = std::forward<decltype(first)>(first),
+                second = std::forward<decltype(second)>(second)](
+                   auto&& value) noexcept -> decltype(auto) {
+            return second(first(std::forward<decltype(value)>(value)));
+        };
+    }
 } // namespace stormkit::core
