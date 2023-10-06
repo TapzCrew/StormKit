@@ -48,6 +48,9 @@ modules = {
 		packages = { "gli", "libpng", "libjpeg-turbo" },
 		modulename = "Image",
 		public_deps = { "stormkit-core" },
+    custom = function()
+      set_policy("build.c++.clang.fallbackscanner", false)
+    end
 	},
 	main = {
 		modulename = "Main",
