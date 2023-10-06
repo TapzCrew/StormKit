@@ -47,10 +47,7 @@ modules = {
 	image = {
 		packages = { "gli", "libpng", "libjpeg-turbo" },
 		modulename = "Image",
-		public_deps = { "stormkit-core" },
-    custom = function()
-      set_policy("build.c++.clang.fallbackscanner", false)
-    end
+		public_deps = { "stormkit-core" }
 	},
 	main = {
 		modulename = "Main",
@@ -325,14 +322,15 @@ if get_config("libc++") then
 	add_cxxflags("-stdlib=libc++", "-fexperimental-library")
 	add_mxxflags("-stdlib=libc++", "-fexperimental-library")
 	set_policy("build.c++.clang.fallbackscanner", true)
+
 	target("stdmodules")
-	set_kind("object")
-	set_languages("c++latest")
+    set_kind("object")
+    set_languages("c++latest")
 
-	add_files("stdmodules/**.cppm")
+    add_files("stdmodules/**.cppm")
 
-	add_cxxflags("-Wno-reserved-module-identifier")
-	set_policy("build.c++.clang.fallbackscanner", false)
+    add_cxxflags("-Wno-reserved-module-identifier")
+    set_policy("build.c++.clang.fallbackscanner", false)
 	target_end()
 end
 
