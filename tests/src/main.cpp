@@ -18,10 +18,11 @@ auto main(int argc, char **argv) noexcept -> int {
         if (arg == "--verbose" or arg == "-v") verbose = true;
     }
 
+    auto return_code = 0;
     for (auto&& suite : test_suites) {
         std::println("Running test suite {} ({} tests)", suite->name, std::size(suite->tests));
-        suite->runTests();
+        if (not suite->runTests()) return_code = -1;
     }
 
-    return 0;
+    return return_code;
 }

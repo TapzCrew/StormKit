@@ -92,6 +92,8 @@ namespace test {
             std::print("{} test failed", failed_tests);
         }
         std::println("");
+
+        return failed_tests == 0;
     }
 
     TestSuite::TestSuite(std::string              && name,
