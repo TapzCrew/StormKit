@@ -56,7 +56,7 @@ jobs:
         id: install-llvm
         run: |
           wget https://github.com/Arthapz/llvm-18-patched/raw/main/macOS/llvm.7z
-          7z x llvm.7z -ollvm
+          7z x llvm.7z
 
       - name: Configure & Build
         id: build
