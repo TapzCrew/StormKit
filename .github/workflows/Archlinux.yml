@@ -54,7 +54,7 @@ jobs:
           xmake-version: branch@dev
 
       - name: Update xmake repository
-        run: sudo xmake repo -vD --update
+        run: xmake repo -vD --update
 
       - name: Configure & Build
         id: build
