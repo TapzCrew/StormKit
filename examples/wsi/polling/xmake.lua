@@ -16,4 +16,12 @@ target("polling")
         add_files("win32/*.manifest")
     end
 
+    add_ldflags("-Wl,--as-needed")
+    add_shflags("-Wl,--as-needed")
+
+    if has_config("mold") then
+      add_ldflags("-Wl,-fuse-ld=mold")
+      add_shflags("-Wl,-fuse-ld=mold")
+    end
+
     set_group("examples/stormkit-wsi")

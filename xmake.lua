@@ -47,7 +47,7 @@ modules = {
 	image = {
 		packages = { "gli", "libpng", "libjpeg-turbo" },
 		modulename = "Image",
-		public_deps = { "stormkit-core" }
+		public_deps = { "stormkit-core" },
 	},
 	main = {
 		modulename = "Main",
@@ -58,17 +58,19 @@ modules = {
 		modulename = "Wsi",
 		public_deps = { "stormkit-core" },
 		deps = { "stormkit-log" },
-		packages = is_plat("linux") and { "libxkbcommon",
-            "libxkbcommon-x11",
-            "libxcb",
-            "xcb-util-keysyms",
-            "xcb-util",
-            "xcb-util-wm",
-            "xcb-util-errors",
-            "wayland",
-            "wayland-protocols",
-          } or nil,
-    frameworks = is_plat("macosx") and {"CoreFoundation", "Foundation", "AppKit", "Metal", "IOKit", "QuartzCore" } or nil,
+		packages = is_plat("linux") and {
+			"libxkbcommon",
+			"libxkbcommon-x11",
+			"libxcb",
+			"xcb-util-keysyms",
+			"xcb-util",
+			"xcb-util-wm",
+			"xcb-util-errors",
+			"wayland",
+			"wayland-protocols",
+		} or nil,
+		frameworks = is_plat("macosx") and { "CoreFoundation", "Foundation", "AppKit", "Metal", "IOKit", "QuartzCore" }
+			or nil,
 		custom = function()
 			if is_plat("linux") then
 				add_rules("wayland.protocols")
@@ -124,9 +126,9 @@ modules = {
 			-- "VULKAN_HPP_NO_EXCEPTIONS", uncomment when vk::raii is supported without exceptions
 		},
 		custom = function()
-      remove_files("src/Gpu/Execution/**.cpp")
-      remove_files("modules/stormkit/Gpu/Execution.mpp")
-      remove_files("modules/stormkit/Gpu/Execution/**.mpp")
+			remove_files("src/Gpu/Execution/**.cpp")
+			remove_files("modules/stormkit/Gpu/Execution.mpp")
+			remove_files("modules/stormkit/Gpu/Execution/**.mpp")
 			if is_plat("linux") then
 				add_defines("VK_USE_PLATFORM_XCB_KHR")
 				add_defines("VK_USE_PLATFORM_WAYLAND_KHR")
@@ -273,14 +275,8 @@ add_cxflags(
 add_cxflags("-fstrict-aliasing", "-Wstrict-aliasing", { tools = { "clang", "gcc" } })
 add_mxflags("-fstrict-aliasing", "-Wstrict-aliasing", { tools = { "clang", "gcc" } })
 
-add_cxxflags(
-	"-Wno-missing-field-initializers",
-	{ tools = { "clang" } }
-)
-add_mxxflags(
-	"-Wno-missing-field-initializers",
-	{ tools = { "clang" } }
-)
+add_cxxflags("-Wno-missing-field-initializers", { tools = { "clang" } })
+add_mxxflags("-Wno-missing-field-initializers", { tools = { "clang" } })
 
 if not is_plat("windows") and not is_plat("macosx") then
 	add_syslinks("stdc++_libbacktrace")
@@ -311,8 +307,6 @@ option_end()
 
 option("mold")
 set_default(false)
-add_ldflags("-Wl,-fuse-ld=mold")
-add_shflags("-Wl,-fuse-ld=mold")
 option_end()
 
 if get_config("libc++") then
@@ -324,13 +318,13 @@ if get_config("libc++") then
 	set_policy("build.c++.clang.fallbackscanner", true)
 
 	target("stdmodules")
-    set_kind("object")
-    set_languages("c++latest")
+	set_kind("object")
+	set_languages("c++latest")
 
-    add_files("stdmodules/**.cppm")
+	add_files("stdmodules/**.cppm")
 
-    add_cxxflags("-Wno-reserved-module-identifier")
-    set_policy("build.c++.clang.fallbackscanner", false)
+	add_cxxflags("-Wno-reserved-module-identifier")
+	set_policy("build.c++.clang.fallbackscanner", false)
 	target_end()
 end
 
@@ -479,6 +473,8 @@ for name, module in pairs(modules) do
 		if get_config("libc++") then
 			add_deps("stdmodules")
 		end
+    add_ldflags("-Wl,--as-needed")
+    add_shflags("-Wl,--as-needed")
 		target_end()
 	end
 end
