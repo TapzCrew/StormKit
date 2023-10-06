@@ -24,16 +24,16 @@ on:
 
 jobs:
   build:
-    name: archlinux-latest-x64 ( ${{ matrix.kind }}-${{ matrix.mode }} )
+    name: ${{ matrix.os }}-x64 ( ${{ matrix.kind }}-${{ matrix.mode }} )
 
     strategy:
       fail-fast: false
       matrix:
-        os: [linux]
+        os: [Linux]
         kind: [static, shared]
         mode: [release, debug, asan]
 
-    runs-on: Linux
+    runs-on: ${{ matrix.os }}
 
     concurrency:
       group: ${{ github.ref }}-${{ github.base_ref }}-${{ github.head_ref }}-Linux-${{ matrix.kind }}-${{ matrix.mode }}

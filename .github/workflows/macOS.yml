@@ -2,26 +2,22 @@ name: macOS
 
 on:
   push:
-    branches: [ main, dev ]
+    branches: [ develop ]
     paths-ignore:
-      - '.github/workflows/Archlinux.yml'
+      - '.github/workflows/Linux.yml'
       - '.github/workflows/Windows.yml'
-      - '.github/workflows/Fedora.yml'
       - '.github/workflows/iOS.yml'
       - '.github/workflows/Android.yml'
-      - '.github/workflows/Ubuntu.yml'
       - '.gitignore'
       - 'LICENSE'
       - 'README.md'
   pull_request:
-    branches: [ main, dev ]
+    branches: [ develop ]
     paths-ignore:
-      - '.github/workflows/Archlinux.yml'
+      - '.github/workflows/Linux.yml'
       - '.github/workflows/Windows.yml'
-      - '.github/workflows/Fedora.yml'
       - '.github/workflows/iOS.yml'
       - '.github/workflows/Android.yml'
-      - '.github/workflows/Ubuntu.yml'
       - '.gitignore'
       - 'LICENSE'
       - 'README.md'
@@ -48,26 +44,29 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install xmake
+      - name: Install
         uses: xmake-io/github-action-setup-xmake@v1
         with:
           xmake-version: branch@dev
 
       - name: Update xmake repository
-        run: xmake repo --update
+        run: xmake repo -vD --update
 
       - name: Configure & Build
         id: build
         run: |
-          xmake f -D --yes -m ${{ matrix.mode }} -k ${{ matrix.kind }}
-          xmake b -D
+          xmake f -vD --yes -m ${{ matrix.mode }} -k ${{ matrix.kind }} --enable_examples=y --enable_tests=y --enable_gpu=n --libc++=y --toolchain=llvm --sdk=/opt/llvm-git/usr
+          xmake b -vD
+
+      - name: Tests
+        run: xmake run core-tests --verbose
 
       - name: Installation
-        run: xmake install -D --installdir="${{ runner.workspace }}/output"
+        run: xmake install -vD --installdir="${{ runner.workspace }}/output"
 
       - name: Upload artifacts
         id: upload
         uses: actions/upload-artifact@v1
         with:
-          name: ${{ matrix.os }}-x64-${{ matrix.kind }}-${{ matrix.mode }}
+          name: Linux-x64-${{ matrix.kind }}-${{ matrix.mode }}
           path: ${{ runner.workspace }}/output
