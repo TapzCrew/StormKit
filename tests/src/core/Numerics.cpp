@@ -639,7 +639,7 @@ namespace {
             [] {
                 auto success = true;
                 auto i       = 0;
-                auto j       = 0;
+                auto j       = 0u;
 
                 for (auto [v1, v2] : multiRange(10, 5u)) {
                     if (v1 != i or v2 != j or not std::same_as<decltype(v2), decltype(j)>) {
