@@ -44,16 +44,16 @@ jobs:
         with:
           fetch-depth: 0
   
-     - name: Dependencies bootstrap
-        run: |
-          pacman -Syu --noconfirm --needed openssl
-          pacman -Sy --noconfirm --needed glibc git base-devel perl make unzip p7zip
-          pacman -Sy --noconfirm --needed mesa gcc-fortran glu wget
-          wget https://github.com/Arthapz/llvm-18-patched/raw/main/arch/libc++-git-18.0.0_r476929.7a46baa465c4-1-x86_64.pkg.tar.zst
-          wget https://github.com/Arthapz/llvm-18-patched/raw/main/arch/libc++abi-git-18.0.0_r476929.7a46baa465c4-1-x86_64.pkg.tar.zst
-          wget https://github.com/Arthapz/llvm-18-patched/raw/main/arch/llvm-git-18.0.0_r476929.7a46baa465c4-1-x86_64.pkg.tar.zst
-          wget https://github.com/Arthapz/llvm-18-patched/raw/main/arch/llvm-libs-git-18.0.0_r476929.7a46baa465c4-1-x86_64.pkg.tar.zst
-          pacman --noconfirm -U *.zst 
+      - name: Dependencies bootstrap
+         run: |
+           pacman -Syu --noconfirm --needed openssl
+           pacman -Sy --noconfirm --needed glibc git base-devel perl make unzip p7zip
+           pacman -Sy --noconfirm --needed mesa gcc-fortran glu wget
+           wget https://github.com/Arthapz/llvm-18-patched/raw/main/arch/libc++-git-18.0.0_r476929.7a46baa465c4-1-x86_64.pkg.tar.zst
+           wget https://github.com/Arthapz/llvm-18-patched/raw/main/arch/libc++abi-git-18.0.0_r476929.7a46baa465c4-1-x86_64.pkg.tar.zst
+           wget https://github.com/Arthapz/llvm-18-patched/raw/main/arch/llvm-git-18.0.0_r476929.7a46baa465c4-1-x86_64.pkg.tar.zst
+           wget https://github.com/Arthapz/llvm-18-patched/raw/main/arch/llvm-libs-git-18.0.0_r476929.7a46baa465c4-1-x86_64.pkg.tar.zst
+           pacman --noconfirm -U *.zst 
 
       - name: Install
         uses: xmake-io/github-action-setup-xmake@v1
