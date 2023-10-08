@@ -65,7 +65,7 @@ jobs:
           xmake b -vD
 
       - name: Tests
-        run: xmake run core-tests --verbose
+        run: DYLD_LIBRARY_PATH="$PWD/llvm/lib" xmake run core-tests --verbose
 
       - name: Installation
         run: xmake install -vD --installdir="${{ runner.workspace }}/output"
