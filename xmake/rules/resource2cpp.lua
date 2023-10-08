@@ -1,6 +1,7 @@
 -- Turns resources into includables headers
 rule("stormkit.utils.resource2cpp")
-	before_build(function (target, opt)
+do
+	before_build(function(target, opt)
 		import("core.base.option")
 		if xmake.version():ge("2.5.9") then
 			import("utils.progress")
@@ -42,7 +43,8 @@ rule("stormkit.utils.resource2cpp")
 			targetFile:close()
 		end
 
-        local target_dir = target:extraconf("rules", "utils.embed_resources", "outputdir") or path.join(target:autogendir(), "rules", "utils", "embed_resources")
+		local target_dir = target:extraconf("rules", "utils.embed_resources", "outputdir")
+			or path.join(target:autogendir(), "rules", "utils", "embed_resources")
 		for _, sourcebatch in pairs(target:sourcebatches()) do
 			if sourcebatch.rulename == "embed_resources" then
 				for _, sourcefile in ipairs(sourcebatch.sourcefiles) do
@@ -50,10 +52,10 @@ rule("stormkit.utils.resource2cpp")
 					if option.get("rebuild") or os.mtime(sourcefile) >= os.mtime(targetpath) then
 						GenerateEmbedHeader(sourcefile, targetpath)
 					end
-
 				end
 			end
 		end
 
-        target:add("includedirs", target_dir)
+		target:add("includedirs", target_dir)
 	end)
+end

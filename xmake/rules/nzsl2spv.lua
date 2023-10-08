@@ -1,48 +1,51 @@
 -- Compile shaders to includables headers
 rule("compile.shaders")
+do
 	set_extensions(".nzsl", ".nzslb")
 
-    -- for c++ module dependency discovery
-    on_load(function(target)
-        if target:rule("c++.build.modules") then
-            local rule = target:rule("c++.build"):clone()
-            rule:add("deps", "wayland.protocols", {order = true})
-            target:rule_add(rule)
-        end
-    end)
+	-- for c++ module dependency discovery
+	on_load(function(target)
+		if target:rule("c++.build.modules") then
+			local rule = target:rule("c++.build"):clone()
+			rule:add("deps", "wayland.protocols", { order = true })
+			target:rule_add(rule)
+		end
+	end)
 
 	on_config(function(target)
-        import("core.base.option")
+		import("core.base.option")
 
 		-- add outputdir to include path
-		local outputdir = target:extraconf("rules", "compile.shaders", "outputdir") or path.join(target:autogendir(), "rules", "compile.shaders")
+		local outputdir = target:extraconf("rules", "compile.shaders", "outputdir")
+			or path.join(target:autogendir(), "rules", "compile.shaders")
 		if not os.isdir(outputdir) then
 			os.mkdir(outputdir)
 		end
 		target:add("includedirs", outputdir)
 
-        if target:rule("c++.build.modules") then
-            local dryrun = option.get("dry-run")
-            local sourcebatches = target:sourcebatches()
-            if not dryrun and sourcebatches["compile.shaders"] and sourcebatches["compile.shaders"].sourcefiles then
-                for _, shaderfile in ipairs(sourcebatches["compile.shaders"].sourcefiles) do
-                    local outputfile = path.join(outputdir, path.basename(shaderfile) .. ".nzslb.h")
+		if target:rule("c++.build.modules") then
+			local dryrun = option.get("dry-run")
+			local sourcebatches = target:sourcebatches()
+			if not dryrun and sourcebatches["compile.shaders"] and sourcebatches["compile.shaders"].sourcefiles then
+				for _, shaderfile in ipairs(sourcebatches["compile.shaders"].sourcefiles) do
+					local outputfile = path.join(outputdir, path.basename(shaderfile) .. ".nzslb.h")
 
-                    -- for c++ module dependency discovery
-                    if not os.exists(outputfile) then
-                        os.touch(outputfile)
-                    end
-                end
-            end
-        end
+					-- for c++ module dependency discovery
+					if not os.exists(outputfile) then
+						os.touch(outputfile)
+					end
+				end
+			end
+		end
 	end)
 
-	before_buildcmd_file(function (target, batchcmds, shaderfile, opt)
+	before_buildcmd_file(function(target, batchcmds, shaderfile, opt)
 		import("core.tool.toolchain")
 		import("lib.detect.find_tool")
 		import("core.project.project")
 
-		local outputdir = target:extraconf("rules", "compile.shaders", "outputdir") or path.join(target:autogendir(), "rules", "compile.shaders")
+		local outputdir = target:extraconf("rules", "compile.shaders", "outputdir")
+			or path.join(target:autogendir(), "rules", "compile.shaders")
 		local fileconfig = target:fileconfig(shaderfile)
 		if fileconfig and fileconfig.prefixdir then
 			outputdir = path.join(outputdir, fileconfig.prefixdir)
@@ -84,9 +87,9 @@ rule("compile.shaders")
 
 		batchcmds:vrunv(nzslc.program, argv, { curdir = ".", envs = envs })
 
-
 		-- add deps
 		batchcmds:add_depfiles(shaderfile)
 		batchcmds:set_depmtime(os.mtime(outputfile))
 		batchcmds:set_depcache(target:dependfile(outputfile))
 	end)
+end
