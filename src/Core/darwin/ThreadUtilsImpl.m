@@ -1,4 +1,4 @@
-#import "ThreadUtils.h"
+#import "ThreadUtilsImpl.h"
 
 #import <Foundation/NSThread.h>
 #import <Foundation/NSString.h>
