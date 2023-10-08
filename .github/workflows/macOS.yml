@@ -57,15 +57,11 @@ jobs:
         run: |
           wget https://github.com/Arthapz/llvm-18-patched/raw/main/macOS/llvm.7z
           7z x llvm.7z
-          ls .
-          echo $PWD
 
       - name: Configure & Build
         id: build
         run: |
-          echo $PWD
-          ls "$PWD/llvm/"
-          xmake f -vD --yes -m ${{ matrix.mode }} -k ${{ matrix.kind }} --enable_examples=y --enable_tests=y --enable_gpu=n --libc++=y --toolchain=llvm --sdk="$PWD/llvm/"
+          xmake f -vD --yes -m ${{ matrix.mode }} -k ${{ matrix.kind }} --enable_examples=y --enable_tests=y --enable_gpu=n --libc++=y --toolchain=llvm --sdk="$PWD/llvm/" --ldflags="-L$PWD/llvm/usr/lib" --shflags="-L$PWD/llvm/usr/lib"
           xmake b -vD
 
       - name: Tests
