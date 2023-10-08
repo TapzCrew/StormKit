@@ -64,7 +64,7 @@ jobs:
         id: build
         run: |
           echo $PWD
-          xmake f -vD --yes -m ${{ matrix.mode }} -k ${{ matrix.kind }} --enable_examples=y --enable_tests=y --enable_gpu=n --libc++=y --toolchain=llvm --sdk=./llvm/
+          xmake f -vD --yes -m ${{ matrix.mode }} -k ${{ matrix.kind }} --enable_examples=y --enable_tests=y --enable_gpu=n --libc++=y --toolchain=llvm --sdk="$PWD/llvm/"
           xmake b -vD
 
       - name: Tests
