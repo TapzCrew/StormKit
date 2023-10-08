@@ -475,8 +475,6 @@ for name, module in pairs(modules) do
 		if get_config("libc++") then
 			add_deps("stdmodules")
 		end
-    add_ldflags("-Wl,--as-needed")
-    add_shflags("-Wl,--as-needed")
 		target_end()
 	end
 end
