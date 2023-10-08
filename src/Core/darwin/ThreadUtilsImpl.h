@@ -4,7 +4,7 @@
 #ifdef __OBJC__ 
 @class NSThread;
 #else
-typedef void NSThread
+typedef void NSThread;
 #endif
 
 void setThreadName(NSThread *id, const char *name);
