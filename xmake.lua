@@ -313,8 +313,10 @@ if get_config("libc++") then
 	if is_plat("windows") then
 		add_sysincludedirs("C:/Dev/llvm/include/c++/v1")
 	end
-	add_cxxflags("-stdlib=libc++", "-fexperimental-library")
-	add_mxxflags("-stdlib=libc++", "-fexperimental-library")
+	add_cxxflags("-stdlib=libc++", "-fexperimental-library", {force = true})
+  add_ldflags("-stdlib=libc++", "-fexperimental-library", {force = true})
+  add_shflags("-stdlib=libc++", "-fexperimental-library", {force = true})
+	add_mxxflags("-stdlib=libc++", "-fexperimental-library", {force = true})
 	set_policy("build.c++.clang.fallbackscanner", true)
 
 	target("stdmodules")
