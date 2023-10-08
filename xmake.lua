@@ -150,14 +150,14 @@ add_urls(
 	"https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git"
 )
 
-add_deps("vulkan-headers", { override = true, version = "main", system = false })
+add_deps("vulkan-headers", { version = "main", system = false })
 
 on_install("windows", "linux", "mingw", "macosx", "iphoneos", "android", function(package)
 	os.cp("include/vk_mem_alloc.h", package:installdir("include"))
 end)
 package_end()
 
-package("vulkan-memory-allocator-hpp")
+package("vulkan-memory-allocator-hpp") do
 set_kind("library", { headeronly = true })
 set_homepage("https://gpuopen-librariesandsdks.github.io/VulkanMemoryAllocator/html/")
 set_description("C++ bindings for VulkanMemoryAllocator.")
@@ -168,7 +168,7 @@ add_urls(
 	"https://github.com/YaaZ/VulkanMemoryAllocator-Hpp.git"
 )
 
-add_deps("vulkan-memory-allocator", { override = true, version = "master", system = false })
+add_deps("vulkan-memory-allocator", { version = "master", system = false })
 
 on_install("windows|x86", "windows|x64", "linux", "macosx", "mingw", "android", "iphoneos", function(package)
 	os.cp("include", package:installdir())
@@ -178,11 +178,10 @@ on_install("windows|x86", "windows|x64", "linux", "macosx", "mingw", "android", 
 		package:add("deps", "vulkan-hpp < 1.3.234")
 	end
 end)
-package_end()
 
-add_requireconfs("vulkan-headers", { override = true, version = "main", system = false })
-add_requireconfs("vulkan-memory-allocator", { override = true, version = "master", system = false })
-add_requireconfs("vulkan-memory-allocator-hpp", { override = true, version = "master", system = false })
+add_requireconfs("vulkan-headers", { version = "main", system = false })
+add_requireconfs("vulkan-memory-allocator", { version = "master", system = false })
+add_requireconfs("vulkan-memory-allocator-hpp", { version = "master", system = false })
 
 local allowedmodes = {
 	"debug",
@@ -308,6 +307,8 @@ option_end()
 option("mold")
 set_default(false)
 option_end()
+
+add_cxxflags("clang::-Wno-experimental-header-units")
 
 if get_config("libc++") then
 	if is_plat("windows") then
