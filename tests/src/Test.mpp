@@ -30,13 +30,12 @@ export namespace test {
     auto expects(bool                        cond,
                  std::string_view            message,
                  const std::source_location& location = std::source_location::current()) noexcept;
+
+    auto parseArgs(std::span<const std::string_view> args) noexcept -> void;
+    auto runTests() noexcept -> int;
 } // namespace test
 
 module :private;
-
-extern "C++" std::vector<std::unique_ptr<test::TestSuiteHolder>> test_suites;
-extern "C++" bool                                                verbose;
-extern "C++" bool                                                failed;
 
 namespace test {
     enum class State {
@@ -46,22 +45,31 @@ namespace test {
         CROSSMARK,
         FAIL
     };
+
+    struct TestState {
+        std::vector<std::unique_ptr<TestSuiteHolder>> test_suites;
+        bool                                          verbose = false;
+        bool                                          failed  = false;
+    };
+
+    auto state = TestState {};
+
     auto colorifyBegin(State) noexcept -> void;
     auto colorifyEnd() noexcept -> void;
 
     auto TestSuiteHolder::runTests() noexcept {
-        if (verbose) { std::println("   > file: {}", location.file_name()); }
+        if (state.verbose) { std::println("   > file: {}", location.file_name()); }
 
         auto passed_tests = 0;
         auto failed_tests = 0;
         for (auto&& test : tests) {
-            failed = false;
-            if (verbose) std::println("     running test {}", test.name);
+            state.failed = false;
+            if (state.verbose) std::println("     running test {}", test.name);
             test.func();
 
-            if (not failed) {
+            if (not state.failed) {
                 ++passed_tests;
-                if (verbose) {
+                if (state.verbose) {
                     std::print("     ");
                     colorifyBegin(State::PASSED);
                     std::print("PASSED");
@@ -70,7 +78,7 @@ namespace test {
                 }
             } else {
                 ++failed_tests;
-                if (verbose) {
+                if (state.verbose) {
                     std::print("     ");
                     colorifyBegin(State::NOTPASSED);
                     std::print("NOT PASSED");
@@ -89,7 +97,7 @@ namespace test {
             colorifyBegin(State::CROSSMARK);
             std::print("❌");
             colorifyEnd();
-            std::print("{} test failed", failed_tests);
+            std::print("{} test state.failed", failed_tests);
         }
         std::println("");
 
@@ -99,7 +107,7 @@ namespace test {
     TestSuite::TestSuite(std::string              && name,
                          std::vector<TestFunc>    && tests,
                          const std::source_location& location) noexcept {
-        test_suites.emplace_back(
+        state.test_suites.emplace_back(
             std::make_unique<TestSuiteHolder>(std::move(name), std::move(tests), location));
     }
 
@@ -107,8 +115,8 @@ namespace test {
                  std::string_view            message,
                  const std::source_location& location) noexcept {
         if (not cond) [[unlikely]] {
-            failed = true;
-            if (verbose) {
+            state.failed = true;
+            if (state.verbose) {
                 std::print("       ");
                 colorifyBegin(State::FAIL);
                 std::print("FAILURE");
@@ -120,7 +128,23 @@ namespace test {
                              location.line());
             }
         }
-    } // namespace test
+    }
+
+    auto parseArgs(std::span<const std::string_view> args) noexcept -> void {
+        for (auto&& arg : args) {
+            if (arg == "--verbose" or arg == "-v") state.verbose = true;
+        }
+    }
+
+    auto runTests() noexcept -> int {
+        auto return_code = 0;
+        for (auto&& suite : state.test_suites) {
+            std::println("Running test suite {} ({} tests)", suite->name, std::size(suite->tests));
+            if (not suite->runTests()) return_code = -1;
+        }
+
+        return return_code;
+    }
 #ifdef STORMKIT_OS_WINDOWS
     namespace {
         constexpr auto KBLA = 0;

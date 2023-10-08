@@ -16,6 +16,7 @@ for name, _ in pairs(modules) do
 			add_shflags("-Wl,-fuse-ld=mold")
 		end
 
+		add_deps("stormkit-main")
 		add_deps("stormkit-" .. name)
 		target_end()
 
