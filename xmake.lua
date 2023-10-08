@@ -194,9 +194,6 @@ local allowedmodes = {
 	"releasedbg",
 	"check",
 	"coverage",
-	"asan",
-	"lsan",
-	"ubsan",
 	"profile",
 	"check",
 	"minsizerel",
@@ -220,10 +217,6 @@ add_rules(
 	"mode.releasedbg",
 	"mode.check",
 	"mode.coverage",
-	"mode.asan",
-	"mode.lsan",
-	"mode.tsan",
-	"mode.ubsan",
 	"mode.profile",
 	"mode.check",
 	"mode.minsizerel"
@@ -238,12 +231,28 @@ option("enable_examples", { default = false, category = "root menu/others" })
 option("enable_applications", { default = false, category = "root menu/others" })
 option("enable_tests", { default = false, category = "root menu/others" })
 
-option("enable_entities", { default = true, category = "root menu/modules" })
+option("libc++", { default = false, category = "root menu/build" })
+option("sanitizers", { default = false, category = "root menu/build" })
+option("mold", { default = false, category = "root menu/build" })
+
+---------------------------- module options ----------------------------
 option("enable_log", { default = true, category = "root menu/modules" })
+option("enable_entities", { default = true, category = "root menu/modules" })
 option("enable_image", { default = true, category = "root menu/modules" })
-option("enable_wsi", { default = true, category = "root menu/modules" })
-option("enable_gpu", { default = true, category = "root menu/modules" })
-option("enable_engine", { default = false, category = "root menu/modules" })
+option("enable_main", { default = true, category = "root menu/modules" })
+option("enable_wsi", { default = true, category = "root menu/modules", deps = { "enable_log" } })
+option(
+	"enable_gpu",
+	{ default = false, category = "root menu/modules", deps = { "enable_log", "enable_image", "enable_wsi" } }
+)
+option(
+	"enable_engine",
+	{
+		default = false,
+		category = "root menu/modules",
+		deps = { "enable_log", "enable-entities", "enable_image", "enable_wsi", "enable_gpu" },
+	}
+)
 
 ---------------------------- global config ----------------------------
 set_allowedmodes(allowedmodes)
@@ -279,39 +288,37 @@ add_cxflags(
 add_cxflags("-fstrict-aliasing", "-Wstrict-aliasing", { tools = { "clang", "gcc" } })
 add_mxflags("-fstrict-aliasing", "-Wstrict-aliasing", { tools = { "clang", "gcc" } })
 
-add_cxxflags("-Wno-missing-field-initializers", { tools = { "clang" } })
-add_mxxflags("-Wno-missing-field-initializers", { tools = { "clang" } })
+add_cxflags("clang::-Wno-missing-field-initializers")
+add_mxflags("clang::-Wno-missing-field-initializers")
 
 if not is_plat("windows") and not is_plat("macosx") then
 	add_syslinks("stdc++_libbacktrace")
 end
 
-if is_mode("release") then
-	set_symbols("hidden")
-	set_optimize("fastest")
-else
+set_symbols("hidden")
+set_optimize("fastest")
+if is_mode("debug") then
 	set_symbols("debug", "hidden")
 	add_defines("_GLIBCXX_DEBUG")
-	add_cxflags("-ggdb3")
-	add_mxflags("-ggdb3")
+	add_cxflags("-ggdb3", { tools = {"clang", "gcc"} })
+	add_mxflags("-ggdb3", { tools = {"clang", "gcc"} })
+elseif is_mode("releasedbg") then
+	set_optimize("fast")
+	set_symbols("debug", "hidden")
+	add_cxflags("-fno-omit-frame-pointer", { tools = { "clang", "gcc" } })
+	add_mxflags("-fno-omit-frame-pointer", { tools = { "clang", "gcc" } })
+	add_cxflags("-ggdb3", { tools = {"clang", "gcc"} })
+	add_mxflags("-ggdb3", { tools = {"clang", "gcc"} })
 end
 
 set_fpmodels("fast")
-add_vectorexts("mmx")
+add_vectorexts("fma")
 add_vectorexts("neon")
 add_vectorexts("avx", "avx2")
 add_vectorexts("sse", "sse2", "sse3", "ssse3", "sse4.2")
 
 -- set_policy("build.optimization.lto", true)
 set_warnings("all", "pedantic", "extra")
-
-option("libc++")
-set_default(false)
-option_end()
-
-option("mold")
-set_default(false)
-option_end()
 
 add_cxxflags("clang::-Wno-experimental-header-units")
 
@@ -338,25 +345,18 @@ if get_config("libc++") then
 	target_end()
 end
 
+if get_config("sanitizers") then
+	set_policy("build.sanitizer.address", true)
+	set_policy("build.sanitizer.undefined", true)
+end
+
 ---------------------------- targets ----------------------------
 for name, module in pairs(modules) do
-	if not name == "core" then
-		option("enable_" .. name)
-		do
-			set_default(true)
-			set_category("root menu/modules")
-			for _, deps in ipairs(module.deps) do
-				add_deps("enable_" .. deps)
-			end
-		end
-		option_end()
-	end
-
 	add_requires(table.join(module.packages or {}, module.public_packages or {}))
 
 	local modulename = module.modulename
 
-	if name == "core" or name == "main" or has_config("enable_" .. name) then
+	if name == "core" or name == "main" or get_config("enable_" .. name) then
 		target("stormkit-" .. name)
 		do
 			set_group("libraries")

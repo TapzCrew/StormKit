@@ -61,7 +61,7 @@ jobs:
       - name: Configure & Build
         id: build
         run: |
-          xmake f -vD --yes -m ${{ matrix.mode }} -k ${{ matrix.kind }} --enable_examples=y --enable_tests=y --enable_gpu=n --libc++=y --toolchain=llvm --sdk="$PWD/llvm/" --ldflags="-L$PWD/llvm/lib" --shflags="-L$PWD/llvm/lib"
+          xmake f -vD --yes -m ${{ (matrix.mode == 'release' || matrix.mode == 'debug') && matrix.mode || 'releasedbg' }} -k ${{ matrix.kind }} --sanitizers=${{ matrix.mode == 'asan' && 'y' || 'n' }} --enable_examples=y --enable_tests=y --enable_gpu=n --libc++=y --toolchain=llvm --sdk="$PWD/llvm/" --ldflags="-L$PWD/llvm/lib" --shflags="-L$PWD/llvm/lib"
           xmake b -vD
 
       - name: Tests
