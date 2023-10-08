@@ -38,7 +38,7 @@ export namespace test {
 module :private;
 
 namespace test {
-    enum class State {
+    enum class Status {
         PASSED,
         NOTPASSED,
         CHECKMARK,
@@ -50,11 +50,12 @@ namespace test {
         std::vector<std::unique_ptr<TestSuiteHolder>> test_suites;
         bool                                          verbose = false;
         bool                                          failed  = false;
+        bool                                          plain   = false;
     };
 
     auto state = TestState {};
 
-    auto colorifyBegin(State) noexcept -> void;
+    auto colorifyBegin(Status) noexcept -> void;
     auto colorifyEnd() noexcept -> void;
 
     auto TestSuiteHolder::runTests() noexcept {
@@ -71,7 +72,7 @@ namespace test {
                 ++passed_tests;
                 if (state.verbose) {
                     std::print("     ");
-                    colorifyBegin(State::PASSED);
+                    colorifyBegin(Status::PASSED);
                     std::print("PASSED");
                     colorifyEnd();
                     std::println("");
@@ -80,7 +81,7 @@ namespace test {
                 ++failed_tests;
                 if (state.verbose) {
                     std::print("     ");
-                    colorifyBegin(State::NOTPASSED);
+                    colorifyBegin(Status::NOTPASSED);
                     std::print("NOT PASSED");
                     colorifyEnd();
                     std::println("");
@@ -88,14 +89,14 @@ namespace test {
             }
         }
 
-        colorifyBegin(State::CHECKMARK);
-        std::print("✔ ");
+        colorifyBegin(Status::CHECKMARK);
+        if (not state.plain) std::print("✔ ");
         colorifyEnd();
         std::print("{} test passed", passed_tests);
         if (failed_tests > 0) {
             std::print(", ");
-            colorifyBegin(State::CROSSMARK);
-            std::print("❌");
+            colorifyBegin(Status::CROSSMARK);
+            if (not state.plain) std::print("❌");
             colorifyEnd();
             std::print("{} test state.failed", failed_tests);
         }
@@ -118,7 +119,7 @@ namespace test {
             state.failed = true;
             if (state.verbose) {
                 std::print("       ");
-                colorifyBegin(State::FAIL);
+                colorifyBegin(Status::FAIL);
                 std::print("FAILURE");
                 colorifyEnd();
 
@@ -133,6 +134,8 @@ namespace test {
     auto parseArgs(std::span<const std::string_view> args) noexcept -> void {
         for (auto&& arg : args) {
             if (arg == "--verbose" or arg == "-v") state.verbose = true;
+            else if (arg == "--plain" or arg == "-p")
+                state.plain = true;
         }
     }
 
@@ -156,6 +159,7 @@ namespace test {
     /////////////////////////////////////
     /////////////////////////////////////
     auto colorifyBegin(bool fail) noexcept -> void {
+        if (state.plain) return;
         auto output = GetStdHandle(STD_OUTPUT_HANDLE);
 
         auto background = (fail) ? KRED : KRGN;
@@ -167,25 +171,28 @@ namespace test {
     /////////////////////////////////////
     /////////////////////////////////////
     auto colorifyEnd() noexcept -> void {
+        if (state.plain) return;
         auto output = GetStdHandle(STD_OUTPUT_HANDLE);
         SetConsoleTextAttribute(output, (KBLA << 4) + KWHT);
     }
 #else
     /////////////////////////////////////
     /////////////////////////////////////
-    auto colorifyBegin(State state) noexcept -> void {
-        switch (state) {
-            case State::PASSED: std::print("\033[30;42m"); break;
-            case State::FAIL: std::print("\033[30;43m"); break;
-            case State::CHECKMARK: std::print("\033[32m"); break;
-            case State::CROSSMARK: std::print("\033[33m"); break;
-            case State::NOTPASSED: std::print("\033[30;41m"); break;
+    auto colorifyBegin(Status status) noexcept -> void {
+        if (state.plain) return;
+        switch (status) {
+            case Status::PASSED: std::print("\033[30;42m"); break;
+            case Status::FAIL: std::print("\033[30;43m"); break;
+            case Status::CHECKMARK: std::print("\033[32m"); break;
+            case Status::CROSSMARK: std::print("\033[33m"); break;
+            case Status::NOTPASSED: std::print("\033[30;41m"); break;
         }
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     auto colorifyEnd() noexcept -> void {
+        if (state.plain) return;
         std::print("\033[0m");
     }
 #endif
