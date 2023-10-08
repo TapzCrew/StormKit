@@ -15,6 +15,8 @@ export namespace test {
     };
 
     struct TestSuiteHolder {
+        auto                  hasTest(std::string_view name) noexcept;
+        auto                  runTest(std::string_view name) noexcept;
         auto                  runTests() noexcept;
         std::string           name;
         std::vector<TestFunc> tests;
@@ -48,15 +50,51 @@ namespace test {
 
     struct TestState {
         std::vector<std::unique_ptr<TestSuiteHolder>> test_suites;
-        bool                                          verbose = false;
-        bool                                          failed  = false;
-        bool                                          plain   = false;
+        bool                                          verbose        = false;
+        bool                                          failed         = false;
+        bool                                          plain          = false;
+        std::optional<std::string>                    requested_test = std::nullopt;
     };
 
     auto state = TestState {};
 
     auto colorifyBegin(Status) noexcept -> void;
     auto colorifyEnd() noexcept -> void;
+
+    auto TestSuiteHolder::hasTest(std::string_view name) noexcept {
+        for (auto&& test : tests) {
+            if (test.name == name) return true;
+        }
+
+        return false;
+    }
+
+    auto TestSuiteHolder::runTest(std::string_view name) noexcept {
+        for (auto&& test : tests) {
+            if (test.name == name) {
+                if (state.verbose) std::println("     running test {}", test.name);
+                test.func();
+                if (not state.failed) {
+                    if (state.verbose) {
+                        std::print("     ");
+                        colorifyBegin(Status::PASSED);
+                        std::print("PASSED");
+                        colorifyEnd();
+                        std::println("");
+                    }
+                } else {
+                    if (state.verbose) {
+                        std::print("     ");
+                        colorifyBegin(Status::NOTPASSED);
+                        std::print("NOT PASSED");
+                        colorifyEnd();
+                        std::println("");
+                    }
+                }
+                return not state.failed;
+            }
+        }
+    }
 
     auto TestSuiteHolder::runTests() noexcept {
         if (state.verbose) { std::println("   > file: {}", location.file_name()); }
@@ -131,23 +169,53 @@ namespace test {
         }
     }
 
+    auto split(std::string_view string, char delim) noexcept -> std::vector<std::string> {
+        auto output = std::vector<std::string> {};
+        auto first  = std::size_t { 0u };
+
+        while (first < string.size()) {
+            const auto second = string.find_first_of(delim, first);
+
+            if (first != second) output.emplace_back(string.substr(first, second - first));
+
+            if (second == std::string_view::npos) break;
+
+            first = second + 1;
+        }
+
+        return output;
+    }
+
     auto parseArgs(std::span<const std::string_view> args) noexcept -> void {
         for (auto&& arg : args) {
             if (arg == "--verbose" or arg == "-v") state.verbose = true;
             else if (arg == "--plain" or arg == "-p")
                 state.plain = true;
+            else if (arg.starts_with("--test_name=")) { state.requested_test = split(arg, '=')[1]; }
         }
     }
 
     auto runTests() noexcept -> int {
         auto return_code = 0;
-        for (auto&& suite : state.test_suites) {
-            std::println("Running test suite {} ({} tests)", suite->name, std::size(suite->tests));
-            if (not suite->runTests()) return_code = -1;
-        }
+
+        if (state.requested_test) {
+            for (auto&& suite : state.test_suites) {
+                if (suite->hasTest(*state.requested_test)) {
+                    if (not suite->runTest(*state.requested_test)) return_code = -1;
+                    break;
+                }
+            }
+        } else
+            for (auto&& suite : state.test_suites) {
+                std::println("Running test suite {} ({} tests)",
+                             suite->name,
+                             std::size(suite->tests));
+                if (not suite->runTests()) return_code = -1;
+            }
 
         return return_code;
     }
+
 #ifdef STORMKIT_OS_WINDOWS
     namespace {
         constexpr auto KBLA = 0;
