@@ -8,20 +8,10 @@ import std;
 
 import Test;
 
-auto test_suites = std::vector<std::unique_ptr<test::TestSuiteHolder>> {};
-auto verbose     = false;
-auto failed      = false;
+import <stormkit/Main/MainMacro.hpp>;
 
-auto main(int argc, char **argv) noexcept -> int {
-    for (auto i = 0; i < argc; ++i) {
-        auto arg = std::string_view { argv[i] };
-        if (arg == "--verbose" or arg == "-v") verbose = true;
-    }
+auto main(std::span<const std::string_view> args) noexcept -> int {
+    test::parseArgs(args);
 
-    for (auto&& suite : test_suites) {
-        std::println("Running test suite {} ({} tests)", suite->name, std::size(suite->tests));
-        suite->runTests();
-    }
-
-    return 0;
+    return test::runTests();
 }

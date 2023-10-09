@@ -1,10 +1,10 @@
 # Installation
 
-A C++20 complient compiler is needed to build StormKit
+A C++23 compliant compiler is needed to build StormKit and XMake build system
 
 ## Dependencies
 ### StormKit-core module
-- [{fmt}](https://fmt.dev/latest/index.html)
+- [glm](https://github.com/g-truc/glm)
 
 ### StormKit-image module
 - [LibPNG >= 1.6](http://www.libpng.org/pub/png/libpng.html)
@@ -12,53 +12,28 @@ A C++20 complient compiler is needed to build StormKit
 
 ### stormkit-gpu module
 - [Vulkan](https://vulkan.lunarg.com)
+- [VulkanMemoryAllocator](https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator)
+- [VulkanMemoryAllocator-hpp](https://github.com/YaaZ/VulkanMemoryAllocator-Hpp)
 
 ### StormKit-engine module
-- [glm](https://github.com/g-truc/glm)
 - [gli](https://github.com/g-truc/gli)
 
 ## Building
-### Windows
-First you need to [download](https://vulkan.lunarg.com/sdk/home#sdk/downloadConfirm/latest/windows/vulkan-sdk.exe) and set an env var (VULKAN_SDK) to its root directory
 ```
-set VULKAN_SDK=C:\Dev\VulkanSDK\<VERSION>
-vcpkg install --triplet x64-windows vulkan-sdk libpng libjpeg-turbo fmt gli glm range-v3 ms-gsl
-
-#Configure the project
-## Dynamic library
-meson builddir -Ddefault_library=shared
-## Static library
-meson builddir -Ddefault_library=static
-## if you use vcpkg add --cmake_prefix-path
-meson builddir --cmake-prefix-path=<PATHTOVCPKG>/installed/x64-windows
-
-#Build the project
-ninja -C builddir
+> xmake f -m <release|debug|releasedbg> -k <shared|static>
+> xmake b
 ```
 
-### Linux / macOS
-```
-#Configure the project
-## Dynamic library
-meson builddir -Ddefault_library=shared
-## Static library
-meson builddir -Ddefault_library=static
+## Parameters
+You can customize your build (with --option=value) with the following parameters 
 
-#Build the project
-ninja -C builddir
-``` 
-
-## Meson parameters
-You can customize your build (with -Doption=value) with the following parameters 
-
-|       Variable        |         Description          |                                   Default value                                       |
-|-----------------------|------------------------------|---------------------------------------------------------------------------------------|
-| enable_doc            | Generate documentation       | false                                                                                 |
-| enable_examples       | Build examples               | false                                                                                 |
-| enable_entities       | Build storm entities library | true                                                                                  |
-| enable_log            | Build storm log library      | true                                                                                  |
-| enable_window         | Build storm window library   | true                                                                                  |
-| enable_image          | Build storm image library    | true                                                                                  |
-| enable_module         | Build storm module library   | true                                                                                  |
-| enable_render         | Build storm render library   | true                                                                                  |
-| enable_engine       | Build storm engine library | true                                                                                  |
+|       Variable        |         Description             |                                   Default value                                       |
+|-----------------------|---------------------------------|---------------------------------------------------------------------------------------|
+| enable_tests          | Build tests                     | no                                                                                    |
+| enable_examples       | Build examples                  | no                                                                                    |
+| enable_log            | Build stormkit log library      | yes                                                                                   |
+| enable_entities       | Build stormkit entities library | yes                                                                                   |
+| enable_image          | Build stormkit image library    | yes                                                                                   |
+| enable_wsi            | Build stormkit wsi library      | yes                                                                                   |
+| enable_gpu            | Build stormkit gpu    library   | yes                                                                                   |
+| enable_engine         | Build stormkit engine library   | yes                                                                                   |

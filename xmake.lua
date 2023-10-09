@@ -47,7 +47,7 @@ modules = {
 	image = {
 		packages = { "gli", "libpng", "libjpeg-turbo" },
 		modulename = "Image",
-		public_deps = { "stormkit-core" }
+		public_deps = { "stormkit-core" },
 	},
 	main = {
 		modulename = "Main",
@@ -58,17 +58,19 @@ modules = {
 		modulename = "Wsi",
 		public_deps = { "stormkit-core" },
 		deps = { "stormkit-log" },
-		packages = is_plat("linux") and { "libxkbcommon",
-            "libxkbcommon-x11",
-            "libxcb",
-            "xcb-util-keysyms",
-            "xcb-util",
-            "xcb-util-wm",
-            "xcb-util-errors",
-            "wayland",
-            "wayland-protocols",
-          } or nil,
-    frameworks = is_plat("macosx") and {"CoreFoundation", "Foundation", "AppKit", "Metal", "IOKit", "QuartzCore" } or nil,
+		packages = is_plat("linux") and {
+			"libxkbcommon",
+			"libxkbcommon-x11",
+			"libxcb",
+			"xcb-util-keysyms",
+			"xcb-util",
+			"xcb-util-wm",
+			"xcb-util-errors",
+			"wayland",
+			"wayland-protocols",
+		} or nil,
+		frameworks = is_plat("macosx") and { "CoreFoundation", "Foundation", "AppKit", "Metal", "IOKit", "QuartzCore" }
+			or nil,
 		custom = function()
 			if is_plat("linux") then
 				add_rules("wayland.protocols")
@@ -124,9 +126,9 @@ modules = {
 			-- "VULKAN_HPP_NO_EXCEPTIONS", uncomment when vk::raii is supported without exceptions
 		},
 		custom = function()
-      remove_files("src/Gpu/Execution/**.cpp")
-      remove_files("modules/stormkit/Gpu/Execution.mpp")
-      remove_files("modules/stormkit/Gpu/Execution/**.mpp")
+			remove_files("src/Gpu/Execution/**.cpp")
+			remove_files("modules/stormkit/Gpu/Execution.mpp")
+			remove_files("modules/stormkit/Gpu/Execution/**.mpp")
 			if is_plat("linux") then
 				add_defines("VK_USE_PLATFORM_XCB_KHR")
 				add_defines("VK_USE_PLATFORM_WAYLAND_KHR")
@@ -138,49 +140,53 @@ modules = {
 }
 
 package("vulkan-memory-allocator")
-set_kind("library", { headeronly = true })
-set_homepage("https://gpuopen-librariesandsdks.github.io/VulkanMemoryAllocator/html/")
-set_description("Easy to integrate Vulkan memory allocation library.")
-set_license("MIT")
+do
+	set_kind("library", { headeronly = true })
+	set_homepage("https://gpuopen-librariesandsdks.github.io/VulkanMemoryAllocator/html/")
+	set_description("Easy to integrate Vulkan memory allocation library.")
+	set_license("MIT")
 
-add_urls(
-	"https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator/archive/refs/tags/$(version).tar.gz",
-	"https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git"
-)
+	add_urls(
+		"https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator/archive/refs/tags/$(version).tar.gz",
+		"https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git"
+	)
 
-add_deps("vulkan-headers", { override = true, version = "main", system = false })
+	add_deps("vulkan-headers", { version = "main", system = false })
 
-on_install("windows", "linux", "mingw", "macosx", "iphoneos", "android", function(package)
-	os.cp("include/vk_mem_alloc.h", package:installdir("include"))
-end)
+	on_install("windows", "linux", "mingw", "macosx", "iphoneos", "android", function(package)
+		os.cp("include/vk_mem_alloc.h", package:installdir("include"))
+	end)
+end
 package_end()
 
 package("vulkan-memory-allocator-hpp")
-set_kind("library", { headeronly = true })
-set_homepage("https://gpuopen-librariesandsdks.github.io/VulkanMemoryAllocator/html/")
-set_description("C++ bindings for VulkanMemoryAllocator.")
-set_license("CC0")
+do
+	set_kind("library", { headeronly = true })
+	set_homepage("https://gpuopen-librariesandsdks.github.io/VulkanMemoryAllocator/html/")
+	set_description("C++ bindings for VulkanMemoryAllocator.")
+	set_license("CC0")
 
-add_urls(
-	"https://github.com/YaaZ/VulkanMemoryAllocator-Hpp/archive/refs/tags/$(version).tar.gz",
-	"https://github.com/YaaZ/VulkanMemoryAllocator-Hpp.git"
-)
+	add_urls(
+		"https://github.com/YaaZ/VulkanMemoryAllocator-Hpp/archive/refs/tags/$(version).tar.gz",
+		"https://github.com/YaaZ/VulkanMemoryAllocator-Hpp.git"
+	)
 
-add_deps("vulkan-memory-allocator", { override = true, version = "master", system = false })
+	add_deps("vulkan-memory-allocator", { version = "master", system = false })
 
-on_install("windows|x86", "windows|x64", "linux", "macosx", "mingw", "android", "iphoneos", function(package)
-	os.cp("include", package:installdir())
-	if package:gitref() or package:version():ge("3.0.1") then
-		package:add("deps", "vulkan-hpp >= 1.3.234")
-	else
-		package:add("deps", "vulkan-hpp < 1.3.234")
-	end
-end)
+	on_install("windows|x86", "windows|x64", "linux", "macosx", "mingw", "android", "iphoneos", function(package)
+		os.cp("include", package:installdir())
+		if package:gitref() or package:version():ge("3.0.1") then
+			package:add("deps", "vulkan-hpp >= 1.3.234")
+		else
+			package:add("deps", "vulkan-hpp < 1.3.234")
+		end
+	end)
+end
 package_end()
 
-add_requireconfs("vulkan-headers", { override = true, version = "main", system = false })
-add_requireconfs("vulkan-memory-allocator", { override = true, version = "master", system = false })
-add_requireconfs("vulkan-memory-allocator-hpp", { override = true, version = "master", system = false })
+add_requireconfs("vulkan-headers", { version = "main", system = false })
+add_requireconfs("vulkan-memory-allocator", { version = "master", system = false })
+add_requireconfs("vulkan-memory-allocator-hpp", { version = "master", system = false })
 
 local allowedmodes = {
 	"debug",
@@ -188,9 +194,6 @@ local allowedmodes = {
 	"releasedbg",
 	"check",
 	"coverage",
-	"asan",
-	"lsan",
-	"ubsan",
 	"profile",
 	"check",
 	"minsizerel",
@@ -214,10 +217,6 @@ add_rules(
 	"mode.releasedbg",
 	"mode.check",
 	"mode.coverage",
-	"mode.asan",
-	"mode.lsan",
-	"mode.tsan",
-	"mode.ubsan",
 	"mode.profile",
 	"mode.check",
 	"mode.minsizerel"
@@ -232,12 +231,28 @@ option("enable_examples", { default = false, category = "root menu/others" })
 option("enable_applications", { default = false, category = "root menu/others" })
 option("enable_tests", { default = false, category = "root menu/others" })
 
-option("enable_entities", { default = true, category = "root menu/modules" })
+option("libc++", { default = false, category = "root menu/build" })
+option("sanitizers", { default = false, category = "root menu/build" })
+option("mold", { default = false, category = "root menu/build" })
+
+---------------------------- module options ----------------------------
 option("enable_log", { default = true, category = "root menu/modules" })
+option("enable_entities", { default = true, category = "root menu/modules" })
 option("enable_image", { default = true, category = "root menu/modules" })
-option("enable_wsi", { default = true, category = "root menu/modules" })
-option("enable_gpu", { default = true, category = "root menu/modules" })
-option("enable_engine", { default = false, category = "root menu/modules" })
+option("enable_main", { default = true, category = "root menu/modules" })
+option("enable_wsi", { default = true, category = "root menu/modules", deps = { "enable_log" } })
+option(
+	"enable_gpu",
+	{ default = false, category = "root menu/modules", deps = { "enable_log", "enable_image", "enable_wsi" } }
+)
+option(
+	"enable_engine",
+	{
+		default = false,
+		category = "root menu/modules",
+		deps = { "enable_log", "enable-entities", "enable_image", "enable_wsi", "enable_gpu" },
+	}
+)
 
 ---------------------------- global config ----------------------------
 set_allowedmodes(allowedmodes)
@@ -273,31 +288,31 @@ add_cxflags(
 add_cxflags("-fstrict-aliasing", "-Wstrict-aliasing", { tools = { "clang", "gcc" } })
 add_mxflags("-fstrict-aliasing", "-Wstrict-aliasing", { tools = { "clang", "gcc" } })
 
-add_cxxflags(
-	"-Wno-missing-field-initializers",
-	{ tools = { "clang" } }
-)
-add_mxxflags(
-	"-Wno-missing-field-initializers",
-	{ tools = { "clang" } }
-)
+add_cxflags("clang::-Wno-missing-field-initializers")
+add_mxflags("clang::-Wno-missing-field-initializers")
 
 if not is_plat("windows") and not is_plat("macosx") then
 	add_syslinks("stdc++_libbacktrace")
 end
 
-if is_mode("release") then
-	set_symbols("hidden")
-	set_optimize("fastest")
-else
+set_symbols("hidden")
+set_optimize("fastest")
+if is_mode("debug") then
 	set_symbols("debug", "hidden")
 	add_defines("_GLIBCXX_DEBUG")
-	add_cxflags("-ggdb3")
-	add_mxflags("-ggdb3")
+	add_cxflags("-ggdb3", { tools = {"clang", "gcc"} })
+	add_mxflags("-ggdb3", { tools = {"clang", "gcc"} })
+elseif is_mode("releasedbg") then
+	set_optimize("fast")
+	set_symbols("debug", "hidden")
+	add_cxflags("-fno-omit-frame-pointer", { tools = { "clang", "gcc" } })
+	add_mxflags("-fno-omit-frame-pointer", { tools = { "clang", "gcc" } })
+	add_cxflags("-ggdb3", { tools = {"clang", "gcc"} })
+	add_mxflags("-ggdb3", { tools = {"clang", "gcc"} })
 end
 
 set_fpmodels("fast")
-add_vectorexts("mmx")
+add_vectorexts("fma")
 add_vectorexts("neon")
 add_vectorexts("avx", "avx2")
 add_vectorexts("sse", "sse2", "sse3", "ssse3", "sse4.2")
@@ -305,179 +320,172 @@ add_vectorexts("sse", "sse2", "sse3", "ssse3", "sse4.2")
 -- set_policy("build.optimization.lto", true)
 set_warnings("all", "pedantic", "extra")
 
-option("libc++")
-set_default(false)
-option_end()
-
-option("mold")
-set_default(false)
-add_ldflags("-Wl,-fuse-ld=mold")
-add_shflags("-Wl,-fuse-ld=mold")
-option_end()
+add_cxxflags("clang::-Wno-experimental-header-units")
 
 if get_config("libc++") then
 	if is_plat("windows") then
 		add_sysincludedirs("C:/Dev/llvm/include/c++/v1")
 	end
-	add_cxxflags("-stdlib=libc++", "-fexperimental-library")
-	add_mxxflags("-stdlib=libc++", "-fexperimental-library")
+	add_cxxflags("-stdlib=libc++", "-fexperimental-library", { force = true })
+	add_ldflags("-stdlib=libc++", "-fexperimental-library", { force = true })
+	add_shflags("-stdlib=libc++", "-fexperimental-library", { force = true })
+	add_mxxflags("-stdlib=libc++", "-fexperimental-library", { force = true })
 	set_policy("build.c++.clang.fallbackscanner", true)
 
 	target("stdmodules")
-    set_kind("object")
-    set_languages("c++latest")
+	do
+		set_kind("object")
+		set_languages("c++latest")
 
-    add_files("stdmodules/**.cppm")
+		add_files("stdmodules/**.cppm")
 
-    add_cxxflags("-Wno-reserved-module-identifier")
-    set_policy("build.c++.clang.fallbackscanner", false)
+		add_cxxflags("-Wno-reserved-module-identifier")
+		set_policy("build.c++.clang.fallbackscanner", false)
+	end
 	target_end()
+end
+
+if get_config("sanitizers") then
+	set_policy("build.sanitizer.address", true)
+	set_policy("build.sanitizer.undefined", true)
 end
 
 ---------------------------- targets ----------------------------
 for name, module in pairs(modules) do
-	if not name == "core" then
-		option("enable_" .. name)
-		set_default(true)
-		set_category("root menu/modules")
-		for _, deps in ipairs(module.deps) do
-			add_deps("enable_" .. deps)
-		end
-		option_end()
-	end
-
 	add_requires(table.join(module.packages or {}, module.public_packages or {}))
 
 	local modulename = module.modulename
 
-	if name == "core" or name == "main" or has_config("enable_" .. name) then
+	if name == "core" or name == "main" or get_config("enable_" .. name) then
 		target("stormkit-" .. name)
-		set_group("libraries")
+		do
+			set_group("libraries")
 
-		if name == "main" then
-			set_kind("static")
-		else
-			set_kind("$(kind)")
-		end
+			if name == "main" then
+				set_kind("static")
+			else
+				set_kind("$(kind)")
+			end
 
-		set_languages("cxxlatest", "clatest")
+			set_languages("cxxlatest", "clatest")
 
-		add_defines("STORMKIT_BUILD")
-		if is_mode("debug") then
-			add_defines("STORMKIT_BUILD_DEBUG")
-			add_defines("STORMKIT_ASSERT=1")
-			set_suffixname("-d")
-		else
-			add_defines("STORMKIT_ASSERT=0")
-		end
+			add_defines("STORMKIT_BUILD")
+			if is_mode("debug") then
+				add_defines("STORMKIT_BUILD_DEBUG")
+				add_defines("STORMKIT_ASSERT=1")
+				set_suffixname("-d")
+			else
+				add_defines("STORMKIT_ASSERT=0")
+			end
 
-		if is_kind("static") then
-			add_defines("STORMKIT_STATIC", { public = true })
-		end
+			if is_kind("static") then
+				add_defines("STORMKIT_STATIC", { public = true })
+			end
 
-		local src_path = path.join("src", modulename)
-		local module_path = path.join("modules", "stormkit", modulename)
-		local include_path = path.join("include", "stormkit", modulename)
+			local src_path = path.join("src", modulename)
+			local module_path = path.join("modules", "stormkit", modulename)
+			local include_path = path.join("include", "stormkit", modulename)
 
-		for _, file in ipairs(os.files(path.join(src_path, "**.mpp"))) do
-			add_files(file)
-		end
-		for _, file in ipairs(os.files(path.join(src_path, "**.cpp"))) do
-			add_files(file)
-		end
-		for _, file in ipairs(os.files(path.join(src_path, "**.mm"))) do
-			add_files(file)
-		end
-		for _, file in ipairs(os.files(path.join(src_path, "**.m"))) do
-			add_files(file)
-		end
-		for _, file in ipairs(os.files(path.join(src_path, "**.inl"))) do
-			add_files(file)
-		end
-
-		if os.exists(module_path .. ".mpp") then
-			add_files(module_path .. ".mpp")
-		end
-
-		if os.files(module_path) then
-			for _, file in ipairs(os.files(path.join(module_path, "**.mpp"))) do
+			for _, file in ipairs(os.files(path.join(src_path, "**.mpp"))) do
 				add_files(file)
 			end
-			for _, file in ipairs(os.files(path.join(module_path, "**.inl"))) do
+			for _, file in ipairs(os.files(path.join(src_path, "**.cpp"))) do
+				add_files(file)
+			end
+			for _, file in ipairs(os.files(path.join(src_path, "**.mm"))) do
+				add_files(file)
+			end
+			for _, file in ipairs(os.files(path.join(src_path, "**.m"))) do
+				add_files(file)
+			end
+			for _, file in ipairs(os.files(path.join(src_path, "**.inl"))) do
+				add_files(file)
+			end
+
+			if os.exists(module_path .. ".mpp") then
+				add_files(module_path .. ".mpp")
+			end
+
+			if os.files(module_path) then
+				for _, file in ipairs(os.files(path.join(module_path, "**.mpp"))) do
+					add_files(file)
+				end
+				for _, file in ipairs(os.files(path.join(module_path, "**.inl"))) do
+					add_headerfiles(file)
+				end
+			end
+
+			for _, file in ipairs(os.files(path.join(include_path, "**.inl"))) do
 				add_headerfiles(file)
 			end
-		end
-
-		for _, file in ipairs(os.files(path.join(include_path, "**.inl"))) do
-			add_headerfiles(file)
-		end
-		for _, file in ipairs(os.files(path.join(include_path, "**.hpp"))) do
-			add_headerfiles(file)
-		end
-
-		if is_plat("windows") or is_plat("mingw") then
-			for _, plat in ipairs({ "posix", "linux", "darwin", "macOS", "iOS", "BSD", "Android" }) do
-				remove_files(path.join(src_path, plat, "**"))
-				remove_headerfiles(path.join(src_path, plat, "**"))
+			for _, file in ipairs(os.files(path.join(include_path, "**.hpp"))) do
+				add_headerfiles(file)
 			end
-		elseif is_plat("macosx") then
-			for _, plat in ipairs({ "linux", "win32", "iOS", "BSD", "Android" }) do
-				remove_files(path.join(src_path, plat, "**"))
-				remove_headerfiles(path.join(src_path, plat, "**"))
+
+			if is_plat("windows") or is_plat("mingw") then
+				for _, plat in ipairs({ "posix", "linux", "darwin", "macOS", "iOS", "BSD", "Android" }) do
+					remove_files(path.join(src_path, plat, "**"))
+					remove_headerfiles(path.join(src_path, plat, "**"))
+				end
+			elseif is_plat("macosx") then
+				for _, plat in ipairs({ "linux", "win32", "iOS", "BSD", "Android" }) do
+					remove_files(path.join(src_path, plat, "**"))
+					remove_headerfiles(path.join(src_path, plat, "**"))
+				end
+			elseif is_plat("ios") then
+				for _, plat in ipairs({ "linux", "macOS", "win32", "BSD", "Android" }) do
+					remove_files(path.join(src_path, plat, "**"))
+					remove_headerfiles(path.join(src_path, plat, "**"))
+				end
+			elseif is_plat("android") then
+				for _, plat in ipairs({ "linux", "darwin", "macOS", "iOS", "BSD", "win32" }) do
+					remove_files(path.join(src_path, plat, "**"))
+					remove_headerfiles(path.join(src_path, plat, "**"))
+				end
+			elseif is_plat("linux") then
+				for _, plat in ipairs({ "win32", "darwin", "macOS", "iOS", "BSD", "Android" }) do
+					remove_files(path.join(src_path, plat, "**"))
+					remove_headerfiles(path.join(src_path, plat, "**"))
+				end
 			end
-		elseif is_plat("ios") then
-			for _, plat in ipairs({ "linux", "macOS", "win32", "BSD", "Android" }) do
-				remove_files(path.join(src_path, plat, "**"))
-				remove_headerfiles(path.join(src_path, plat, "**"))
+
+			add_includedirs("$(projectdir)/include", { public = true })
+
+			if module.defines then
+				add_defines(module.defines)
 			end
-		elseif is_plat("android") then
-			for _, plat in ipairs({ "linux", "darwin", "macOS", "iOS", "BSD", "win32" }) do
-				remove_files(path.join(src_path, plat, "**"))
-				remove_headerfiles(path.join(src_path, plat, "**"))
+
+			if module.cxxflags then
+				add_cxxflags(module.cxxflags)
+				add_mxxflags(module.cxxflags)
 			end
-		elseif is_plat("linux") then
-			for _, plat in ipairs({ "win32", "darwin", "macOS", "iOS", "BSD", "Android" }) do
-				remove_files(path.join(src_path, plat, "**"))
-				remove_headerfiles(path.join(src_path, plat, "**"))
+
+			if module.public_deps then
+				add_deps(module.public_deps, { public = true })
 			end
-		end
 
-		add_includedirs("$(projectdir)/include", { public = true })
+			if module.deps then
+				add_deps(module.deps, { public = is_kind("static") })
+			end
 
-		if module.defines then
-			add_defines(module.defines)
-		end
+			if module.public_packages then
+				add_packages(module.public_packages, { public = true })
+			end
 
-		if module.cxxflags then
-			add_cxxflags(module.cxxflags)
-			add_mxxflags(module.cxxflags)
-		end
+			if module.packages then
+				add_packages(module.packages, { public = is_kind("static") })
+			end
 
-		if module.public_deps then
-			add_deps(module.public_deps, { public = true })
-		end
+			if module.frameworks then
+				add_frameworks(module.frameworks, { public = is_kind("static") })
+			end
+			if module.custom then
+				module.custom()
+			end
 
-		if module.deps then
-			add_deps(module.deps, { public = is_kind("static") })
-		end
-
-		if module.public_packages then
-			add_packages(module.public_packages, { public = true })
-		end
-
-		if module.packages then
-			add_packages(module.packages, { public = is_kind("static") })
-		end
-
-		if module.frameworks then
-			add_frameworks(module.frameworks, { public = is_kind("static") })
-		end
-		if module.custom then
-			module.custom()
-		end
-
-		if get_config("libc++") then
-			add_deps("stdmodules")
+			if get_config("libc++") then
+				add_deps("stdmodules")
+			end
 		end
 		target_end()
 	end

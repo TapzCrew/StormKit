@@ -1,21 +1,21 @@
-name: macOS
+name: Linux
 
 on:
   push:
-    branches: [ develop ]
+    branches: [develop]
     paths-ignore:
-      - '.github/workflows/Linux.yml'
       - '.github/workflows/Windows.yml'
+      - '.github/workflows/macOS.yml'
       - '.github/workflows/iOS.yml'
       - '.github/workflows/Android.yml'
       - '.gitignore'
       - 'LICENSE'
       - 'README.md'
   pull_request:
-    branches: [ develop ]
+    branches: [main, develop]
     paths-ignore:
-      - '.github/workflows/Linux.yml'
       - '.github/workflows/Windows.yml'
+      - '.github/workflows/macOS.yml'
       - '.github/workflows/iOS.yml'
       - '.github/workflows/Android.yml'
       - '.gitignore'
@@ -29,21 +29,21 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macOS-latest]
+        os: [Linux]
         kind: [static, shared]
         mode: [release, debug, asan]
 
     runs-on: ${{ matrix.os }}
 
     concurrency:
-      group: ${{ github.ref }}-${{ github.base_ref }}-${{ github.head_ref }}-macOS-${{ matrix.kind }}-${{ matrix.mode }}
+      group: ${{ github.ref }}-${{ github.base_ref }}-${{ github.head_ref }}-Linux-${{ matrix.kind }}-${{ matrix.mode }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-
+  
       - name: Install
         uses: xmake-io/github-action-setup-xmake@v1
         with:
@@ -52,20 +52,14 @@ jobs:
       - name: Update xmake repository
         run: xmake repo -vD --update
 
-      - name: Bootstrap LLVM 
-        id: install-llvm
-        run: |
-          wget https://github.com/Arthapz/llvm-18-patched/raw/main/macOS/llvm.7z
-          7z x llvm.7z
-
       - name: Configure & Build
         id: build
         run: |
-          xmake f -vD --yes -m ${{ (matrix.mode == 'release' || matrix.mode == 'debug') && matrix.mode || 'releasedbg' }} -k ${{ matrix.kind }} --sanitizers=${{ matrix.mode == 'asan' && 'y' || 'n' }} --enable_examples=y --enable_tests=y --enable_gpu=n --libc++=y --toolchain=llvm --sdk="$PWD/llvm/" --ldflags="-L$PWD/llvm/lib" --shflags="-L$PWD/llvm/lib"
+          xmake f -vD --yes -m ${{ (matrix.mode == 'release' || matrix.mode == 'debug') && matrix.mode || 'releasedbg' }} -k ${{ matrix.kind }} --sanitizers=${{ matrix.mode == 'asan' && 'y' || 'n' }} --enable_examples=y --enable_tests=y --enable_gpu=n --libc++=y --toolchain=llvm --mold=y --sdk=/opt/llvm-git/usr --ldflags="-L/opt/llvm-git/usr/lib" --shflags="-L/opt/llvm-git/usr/lib"
           xmake b -vD
 
       - name: Tests
-        run: DYLD_LIBRARY_PATH="$PWD/llvm/lib" xmake test
+        run: LD_LIBRARY_PATH="/opt/llvm-git/usr/lib" xmake test
 
       - name: Installation
         run: xmake install -vD --installdir="${{ runner.workspace }}/output"
