@@ -3,7 +3,7 @@ StormKit is my personal C++ toolkit.
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 ## Project Health
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/c282faa85ff24b049eb7f61f826224b3)](https://www.codacy.com/app/Arthapz/StormKit?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Arthapz/StormKit&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/2dd182e2c2b74ea2ada2384c96e9304d)](https://app.codacy.com/gh/TapzCrew/StormKit/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 
 | OS | Status |
 | ------- | ------ |
@@ -13,10 +13,3 @@ StormKit is my personal C++ toolkit.
 
 ## Getting Started
   - [Install](INSTALL.md)
-  - [Contribution](CONTRIBUTE.md)
-
-## Usefull links
-
-  - [StormKit git](https://gitlab.com/Arthapz/stormkit)
-  - [StormKit documentation](http://doc.arthapz.fr/StormKit)
-  - [StormKit wiki](https://gitlab.com/Arthapz/stormkit/wiki)
