@@ -54,6 +54,9 @@ namespace stormkit::core {
         concept IsIndirection = IsLValueReference<T> or IsPointer<T>;
 
         template<class T>
+        concept IsRawIndirection = IsLValueReference<T> or IsRawPointer<T>;
+
+        template<class T>
         concept IsPolymorphic = std::is_polymorphic_v<T>;
 
         // clang-format off
