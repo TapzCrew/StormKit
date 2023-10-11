@@ -119,7 +119,7 @@ namespace stormkit::core {
 #elif defined(STORMKIT_OS_MACOS)
         output = std::bit_cast<char*>(std::data(input));
 #else
-        for (const auto& c : input) std::c8rtomb(std::data(output), core::as<char>(c), &state);
+        for (const auto& c : input) std::c8rtomb(std::data(output), core::narrow<char>(c), &state);
 #endif
 
         return output;
@@ -130,7 +130,7 @@ namespace stormkit::core {
     inline auto asciiToUtf8(std::string_view input) -> std::u8string {
         auto state  = std::mbstate_t {};
         auto output = std::u8string {};
-        output.resize(std::size(input) * as<RangeExtent>(MB_LEN_MAX));
+        output.resize(std::size(input) * narrow<RangeExtent>(MB_LEN_MAX));
 
 #if defined(STORMKIT_COMPILER_MSVC)
         auto bytes = toByteSpan(output);

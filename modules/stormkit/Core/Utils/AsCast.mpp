@@ -6,6 +6,8 @@ export module stormkit.Core:Utils.AsCast;
 
 import std;
 
+import <stormkit/Core/PlatformMacro.hpp>;
+
 import :Utils.Assert;
 import :Meta.Concepts;
 import :Meta.Traits;
@@ -14,81 +16,98 @@ export namespace stormkit::core {
     template<IsNotReference To, typename... Args>
     [[nodiscard]] constexpr auto is(const std::variant<Args...>& variant) noexcept -> bool;
 
-    template<IsNotIndirection To>
-    [[nodiscard]] constexpr auto is(IsPointer auto&& value) noexcept -> bool;
+    template<IsPolymorphic To, IsIndirection From>
+        requires(IsPolymorphic<RawType<From>> and Is<To, RawType<From>>)
+    [[nodiscard]] constexpr auto is(From&& value) noexcept -> bool;
 
-    template<IsNotIndirection To>
-    [[nodiscard]] constexpr auto is(IsLValueReference auto&& value) noexcept -> bool;
+    // variants
+    template<IsNotReference To, typename... Args>
+    [[nodiscard]] constexpr auto as(std::variant<Args...>& variant) noexcept -> decltype(auto);
 
     template<IsNotReference To, typename... Args>
-    [[nodiscard]] constexpr auto as(std::variant<Args...>& variant) noexcept -> auto&&;
+    [[nodiscard]] constexpr auto as(std::variant<Args...>&& variant) noexcept -> decltype(auto);
 
     template<IsNotReference To, typename... Args>
-    [[nodiscard]] constexpr auto as(std::variant<Args...>&& variant) noexcept -> auto&&;
+    [[nodiscard]] constexpr auto as(const std::variant<Args...>& variant) noexcept
+        -> decltype(auto);
 
     template<IsNotReference To, typename... Args>
-    [[nodiscard]] constexpr auto as(const std::variant<Args...>& variant) noexcept -> auto&&;
+    [[nodiscard]] constexpr auto as(const std::variant<Args...>&& variant) noexcept
+        -> decltype(auto);
 
-    template<IsNotReference To, typename... Args>
-    [[nodiscard]] constexpr auto as(const std::variant<Args...>&& variant) noexcept -> auto&&;
-
-    template<std::signed_integral To, std::signed_integral From>
-    [[nodiscard]] constexpr auto as(From value) noexcept -> To;
-
-    template<std::unsigned_integral To, std::unsigned_integral From>
-    [[nodiscard]] constexpr auto as(From value) noexcept -> To;
-
-    template<std::signed_integral To, std::unsigned_integral From>
-    [[nodiscard]] constexpr auto as(From value) noexcept -> To;
-
-    template<std::unsigned_integral To, std::signed_integral From>
-    [[nodiscard]] constexpr auto as(From value) noexcept -> To;
-
-    template<std::floating_point To, std::floating_point From>
-    [[nodiscard]] constexpr auto as(From value) noexcept -> To;
-
-    template<std::floating_point To, std::signed_integral From>
-    [[nodiscard]] constexpr auto as(From value) noexcept -> To;
-
-    template<std::floating_point To, std::unsigned_integral From>
-    [[nodiscard]] constexpr auto as(From value) noexcept -> To;
-
-    template<std::unsigned_integral To, std::floating_point From>
-    [[nodiscard]] constexpr auto as(From value) noexcept -> To;
-
-    template<std::integral To, IsEnumeration From>
-        requires(IsNotByte<From>)
-    [[nodiscard]] constexpr auto as(From value) noexcept -> To;
-
-    template<IsEnumeration To, std::integral From>
-        requires(IsNotByte<To>)
-    [[nodiscard]] constexpr auto as(From value) noexcept -> To;
-
-    template<IsEnumeration To, IsEnumeration From>
-        requires(IsNotByte<To> and IsNotByte<From>)
-    [[nodiscard]] constexpr auto as(From value) noexcept -> To;
-
-    template<std::integral To, IsByte From>
-    [[nodiscard]] constexpr auto as(From value) noexcept -> To;
-
-    template<IsByte To, std::integral From>
-    [[nodiscard]] constexpr auto as(From value) noexcept -> To;
-
-    template<IsReference To, IsReference From>
-        requires Is<To, From>
+    // polymorphic
+    template<IsRawIndirection To, IsRawIndirection From>
+        requires(IsPolymorphic<RawType<From>> and IsPolymorphic<RawType<To>> and
+                 Is<RawType<To>, RawType<From>>)
     [[nodiscard]] constexpr auto as(From&& value) -> To;
 
-    template<IsRawPointer To, IsRawPointer From>
-        requires Is<To, From>
+    // std::byte* / char*
+    template<IsRawPointer To, IsRawIndirection From>
+        requires IsByte<RawType<To>>
     [[nodiscard]] constexpr auto as(From&& value) noexcept -> To;
 
-    template<class To, std::convertible_to<To> From>
-        requires(not IsArithmetic<To> and not IsArithmetic<From>)
-    [[nodiscard]] constexpr auto as(From& value) noexcept -> To;
+    template<IsRawPointer To, IsRawIndirection From>
+        requires IsByte<RawType<From>>
+    [[nodiscard]] constexpr auto as(From&& value) noexcept -> To;
 
-    template<IsRawPointer To, IsRawPointer From>
-        requires(IsByte<PureType<To>>)
-    [[nodiscard]] constexpr auto as(From value) noexcept -> To;
+    // enumerations
+    // template<IsEnumeration To, std::integral From>
+    // [[nodiscard]] constexpr auto as(From&& value) noexcept -> To;
+
+    template<IsEnumeration To, IsEnumeration From>
+    [[nodiscard]] constexpr auto as(From&& value) noexcept -> To;
+
+    template<std::integral To, IsEnumeration From>
+    [[nodiscard]] constexpr auto as(From&& value) noexcept -> To;
+
+    // explicit casts
+    template<IsNot<std::string> To, IsBraceInitializableTo<To> From>
+        requires IsNot<From, To>
+    [[nodiscard]] constexpr auto as(From&& from) noexcept -> To;
+
+    template<typename To, Is<To> From>
+    [[nodiscard]] constexpr auto as(From&& from) noexcept -> To;
+
+    // safe numeric types
+    template<typename To, typename From>
+    concept IsNarrowing =
+        IsArithmetic<To> and IsArithmetic<From> and IsBraceInitializableTo<PureType<From>, To>;
+
+    template<typename To, typename From>
+    concept IsNarrowingWithError = [] {
+        static_assert(IsNarrowing<To, From>,
+                      "as cast only allow non-narrowing casts, use core::narrow to "
+                      "explicitly narrow cast");
+        return true;
+    }();
+
+    template<IsArithmetic To, IsArithmetic From>
+        requires(IsNot<From, To> and not IsNarrowing<To, From>)
+    [[nodiscard]] constexpr auto as(From&& value) noexcept -> To;
+
+    // std::byte
+    template<std::integral To, IsByte From>
+    [[nodiscard]] constexpr auto as(From&& value) noexcept -> To;
+
+    template<IsByte To, std::integral From>
+    [[nodiscard]] constexpr auto as(From&& value) noexcept -> To;
+
+    // else
+    template<std::integral To, std::integral From>
+    [[nodiscard]] constexpr auto narrow(From value) noexcept -> To;
+
+    template<std::floating_point To, std::integral From>
+    [[nodiscard]] constexpr auto narrow(From value) noexcept -> To;
+
+    template<std::integral To, std::floating_point From>
+    [[nodiscard]] constexpr auto narrow(From value) noexcept -> To;
+
+    template<std::floating_point To, std::floating_point From>
+    [[nodiscard]] constexpr auto narrow(From value) noexcept -> To;
+    // template<class To, typename From>
+    //     requires(not std::convertible_to<From, To> and not IsArithmetic<To> and
+    //              not IsArithmetic<From>)
+    // [[nodiscard]] constexpr auto as(From&& value) noexcept -> To;
 } // namespace stormkit::core
 
 ////////////////////////////////////////////////////////////////////
@@ -99,30 +118,26 @@ namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
     template<IsNotReference To, typename... Args>
-    constexpr auto is(const std::variant<Args...>& variant) noexcept -> bool {
+    STORMKIT_FORCE_INLINE constexpr auto is(const std::variant<Args...>& variant) noexcept -> bool {
         return std::holds_alternative<To>(variant);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    template<IsNotIndirection To>
-    constexpr auto is(IsPointer auto&& value) noexcept -> bool {
-        using Type = std::conditional_t<IsConst<decltype(value)>, const To *, To *>;
-
-        return dynamic_cast<Type>(std::to_address(value));
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    template<IsNotIndirection To>
-    constexpr auto is(IsLValueReference auto&& value) noexcept -> bool {
-        return is<To>(&value);
+    template<IsPolymorphic To, IsIndirection From>
+        requires(IsPolymorphic<RawType<From>> and Is<To, RawType<From>>)
+    STORMKIT_FORCE_INLINE constexpr auto is(From&& value) noexcept -> bool {
+        if constexpr (IsLValueReference<From> and not IsPointer<std::remove_reference_t<From>>)
+            return dynamic_cast<const To *>(&std::forward<From>(value)) != nullptr;
+        else
+            return dynamic_cast<const To *>(std::to_address(std::forward<From>(value))) != nullptr;
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<IsNotReference To, typename... Args>
-    constexpr auto as(std::variant<Args...>& variant) noexcept -> auto&& {
+    STORMKIT_FORCE_INLINE constexpr auto as(std::variant<Args...>& variant) noexcept
+        -> decltype(auto) {
         expects(is<To, Args...>(variant));
 
         return std::get<To>(variant);
@@ -131,7 +146,8 @@ namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
     template<IsNotReference To, typename... Args>
-    constexpr auto as(std::variant<Args...>&& variant) noexcept -> auto&& {
+    STORMKIT_FORCE_INLINE constexpr auto as(std::variant<Args...>&& variant) noexcept
+        -> decltype(auto) {
         expects(is<To, Args...>(variant));
 
         return std::get<To>(std::move(variant));
@@ -140,7 +156,8 @@ namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
     template<IsNotReference To, typename... Args>
-    constexpr auto as(const std::variant<Args...>& variant) noexcept -> auto&& {
+    STORMKIT_FORCE_INLINE constexpr auto as(const std::variant<Args...>& variant) noexcept
+        -> decltype(auto) {
         expects(is<To, Args...>(variant));
 
         return std::get<To>(variant);
@@ -149,7 +166,8 @@ namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
     template<IsNotReference To, typename... Args>
-    constexpr auto as(const std::variant<Args...>&& variant) noexcept -> auto&& {
+    STORMKIT_FORCE_INLINE constexpr auto as(const std::variant<Args...>&& variant) noexcept
+        -> decltype(auto) {
         expects(is<To, Args...>(variant));
 
         return std::get<To>(std::move(variant));
@@ -157,111 +175,117 @@ namespace stormkit::core {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    template<std::signed_integral To, std::signed_integral From>
-    constexpr auto as(From value) noexcept -> To {
-        expects(std::numeric_limits<To>::min() <= value);
-        expects(std::numeric_limits<To>::max() > value);
+    template<IsRawIndirection To, IsRawIndirection From>
+        requires(IsPolymorphic<RawType<From>> and IsPolymorphic<RawType<To>> and
+                 Is<RawType<To>, RawType<From>>)
+    STORMKIT_FORCE_INLINE constexpr auto as(From&& value) -> To {
+        expects(is<RawType<To>>(value));
 
-        return static_cast<To>(value);
+        if constexpr (IsLValueReference<From>)
+            if constexpr (IsLValueReference<To>) return static_cast<To>(value);
+            else
+                return static_cast<To>(&value);
+        else {
+            if constexpr (IsLValueReference<To>) return static_cast<To>(*value);
+            else
+                return static_cast<To>(value);
+        }
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    template<std::unsigned_integral To, std::unsigned_integral From>
-    constexpr auto as(From value) noexcept -> To {
-        expects(std::numeric_limits<To>::min() <= value);
-        expects(std::numeric_limits<To>::max() > value);
-
-        return static_cast<To>(value);
+    template<IsRawPointer To, IsRawIndirection From>
+        requires IsByte<RawType<To>>
+    STORMKIT_FORCE_INLINE constexpr auto as(From&& value) noexcept -> To {
+        if constexpr (IsLValueReference<From> and not IsRawPointer<std::remove_reference_t<From>>)
+            return std::bit_cast<To>(&value);
+        else
+            return std::bit_cast<To>(value);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    template<std::signed_integral To, std::unsigned_integral From>
-    constexpr auto as(From value) noexcept -> To {
-        using Type = SafeTypeHelperType<To, From>;
-
-        expects(static_cast<Type>(std::numeric_limits<To>::max()) > static_cast<Type>(value));
-
-        return static_cast<To>(value);
+    template<IsRawPointer To, IsRawIndirection From>
+        requires IsByte<RawType<From>>
+    STORMKIT_FORCE_INLINE constexpr auto as(From&& value) noexcept -> To {
+        if constexpr (IsLValueReference<From> and not IsRawPointer<std::remove_reference_t<From>>)
+            return std::bit_cast<To>(&value);
+        else
+            return std::bit_cast<To>(value);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    template<std::unsigned_integral To, std::signed_integral From>
-    constexpr auto as(From value) noexcept -> To {
-        using Type = SafeTypeHelperType<To, From>;
-
-        expects(value >= 0);
-        expects(static_cast<Type>(std::numeric_limits<To>::max()) > static_cast<Type>(value));
-
-        return static_cast<To>(value);
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    template<std::floating_point To, std::floating_point From>
-    constexpr auto as(From value) noexcept -> To {
-        expects(std::numeric_limits<To>::min() < value);
-        expects(std::numeric_limits<To>::max() > value);
-
-        return static_cast<To>(value);
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    template<std::floating_point To, std::signed_integral From>
-    constexpr auto as(From value) noexcept -> To {
-        expects(std::numeric_limits<To>::min() < value);
-        expects(std::numeric_limits<To>::max() > value);
-
-        return static_cast<To>(value);
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    template<std::floating_point To, std::unsigned_integral From>
-    constexpr auto as(From value) noexcept -> To {
-        using Type = SafeTypeHelperType<To, From>;
-
-        expects(static_cast<Type>(std::numeric_limits<To>::max()) > static_cast<Type>(value));
-
-        return static_cast<To>(value);
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    template<std::unsigned_integral To, std::floating_point From>
-    constexpr auto as(From value) noexcept -> To {
-        using Type = SafeTypeHelperType<To, From>;
-
-        expects(value >= 0);
-        expects(static_cast<Type>(std::numeric_limits<To>::max()) > static_cast<Type>(value));
-
-        return static_cast<To>(value);
+    template<IsEnumeration To, IsEnumeration From>
+    STORMKIT_FORCE_INLINE constexpr auto as(From&& value) noexcept -> To {
+        return as<To>(as<std::underlying_type_t<From>>(std::forward<From>(value)));
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<std::integral To, IsEnumeration From>
-        requires(IsNotByte<From>)
-    constexpr auto as(From value) noexcept -> To {
-        return as<To>(static_cast<std::underlying_type_t<From>>(value));
+    STORMKIT_FORCE_INLINE constexpr auto as(From&& value) noexcept -> To {
+        return as<To>(static_cast<std::underlying_type_t<From>>(std::forward<From>(value)));
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    template<IsEnumeration To, std::integral From>
-        requires(IsNotByte<To>)
-    constexpr auto as(From value) noexcept -> To {
-        using UnderlyingType = std::underlying_type_t<To>;
+    template<IsNot<std::string> To, IsBraceInitializableTo<To> From>
+        requires IsNot<From, To>
+    STORMKIT_FORCE_INLINE constexpr auto as(From&& from) noexcept -> To {
+        return To { std::forward<From>(from) };
+    }
 
-        expects(std::numeric_limits<UnderlyingType>::max() > value);
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<typename To, Is<To> From>
+    STORMKIT_FORCE_INLINE constexpr auto as(From&& from) noexcept -> To {
+        return std::forward<From>(from);
+    }
 
-        if constexpr (std::unsigned_integral<UnderlyingType>) {
-            expects(value >= 0);
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<IsArithmetic To, IsArithmetic From>
+        requires(IsNot<From, To> and not IsNarrowing<To, From>)
+    STORMKIT_FORCE_INLINE constexpr auto as(From&& value) noexcept -> To {
+        return static_cast<To>(std::forward<From>(value));
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<std::integral To, IsByte From>
+    STORMKIT_FORCE_INLINE constexpr auto as(From&& value) noexcept -> To {
+        return static_cast<To>(std::forward<From>(value));
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<IsByte To, std::integral From>
+    STORMKIT_FORCE_INLINE constexpr auto as(From&& value) noexcept -> To {
+        return static_cast<To>(std::forward<From>(value));
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<std::integral To, std::integral From>
+    STORMKIT_FORCE_INLINE constexpr auto narrow(From value) noexcept -> To {
+        if constexpr (Is<From, To>) {
+            expects(std::numeric_limits<To>::lowest() <= value);
+            expects(std::numeric_limits<To>::max() > value);
         } else {
-            expects(std::numeric_limits<UnderlyingType>::min() < core::as<UnderlyingType>(value));
+            if constexpr (std::signed_integral<To> and std::unsigned_integral<From>) {
+                using Type = SafeTypeHelperType<To, From>;
+
+                expects(static_cast<Type>(std::numeric_limits<To>::max()) >
+                        static_cast<Type>(value));
+            } else {
+                using Type = SafeTypeHelperType<To, From>;
+
+                expects(static_cast<Type>(std::numeric_limits<To>::lowest()) <=
+                        static_cast<Type>(value));
+                expects(static_cast<Type>(std::numeric_limits<To>::max()) >
+                        static_cast<Type>(value));
+            }
         }
 
         return static_cast<To>(value);
@@ -269,56 +293,36 @@ namespace stormkit::core {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    template<IsEnumeration To, IsEnumeration From>
-        requires(IsNotByte<To> and IsNotByte<From>)
-    constexpr auto as(From value) noexcept -> To {
-        return static_cast<To>(
-            core::as<std::underlying_type_t<To>>(core::as<std::underlying_type_t<From>>(value)));
-    }
+    template<std::floating_point To, std::floating_point From>
+    STORMKIT_FORCE_INLINE constexpr auto narrow(From value) noexcept -> To {
+        expects(std::numeric_limits<To>::lowest() < value);
+        expects(std::numeric_limits<To>::max() > value);
 
-    /////////////////////////////////////
-    /////////////////////////////////////
-    template<std::integral To, IsByte From>
-    constexpr auto as(From value) noexcept -> To {
         return static_cast<To>(value);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    template<IsByte To, std::integral From>
-    constexpr auto as(From value) noexcept -> To {
+    template<std::floating_point To, std::integral From>
+    STORMKIT_FORCE_INLINE constexpr auto narrow(From value) noexcept -> To {
+        using Type = SafeTypeHelperType<To, From>;
+
+        expects(static_cast<Type>(std::numeric_limits<To>::lowest()) < static_cast<Type>(value));
+        expects(static_cast<Type>(std::numeric_limits<To>::max()) > static_cast<Type>(value));
+
         return static_cast<To>(value);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    template<IsReference To, IsReference From>
-        requires Is<To, From>
-    constexpr auto as(From&& value) -> To {
+    template<std::integral To, std::floating_point From>
+    STORMKIT_FORCE_INLINE constexpr auto narrow(From value) noexcept -> To {
+        using Type = SafeTypeHelperType<To, From>;
+
+        expects(static_cast<Type>(std::numeric_limits<To>::lowest()) < static_cast<Type>(value));
+        expects(static_cast<Type>(std::numeric_limits<To>::max()) > static_cast<Type>(value));
+
         return static_cast<To>(value);
     }
 
-    /////////////////////////////////////
-    /////////////////////////////////////
-    template<IsRawPointer To, IsRawPointer From>
-        requires Is<To, From>
-    constexpr auto as(From&& value) noexcept -> To {
-        return dynamic_cast<To>(value);
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    template<class To, std::convertible_to<To> From>
-        requires(not IsArithmetic<To> and not IsArithmetic<From>)
-    constexpr auto as(From& value) noexcept -> To {
-        return static_cast<To>(value);
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    template<IsRawPointer To, IsRawPointer From>
-        requires(IsByte<PureType<To>>)
-    constexpr auto as(From value) noexcept -> To {
-        return reinterpret_cast<To>(value);
-    }
 } // namespace stormkit::core

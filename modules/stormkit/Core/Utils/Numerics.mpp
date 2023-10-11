@@ -216,7 +216,7 @@ namespace stormkit::core {
     constexpr auto isEqual(T a, U b, V epsilon) noexcept -> bool {
         using Type = SafeTypeHelperType<decltype(a), decltype(b)>;
 
-        return isEqual<Type>(core::as<Type>(a), core::as<Type>(b), core::as<Type>(epsilon));
+        return isEqual<Type>(narrow<Type>(a), narrow<Type>(b), narrow<Type>(epsilon));
     }
 
     /////////////////////////////////////
@@ -231,7 +231,7 @@ namespace stormkit::core {
     constexpr auto isEqual(std::integral auto a, std::integral auto b) noexcept -> bool {
         using T = SafeTypeHelperType<decltype(a), decltype(b)>;
 
-        return isEqual<T>(core::as<T>(a), core::as<T>(b));
+        return isEqual<T>(narrow<T>(a), narrow<T>(b));
     }
 
     /////////////////////////////////////
