@@ -55,7 +55,7 @@ jobs:
       - name: Bootstrap LLVM 
         id: install-llvm
         run: |
-          wget https://github.com/Arthapz/llvm-18-patched/raw/main/macOS/llvm.7z
+          wget https://mega.nz/file/JthzxBSB#1AykKg-qWkmXqNeluTKxOjg_N4B9IBrx5cDtJxpQP6I
           7z x llvm.7z
 
       - name: Configure & Build
