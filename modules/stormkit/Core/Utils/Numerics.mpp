@@ -261,7 +261,7 @@ namespace stormkit::core {
                                              const T& in_max,
                                              const U& out_min,
                                              const U& out_max) noexcept -> U {
-        return narrow<U>((x - in_min) * (out_max - out_min) / (in_min) + out_min);
+        return narrow<U>((x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min);
     }
 
     /////////////////////////////////////
