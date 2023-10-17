@@ -91,7 +91,7 @@ namespace stormkit::image {
         }
 
         auto map(std::span<const core::Byte> bytes,
-                 core::UInt32 source_count,
+                 core::UInt32                source_count,
                  core::UInt32 destination_count) noexcept -> std::vector<core::Byte> {
             core::expects(source_count <= 4u and source_count > 0u and destination_count <= 4u and
                           destination_count > 0u);
@@ -107,8 +107,8 @@ namespace stormkit::image {
             data.resize(std::size(bytes) * destination_count);
 
             if (source_count == 1u and destination_count == 2u) {
-                const auto input_it = reinterpret_cast<const core::UInt8 *>(std::data(data));
-                auto output_it      = reinterpret_cast<core::UInt16 *>(std::data(data));
+                const auto input_it  = std::bit_cast<const core::UInt8 *>(std::data(data));
+                auto       output_it = std::bit_cast<core::UInt16 *>(std::data(data));
 
                 for (auto i : core::range(std::size(bytes)))
                     output_it[i] = core::map<core::UInt16>(input_it[i],
@@ -117,8 +117,8 @@ namespace stormkit::image {
                                                            BYTE_2_MIN,
                                                            BYTE_2_MAX);
             } else if (source_count == 1u and destination_count == 4u) {
-                const auto input_it = reinterpret_cast<const core::UInt8 *>(std::data(data));
-                auto output_it      = reinterpret_cast<core::UInt32 *>(std::data(data));
+                const auto input_it  = std::bit_cast<const core::UInt8 *>(std::data(data));
+                auto       output_it = std::bit_cast<core::UInt32 *>(std::data(data));
 
                 for (auto i : core::range(std::size(bytes)))
                     output_it[i] = core::map<core::UInt32>(input_it[i],
@@ -127,8 +127,8 @@ namespace stormkit::image {
                                                            BYTE_4_MIN,
                                                            BYTE_4_MAX);
             } else if (source_count == 2u and destination_count == 1u) {
-                const auto input_it = reinterpret_cast<const core::UInt16 *>(std::data(data));
-                auto output_it      = reinterpret_cast<core::UInt8 *>(std::data(data));
+                const auto input_it  = std::bit_cast<const core::UInt16 *>(std::data(data));
+                auto       output_it = std::bit_cast<core::UInt8 *>(std::data(data));
 
                 for (auto i : core::range(std::size(bytes)))
                     output_it[i] = core::map<core::UInt8>(input_it[i],
@@ -137,8 +137,8 @@ namespace stormkit::image {
                                                           BYTE_1_MIN,
                                                           BYTE_1_MAX);
             } else if (source_count == 2u and destination_count == 4u) {
-                const auto input_it = reinterpret_cast<const core::UInt16 *>(std::data(data));
-                auto output_it      = reinterpret_cast<core::UInt32 *>(std::data(data));
+                const auto input_it  = std::bit_cast<const core::UInt16 *>(std::data(data));
+                auto       output_it = std::bit_cast<core::UInt32 *>(std::data(data));
 
                 for (auto i : core::range(std::size(bytes)))
                     output_it[i] = core::map<core::UInt32>(input_it[i],
@@ -147,8 +147,8 @@ namespace stormkit::image {
                                                            BYTE_4_MIN,
                                                            BYTE_4_MAX);
             } else if (source_count == 4u and destination_count == 1u) {
-                const auto input_it = reinterpret_cast<const core::UInt32 *>(std::data(data));
-                auto output_it      = reinterpret_cast<core::UInt8 *>(std::data(data));
+                const auto input_it  = std::bit_cast<const core::UInt32 *>(std::data(data));
+                auto       output_it = std::bit_cast<core::UInt8 *>(std::data(data));
 
                 for (auto i : core::range(std::size(bytes)))
                     output_it[i] = core::map<core::UInt8>(input_it[i],
@@ -157,8 +157,8 @@ namespace stormkit::image {
                                                           BYTE_1_MIN,
                                                           BYTE_1_MAX);
             } else if (source_count == 4u and destination_count == 2u) {
-                const auto input_it = reinterpret_cast<const core::UInt32 *>(std::data(data));
-                auto output_it      = reinterpret_cast<core::UInt16 *>(std::data(data));
+                const auto input_it  = std::bit_cast<const core::UInt32 *>(std::data(data));
+                auto       output_it = std::bit_cast<core::UInt16 *>(std::data(data));
 
                 for (auto i : core::range(std::size(bytes)))
                     output_it[i] = core::map<core::UInt16>(input_it[i],
@@ -238,8 +238,8 @@ namespace stormkit::image {
         }
 
         const auto data = [&filepath]() {
-            auto stream     = std::ifstream { filepath, std::ios::binary | std::ios::ate };
-            const auto size = stream.tellg();
+            auto       stream = std::ifstream { filepath, std::ios::binary | std::ios::ate };
+            const auto size   = stream.tellg();
 
             return core::read(stream, size);
         }();
@@ -463,7 +463,7 @@ namespace stormkit::image {
     /////////////////////////////////////
     /////////////////////////////////////
     auto Image::saveToFile(std::filesystem::path filepath,
-                           Codec codec,
+                           Codec                 codec,
                            CodecArgs args) const noexcept -> std::expected<void, Error> {
         filepath = std::filesystem::canonical(filepath.parent_path()) / filepath.filename();
 
@@ -748,8 +748,8 @@ namespace stormkit::image {
                                                                  m_data.extent.width,
                                                                  m_data.extent.height,
                                                                  m_data.extent.depth)) {
-            const auto inv_x = m_data.extent.width - x - 1u;
-            auto output      = image.pixel({ inv_x, y, z }, layer, face, mip);
+            const auto inv_x  = m_data.extent.width - x - 1u;
+            auto       output = image.pixel({ inv_x, y, z }, layer, face, mip);
             // const auto data  = pixel({ x, y, z }, layer, face, mip);
 
             std::ranges::copy(pixel({ x, y, z }, layer, face, mip), std::ranges::begin(output));
@@ -779,8 +779,8 @@ namespace stormkit::image {
                                                                  m_data.extent.width,
                                                                  m_data.extent.height,
                                                                  m_data.extent.depth)) {
-            const auto inv_y = m_data.extent.height - 1u - y;
-            auto output      = image.pixel({ x, inv_y, z }, layer, face, mip);
+            const auto inv_y  = m_data.extent.height - 1u - y;
+            auto       output = image.pixel({ x, inv_y, z }, layer, face, mip);
 
             std::ranges::copy(pixel({ x, y, z }, layer, face, mip), std::ranges::begin(output));
         }
@@ -808,8 +808,8 @@ namespace stormkit::image {
                                                                  m_data.extent.width,
                                                                  m_data.extent.height,
                                                                  m_data.extent.depth)) {
-            const auto inv_z = m_data.extent.depth - 1u - z;
-            auto output      = image.pixel({ x, z, inv_z }, layer, face, mip);
+            const auto inv_z  = m_data.extent.depth - 1u - z;
+            auto       output = image.pixel({ x, z, inv_z }, layer, face, mip);
 
             std::ranges::copy(pixel({ x, y, z }, layer, face, mip), std::ranges::begin(output));
         }

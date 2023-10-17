@@ -123,6 +123,8 @@ namespace {
                                     };
 
                                     auto foo = Foo::A;
+                                    expects((as<Underlying>(foo) == 5));
+                                    expects((as<Underlying>(Bar::A) == 5));
                                     expects((as<int>(foo) == 5));
                                     expects((as<unsigned int>(Bar::A) == 5));
                                     expects((as<Foo>(as<int>(foo)) == Foo::A));

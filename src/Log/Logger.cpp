@@ -12,12 +12,14 @@ import :Logger;
 import :Severity;
 
 namespace stormkit::log {
+    namespace {
 #ifdef STORMKIT_BUILD_DEBUG
-    static constexpr auto DEFAULT_SEVERITY =
-        Severity::Info | Severity::Debug | Severity::Error | Severity::Fatal | Severity::Warning;
+        constexpr auto DEFAULT_SEVERITY = Severity::Info | Severity::Debug | Severity::Error |
+                                          Severity::Fatal | Severity::Warning;
 #else
-    static constexpr auto DEFAULT_SEVERITY = Severity::Info | Severity::Error | Severity::Fatal;
+        constexpr auto DEFAULT_SEVERITY = Severity::Info | Severity::Error | Severity::Fatal;
 #endif
+    } // namespace
 
     static Logger *logger = nullptr;
 

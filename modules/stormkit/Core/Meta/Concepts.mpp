@@ -26,8 +26,10 @@ namespace stormkit::core {
         };
 
         template<class T, class U>
-        concept Is =
-            std::same_as<std::remove_cvref_t<T>, U> or std::derived_from<std::remove_cvref_t<T>, U>;
+        concept Is = std::same_as<T, U> or std::derived_from<T, U>;
+
+        template<class T, class U>
+        concept IsPure = Is<std::remove_cvref_t<T>, std::remove_cvref_t<U>>;
 
         template<class T, class... U>
         concept IsOneOf = (Is<T, U> or ...);
@@ -35,11 +37,20 @@ namespace stormkit::core {
         template<class T, class U>
         concept IsNot = not Is<T, U>;
 
+        template<class T, class U>
+        concept IsNotPure = IsNot<std::remove_cvref_t<T>, std::remove_cvref_t<U>>;
+
         template<class T>
         concept IsByte = Is<T, std::byte>;
 
         template<class T>
+        concept IsBytePure = IsPure<T, std::byte>;
+
+        template<class T>
         concept IsNotByte = not IsByte<T>;
+
+        template<class T>
+        concept IsNotBytePure = not IsBytePure<T>;
 
         template<class T>
         concept IsStringLike = std::convertible_to<T, std::string_view>;
@@ -85,8 +96,26 @@ namespace stormkit::core {
         concept IsEnumeration = std::is_enum_v<T> and IsNotByte<T>;
 
         template<class T>
-        concept IsArithmetic = (std::integral<T> or std::floating_point<T>)and not IsPointer<T> and
-                               not IsEnumeration<T>;
+        concept IsEnumerationPure = IsEnumeration<std::remove_cvref_t<T>>;
+
+        template<typename T>
+        concept IsIntegral = std::integral<T>;
+
+        template<typename T>
+        concept IsIntegralPure = IsIntegral<std::remove_cvref_t<T>>;
+
+        template<typename T>
+        concept IsFloatingPoint = std::floating_point<T>;
+
+        template<typename T>
+        concept IsFloatingPointPure = IsFloatingPoint<std::remove_cvref_t<T>>;
+
+        template<class T>
+        concept IsArithmetic =
+            (IsIntegral<T> or IsFloatingPoint<T>)and not IsPointer<T> and not IsEnumeration<T>;
+
+        template<class T>
+        concept IsArithmeticPure = IsArithmetic<std::remove_cvref_t<T>>;
 
         template<class T>
         concept IsPreIncrementable = requires(T& a) { a.operator--(); };
@@ -131,6 +160,9 @@ namespace stormkit::core {
             IsOneOf<T, char, signed char, unsigned char, wchar_t, char8_t, char16_t, char32_t>;
 
         template<class T>
+        concept IsCharacterPure = IsCharacter<std::remove_cvref_t<T>>;
+
+        template<class T>
         concept IsColorComponent = Is<T, float> or Is<T, std::uint8_t>;
 
         template<class T>
@@ -141,6 +173,13 @@ namespace stormkit::core {
 
         template<class From, typename To>
         concept IsBraceInitializableTo = requires(From&& from) { To { std::forward<From>(from) }; };
+
+        template<typename To, typename From>
+        concept IsNarrowing =
+            IsArithmetic<To> and IsArithmetic<From> and IsBraceInitializableTo<From, To>;
+
+        template<typename To, typename From>
+        concept IsNarrowingPure = IsNarrowing<std::remove_cvref_t<To>, std::remove_cvref_t<From>>;
     } // namespace stormkit::core
 
 #ifndef STORMKIT_NO_MODULES

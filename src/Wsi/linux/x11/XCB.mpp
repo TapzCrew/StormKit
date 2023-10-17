@@ -124,7 +124,7 @@ namespace stormkit::wsi::linux::x11 {
     inline auto getXCBConnection() noexcept -> XCBConnectionScoped {
         if (!xcb_connection) [[unlikely]] {
             xcb_connection = xcb_connect(nullptr, nullptr);
-            dlog("New xcb connection {}", core::as<void *>(xcb_connection));
+            dlog("New xcb connection {}", std::bit_cast<void *>(xcb_connection));
         }
 
         core::ensures(xcb_connection);
@@ -178,7 +178,7 @@ namespace stormkit::wsi::linux::x11 {
     inline auto getXCBErrorContext() noexcept -> XCBErrorContextScoped {
         if (!xcb_error_context) [[unlikely]] {
             xcb_errors_context_new(getXCBConnection(), &xcb_error_context);
-            dlog("New xcb error context {}", core::as<void *>(xcb_error_context));
+            dlog("New xcb error context {}", std::bit_cast<void *>(xcb_error_context));
         }
 
         core::ensures(xcb_error_context);

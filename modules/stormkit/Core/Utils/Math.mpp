@@ -437,9 +437,9 @@ namespace stormkit::core {
         template<IsArithmetic T>
         template<IsArithmetic U>
         constexpr Extent<T>::Extent(const Extent<U>& other) noexcept
-            : width { as<UnderlyingType>(other.width) },
-              height { as<UnderlyingType>(other.height) },
-              depth { as<UnderlyingType>(other.depth) } {
+            : width { narrow<UnderlyingType>(other.width) },
+              height { narrow<UnderlyingType>(other.height) },
+              depth { narrow<UnderlyingType>(other.depth) } {
         }
 
         /////////////////////////////////////
