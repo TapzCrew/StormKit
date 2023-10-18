@@ -80,12 +80,17 @@ jobs:
           path: ${{ env.XMAKE_GLOBALDIR }}/.xmake/packages
           key: Windows-${{ matrix.compiler }}-${{ matrix.mode }}-${{ steps.dep_hash.outputs.hash }}-W${{ steps.cache_key.outputs.key }}
 
-      - name: Bootstrap LLVM 
-        id: install-llvm
+      - name: Download LLVM
+        uses: wei/wget@v1
         if: ${{ matrix.compiler == 'llvm' }}
-        run: |
-          wget http://86.221.35.29:1337/llvm-win.7z
-          7z x llvm-win.7z
+        with:
+          args: http://86.221.35.29:1337/llvm-win.7z
+
+      - name: Uncompress LLVM
+        uses: edgarrc/action-7z@v1
+        if: ${{ matrix.compiler == 'llvm' }}
+        with:
+          args: 7z x llvm-win.7z
 
       - name: Configure & Build
         id: build_msvc

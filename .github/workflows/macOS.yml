@@ -70,11 +70,17 @@ jobs:
           path: ${{ env.XMAKE_GLOBALDIR }}/.xmake/packages
           key: macOS-${{ matrix.mode }}-${{ steps.dep_hash.outputs.hash }}-W${{ steps.cache_key.outputs.key }}
 
-      - name: Bootstrap LLVM 
-        id: install-llvm
-        run: |
-          wget http://86.221.35.29:1337/llvm-macos.7z
-          7z x llvm-macos.7z
+      - name: Download LLVM
+        uses: wei/wget@v1
+        if: ${{ matrix.compiler == 'llvm' }}
+        with:
+          args: http://86.221.35.29:1337/llvm-macos.7z
+
+      - name: Uncompress LLVM
+        uses: edgarrc/action-7z@v1
+        if: ${{ matrix.compiler == 'llvm' }}
+        with:
+          args: 7z x llvm-macos.7z
 
       - name: Configure & Build
         id: build
