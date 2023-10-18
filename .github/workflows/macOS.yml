@@ -57,7 +57,7 @@ jobs:
           path: ${{ runner.workspace }}/StormKit/llvm
           key: ${{ matrix.os }}-llvm
           restore-keys: |
-            {{ matrix.os }}-llvm
+            ${{ matrix.os }}-llvm
 
       - name: Set xmake env
         run: echo "XMAKE_GLOBALDIR=${{ runner.workspace }}/xmake-global" >> $GITHUB_ENV
