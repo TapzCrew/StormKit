@@ -80,12 +80,6 @@ jobs:
           path: ${{ env.XMAKE_GLOBALDIR }}/.xmake/packages
           key: ${{ matrix.os }}-LLVM-${{ matrix.mode }}-${{ steps.dep_hash.outputs.hash }}-W${{ steps.cache_key.outputs.key }}
 
-      - name: Download and Uncompress LLVM
-        if: ${{ steps.cache-llvm.outputs.cache-hit != 'true' }}
-        run: |
-          C:/msys64/usr/bin/wget 'http://86.221.35.29:1337/llvm-win.7z'
-          7z x llvm-win.7z
-
       - name: Cache LLVM
         id: cache-llvm
         uses: actions/cache@v3
@@ -96,6 +90,12 @@ jobs:
           key: ${{ matrix.os }}-LLVM-${{ env.cache-name }}
           restore-keys: |
             ${{ matrix.os }}-LLVM-${{ env.cache-name }}
+
+      - name: Download and Uncompress LLVM
+        if: ${{ steps.cache-llvm.outputs.cache-hit != 'true' }}
+        run: |
+          C:/msys64/usr/bin/wget 'http://86.221.35.29:1337/llvm-win.7z'
+          7z x llvm-win.7z
 
       - name: Configure & Build
         id: build_llvm

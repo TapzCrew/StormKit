@@ -72,12 +72,6 @@ jobs:
           path: ${{ env.XMAKE_GLOBALDIR }}/.xmake/packages
           key: macOS-${{ matrix.mode }}-${{ steps.dep_hash.outputs.hash }}-W${{ steps.cache_key.outputs.key }}
 
-      - name: Download and Uncompress LLVM
-        if: ${{ steps.cache-llvm.outputs.cache-hit != 'true' }}
-        run: |
-          wget 'http://86.221.35.29:1337/llvm-macos.7z'
-          7z x llvm-macos.7z
-
       - name: Cache LLVM
         id: cache-llvm
         uses: actions/cache@v3
@@ -88,6 +82,12 @@ jobs:
           key: ${{ matrix.os }}-${{ env.cache-name }}-llvm
           restore-keys: |
             {{ matrix.os }}-${{ env.cache-name }}-llvm
+
+      - name: Download and Uncompress LLVM
+        if: ${{ steps.cache-llvm.outputs.cache-hit != 'true' }}
+        run: |
+          wget 'http://86.221.35.29:1337/llvm-macos.7z'
+          7z x llvm-macos.7z
 
       - name: Configure & Build
         id: build
