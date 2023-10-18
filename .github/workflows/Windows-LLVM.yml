@@ -74,7 +74,7 @@ jobs:
           7z x llvm-win.7z
 
       - name: Set xmake env
-        run: echo "XMAKE_GLOBALDIR=${{ runner.workspace }}/xmake-global" >> $GITHUB_ENV
+        run: echo "XMAKE_GLOBALDIR=${{ runner.workspace }}/xmake-global" >> $env:GITHUB_ENV
 
       - name: Install xmake
         uses: xmake-io/github-action-setup-xmake@v1
@@ -87,7 +87,7 @@ jobs:
 
       - name: Retrieve dependencies hash
         id: dep_hash
-        run: echo "hash=$(xmake l utils.ci.packageskey)" >> $GITHUB_OUTPUT
+        run: echo "hash=$(xmake l utils.ci.packageskey)" >> $env:GITHUB_OUTPUT
 
       - name: Retrieve cached xmake dependencies
         uses: actions/cache@v3
