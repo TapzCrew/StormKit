@@ -31,7 +31,7 @@ namespace stormkit::log::details {
     /////////////////////////////////////
     /////////////////////////////////////
     auto colorifyBegin(Severity severity, bool to_stderr) noexcept -> void {
-        auto output = (to_stderr) ? core::getSTDErr() : core::getSTDLog();
+        auto output = (to_stderr) ? core::getSTDErr() : core::getSTDOut();
 
         auto background = KBLA;
         auto text       = KWHT;
@@ -64,7 +64,7 @@ namespace stormkit::log::details {
     /////////////////////////////////////
     /////////////////////////////////////
     auto colorifyEnd(bool to_stderr) noexcept -> void {
-        auto handle = GetStdHandle((to_stderr) ? STD_ERROR_HANDLE : STD_OUTPUT_HANDLE);
-        SetConsoleTextAttribute(handle, (KBLA << 4) + KWHT);
+        auto output = (to_stderr) ? core::getSTDErr() : core::getSTDOut();
+        SetConsoleTextAttribute(output, (KBLA << 4) + KWHT);
     }
 } // namespace stormkit::log::details

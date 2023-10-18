@@ -4,7 +4,11 @@ module;
 #define __SPECSTRINGS_STRICT_LEVEL 0
 #include <windows.h>
 
+#include <cstdio>
+
 module stormkit.Core;
+
+import std;
 
 namespace stormkit::core {
     /////////////////////////////////////
