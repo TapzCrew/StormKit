@@ -17,9 +17,10 @@ import <stormkit/Core/PlatformMacro.hpp>;
 import :Utils.Expected;
 import :Utils.Numerics;
 import :Utils.AsCast;
+import :Utils.DynamicLoader;
 
 export namespace stormkit::core {
-    class DynamicLoaderImpl {
+    class DynamicLoader::DynamicLoaderImpl {
       public:
         template<class T>
         using Expected = std::expected<T, std::error_code>;
@@ -38,6 +39,9 @@ export namespace stormkit::core {
         /////////////////////////////////////
         /////////////////////////////////////
         DynamicLoaderImpl(const DynamicLoaderImpl&)                    = delete;
+
+        /////////////////////////////////////
+        /////////////////////////////////////
         auto operator=(const DynamicLoaderImpl&) -> DynamicLoaderImpl& = delete;
 
         /////////////////////////////////////

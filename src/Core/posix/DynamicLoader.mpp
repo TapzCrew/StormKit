@@ -16,7 +16,6 @@ import <stormkit/Core/PlatformMacro.hpp>;
 import :Utils.Expected;
 import :Utils.Numerics;
 import :Utils.AsCast;
-
 import :Utils.DynamicLoader;
 
 export namespace stormkit::core {

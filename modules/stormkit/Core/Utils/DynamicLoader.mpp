@@ -44,7 +44,7 @@ export namespace stormkit::core {
         [[nodiscard]] auto filepath() const noexcept -> const std::filesystem::path&;
 
       private:
-        struct DynamicLoaderImpl;
+        class DynamicLoaderImpl;
 
         DynamicLoader() noexcept;
 
