@@ -23,7 +23,7 @@
     #define STORMKIT_IMPORT        __declspec(dllimport)
     #define STORMKIT_RESTRICT      __restrict
     #define STORMKIT_PRIVATE
-    #define STORMKIT_FORCE_INLINE __forceinline inline
+    #define STORMKIT_FORCE_INLINE __forceinline 
 #elif defined(__MINGW32__)
     #define STORMKIT_EXPORT __declspec(dllexport)
     #define STORMKIT_IMPORT __declspec(dllimport)
