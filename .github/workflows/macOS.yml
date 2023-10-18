@@ -78,7 +78,7 @@ jobs:
         env:
           cache-name: cache-llvm
         with:
-          path: llvm
+          path: ${{ runner.workspace }}/StormKit/llvm
           key: ${{ matrix.os }}-${{ env.cache-name }}-llvm
           restore-keys: |
             {{ matrix.os }}-${{ env.cache-name }}-llvm
@@ -92,11 +92,11 @@ jobs:
       - name: Configure & Build
         id: build
         run: |
-          xmake f -vD --yes -m ${{ (matrix.mode == 'release' || matrix.mode == 'debug') && matrix.mode || 'releasedbg' }} -k ${{ matrix.kind }} --sanitizers=${{ matrix.mode == 'asan' && 'y' || 'n' }} --enable_examples=y --enable_tests=y --enable_gpu=n --libc++=y --toolchain=llvm --sdk="${{ runner.workspace }}/llvm/" --ldflags="-L${{ runner.workspace }}/llvm/lib" --shflags="-L${{ runner.workspace }}/llvm/lib"
+          xmake f -vD --yes -m ${{ (matrix.mode == 'release' || matrix.mode == 'debug') && matrix.mode || 'releasedbg' }} -k ${{ matrix.kind }} --sanitizers=${{ matrix.mode == 'asan' && 'y' || 'n' }} --enable_examples=y --enable_tests=y --enable_gpu=n --libc++=y --toolchain=llvm --sdk="${{ runner.workspace }}/StormKit/llvm/" --ldflags="-L${{ runner.workspace }}/StormKit/llvm/lib" --shflags="-L${{ runner.workspace }}/StormKit/llvm/lib"
           xmake b -vD
 
       - name: Tests
-        run: DYLD_LIBRARY_PATH="${{ runner.workspace }}/llvm/lib" xmake test -vD
+        run: DYLD_LIBRARY_PATH="${{ runner.workspace }}/StormKit/llvm/lib" xmake test -vD
 
       - name: Installation
         run: xmake install -vD --installdir="${{ runner.workspace }}/output"

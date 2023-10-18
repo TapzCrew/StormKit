@@ -86,7 +86,7 @@ jobs:
         env:
           cache-name: cache-llvm
         with:
-          path: ${{ runner.workspace }}/llvm2/
+          path: ${{ runner.workspace }}/StormKit/llvm2/
           key: ${{ matrix.os }}-LLVM-${{ env.cache-name }}
           restore-keys: |
             ${{ matrix.os }}-LLVM-${{ env.cache-name }}
@@ -101,12 +101,12 @@ jobs:
         id: build_llvm
         run: |
           {{  }}
-          xmake f -vD --yes -a ${{ matrix.arch }}  -m ${{ (matrix.mode == 'release' || matrix.mode == 'debug') && matrix.mode || 'releasedbg' }} -k ${{ matrix.kind }} --enable_examples=y --enable_tests=y --enable_gpu=n --libc++=y --toolchain=llvm --sdk="${{ runner.workspace }}/llvm2/" --libc++=y --cxxflags="-fno-delayed-template-parsing -cxx-isystem${{ runner.workspace }}/llvm2/include/c++/v1" --ldflags="-L${{ runner.workspace }}/llvm2/lib" --shflags="-L${{ runner.workspace }}/llvm2/lib"
+          xmake f -vD --yes -a ${{ matrix.arch }}  -m ${{ (matrix.mode == 'release' || matrix.mode == 'debug') && matrix.mode || 'releasedbg' }} -k ${{ matrix.kind }} --enable_examples=y --enable_tests=y --enable_gpu=n --libc++=y --toolchain=llvm --sdk="${{ runner.workspace }}/StormKit/llvm2/" --libc++=y --cxxflags="-fno-delayed-template-parsing -cxx-isystem${{ runner.workspace }}/StormKit/llvm2/include/c++/v1" --ldflags="-L${{ runner.workspace }}/StormKit/llvm2/lib" --shflags="-L${{ runner.workspace }}/StormKit/llvm2/lib"
           xmake b -vD
 
       - name: Tests
         run: |
-          set PATH="%PATH%;${{ runner.workspace }}/llvm2/lib"
+          set PATH="%PATH%;${{ runner.workspace }}/StormKit/llvm2/lib"
           xmake test -vD
 
       - name: Installation
