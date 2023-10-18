@@ -60,7 +60,7 @@ jobs:
 
       - name: Cache LLVM
         id: cache_llvm
-        uses: actions/cache@v3
+        uses: actions/cache@v3.2.2
         with:
           path: ${{ runner.workspace }}/StormKit/llvm2/
           key: ${{ matrix.os }}-llvm
