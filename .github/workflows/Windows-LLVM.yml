@@ -26,7 +26,7 @@ on:
 
 jobs:
   build:
-    name: ${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.arch }} ( LLVM-${{ matrix.kind }}-${{ matrix.mode }} )
+    name: ${{ matrix.os }}-LLVM-${{ matrix.arch }} ( ${{ matrix.kind }}-${{ matrix.mode }} )
 
     strategy:
       fail-fast: false

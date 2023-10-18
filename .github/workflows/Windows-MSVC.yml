@@ -26,13 +26,12 @@ on:
 
 jobs:
   build:
-    name: ${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.arch }} ( ${{ matrix.kind }}-${{ matrix.mode }}-${{ matrix.vs_runtime }} )
+    name: ${{ matrix.os }}-MSVC-${{ matrix.arch }} ( ${{ matrix.kind }}-${{ matrix.mode }}-${{ matrix.vs_runtime }} )
 
     strategy:
       fail-fast: false
       matrix:
         os: [windows-2022]
-        compiler: [llvm]
         kind: [static, shared]
         mode: [release, debug, asan]
         vs_runtime: [MT, MD]
@@ -101,5 +100,5 @@ jobs:
         id: upload
         uses: actions/upload-artifact@v1
         with:
-          name: ${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.arch }}-${{ matrix.kind }}-${{ matrix.mode }}-${{ matrix.vs_runtime }}
+          name: ${{ matrix.os }}-MSVC-${{ matrix.arch }}-${{ matrix.kind }}-${{ matrix.mode }}-${{ matrix.vs_runtime }}
           path: ${{ runner.workspace }}/output
