@@ -88,7 +88,7 @@ jobs:
           cache-name: cache-llvm
         with:
           path: llvm
-          key: Windows-${{ env.cache-name }}-llvm
+          key: ${{ runner.os }}-${{ env.cache-name }}-llvm
           restore-keys: |
             ${{ runner.os }}-${{ env.cache-name }}-llvm
 

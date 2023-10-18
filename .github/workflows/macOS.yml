@@ -78,12 +78,12 @@ jobs:
           cache-name: cache-llvm
         with:
           path: llvm
-          key: Windows-${{ env.cache-name }}-llvm
+          key: ${{ runner.os }}-${{ env.cache-name }}-llvm
           restore-keys: |
-            ${{ runner.os }}-${{ env.cache-name }}-llvm
+            {{ runner.os }}-${{ env.cache-name }}-llvm
 
       - name: Download and Uncompress LLVM
-        if: ${{ matrix.compiler == 'llvm' && steps.cache-llvm.outputs.cache-hit != 'true' }}
+        if: ${{ steps.cache-llvm.outputs.cache-hit != 'true' }}
         run: |
           wget.exe http://86.221.35.29:1337/llvm-win.7z
           7z x llvm-win.7z
