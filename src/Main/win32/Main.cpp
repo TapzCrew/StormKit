@@ -10,6 +10,9 @@
 #include <cstdlib>
 
 import std;
+
+import <stormkit/Core/PlatformMacro.hpp>;
+
 import stormkit.Core;
 
 namespace {
@@ -18,10 +21,7 @@ namespace {
 
 extern auto userMain(std::span<const std::string_view>) -> int;
 
-auto WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) -> int {
-    auto  argc = __argc;
-    auto& argv = __argv;
-
+auto __stdcall main(int argc, char **argv) -> int {
     std::locale::global(std::locale { "" });
     SetConsoleOutputCP(CP_UTF8);
     SetConsoleCP(CP_UTF8);
@@ -37,4 +37,8 @@ auto WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) -> int {
     for (auto i : stormkit::core::range(argc)) args.emplace_back(argv[i]);
 
     return userMain(args);
+}
+
+auto __stdcall WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) -> int {
+    return main(__argc, __argv);
 }

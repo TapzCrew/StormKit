@@ -31,7 +31,7 @@ namespace stormkit::log::details {
     /////////////////////////////////////
     /////////////////////////////////////
     auto colorifyBegin(Severity severity, bool to_stderr) noexcept -> void {
-        auto output = (to_stderr) ? core::getSTDErr() : core::getSTDOut();
+        auto output = (to_stderr) ? GetStdHandle(STD_ERROR_HANDLE) : GetStdHandle(STD_OUTPUT_HANDLE);
 
         auto background = KBLA;
         auto text       = KWHT;
@@ -56,6 +56,7 @@ namespace stormkit::log::details {
                 background = KCYN;
                 text       = KBLA;
                 break;
+            default: std::unreachable();
         }
 
         SetConsoleTextAttribute(output, (background << 4) + text);
@@ -64,7 +65,7 @@ namespace stormkit::log::details {
     /////////////////////////////////////
     /////////////////////////////////////
     auto colorifyEnd(bool to_stderr) noexcept -> void {
-        auto output = (to_stderr) ? core::getSTDErr() : core::getSTDOut();
+        auto output = (to_stderr) ? GetStdHandle(STD_ERROR_HANDLE) : GetStdHandle(STD_OUTPUT_HANDLE);
         SetConsoleTextAttribute(output, (KBLA << 4) + KWHT);
     }
 } // namespace stormkit::log::details

@@ -18,6 +18,16 @@ modules = {
 			add_files("modules/stormkit/Core.mpp")
 			add_files("$(buildir)/.gens/modules/stormkit/Core/Configuration.mpp", { always_added = true })
 
+      if is_plat("mingw") then
+         add_ldflags("-Wl,-mconsole", { public = true })
+      elseif is_plat("windows") then
+          if get_config("libc++") then
+             add_ldflags("-Wl,-subsystem:console", { public = true, force = true })
+          else
+             add_ldflags("/subsystem:console", { public = true })
+          end
+      end
+
 			on_config(function(target)
 				local output, errors = os.iorunv("git", { "rev-parse", "--abbrev-ref", "HEAD" })
 
@@ -92,7 +102,18 @@ modules = {
 						target:add("files", path.join(wayland_protocols_dir, protocol))
 					end
 				end)
-			end
+      end
+      if is_plat("mingw") then
+         add_syslinks("user32", "shell32")
+         add_ldflags("-Wl,-mwindows", { public = true })
+      elseif is_plat("windows") then
+         add_syslinks("user32", "shell32")
+         if get_config("libc++") then
+            add_ldflags("-Wl,-subsystem:windows", { public = true, force = true })
+         else
+            add_ldflags("/subsystem:windows", { public = true })
+         end
+      end
 		end,
 	},
 	engine = {
@@ -271,7 +292,7 @@ add_cxxflags(
 	"/Zc:preprocessor",
 	"/Zc:referenceBinding",
 	"/Zc:strictStrings",
-	{ tools = { "msvc", "clang-cl" } }
+	{ tools = { "cl", "clang_cl" } }
 )
 
 add_cxflags(
@@ -282,7 +303,7 @@ add_cxflags(
 	"/wd5050",
 	"/wd4005",
 	"/wd4611", -- Disable setjmp warning
-	{ tools = { "msvc", "clang-cl" } }
+	{ tools = { "cl", "clang_cl" } }
 )
 
 add_cxflags("-fstrict-aliasing", "-Wstrict-aliasing", { tools = { "clang", "gcc" } })
@@ -327,9 +348,6 @@ if is_plat("windows") then
 end
 
 if get_config("libc++") then
-	if is_plat("windows") then
-		add_sysincludedirs("F:/llvm/include/c++/v1")
-	end
 	add_cxxflags("-stdlib=libc++", "-fexperimental-library", { force = true })
 	add_ldflags("-stdlib=libc++", "-fexperimental-library", { force = true })
 	add_shflags("-stdlib=libc++", "-fexperimental-library", { force = true })
