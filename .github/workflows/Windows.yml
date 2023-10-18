@@ -64,14 +64,14 @@ jobs:
 
       - name: Bootstrap LLVM 
         id: install-llvm
-        if: ${{ matrix.compiler == "llvm" }}
+        if: ${{ matrix.compiler == 'llvm' }}
         run: |
           wget http://86.221.35.29:1337/llvm-win.7z
           7z x llvm.7z
 
       - name: Configure & Build
         id: build
-        if: ${{ matrix.compiler == "msvc" }}
+        if: ${{ matrix.compiler == 'msvc' }}
         run: |
           {{  }}
           xmake f -vD --yes -a ${{ matrix.arch }}  -m ${{ (matrix.mode == 'release' || matrix.mode == 'debug') && matrix.mode || 'releasedbg' }} -k ${{ matrix.kind }} --vs_runtime=${{ matrix.vs_runtime }} --enable_examples=y --enable_tests=y --enable_gpu=n
@@ -79,19 +79,19 @@ jobs:
 
       - name: Configure & Build
         id: build
-        if: ${{ matrix.compiler == "llvm" }}
+        if: ${{ matrix.compiler == 'llvm' }}
         run: |
           {{  }}
           xmake f -vD --yes -a ${{ matrix.arch }}  -m ${{ (matrix.mode == 'release' || matrix.mode == 'debug') && matrix.mode || 'releasedbg' }} -k ${{ matrix.kind }} --vs_runtime=${{ matrix.vs_runtime }} --enable_examples=y --enable_tests=y --enable_gpu=n --libc++=y --toolchain=llvm --sdk="$PWD/llvm/" --libc++=y --cxxflags="-fno-delayed-template-parsing "-cxx-isystem$PWD/llvm/include/c++/v1" --ldflags="-L$PWD/llvm/lib" --shflags="-L$PWD/llvm/lib"
           xmake b -vD
 
       - name: Tests
-        if: ${{ matrix.compiler == "msvc" }}
+        if: ${{ matrix.compiler == 'msvc' }}
         run: |
           xmake test -vD
 
       - name: Tests
-        if: ${{ matrix.compiler == "llvm" }}
+        if: ${{ matrix.compiler == 'llvm' }}
         run: |
           set PATH=%PATH%;$PWD/llvm/lib
           xmake test -vD
