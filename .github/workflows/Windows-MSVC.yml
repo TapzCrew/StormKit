@@ -43,6 +43,13 @@ jobs:
       group: ${{ github.ref }}-${{ github.base_ref }}-${{ github.head_ref }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.kind }}-${{ matrix.mode }}-${{ matrix.vs_runtime }}
 
     steps:
+      - name: Configure Pagefile
+        uses: al-cheb/configure-pagefile-action@v1.3
+        with:
+          minimum-size: 8GB
+          maximum-size: 32GB
+          disk-root: "D:"
+
       - name: Get current date as package key
         id: cache-key
         run: echo "key=$(date +'%W')" >> $GITHUB_OUTPUT
@@ -59,17 +66,10 @@ jobs:
         uses: xmake-io/github-action-setup-xmake@v1
         with:
           xmake-version: branch@dev
-          actions-cache-folder: .xmake-cache-W${{ steps.cache-key.outputs.key }}
+          actions-cache-folder: .xmake-cache-${{ steps.cache-key.outputs.key }}
 
       - name: Update xmake repository
         run: xmake repo --update
-
-      - name: Configure Pagefile
-        uses: al-cheb/configure-pagefile-action@v1.3
-        with:
-          minimum-size: 8GB
-          maximum-size: 32GB
-          disk-root: "D:"
 
       - name: Retrieve dependencies hash
         id: dep-hash
@@ -79,7 +79,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ env.XMAKE_GLOBALDIR }}/.xmake/packages
-          key: ${{ matrix.os }}-MSVC-${{ matrix.mode }}-${{ steps.dep-hash.outputs.hash }}-W${{ steps.cache-key.outputs.key }}
+          key: ${{ matrix.os }}-MSVC-${{ matrix.mode }}-${{ matrix.vs_runtime }}-${{ steps.dep-hash.outputs.hash }}-${{ steps.cache-key.outputs.key }}
 
       - name: Configure & Build
         id: build_msvc
