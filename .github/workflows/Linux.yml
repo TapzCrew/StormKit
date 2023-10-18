@@ -59,7 +59,7 @@ jobs:
           xmake b -vD
 
       - name: Tests
-        run: LD_LIBRARY_PATH="/opt/llvm-git/usr/lib" xmake test
+        run: LD_LIBRARY_PATH="/opt/llvm-git/usr/lib" xmake test -vD
 
       - name: Installation
         run: xmake install -vD --installdir="${{ runner.workspace }}/output"
