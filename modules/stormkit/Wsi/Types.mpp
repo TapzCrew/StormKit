@@ -25,7 +25,7 @@ export {
 
         using NativeHandle = void *;
 
-        enum class Key : core::Int8 {
+        enum class Key : core::UInt8 {
             A = 0,
             B,
             C,
