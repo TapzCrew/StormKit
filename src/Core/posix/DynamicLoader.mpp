@@ -11,6 +11,8 @@ export module stormkit.Core:Utils.DynamicLoaderImpl;
 
 import std;
 
+import <stormkit/Core/PlatformMacro.hpp>;
+
 import :Utils.Expected;
 import :Utils.Numerics;
 import :Utils.AsCast;
@@ -49,7 +51,7 @@ export namespace stormkit::core {
 
         /////////////////////////////////////
         /////////////////////////////////////
-        inline auto operator=(DynamicLoaderImpl&& other) noexcept -> DynamicLoaderImpl& {
+        STORMKIT_FORCE_INLINE auto operator=(DynamicLoaderImpl&& other) noexcept -> DynamicLoaderImpl& {
             if (&other == this) [[unlikely]]
                 return *this;
 
@@ -60,7 +62,7 @@ export namespace stormkit::core {
 
         /////////////////////////////////////
         /////////////////////////////////////
-        inline auto doLoad(const std::filesystem::path& filepath) -> Expected<void> {
+        STORMKIT_FORCE_INLINE auto doLoad(const std::filesystem::path& filepath) -> Expected<void> {
             m_library_handle = ::dlopen(filepath.c_str(), RTLD_LAZY | RTLD_LOCAL);
 
             if (not m_library_handle) [[unlikely]]
@@ -72,7 +74,7 @@ export namespace stormkit::core {
 
         /////////////////////////////////////
         /////////////////////////////////////
-        inline auto doGetFunc(std::string_view name) const -> Expected<void *> {
+        STORMKIT_FORCE_INLINE auto doGetFunc(std::string_view name) const -> Expected<void *> {
             core::expects(m_library_handle);
             auto func = ::dlsym(m_library_handle, std::data(name));
 
