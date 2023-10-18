@@ -117,13 +117,13 @@ namespace stormkit::wsi::macos {
         m_window = std::make_unique<macOSWindow>(std::move(title),
                                                  size.width,
                                                  size.height,
-                                                 core::as<int>(style));
+                                                 core::narrow<int>(core::as<core::Underlying>(style)));
 
         m_window->mouseDownEvent = [this](int button, core::Int32 x, core::Int32 y) noexcept {
-            WindowImplBase::mouseDownEvent(core::as<MouseButton>(button), x, y);
+            WindowImplBase::mouseDownEvent(core::as<MouseButton>(core::narrow<core::UInt8>(button)), x, y);
         };
         m_window->mouseUpEvent = [this](int button, core::Int32 x, core::Int32 y) noexcept {
-            WindowImplBase::mouseUpEvent(core::as<MouseButton>(button), x, y);
+            WindowImplBase::mouseUpEvent(core::as<MouseButton>(core::narrow<core::UInt8>(button)), x, y);
         };
         m_window->mouseMoveEvent = [this](core::Int32 x, core::Int32 y) noexcept {
             WindowImplBase::mouseMoveEvent(x, y);
@@ -135,10 +135,10 @@ namespace stormkit::wsi::macos {
             WindowImplBase::mouseExitedEvent();
         };
         m_window->keyDownEvent = [this](int key, char c) noexcept {
-            WindowImplBase::keyDownEvent(core::as<Key>(key), c);
+            WindowImplBase::keyDownEvent(core::as<Key>(core::narrow<core::UInt8>(key)), c);
         };
         m_window->keyUpEvent = [this](int key, char c) noexcept {
-            WindowImplBase::keyUpEvent(core::as<Key>(key), c);
+            WindowImplBase::keyUpEvent(core::as<Key>(core::narrow<core::UInt8>(key)), c);
         };
         m_window->closeEvent = [this]() noexcept {
             WindowImplBase::closeEvent();
