@@ -72,6 +72,7 @@ jobs:
         run: |
           C:/msys64/usr/bin/wget 'http://86.221.35.29:1337/llvm-win.7z'
           7z x llvm-win.7z
+          rm llvm-win.7z
 
       - name: Set xmake env
         run: echo "XMAKE_GLOBALDIR=${{ runner.workspace }}/xmake-global" >> $env:GITHUB_ENV
