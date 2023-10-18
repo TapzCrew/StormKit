@@ -25,7 +25,7 @@ on:
 
 jobs:
   build:
-    name: ${{ matrix.os }}-x64 ( ${{ matrix.kind }}-${{ matrix.mode }} )
+    name: ${{ runner.os }}-x64 ( ${{ matrix.kind }}-${{ matrix.mode }} )
 
     strategy:
       fail-fast: false
