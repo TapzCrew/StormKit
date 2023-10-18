@@ -80,15 +80,27 @@ jobs:
           path: ${{ env.XMAKE_GLOBALDIR }}/.xmake/packages
           key: Windows-${{ matrix.compiler }}-${{ matrix.mode }}-${{ steps.dep_hash.outputs.hash }}-W${{ steps.cache_key.outputs.key }}
 
+      - name: Cache LLVM
+        id: cache-llvm
+        if: ${{ matrix.compiler == 'llvm' }}
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-llvm
+        with:
+          path: llvm
+          key: Windows-${{ env.cache-name }}-llvm
+          restore-keys: |
+            ${{ runner.os }}-${{ env.cache-name }}-llvm
+
       - name: Download LLVM
         uses: wei/wget@v1
-        if: ${{ matrix.compiler == 'llvm' }}
+        if: ${{ matrix.compiler == 'llvm' && steps.cache-llvm.outputs.cache-hit != 'true' }}
         with:
           args: http://86.221.35.29:1337/llvm-win.7z
 
       - name: Uncompress LLVM
         uses: edgarrc/action-7z@v1
-        if: ${{ matrix.compiler == 'llvm' }}
+        if: ${{ matrix.compiler == 'llvm' && steps.cache-llvm.outputs.cache-hit != 'true' }}
         with:
           args: 7z x llvm-win.7z
 
