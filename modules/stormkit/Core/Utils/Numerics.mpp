@@ -104,7 +104,7 @@ namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
     template<IsNumericsRange T, IsNumericsRange U>
-    auto rangeImplementation(const T& a, const U& b) noexcept
+    auto rangeImplementation(T a, U b) noexcept
         -> std::generator<std::tuple<decltype(a.begin), decltype(b.begin)>> {
         FOR(i, a)
         FOR(j, b)
