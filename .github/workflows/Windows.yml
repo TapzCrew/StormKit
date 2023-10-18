@@ -96,6 +96,7 @@ jobs:
         if: ${{ matrix.compiler == 'llvm' && steps.cache-llvm.outputs.cache-hit != 'true' }}
         run: |
           set PATH="%PATH%;C:/msys64/usr/bin"
+          dir C:/msys64/usr/bin
           wget 'http://86.221.35.29:1337/llvm-win.7z'
           7z x llvm-win.7z
 
