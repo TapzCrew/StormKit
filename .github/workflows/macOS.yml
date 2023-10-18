@@ -86,7 +86,7 @@ jobs:
         if: ${{ steps.cache-llvm.outputs.cache-hit != 'true' }}
         run: |
           wget 'http://86.221.35.29:1337/llvm-macos.7z'
-          7z x llvm-win.7z
+          7z x llvm-macos.7z
 
       - name: Configure & Build
         id: build
