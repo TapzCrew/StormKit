@@ -228,7 +228,8 @@ namespace stormkit::image::details {
 
         jpeg_create_compress(&info);
 
-        auto out_size = std::size_t { 0 };
+        using ulong = unsigned long;
+        auto out_size = ulong { 0 };
         jpeg_mem_dest(&info, &output_ptr, &out_size);
 
         info.image_width      = extent.width;
