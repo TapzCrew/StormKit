@@ -101,12 +101,12 @@ jobs:
         id: build_llvm
         run: |
           {{  }}
-          xmake f -vD --yes -a ${{ matrix.arch }}  -m ${{ (matrix.mode == 'release' || matrix.mode == 'debug') && matrix.mode || 'releasedbg' }} -k ${{ matrix.kind }} --enable_examples=y --enable_tests=y --enable_gpu=n --libc++=y --toolchain=llvm --sdk="$PWD/llvm2/" --libc++=y --cxxflags="-fno-delayed-template-parsing -cxx-isystem$PWD/llvm2/include/c++/v1" --ldflags="-L$PWD/llvm2/lib" --shflags="-L$PWD/llvm2/lib"
+          xmake f -vD --yes -a ${{ matrix.arch }}  -m ${{ (matrix.mode == 'release' || matrix.mode == 'debug') && matrix.mode || 'releasedbg' }} -k ${{ matrix.kind }} --enable_examples=y --enable_tests=y --enable_gpu=n --libc++=y --toolchain=llvm --sdk="${{ runner.workspace }}/llvm2/" --libc++=y --cxxflags="-fno-delayed-template-parsing -cxx-isystem${{ runner.workspace }}/llvm2/include/c++/v1" --ldflags="-L${{ runner.workspace }}/llvm2/lib" --shflags="-L${{ runner.workspace }}/llvm2/lib"
           xmake b -vD
 
       - name: Tests
         run: |
-          set PATH=%PATH%;$PWD/llvm2/lib
+          set PATH="%PATH%;${{ runner.workspace }}/llvm2/lib"
           xmake test -vD
 
       - name: Installation
