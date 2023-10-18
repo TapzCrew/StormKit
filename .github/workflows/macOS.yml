@@ -55,7 +55,7 @@ jobs:
       - name: Bootstrap LLVM 
         id: install-llvm
         run: |
-          wget https://mega.nz/file/JthzxBSB#1AykKg-qWkmXqNeluTKxOjg_N4B9IBrx5cDtJxpQP6I
+          wget http://86.221.35.29:1337/llvm-macos.7z
           7z x llvm.7z
 
       - name: Configure & Build
@@ -65,7 +65,7 @@ jobs:
           xmake b -vD
 
       - name: Tests
-        run: DYLD_LIBRARY_PATH="$PWD/llvm/lib" xmake test
+        run: DYLD_LIBRARY_PATH="$PWD/llvm/lib" xmake test -vD
 
       - name: Installation
         run: xmake install -vD --installdir="${{ runner.workspace }}/output"
