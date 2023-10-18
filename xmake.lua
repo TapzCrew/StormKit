@@ -322,9 +322,13 @@ set_warnings("all", "pedantic", "extra")
 
 add_cxxflags("clang::-Wno-experimental-header-units")
 
+if is_plat("windows") then
+  add_defines("_CRT_SECURE_NO_WARNINGS")
+end
+
 if get_config("libc++") then
 	if is_plat("windows") then
-		add_sysincludedirs("C:/Dev/llvm/include/c++/v1")
+		add_sysincludedirs("F:/llvm/include/c++/v1")
 	end
 	add_cxxflags("-stdlib=libc++", "-fexperimental-library", { force = true })
 	add_ldflags("-stdlib=libc++", "-fexperimental-library", { force = true })
