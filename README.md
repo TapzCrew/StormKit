@@ -10,7 +10,8 @@ StormKit is my personal C++ toolkit.
 | OS      | Status                                                                                                                                                                                                                     |
 | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Linux   | [![Linux](https://github.com/TapzCrew/StormKit/actions/workflows/Linux.yml/badge.svg?branch=main)](https://github.com/TapzCrew/StormKit/actions/workflows/Linux.yml)                                                       |
-| Windows | [![Windows](https://github.com/Arthapz/StormKit/actions/workflows/Windows.yml/badge.svg)](https://github.com/Arthapz/StormKit/actions/workflows/Windows.yml) (can't work until Microsoft support deducing this in modules) |
+| Windows-LLVM | [![Windows](https://github.com/Arthapz/StormKit/actions/workflows/Windows-LLVM.yml/badge.svg)](https://github.com/Arthapz/StormKit/actions/workflows/Windows-LLVM.yml)
+| Windows-MSVC | [![Windows](https://github.com/Arthapz/StormKit/actions/workflows/Windows-MSVC.yml/badge.svg)](https://github.com/Arthapz/StormKit/actions/workflows/Windows-MSVC.yml) (can't work until Microsoft support deducing this in modules) |
 | macOS   | [![macOS](https://github.com/TapzCrew/StormKit/actions/workflows/macOS.yml/badge.svg)](https://github.com/TapzCrew/StormKit/actions/workflows/macOS.yml)                                                                   |
 
 ## Getting Started
