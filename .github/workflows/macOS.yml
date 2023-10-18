@@ -15,7 +15,8 @@ on:
     branches: [ develop ]
     paths-ignore:
       - '.github/workflows/Linux.yml'
-      - '.github/workflows/Windows.yml'
+      - '.github/workflows/Windows-LLVM.yml'
+      - '.github/workflows/Windows-MSVC.yml'
       - '.github/workflows/iOS.yml'
       - '.github/workflows/Android.yml'
       - '.gitignore'
@@ -70,23 +71,22 @@ jobs:
           path: ${{ env.XMAKE_GLOBALDIR }}/.xmake/packages
           key: macOS-${{ matrix.mode }}-${{ steps.dep_hash.outputs.hash }}-W${{ steps.cache_key.outputs.key }}
 
-      - name: Cache LLVM
-        id: cache-llvm
-        if: ${{ matrix.compiler == 'llvm' }}
-        uses: actions/cache@v3
-        env:
-          cache-name: cache-llvm
-        with:
-          path: llvm
-          key: ${{ runner.os }}-${{ env.cache-name }}-llvm
-          restore-keys: |
-            {{ runner.os }}-${{ env.cache-name }}-llvm
-
       - name: Download and Uncompress LLVM
         if: ${{ steps.cache-llvm.outputs.cache-hit != 'true' }}
         run: |
           wget 'http://86.221.35.29:1337/llvm-macos.7z'
           7z x llvm-macos.7z
+
+      - name: Cache LLVM
+        id: cache-llvm
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-llvm
+        with:
+          path: llvm
+          key: ${{ matrix.os }}-${{ env.cache-name }}-llvm
+          restore-keys: |
+            {{ matrix.os }}-${{ env.cache-name }}-llvm
 
       - name: Configure & Build
         id: build

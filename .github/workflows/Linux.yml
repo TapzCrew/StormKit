@@ -4,7 +4,8 @@ on:
   push:
     branches: [develop]
     paths-ignore:
-      - '.github/workflows/Windows.yml'
+      - '.github/workflows/Windows-LLVM.yml'
+      - '.github/workflows/Windows-MSVC.yml'
       - '.github/workflows/macOS.yml'
       - '.github/workflows/iOS.yml'
       - '.github/workflows/Android.yml'
@@ -14,7 +15,8 @@ on:
   pull_request:
     branches: [main, develop]
     paths-ignore:
-      - '.github/workflows/Windows.yml'
+      - '.github/workflows/Windows-LLVM.yml'
+      - '.github/workflows/Windows-MSVC.yml'
       - '.github/workflows/macOS.yml'
       - '.github/workflows/iOS.yml'
       - '.github/workflows/Android.yml'
