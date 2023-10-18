@@ -1,19 +1,8 @@
 name: macOS
 
 on:
-  push:
-    branches: [ develop ]
-    paths-ignore:
-      - '.github/workflows/Linux.yml'
-      - '.github/workflows/Windows-LLVM.yml'
-      - '.github/workflows/Windows-MSVC.yml'
-      - '.github/workflows/iOS.yml'
-      - '.github/workflows/Android.yml'
-      - '.gitignore'
-      - 'LICENSE'
-      - 'README.md'
   pull_request:
-    branches: [ develop ]
+    branches: [develop]
     paths-ignore:
       - '.github/workflows/Linux.yml'
       - '.github/workflows/Windows-LLVM.yml'
