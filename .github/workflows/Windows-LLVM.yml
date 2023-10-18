@@ -58,7 +58,7 @@ jobs:
         uses: xmake-io/github-action-setup-xmake@v1
         with:
           xmake-version: branch@dev
-          actions-cache-folder: .xmake-cache-W${{ steps.cache_key.outputs.key }}
+          actions-cache-folder: .xmake-cache-W${{ steps.cache-key.outputs.key }}
 
       - name: Update xmake repository
         run: xmake repo --update
@@ -78,7 +78,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ env.XMAKE_GLOBALDIR }}/.xmake/packages
-          key: ${{ matrix.os }}-LLVM-${{ matrix.mode }}-${{ steps.dep_hash.outputs.hash }}-W${{ steps.cache_key.outputs.key }}
+          key: ${{ matrix.os }}-LLVM-${{ matrix.mode }}-${{ steps.dep-hash.outputs.hash }}-W${{ steps.cache-key.outputs.key }}
 
       - name: Cache LLVM
         id: cache-llvm
