@@ -10,13 +10,16 @@
 #include <cstdlib>
 
 import std;
+import stormkit.Core;
 
-constexpr auto BUF_SIZE = 1024;
+namespace {
+    constexpr auto BUF_SIZE = 1024;
+}
 
-extern auto main(std::span<const std::string_view>) -> int;
+extern auto userMain(std::span<const std::string_view>) -> int;
 
 auto WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) -> int {
-    auto argc  = __argc;
+    auto  argc = __argc;
     auto& argv = __argv;
 
     std::locale::global(std::locale { "" });
@@ -33,5 +36,5 @@ auto WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) -> int {
 
     for (auto i : stormkit::core::range(argc)) args.emplace_back(argv[i]);
 
-    return main(args);
+    return userMain(args);
 }
