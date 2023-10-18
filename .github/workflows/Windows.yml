@@ -70,7 +70,7 @@ jobs:
           7z x llvm.7z
 
       - name: Configure & Build
-        id: build
+        id: build_msvc
         if: ${{ matrix.compiler == 'msvc' }}
         run: |
           {{  }}
@@ -78,7 +78,7 @@ jobs:
           xmake b -vD
 
       - name: Configure & Build
-        id: build
+        id: build_llvm
         if: ${{ matrix.compiler == 'llvm' }}
         run: |
           {{  }}
