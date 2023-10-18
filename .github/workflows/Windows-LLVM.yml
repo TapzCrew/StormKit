@@ -50,7 +50,7 @@ jobs:
           disk-root: "D:"
 
       - name: Get current date as package key
-        id: cache-key
+        id: cache_key
         run: echo "key=$(date +'%W')" >> $GITHUB_OUTPUT
 
       - name: Checkout
@@ -59,7 +59,7 @@ jobs:
           fetch-depth: 0
 
       - name: Cache LLVM
-        id: cache-llvm
+        id: cache_llvm
         uses: actions/cache@v3
         with:
           path: ${{ runner.workspace }}/StormKit/llvm2/
@@ -68,7 +68,7 @@ jobs:
             ${{ matrix.os }}-llvm
 
       - name: Download and Uncompress LLVM
-        if: ${{ steps.cache-llvm.outputs.cache-hit != 'true' }}
+        if: ${{ steps.cache_llvm.outputs.cache-hit != 'true' }}
         run: |
           C:/msys64/usr/bin/wget 'http://86.221.35.29:1337/llvm-win.7z'
           7z x llvm-win.7z
@@ -80,20 +80,20 @@ jobs:
         uses: xmake-io/github-action-setup-xmake@v1
         with:
           xmake-version: branch@dev
-          actions-cache-folder: .xmake-cache-${{ steps.cache-key.outputs.key }}
+          actions-cache-folder: .xmake-cache-${{ steps.cache_key.outputs.key }}
 
       - name: Update xmake repository
         run: xmake repo --update
 
       - name: Retrieve dependencies hash
-        id: dep-hash
+        id: dep_hash
         run: echo "hash=$(xmake l utils.ci.packageskey)" >> $GITHUB_OUTPUT
 
       - name: Retrieve cached xmake dependencies
         uses: actions/cache@v3
         with:
           path: ${{ env.XMAKE_GLOBALDIR }}/.xmake/packages
-          key: ${{ matrix.os }}-LLVM-${{ matrix.mode }}-${{ steps.dep-hash.outputs.hash }}-${{ steps.cache-key.outputs.key }}
+          key: ${{ matrix.os }}-LLVM-${{ matrix.mode }}-${{ steps.dep_hash.outputs.hash }}-${{ steps.cache_key.outputs.key }}
 
       - name: Configure & Build
         id: build_llvm
