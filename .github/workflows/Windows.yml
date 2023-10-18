@@ -96,13 +96,12 @@ jobs:
         uses: wei/wget@v1
         if: ${{ matrix.compiler == 'llvm' && steps.cache-llvm.outputs.cache-hit != 'true' }}
         with:
-          args: http://86.221.35.29:1337/llvm-win.7z
 
-      - name: Uncompress LLVM
-        uses: edgarrc/action-7z@v1
+      - name: Download and Uncompress LLVM
         if: ${{ matrix.compiler == 'llvm' && steps.cache-llvm.outputs.cache-hit != 'true' }}
-        with:
-          args: 7z x llvm-win.7z
+        run: |
+          C:/msys64/bin/wget.exe http://86.221.35.29:1337/llvm-win.7z
+          7z x llvm-win.7z
 
       - name: Configure & Build
         id: build_msvc
