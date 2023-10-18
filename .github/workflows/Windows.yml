@@ -92,15 +92,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-${{ env.cache-name }}-llvm
 
-      - name: Download LLVM
-        uses: wei/wget@v1
-        if: ${{ matrix.compiler == 'llvm' && steps.cache-llvm.outputs.cache-hit != 'true' }}
-        with:
-
       - name: Download and Uncompress LLVM
         if: ${{ matrix.compiler == 'llvm' && steps.cache-llvm.outputs.cache-hit != 'true' }}
         run: |
-          C:/msys64/bin/wget.exe http://86.221.35.29:1337/llvm-win.7z
+          "C:/msys64/bin/wget.exe" http://86.221.35.29:1337/llvm-win.7z
           7z x llvm-win.7z
 
       - name: Configure & Build
