@@ -56,16 +56,16 @@ jobs:
         id: install-llvm
         run: |
           wget http://86.221.35.29:1337/llvm-macos.7z
-          7z x llvm.7z
+          7z x llvm-macos.7z
 
       - name: Configure & Build
         id: build
         run: |
-          xmake f -vD --yes -m ${{ (matrix.mode == 'release' || matrix.mode == 'debug') && matrix.mode || 'releasedbg' }} -k ${{ matrix.kind }} --sanitizers=${{ matrix.mode == 'asan' && 'y' || 'n' }} --enable_examples=y --enable_tests=y --enable_gpu=n --libc++=y --toolchain=llvm --sdk="$PWD/llvm/" --ldflags="-L$PWD/llvm/lib" --shflags="-L$PWD/llvm/lib"
+          xmake f -vD --yes -m ${{ (matrix.mode == 'release' || matrix.mode == 'debug') && matrix.mode || 'releasedbg' }} -k ${{ matrix.kind }} --sanitizers=${{ matrix.mode == 'asan' && 'y' || 'n' }} --enable_examples=y --enable_tests=y --enable_gpu=n --libc++=y --toolchain=llvm --sdk="$PWD/llvm-macos/" --ldflags="-L$PWD/llvm-macos/lib" --shflags="-L$PWD/llvm-macos/lib"
           xmake b -vD
 
       - name: Tests
-        run: DYLD_LIBRARY_PATH="$PWD/llvm/lib" xmake test -vD
+        run: DYLD_LIBRARY_PATH="$PWD/llvm-macos/lib" xmake test -vD
 
       - name: Installation
         run: xmake install -vD --installdir="${{ runner.workspace }}/output"
