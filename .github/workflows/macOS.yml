@@ -5,7 +5,8 @@ on:
     branches: [ develop ]
     paths-ignore:
       - '.github/workflows/Linux.yml'
-      - '.github/workflows/Windows.yml'
+      - '.github/workflows/Windows-LLVM.yml'
+      - '.github/workflows/Windows-MSVC.yml'
       - '.github/workflows/iOS.yml'
       - '.github/workflows/Android.yml'
       - '.gitignore'
@@ -25,7 +26,7 @@ on:
 
 jobs:
   build:
-    name: ${{ runner.os }}-x64 ( ${{ matrix.kind }}-${{ matrix.mode }} )
+    name: ${{ matrix.os }}-x64 ( ${{ matrix.kind }}-${{ matrix.mode }} )
 
     strategy:
       fail-fast: false

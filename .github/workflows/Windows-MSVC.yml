@@ -4,6 +4,7 @@ on:
   push:
     branches: [develop]
     paths-ignore:
+      - '.github/workflows/Windows-LLVM.yml'
       - '.github/workflows/Linux.yml'
       - '.github/workflows/macOS.yml'
       - '.github/workflows/iOS.yml'
@@ -14,6 +15,7 @@ on:
   pull_request:
     branches: [main, develop]
     paths-ignore:
+      - '.github/workflows/Windows-LLVM.yml'
       - '.github/workflows/Linux.yml'
       - '.github/workflows/macOS.yml'
       - '.github/workflows/iOS.yml'
@@ -24,20 +26,22 @@ on:
 
 jobs:
   build:
-    name: ${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.arch }} ( LLVM-${{ matrix.kind }}-${{ matrix.mode }} )
+    name: ${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.arch }} ( ${{ matrix.kind }}-${{ matrix.mode }}-${{ matrix.vs_runtime }} )
 
     strategy:
       fail-fast: false
       matrix:
         os: [windows-2022]
+        compiler: [llvm]
         kind: [static, shared]
         mode: [release, debug, asan]
+        vs_runtime: [MT, MD]
         arch: [x64]
 
     runs-on: ${{ matrix.os }}
 
     concurrency:
-      group: ${{ github.ref }}-${{ github.base_ref }}-${{ github.head_ref }}-${{ matrix.os }}-LLVM-${{ matrix.kind }}-${{ matrix.mode }}
+      group: ${{ github.ref }}-${{ github.base_ref }}-${{ github.head_ref }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.kind }}-${{ matrix.mode }}-${{ matrix.vs_runtime }}
 
     steps:
       - name: Get current date as package key
@@ -76,35 +80,18 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ env.XMAKE_GLOBALDIR }}/.xmake/packages
-          key: ${{ matrix.os }}-LLVM-${{ matrix.mode }}-${{ steps.dep_hash.outputs.hash }}-W${{ steps.cache_key.outputs.key }}
-
-      - name: Download and Uncompress LLVM
-        if: $steps.cache-llvm.outputs.cache-hit != 'true' }}
-        run: |
-          C:/msys64/usr/bin/wget 'http://86.221.35.29:1337/llvm-win.7z'
-          7z x llvm-win.7z
-
-      - name: Cache LLVM
-        id: cache-llvm
-        uses: actions/cache@v3
-        env:
-          cache-name: cache-llvm
-        with:
-          path: ${{ runner.workspace }}/llvm2/
-          key: ${{ matrix.os }}-LLVM-${{ env.cache-name }}
-          restore-keys: |
-            ${{ matrix.os }}-LLVM-${{ env.cache-name }}
+          key: ${{ matrix.os }}-MSVC-${{ matrix.mode }}-${{ steps.dep_hash.outputs.hash }}-W${{ steps.cache_key.outputs.key }}
 
       - name: Configure & Build
-        id: build_llvm
+        id: build_msvc
         run: |
           {{  }}
-          xmake f -vD --yes -a ${{ matrix.arch }}  -m ${{ (matrix.mode == 'release' || matrix.mode == 'debug') && matrix.mode || 'releasedbg' }} -k ${{ matrix.kind }} --enable_examples=y --enable_tests=y --enable_gpu=n --libc++=y --toolchain=llvm --sdk="$PWD/llvm2/" --libc++=y --cxxflags="-fno-delayed-template-parsing -cxx-isystem$PWD/llvm2/include/c++/v1" --ldflags="-L$PWD/llvm2/lib" --shflags="-L$PWD/llvm2/lib"
+          xmake f -vD --yes -a ${{ matrix.arch }}  -m ${{ (matrix.mode == 'release' || matrix.mode == 'debug') && matrix.mode || 'releasedbg' }} -k ${{ matrix.kind }} --vs_runtime=${{ matrix.vs_runtime }} --enable_examples=y --enable_tests=y --enable_gpu=n
           xmake b -vD
 
       - name: Tests
+        if: ${{ matrix.compiler == 'msvc' }}
         run: |
-          set PATH=%PATH%;$PWD/llvm2/lib
           xmake test -vD
 
       - name: Installation
@@ -114,5 +101,5 @@ jobs:
         id: upload
         uses: actions/upload-artifact@v1
         with:
-          name: ${{ matrix.os }}-${{ matrix.arch }}-LLVM-${{ matrix.kind }}-${{ matrix.mode }}
+          name: ${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.arch }}-${{ matrix.kind }}-${{ matrix.mode }}-${{ matrix.vs_runtime }}
           path: ${{ runner.workspace }}/output
