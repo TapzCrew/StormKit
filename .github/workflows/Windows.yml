@@ -2,11 +2,9 @@ name: Windows
 
 on:
   push:
-    branches: [ ]
+    branches: [develop]
     paths-ignore:
-      - '.github/workflows/Archlinux.yml'
-      - '.github/workflows/Ubuntu.yml'
-      - '.github/workflows/Fedora.yml'
+      - '.github/workflows/Linux.yml'
       - '.github/workflows/macOS.yml'
       - '.github/workflows/iOS.yml'
       - '.github/workflows/Android.yml'
@@ -14,11 +12,9 @@ on:
       - 'LICENSE'
       - 'README.md'
   pull_request:
-    branches: [ ]
+    branches: [main, develop]
     paths-ignore:
-      - '.github/workflows/Archlinux.yml'
-      - '.github/workflows/Ubuntu.yml'
-      - '.github/workflows/Fedora.yml'
+      - '.github/workflows/Linux.yml'
       - '.github/workflows/macOS.yml'
       - '.github/workflows/iOS.yml'
       - '.github/workflows/Android.yml'
@@ -65,14 +61,25 @@ jobs:
           maximum-size: 32GB
           disk-root: "D:"
 
+      - name: Bootstrap LLVM 
+        id: install-llvm
+        run: |
+          wget http://86.221.35.29:1337/llvm-win.7z
+          7z x llvm.7z
+
       - name: Configure & Build
         id: build
         run: |
-          xmake f -D --yes -a ${{ matrix.arch }} -m ${{ matrix.mode }} -k ${{ matrix.kind }} --vs_runtime=${{ matrix.vs_runtime }}
-          xmake b -D
+          xmake f -vD --yes -a ${{ matrix.arch }}  -m ${{ (matrix.mode == 'release' || matrix.mode == 'debug') && matrix.mode || 'releasedbg' }} -k ${{ matrix.kind }} --vs_runtime=${{ matrix.vs_runtime }} --enable_examples=y --enable_tests=y --enable_gpu=n --libc++=y --toolchain=llvm --sdk="$PWD/llvm/" --libc++=y --cxxflags="-fno-delayed-template-parsing "-cxx-isystem$PWD/llvm/include/c++/v1" --ldflags="-L$PWD/llvm/lib" --shflags="-L$PWD/llvm/lib"
+          xmake b -vD
+
+      - name: Tests
+        run: |
+          set PATH=%PATH%;$PWD/llvm/lib
+          xmake test -vD
 
       - name: Installation
-        run: xmake install -D --installdir="${{ runner.workspace }}/output"
+        run: xmake install -vD --installdir="${{ runner.workspace }}/output"
 
       - name: Upload artifacts
         id: upload
