@@ -132,8 +132,7 @@ modules = {
 		modulename = "Gpu",
 		has_headers = true,
 		public_deps = { "stormkit-core", "stormkit-log", "stormkit-wsi", "stormkit-image" },
-		public_packages = { "vulkan-headers", "vulkan-memory-allocator", "vulkan-memory-allocator-hpp" },
-		private_packages = {
+		packages = {
 			"libxcb",
 			"wayland",
 		},
@@ -148,6 +147,7 @@ modules = {
 			-- "VULKAN_HPP_NO_EXCEPTIONS", uncomment when vk::raii is supported without exceptions
 		},
 		custom = function()
+      add_packages("vulkan-header", "vulkan-memory-allocator", "vulkan-memory-allocator-hpp")
 			if is_plat("linux") then
 				add_defines("VK_USE_PLATFORM_XCB_KHR")
 				add_defines("VK_USE_PLATFORM_WAYLAND_KHR")
@@ -170,8 +170,6 @@ do
 		"https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git"
 	)
 
-	add_deps("vulkan-headers", { version = "main", system = false })
-
 	on_install("windows", "linux", "mingw", "macosx", "iphoneos", "android", function(package)
 		os.cp("include/vk_mem_alloc.h", package:installdir("include"))
 	end)
@@ -190,8 +188,6 @@ do
 		"https://github.com/YaaZ/VulkanMemoryAllocator-Hpp.git"
 	)
 
-	add_deps("vulkan-memory-allocator", { version = "master", system = false })
-
 	on_install("windows|x86", "windows|x64", "linux", "macosx", "mingw", "android", "iphoneos", function(package)
 		os.cp("include", package:installdir())
 		if package:gitref() or package:version():ge("3.0.1") then
@@ -202,10 +198,6 @@ do
 	end)
 end
 package_end()
-
-add_requireconfs("vulkan-headers", { version = "main", system = false })
-add_requireconfs("vulkan-memory-allocator", { version = "master", system = false })
-add_requireconfs("vulkan-memory-allocator-hpp", { version = "master", system = false })
 
 local allowedmodes = {
 	"debug",
@@ -368,6 +360,12 @@ end
 if get_config("sanitizers") then
 	set_policy("build.sanitizer.address", true)
 	set_policy("build.sanitizer.undefined", true)
+end
+
+if has_config("enable_gpu") then
+  add_requires("vulkan-headers main", {system = false}) 
+  add_requires("vulkan-memory-allocator master", { system = false}) 
+  add_requires("vulkan-memory-allocator-hpp master", { system = false })
 end
 
 ---------------------------- targets ----------------------------
