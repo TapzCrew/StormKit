@@ -107,6 +107,9 @@ export namespace stormkit::core {
 
     template<typename T>
     using AddConst = const T;
+
+    template<IsEnumeration T>
+    using UnderlyingType = std::underlying_type_t<T>;
 } // namespace stormkit::core
 
 ////////////////////////////////////////////////////////////////////
