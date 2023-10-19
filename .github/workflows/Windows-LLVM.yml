@@ -98,7 +98,9 @@ jobs:
           xmake test -vD
 
       - name: Installation
-        run: xmake install -vD --installdir="${{ runner.workspace }}/output"
+        run: |
+          xmake install -vD --installdir="${{ runner.workspace }}/output"
+          cp "${{ runner.workspace }}/StormKit/llvm2/lib/c++.dll" "${{ runner.output }}/bin/"
 
       - name: Upload artifacts
         id: upload
