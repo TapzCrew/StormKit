@@ -6,6 +6,8 @@ export module stormkit.Image:QOIImage;
 
 import std;
 
+import frozen;
+
 import stormkit.Core;
 
 import :Image;
@@ -42,7 +44,7 @@ namespace stormkit::image::details {
         constexpr auto SIZE_OF_HEADER = 14;
 
         constexpr auto CHANNELS_TO_FORMAT =
-            core::makeFrozenMap<core::Int32, std::array<image::Image::Format, 2>>(
+            frozen::make_unordered_map<core::Int32, std::array<image::Image::Format, 2>>(
                 { { 3,
                     std::array { image::Image::Format::sRGB8, image::Image::Format::RGB8_UNorm } },
                   { 4,

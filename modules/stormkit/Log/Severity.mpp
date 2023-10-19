@@ -6,6 +6,8 @@ export module stormkit.Log:Severity;
 
 import std;
 
+import frozen;
+
 import stormkit.Core;
 
 import <stormkit/Core/FlagsMacro.hpp>;
@@ -33,8 +35,9 @@ export {
             template<class FormatContext>
             auto format(stormkit::log::Severity data, FormatContext& ctx) const
                 -> decltype(ctx.out()) {
-                return formatter<basic_string_view<CharT>,
-                                 CharT>::format(stormkit::log::toStringView(data), ctx);
+                return formatter<basic_string_view<CharT>, CharT>::format(
+                    stormkit::log::toStringView(data),
+                    ctx);
             }
         };
     } // namespace std
@@ -49,7 +52,7 @@ namespace stormkit::log {
         constexpr auto SEVERITY_TO_STRING = [] {
             using namespace std::literals;
 
-            return core::makeFrozenMap<Severity, std::string_view>({
+            return frozen::make_unordered_map<Severity, std::string_view>({
                 { Severity::Info, "Info"sv },
                 { Severity::Warning, "Warning"sv },
                 { Severity::Error, "Error"sv },

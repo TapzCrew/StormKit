@@ -6,6 +6,8 @@ export module stormkit.Gpu:Execution.CommandBuffer;
 
 import std;
 
+import frozen;
+
 import <stormkit/Core/PlatformMacro.hpp>;
 import <stormkit/Core/HashMacro.hpp>;
 
@@ -274,7 +276,7 @@ export namespace stormkit::gpu {
 namespace stormkit::gpu {
     namespace {
         constexpr auto old_layout_access_map =
-            core::makeFrozenMap<vk::ImageLayout,
+            frozen::make_unordered_map<vk::ImageLayout,
                                 std::pair<vk::AccessFlags, vk::PipelineStageFlags>>(
                 { { vk::ImageLayout::eUndefined,
                     { vk::AccessFlagBits {}, vk::PipelineStageFlagBits::eTopOfPipe } },
@@ -306,7 +308,7 @@ namespace stormkit::gpu {
                     { vk::AccessFlagBits::eMemoryRead, vk::PipelineStageFlagBits::eTransfer } } });
 
         constexpr auto new_layout_access_map =
-            core::makeFrozenMap<vk::ImageLayout,
+            frozen::make_unordered_map<vk::ImageLayout,
                                 std::pair<vk::AccessFlags, vk::PipelineStageFlags>>(
                 { { vk::ImageLayout::eUndefined, { vk::AccessFlagBits {}, {} } },
                   { vk::ImageLayout::ePreinitialized, { vk::AccessFlagBits {}, {} } },

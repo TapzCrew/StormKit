@@ -46,6 +46,7 @@ modules = {
 		end,
 	},
 	log = {
+		public_packages = { "frozen" },
 		modulename = "Log",
 		public_deps = { "stormkit-core" },
 		has_headers = true,
@@ -55,6 +56,7 @@ modules = {
 		public_deps = { "stormkit-core" },
 	},
 	image = {
+		public_packages = { "frozen" },
 		packages = { "gli", "libpng", "libjpeg-turbo" },
 		modulename = "Image",
 		public_deps = { "stormkit-core" },
@@ -67,7 +69,7 @@ modules = {
 	wsi = {
 		modulename = "Wsi",
 		public_deps = { "stormkit-core" },
-		deps = { "stormkit-log" },
+    deps = { "stormkit-log" },
 		packages = is_plat("linux") and {
 			"libxkbcommon",
 			"libxkbcommon-x11",
@@ -86,7 +88,6 @@ modules = {
 				add_rules("wayland.protocols")
 
 				on_load(function(target)
-					local pkg = target:pkg("wayland-protocols")
 					local wayland_protocols_dir =
 						path.join(target:pkg("wayland-protocols"):installdir() or "/usr", "share", "wayland-protocols")
 					assert(wayland_protocols_dir, "wayland protocols directory not found")
@@ -131,11 +132,12 @@ modules = {
 	gpu = {
 		modulename = "Gpu",
 		has_headers = true,
+		public_packages = { "frozen" },
 		public_deps = { "stormkit-core", "stormkit-log", "stormkit-wsi", "stormkit-image" },
-		packages = {
+		packages = is_plat("linux") and {
 			"libxcb",
 			"wayland",
-		},
+		} or nil,
 		defines = {
 			"VK_NO_PROTOTYPES",
 			"VMA_DYNAMIC_VULKAN_FUNCTIONS=1",
@@ -195,6 +197,18 @@ package("vulkan-memory-allocator-hpp", function()
 	end)
 end)
 
+package("frozen", function()
+	set_homepage("https://github.com/serge-sans-paille/frozen")
+	set_description("A header-only, constexpr alternative to gperf for C++14 users")
+	set_license("Apache-2.0")
+
+	set_urls("https://github.com/Arthapz/frozen.git")
+
+	on_install(function(package)
+		import("package.tools.xmake").install(package, {enable_module=true})
+	end)
+end)
+
 local allowedmodes = {
 	"debug",
 	"release",
@@ -247,10 +261,10 @@ option("enable_log", { default = true, category = "root menu/modules" })
 option("enable_entities", { default = true, category = "root menu/modules" })
 option("enable_image", { default = true, category = "root menu/modules" })
 option("enable_main", { default = true, category = "root menu/modules" })
-option("enable_wsi", { default = true, category = "root menu/modules", deps = { "enable_log" } })
+option("enable_wsi", { default = true, category = "root menu/modules" })
 option(
 	"enable_gpu",
-	{ default = false, category = "root menu/modules", deps = { "enable_log", "enable_image", "enable_wsi" } }
+	{ default = true, category = "root menu/modules", deps = { "enable_log", "enable_image", "enable_wsi" } }
 )
 option("enable_engine", {
 	default = false,
@@ -360,6 +374,8 @@ if has_config("enable_gpu") then
 	add_requires("vulkan-memory-allocator master", { system = false })
 	add_requires("vulkan-memory-allocator-hpp master", { system = false })
 end
+
+add_defines("FROZEN_DONT_INCLUDE_STL")
 
 ---------------------------- targets ----------------------------
 for name, module in pairs(modules) do

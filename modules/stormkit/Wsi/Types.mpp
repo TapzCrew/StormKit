@@ -6,6 +6,8 @@ export module stormkit.Wsi:Types;
 
 import std;
 
+import frozen;
+
 import stormkit.Core;
 
 import <stormkit/Core/FlagsMacro.hpp>;
@@ -348,7 +350,7 @@ namespace stormkit::wsi {
         constexpr auto KEY_TO_STRING = [] {
             using namespace std::literals;
 
-            return core::makeFrozenMap<Key, std::string_view>({
+            return frozen::make_unordered_map<Key, std::string_view>({
                 { Key::Unknow, "Unknow key"sv },
                 { Key::A, "A"sv },
                 { Key::B, "B"sv },
@@ -459,7 +461,7 @@ namespace stormkit::wsi {
         constexpr auto MOUSE_BUTTON_TO_STRING = [] {
             using namespace std::literals;
 
-            return core::makeFrozenMap<MouseButton, std::string_view>({
+            return frozen::make_unordered_map<MouseButton, std::string_view>({
                 { MouseButton::Left, "Left"sv },
                 { MouseButton::Right, "Right"sv },
                 { MouseButton::Middle, "Middle"sv },
