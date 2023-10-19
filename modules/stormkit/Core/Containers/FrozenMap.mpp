@@ -11,21 +11,24 @@ export module stormkit.Core:Containers.FrozenMap;
 
 import std;
 
+import <stormkit/Core/PlatformMacro.hpp>;
+
 import :Utils.Numerics;
+import :Utils.AsCast;
 import :Meta.Concepts;
 
 export namespace stormkit::core {
     template<IsHashable Key, class Value, RangeExtent N>
-    constexpr auto makeFrozenMap(const std::pair<Key, Value> (&items)[N]) noexcept;
+    [[nodiscard]] constexpr auto makeFrozenMap(const std::pair<Key, Value> (&items)[N]) noexcept;
 
     template<IsHashable Key,
              class Value,
-             RangeExtent N,
-             IsHashFunc<Value> Hasher,
+             RangeExtent              N,
+             IsHashFunc<Value>        Hasher,
              IsBinaryPredicate<Value> Equal>
-    constexpr auto makeFrozenMap(const std::pair<Key, Value> (&items)[N],
-                                 const Hasher& hash,
-                                 const Equal& equal) noexcept;
+    [[nodiscard]] constexpr auto makeFrozenMap(const std::pair<Key, Value> (&items)[N],
+                                               const Hasher& hash,
+                                               const Equal & equal) noexcept;
 
     // template<IsHashable Key, class Value, RangeExtent N>
     // constexpr auto makeFrozenMap(const std::array<std::pair<Key, Value>, N>& items) noexcept;
@@ -40,24 +43,36 @@ export namespace stormkit::core {
     //                              const Equal& equal) noexcept;
 } // namespace stormkit::core
 
+export namespace frozen {
+    using frozen::elsa;
+
+    template<stormkit::core::IsEnumeration T>
+    struct elsa<T> {
+        [[nodiscard]] constexpr auto operator()(const T                    & value,
+                                                [[maybe_unused]] std::size_t seed) const noexcept
+            -> std::size_t;
+    };
+} // namespace frozen
+
 ////////////////////////////////////////////////////////////////////
 ///                      IMPLEMENTATION                          ///
 ////////////////////////////////////////////////////////////////////
 
 namespace stormkit::core {
     template<IsHashable Key, class Value, RangeExtent N>
-    constexpr auto makeFrozenMap(const std::pair<Key, Value> (&items)[N]) noexcept {
+    STORMKIT_FORCE_INLINE constexpr auto
+        makeFrozenMap(const std::pair<Key, Value> (&items)[N]) noexcept {
         return frozen::make_unordered_map<Key, Value, N>(items);
     }
 
     template<IsHashable Key,
              class Value,
-             RangeExtent N,
-             IsHashFunc<Value> Hasher,
+             RangeExtent              N,
+             IsHashFunc<Value>        Hasher,
              IsBinaryPredicate<Value> Equal>
-    constexpr auto makeFrozenMap(const std::pair<Key, Value> (&items)[N],
-                                 const Hasher& hash,
-                                 const Equal& equal) noexcept {
+    STORMKIT_FORCE_INLINE constexpr auto makeFrozenMap(const std::pair<Key, Value> (&items)[N],
+                                                       const Hasher& hash,
+                                                       const Equal & equal) noexcept {
         return frozen::make_unordered_map<Key, Value, N, Hasher, Equal>(items, hash, equal);
     }
 
@@ -77,3 +92,13 @@ namespace stormkit::core {
     //     return frozen::make_unordered_map<Key, Value, N, Hasher, Equal>(items, hash, equal);
     // }
 } // namespace stormkit::core
+
+namespace frozen {
+    template<stormkit::core::IsEnumeration T>
+    STORMKIT_FORCE_INLINE constexpr auto
+        elsa<T>::operator()(const T& value, [[maybe_unused]] std::size_t seed) const noexcept
+        -> std::size_t {
+        using namespace stormkit::core;
+        return as<Underlying>(value);
+    }
+} // namespace frozen

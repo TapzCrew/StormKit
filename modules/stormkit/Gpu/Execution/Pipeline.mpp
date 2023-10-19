@@ -234,7 +234,7 @@ namespace stormkit::gpu {
             m_layout.push_constant_ranges |
             std::views::transform([](auto&& push_constant_range) noexcept {
                 return vk::PushConstantRange {}
-                    .setStageFlags(core::as<vk::ShaderStageFlagBits>(push_constant_range.stages))
+                    .setStageFlags(core::narrow<vk::ShaderStageFlagBits>(push_constant_range.stages))
                     .setOffset(push_constant_range.offset)
                     .setSize(core::as<core::UInt32>(push_constant_range.size));
             }) |

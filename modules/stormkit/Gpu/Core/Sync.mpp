@@ -101,7 +101,7 @@ namespace stormkit::gpu {
 
         vkCreate<vk::raii::Fence>(this->device().vkHandle(), create_info)
             .transform(core::monadic::set(m_vk_fence))
-            .transform_error(core::monadic::map(core::monadic::as<Result>(), core::throwError()));
+            .transform_error(core::monadic::map(core::monadic::narrow<Result>(), core::throwError()));
     }
 
     /////////////////////////////////////
@@ -127,7 +127,7 @@ namespace stormkit::gpu {
 
                 std::unreachable();
             })
-            .transform_error(core::monadic::as<Result>());
+            .transform_error(core::monadic::narrow<Result>());
     }
 
     /////////////////////////////////////
@@ -185,7 +185,7 @@ namespace stormkit::gpu {
 
         vkCreate<vk::raii::Semaphore>(this->device().vkHandle(), create_info)
             .transform(core::monadic::set(m_vk_semaphore))
-            .transform_error(core::monadic::map(core::monadic::as<Result>(), core::throwError()));
+            .transform_error(core::monadic::map(core::monadic::narrow<Result>(), core::throwError()));
     };
 
     /////////////////////////////////////

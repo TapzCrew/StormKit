@@ -219,20 +219,20 @@ namespace stormkit::gpu {
         : DeviceObject { device }, m_settings { settings } {
         auto create_info =
             vk::SamplerCreateInfo {}
-                .setMagFilter(core::as<vk::Filter>(m_settings.mag_filter))
-                .setMinFilter(core::as<vk::Filter>(m_settings.min_filter))
-                .setMipmapMode(core::as<vk::SamplerMipmapMode>(m_settings.mipmap_mode))
-                .setAddressModeU(core::as<vk::SamplerAddressMode>(m_settings.address_mode_u))
-                .setAddressModeV(core::as<vk::SamplerAddressMode>(m_settings.address_mode_v))
-                .setAddressModeW(core::as<vk::SamplerAddressMode>(m_settings.address_mode_w))
+                .setMagFilter(core::narrow<vk::Filter>(m_settings.mag_filter))
+                .setMinFilter(core::narrow<vk::Filter>(m_settings.min_filter))
+                .setMipmapMode(core::narrow<vk::SamplerMipmapMode>(m_settings.mipmap_mode))
+                .setAddressModeU(core::narrow<vk::SamplerAddressMode>(m_settings.address_mode_u))
+                .setAddressModeV(core::narrow<vk::SamplerAddressMode>(m_settings.address_mode_v))
+                .setAddressModeW(core::narrow<vk::SamplerAddressMode>(m_settings.address_mode_w))
                 .setMipLodBias(m_settings.mip_lod_bias)
                 .setAnisotropyEnable(m_settings.enable_anisotropy)
                 .setMaxAnisotropy(m_settings.max_anisotropy)
                 .setCompareEnable(m_settings.compare_enable)
-                .setCompareOp(core::as<vk::CompareOp>(m_settings.compare_operation))
+                .setCompareOp(core::narrow<vk::CompareOp>(m_settings.compare_operation))
                 .setMinLod(m_settings.min_lod)
                 .setMaxLod(m_settings.max_lod)
-                .setBorderColor(core::as<vk::BorderColor>(m_settings.border_color))
+                .setBorderColor(core::narrow<vk::BorderColor>(m_settings.border_color))
                 .setUnnormalizedCoordinates(m_settings.unnormalized_coordinates);
 
         vkCreate<vk::raii::Sampler>(this->device().vkHandle(), std::move(create_info))
@@ -296,7 +296,7 @@ namespace stormkit::gpu {
           m_subresource_range { subresource_range } {
         const auto vk_subresource_range =
             vk::ImageSubresourceRange {}
-                .setAspectMask(core::as<vk::ImageAspectFlagBits>(m_subresource_range.aspect_mask))
+                .setAspectMask(core::narrow<vk::ImageAspectFlagBits>(m_subresource_range.aspect_mask))
                 .setBaseMipLevel(m_subresource_range.base_mip_level)
                 .setLevelCount(m_subresource_range.level_count)
                 .setBaseArrayLayer(m_subresource_range.base_array_layer)
@@ -310,8 +310,8 @@ namespace stormkit::gpu {
 
         const auto create_info = vk::ImageViewCreateInfo {}
                                      .setImage(*this->image().vkHandle())
-                                     .setViewType(core::as<vk::ImageViewType>(m_type))
-                                     .setFormat(core::as<vk::Format>(this->image().format()))
+                                     .setViewType(core::narrow<vk::ImageViewType>(m_type))
+                                     .setFormat(core::narrow<vk::Format>(this->image().format()))
                                      .setComponents(components)
                                      .setSubresourceRange(vk_subresource_range);
 
@@ -389,17 +389,17 @@ namespace stormkit::gpu {
     STORMKIT_FORCE_INLINE Image::Image(const Device& device, const CreateInfo& info, Tag)
         : Image { device, info } {
         const auto create_info = vk::ImageCreateInfo {}
-                                     .setFlags(core::as<vk::ImageCreateFlagBits>(m_flags))
-                                     .setImageType(core::as<vk::ImageType>(m_type))
-                                     .setFormat(core::as<vk::Format>(m_format))
+                                     .setFlags(core::narrow<vk::ImageCreateFlagBits>(m_flags))
+                                     .setImageType(core::narrow<vk::ImageType>(m_type))
+                                     .setFormat(core::narrow<vk::Format>(m_format))
                                      .setExtent(vk::Extent3D { .width  = m_extent.width,
                                                                .height = m_extent.height,
                                                                .depth  = m_extent.depth })
                                      .setMipLevels(m_mip_levels)
                                      .setArrayLayers(m_layers * m_faces)
-                                     .setSamples(core::as<vk::SampleCountFlagBits>(m_samples))
-                                     .setTiling(core::as<vk::ImageTiling>(info.tiling))
-                                     .setUsage(core::as<vk::ImageUsageFlagBits>(m_usages))
+                                     .setSamples(core::narrow<vk::SampleCountFlagBits>(m_samples))
+                                     .setTiling(core::narrow<vk::ImageTiling>(info.tiling))
+                                     .setUsage(core::narrow<vk::ImageUsageFlagBits>(m_usages))
                                      .setSharingMode(vk::SharingMode::eExclusive)
                                      .setInitialLayout(vk::ImageLayout::eUndefined);
 
@@ -409,7 +409,7 @@ namespace stormkit::gpu {
                 const auto requirements = m_vk_image->getMemoryRequirements();
 
                 const auto allocate_info = vma::AllocationCreateInfo {}.setRequiredFlags(
-                    core::as<vk::MemoryPropertyFlagBits>(info.property));
+                    core::narrow<vk::MemoryPropertyFlagBits>(info.property));
 
                 auto&& allocator = this->device().vmaAllocator();
 
@@ -417,7 +417,7 @@ namespace stormkit::gpu {
                     m_vma_allocation = allocator.allocateMemoryUnique(requirements, allocate_info);
                     allocator.bindImageMemory(*m_vma_allocation, *m_vk_image.get());
                 } catch (const vk::SystemError& err) {
-                    return std::unexpected { core::as<vk::Result>(err.code().value()) };
+                    return std::unexpected { core::narrow<vk::Result>(err.code().value()) };
                 }
                 return {};
             })
