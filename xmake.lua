@@ -18,15 +18,15 @@ modules = {
 			add_files("modules/stormkit/Core.mpp")
 			add_files("$(buildir)/.gens/modules/stormkit/Core/Configuration.mpp", { always_added = true })
 
-      if is_plat("mingw") then
-         add_ldflags("-Wl,-mconsole", { public = true })
-      elseif is_plat("windows") then
-          if get_config("libc++") then
-             add_ldflags("-Wl,-subsystem:console", { public = true, force = true })
-          else
-             add_ldflags("/subsystem:console", { public = true })
-          end
-      end
+			if is_plat("mingw") then
+				add_ldflags("-Wl,-mconsole", { public = true })
+			elseif is_plat("windows") then
+				if get_config("libc++") then
+					add_ldflags("-Wl,-subsystem:console", { public = true, force = true })
+				else
+					add_ldflags("/subsystem:console", { public = true })
+				end
+			end
 
 			on_config(function(target)
 				local output, errors = os.iorunv("git", { "rev-parse", "--abbrev-ref", "HEAD" })
@@ -102,18 +102,18 @@ modules = {
 						target:add("files", path.join(wayland_protocols_dir, protocol))
 					end
 				end)
-      end
-      if is_plat("mingw") then
-         add_syslinks("user32", "shell32")
-         add_ldflags("-Wl,-mwindows", { public = true })
-      elseif is_plat("windows") then
-         add_syslinks("user32", "shell32")
-         if get_config("libc++") then
-            add_ldflags("-Wl,-subsystem:windows", { public = true, force = true })
-         else
-            add_ldflags("/subsystem:windows", { public = true })
-         end
-      end
+			end
+			if is_plat("mingw") then
+				add_syslinks("user32", "shell32")
+				add_ldflags("-Wl,-mwindows", { public = true })
+			elseif is_plat("windows") then
+				add_syslinks("user32", "shell32")
+				if get_config("libc++") then
+					add_ldflags("-Wl,-subsystem:windows", { public = true, force = true })
+				else
+					add_ldflags("/subsystem:windows", { public = true })
+				end
+			end
 		end,
 	},
 	engine = {
@@ -142,12 +142,12 @@ modules = {
 			"VMA_STATIC_VULKAN_FUNCTIONS=0",
 			"VULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1",
 			"VULKAN_HPP_NO_STRUCT_CONSTRUCTORS",
-      "VULKAN_HPP_NO_UNION_CONSTRUCTORS",
+			"VULKAN_HPP_NO_UNION_CONSTRUCTORS",
 			"VULKAN_HPP_STORAGE_SHARED",
 			-- "VULKAN_HPP_NO_EXCEPTIONS", uncomment when vk::raii is supported without exceptions
 		},
 		custom = function()
-      add_packages("vulkan-header", "vulkan-memory-allocator", "vulkan-memory-allocator-hpp")
+			add_packages("vulkan-header", "vulkan-memory-allocator", "vulkan-memory-allocator-hpp")
 			if is_plat("linux") then
 				add_defines("VK_USE_PLATFORM_XCB_KHR")
 				add_defines("VK_USE_PLATFORM_WAYLAND_KHR")
@@ -158,8 +158,7 @@ modules = {
 	},
 }
 
-package("vulkan-memory-allocator")
-do
+package("vulkan-memory-allocator", function()
 	set_kind("library", { headeronly = true })
 	set_homepage("https://gpuopen-librariesandsdks.github.io/VulkanMemoryAllocator/html/")
 	set_description("Easy to integrate Vulkan memory allocation library.")
@@ -173,11 +172,9 @@ do
 	on_install("windows", "linux", "mingw", "macosx", "iphoneos", "android", function(package)
 		os.cp("include/vk_mem_alloc.h", package:installdir("include"))
 	end)
-end
-package_end()
+end)
 
-package("vulkan-memory-allocator-hpp")
-do
+package("vulkan-memory-allocator-hpp", function()
 	set_kind("library", { headeronly = true })
 	set_homepage("https://gpuopen-librariesandsdks.github.io/VulkanMemoryAllocator/html/")
 	set_description("C++ bindings for VulkanMemoryAllocator.")
@@ -196,8 +193,7 @@ do
 			package:add("deps", "vulkan-hpp < 1.3.234")
 		end
 	end)
-end
-package_end()
+end)
 
 local allowedmodes = {
 	"debug",
@@ -256,14 +252,11 @@ option(
 	"enable_gpu",
 	{ default = false, category = "root menu/modules", deps = { "enable_log", "enable_image", "enable_wsi" } }
 )
-option(
-	"enable_engine",
-	{
-		default = false,
-		category = "root menu/modules",
-		deps = { "enable_log", "enable-entities", "enable_image", "enable_wsi", "enable_gpu" },
-	}
-)
+option("enable_engine", {
+	default = false,
+	category = "root menu/modules",
+	deps = { "enable_log", "enable-entities", "enable_image", "enable_wsi", "enable_gpu" },
+})
 
 ---------------------------- global config ----------------------------
 set_allowedmodes(allowedmodes)
@@ -311,15 +304,15 @@ set_optimize("fastest")
 if is_mode("debug") then
 	set_symbols("debug", "hidden")
 	add_defines("_GLIBCXX_DEBUG")
-	add_cxflags("-ggdb3", { tools = {"clang", "gcc"} })
-	add_mxflags("-ggdb3", { tools = {"clang", "gcc"} })
+	add_cxflags("-ggdb3", { tools = { "clang", "gcc" } })
+	add_mxflags("-ggdb3", { tools = { "clang", "gcc" } })
 elseif is_mode("releasedbg") then
 	set_optimize("fast")
 	set_symbols("debug", "hidden")
 	add_cxflags("-fno-omit-frame-pointer", { tools = { "clang", "gcc" } })
 	add_mxflags("-fno-omit-frame-pointer", { tools = { "clang", "gcc" } })
-	add_cxflags("-ggdb3", { tools = {"clang", "gcc"} })
-	add_mxflags("-ggdb3", { tools = {"clang", "gcc"} })
+	add_cxflags("-ggdb3", { tools = { "clang", "gcc" } })
+	add_mxflags("-ggdb3", { tools = { "clang", "gcc" } })
 end
 
 set_fpmodels("fast")
@@ -334,7 +327,7 @@ set_warnings("all", "pedantic", "extra")
 add_cxxflags("clang::-Wno-experimental-header-units")
 
 if is_plat("windows") then
-  add_defines("_CRT_SECURE_NO_WARNINGS")
+	add_defines("_CRT_SECURE_NO_WARNINGS")
 end
 
 if get_config("libc++") then
@@ -363,9 +356,9 @@ if get_config("sanitizers") then
 end
 
 if has_config("enable_gpu") then
-  add_requires("vulkan-headers main", {system = false}) 
-  add_requires("vulkan-memory-allocator master", { system = false}) 
-  add_requires("vulkan-memory-allocator-hpp master", { system = false })
+	add_requires("vulkan-headers main", { system = false })
+	add_requires("vulkan-memory-allocator master", { system = false })
+	add_requires("vulkan-memory-allocator-hpp master", { system = false })
 end
 
 ---------------------------- targets ----------------------------
@@ -375,8 +368,7 @@ for name, module in pairs(modules) do
 	local modulename = module.modulename
 
 	if name == "core" or name == "main" or get_config("enable_" .. name) then
-		target("stormkit-" .. name)
-		do
+		target("stormkit-" .. name, function()
 			set_group("libraries")
 
 			if name == "main" then
@@ -504,8 +496,7 @@ for name, module in pairs(modules) do
 			if get_config("libc++") then
 				add_deps("stdmodules")
 			end
-		end
-		target_end()
+		end)
 	end
 end
 
