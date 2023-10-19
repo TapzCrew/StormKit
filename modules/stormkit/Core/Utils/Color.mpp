@@ -207,13 +207,14 @@ namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
     constexpr auto colorComponentAs(UInt8 component) noexcept -> float {
-        return as<float>(component) / 255.f;
+        return narrow<float>(component) / 255.f;
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     constexpr auto colorComponentAs(float component) noexcept -> UInt8 {
-        return as<UInt8>(component * 255u);
+        expects(component <= 1.f);
+        return narrow<UInt8>(component * 255u);
     }
 
     /////////////////////////////////////

@@ -6,6 +6,8 @@ export module stormkit.Core:Utils.Numerics;
 
 import std;
 
+import <stormkit/Core/PlatformMacro.hpp>;
+
 import :Meta.Traits;
 import :Meta.Concepts;
 import :Utils.AsCast;
@@ -30,24 +32,33 @@ export namespace stormkit::core {
 
     using Secondf = std::chrono::duration<float, std::chrono::seconds::period>;
 
-    template<std::floating_point T>
+    template<IsFloatingPoint T>
+    inline constexpr auto Epsilon = std::numeric_limits<T>::epsilon();
+
+    template<IsFloatingPoint T>
     [[nodiscard]] constexpr auto
-        isEqual(T a, T b, T epsilon = std::numeric_limits<T>::epsilon()) noexcept -> bool;
+        isEqual(const T& a, const T& b, const T& epsilon = Epsilon<T>) noexcept -> bool;
 
-    template<std::floating_point T,
-             std::floating_point U,
-             std::floating_point V = SafeTypeHelperOtherType<T, U>>
+    template<IsFloatingPoint T,
+             IsFloatingPoint U,
+             IsFloatingPoint V = SafeNarrowHelperOtherType<T, U>>
     [[nodiscard]] constexpr auto
-        isEqual(T a, U b, V epsilon = std::numeric_limits<V>::epsilon()) noexcept -> bool;
+        isEqual(const T& a, const U& b, const V& epsilon = Epsilon<V>) noexcept -> bool;
 
-    template<std::integral T>
-    [[nodiscard]] constexpr auto isEqual(T a, T b) noexcept -> bool;
+    template<IsIntegral T, IsIntegral U>
+        requires Is<T, U>
+    [[nodiscard]] constexpr auto isEqual(const T& a, const U& b) noexcept -> bool;
 
-    [[nodiscard]] constexpr auto isEqual(std::integral auto a, std::integral auto b) noexcept
-        -> bool;
+    template<IsIntegral T, IsIntegral U>
+        requires IsNot<T, U>
+    [[nodiscard]] constexpr auto isEqual(const T& a, const U& b) noexcept -> bool;
 
-    template<IsArithmetic T, IsArithmetic V>
-    [[nodiscard]] constexpr auto map(V x, V in_min, V in_max, T out_min, T out_max) noexcept -> T;
+    template<IsArithmetic U, IsArithmetic T>
+    [[nodiscard]] constexpr auto map(const T& x,
+                                     const T& in_min,
+                                     const T& in_max,
+                                     const U& out_min,
+                                     const U& out_max) noexcept -> U;
 
     template<IsArithmetic T>
     struct NumericsRange {
@@ -57,24 +68,28 @@ export namespace stormkit::core {
     };
 
     template<class T>
-    concept IsNumericsRange = requires(T&& t) {
+    concept IsNumericsRange = requires(const T& t) {
         t.begin;
         t.end;
         t.step;
     };
 
+    template<class T>
+    concept IsNumericsRangePure = IsNumericsRange<PureType<T>>;
+
     template<IsArithmetic T>
-    [[nodiscard]] constexpr auto range(T end) noexcept;
+    [[nodiscard]] constexpr auto range(const T& end) noexcept;
 
     template<IsArithmetic T, IsArithmetic U, IsArithmetic V = U>
-    [[nodiscard]] constexpr auto range(T begin, U end, V step = V { 1 }) noexcept;
+    [[nodiscard]] constexpr auto
+        range(const T& begin, const U& end, const V& step = V { 1 }) noexcept;
 
-    [[nodiscard]] constexpr auto range(IsNumericsRange auto range) noexcept;
+    [[nodiscard]] constexpr auto range(IsNumericsRangePure auto&& range) noexcept;
 
     template<IsArithmetic... Args>
-    [[nodiscard]] constexpr auto multiRange(Args&&...args) noexcept;
+    [[nodiscard]] constexpr auto multiRange(const Args&...args) noexcept;
 
-    template<IsNumericsRange... Args>
+    template<IsNumericsRangePure... Args>
     [[nodiscard]] constexpr auto multiRange(Args&&...args) noexcept;
 } // namespace stormkit::core
 
@@ -196,8 +211,8 @@ namespace stormkit::core {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    template<std::floating_point T>
-    constexpr auto isEqual(T a, T b, T epsilon) noexcept -> bool {
+    template<IsFloatingPoint T>
+    constexpr auto isEqual(const T& a, const T& b, const T& epsilon) noexcept -> bool {
         const auto diff   = std::abs(a - b);
         const auto max_ab = std::max(std::abs(a), std::abs(b));
 
@@ -210,72 +225,80 @@ namespace stormkit::core {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    template<std::floating_point T,
-             std::floating_point U,
-             std::floating_point V = SafeTypeHelperOtherType<T, U>>
-    constexpr auto isEqual(T a, U b, V epsilon) noexcept -> bool {
-        using Type = SafeTypeHelperType<decltype(a), decltype(b)>;
+    template<IsFloatingPoint T,
+             IsFloatingPoint U,
+             IsFloatingPoint V = SafeNarrowHelperOtherType<T, U>>
+    STORMKIT_FORCE_INLINE constexpr auto isEqual(const T& a, const U& b, const V& epsilon) noexcept
+        -> bool {
+        using Type = SafeNarrowHelperType<T, U>;
 
-        return isEqual<Type>(core::as<Type>(a), core::as<Type>(b), core::as<Type>(epsilon));
+        return isEqual<Type>(narrow<Type>(a), narrow<Type>(b), narrow<Type>(epsilon));
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    template<std::integral T>
-    constexpr auto isEqual(T a, T b) noexcept -> bool {
+    template<IsIntegral T, IsIntegral U>
+        requires Is<T, U>
+    STORMKIT_FORCE_INLINE constexpr auto isEqual(const T& a, const U& b) noexcept -> bool {
         return a == b;
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    constexpr auto isEqual(std::integral auto a, std::integral auto b) noexcept -> bool {
-        using T = SafeTypeHelperType<decltype(a), decltype(b)>;
+    template<IsIntegral T, IsIntegral U>
+        requires IsNot<T, U>
+    STORMKIT_FORCE_INLINE constexpr auto isEqual(const T& a, const U& b) noexcept -> bool {
+        using Type = SafeNarrowHelperType<T, U>;
 
-        return isEqual<T>(core::as<T>(a), core::as<T>(b));
+        return isEqual<Type>(narrow<Type>(a), narrow<Type>(b));
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    template<IsArithmetic T, IsArithmetic V>
-    constexpr auto map(V x, V in_min, V in_max, T out_min, T out_max) noexcept -> T {
-        return as<T>((x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min);
+    template<IsArithmetic U, IsArithmetic T>
+    STORMKIT_FORCE_INLINE constexpr auto map(const T& x,
+                                             const T& in_min,
+                                             const T& in_max,
+                                             const U& out_min,
+                                             const U& out_max) noexcept -> U {
+        return narrow<U>((x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    constexpr auto range(IsNumericsRange auto range) noexcept {
+    STORMKIT_FORCE_INLINE constexpr auto range(IsNumericsRangePure auto&& range) noexcept {
         return std::views::iota(range.begin, range.end) | std::views::stride(range.step);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    template<IsArithmetic T, IsArithmetic U, IsArithmetic V = U>
-    constexpr auto range(T begin, U end, V step) noexcept {
-        using Type = SafeTypeHelperType<SafeTypeHelperType<T, U>, V>;
-        return range(NumericsRange<Type> { .begin = static_cast<Type>(begin),
-                                           .end   = static_cast<Type>(end),
-                                           .step  = static_cast<Type>(step) });
+    template<IsArithmetic T, IsArithmetic U, IsArithmetic V>
+    STORMKIT_FORCE_INLINE constexpr auto
+        range(const T& begin, const U& end, const V& step) noexcept {
+        using Type = SafeNarrowHelperType<SafeNarrowHelperType<T, U>, V>;
+        return range(NumericsRange<Type> { .begin = narrow<Type>(begin),
+                                           .end   = narrow<Type>(end),
+                                           .step  = narrow<Type>(step) });
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<IsArithmetic T>
-    constexpr auto range(T end) noexcept {
+    STORMKIT_FORCE_INLINE constexpr auto range(const T& end) noexcept {
         return range(T { 0 }, end);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<IsArithmetic... Args>
-    constexpr auto multiRange(Args&&...args) noexcept {
-        return rangeImplementation(
-            NumericsRange<PureType<Args>> { .begin = 0, .end = std::forward<Args>(args) }...);
+    STORMKIT_FORCE_INLINE constexpr auto multiRange(const Args&...args) noexcept {
+        return rangeImplementation(NumericsRange<Args> { .begin = 0, .end = args }...);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    template<IsNumericsRange... Args>
-    constexpr auto multiRange(Args&&...args) noexcept {
+    template<IsNumericsRangePure... Args>
+    STORMKIT_FORCE_INLINE constexpr auto multiRange(Args&&...args) noexcept {
         return rangeImplementation(std::forward<Args>(args)...);
     }
 } // namespace stormkit::core

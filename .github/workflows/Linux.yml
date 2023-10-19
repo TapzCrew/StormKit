@@ -1,20 +1,11 @@
 name: Linux
 
 on:
-  push:
-    branches: [develop]
-    paths-ignore:
-      - '.github/workflows/Windows.yml'
-      - '.github/workflows/macOS.yml'
-      - '.github/workflows/iOS.yml'
-      - '.github/workflows/Android.yml'
-      - '.gitignore'
-      - 'LICENSE'
-      - 'README.md'
   pull_request:
     branches: [main, develop]
     paths-ignore:
-      - '.github/workflows/Windows.yml'
+      - '.github/workflows/Windows-LLVM.yml'
+      - '.github/workflows/Windows-MSVC.yml'
       - '.github/workflows/macOS.yml'
       - '.github/workflows/iOS.yml'
       - '.github/workflows/Android.yml'
@@ -39,18 +30,36 @@ jobs:
       group: ${{ github.ref }}-${{ github.base_ref }}-${{ github.head_ref }}-Linux-${{ matrix.kind }}-${{ matrix.mode }}
 
     steps:
+      - name: Get current date as package key
+        id: cache_key
+        run: echo "key=$(date +'%W')" >> $GITHUB_OUTPUT
+
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
   
-      - name: Install
+      - name: Set xmake env
+        run: echo "XMAKE_GLOBALDIR=${{ runner.workspace }}/xmake-global" >> $GITHUB_ENV
+
+      - name: Install XMake
         uses: xmake-io/github-action-setup-xmake@v1
         with:
           xmake-version: branch@dev
+          actions-cache-folder: .xmake-cache-${{ steps.cache_key.outputs.key }}
 
       - name: Update xmake repository
         run: xmake repo -vD --update
+
+      - name: Retrieve dependencies hash
+        id: dep_hash
+        run: echo "hash=$(xmake l utils.ci.packageskey)" >> $GITHUB_OUTPUT
+
+      - name: Retrieve cached xmake dependencies
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.XMAKE_GLOBALDIR }}/.xmake/packages
+          key: ${{ matrix.os }}-${{ matrix.mode }}-${{ steps.dep_hash.outputs.hash }}-${{ steps.cache_key.outputs.key }}
 
       - name: Configure & Build
         id: build
@@ -59,7 +68,7 @@ jobs:
           xmake b -vD
 
       - name: Tests
-        run: LD_LIBRARY_PATH="/opt/llvm-git/usr/lib" xmake test
+        run: LD_LIBRARY_PATH="/opt/llvm-git/usr/lib" xmake test -vD
 
       - name: Installation
         run: xmake install -vD --installdir="${{ runner.workspace }}/output"

@@ -87,7 +87,7 @@ export namespace stormkit::log {
 
         auto flush() const -> void;
 
-        std::string_view name;
+        std::string_view name = "";
     };
 
     template<core::ConstexprString str>
@@ -164,7 +164,7 @@ namespace stormkit::log {
     template<class... Args>
     auto Logger::log(Severity severity, std::string_view format_string, Args&&...param_args)
         -> void {
-        log(severity, " "_module, format_string, std::forward<Args>(param_args)...);
+        log(severity, Module{}, format_string, std::forward<Args>(param_args)...);
     }
 
     ////////////////////////////////////////

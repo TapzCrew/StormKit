@@ -25,7 +25,7 @@ export {
 
         using NativeHandle = void *;
 
-        enum class Key : core::Int8 {
+        enum class Key : core::UInt8 {
             A = 0,
             B,
             C,
@@ -131,7 +131,7 @@ export {
             KeyCount,
             Unknow = std::numeric_limits<core::Int8>::max(),
         };
-        inline constexpr auto KEY_COUNT = core::as<core::RangeExtent>(Key::KeyCount);
+        inline constexpr auto KEY_COUNT = core::as<core::Underlying>(Key::KeyCount);
 
         enum class MouseButton : core::UInt8 {
             Left,
@@ -143,7 +143,7 @@ export {
             Unknow = std::numeric_limits<core::Int8>::max(),
         };
         inline constexpr auto MOUSE_BUTTON_COUNT =
-            core::as<core::RangeExtent>(MouseButton::ButtonCount);
+            core::as<core::Underlying>(MouseButton::ButtonCount);
 
         struct Monitor {
             enum class Flags {
@@ -151,7 +151,7 @@ export {
                 Primary
             };
 
-            Flags flags = Flags::None;
+            Flags       flags = Flags::None;
             std::string name;
 
             std::vector<core::math::ExtentU> extents;
@@ -197,7 +197,7 @@ export {
 
         struct ResizedEventData {
             static constexpr auto TYPE = EventType::Resized;
-            core::math::ExtentU extent;
+            core::math::ExtentU   extent;
         };
 
         struct MinimizedEventData {
@@ -210,26 +210,26 @@ export {
 
         struct KeyPressedEventData {
             static constexpr auto TYPE = EventType::KeyPressed;
-            Key key;
-            char character;
+            Key                   key;
+            char                  character;
         };
 
         struct KeyReleasedEventData {
             static constexpr auto TYPE = EventType::KeyReleased;
-            Key key;
-            char character;
+            Key                   key;
+            char                  character;
         };
 
         struct MouseButtonPushedEventData {
             static constexpr auto TYPE = EventType::MouseButtonPushed;
-            core::math::Vector2I position;
-            MouseButton button;
+            core::math::Vector2I  position;
+            MouseButton           button;
         };
 
         struct MouseButtonReleasedEventData {
             static constexpr auto TYPE = EventType::MouseButtonReleased;
-            core::math::Vector2I position;
-            MouseButton button;
+            core::math::Vector2I  position;
+            MouseButton           button;
         };
 
         struct MouseEnteredEventData {
@@ -242,7 +242,7 @@ export {
 
         struct MouseMovedEventData {
             static constexpr auto TYPE = EventType::MouseMoved;
-            core::math::Vector2I position;
+            core::math::Vector2I  position;
         };
 
         struct LostFocusEventData {
@@ -279,7 +279,7 @@ export {
         [[nodiscard]] constexpr auto toString(Key value) -> std::string;
         [[nodiscard]] constexpr auto toStringView(Key value) noexcept -> std::string_view;
         //
-        [[nodiscard]] auto toString(const Monitor& flags) -> std::string;
+        [[nodiscard]] auto           toString(const Monitor          &flags) -> std::string;
         [[nodiscard]] constexpr auto toString(Monitor::Flags flags) -> std::string;
         [[nodiscard]] constexpr auto toStringView(Monitor::Flags flags) noexcept
             -> std::string_view;
@@ -294,8 +294,9 @@ export {
         struct formatter<stormkit::wsi::Key, CharT>: formatter<basic_string_view<CharT>, CharT> {
             template<class FormatContext>
             auto format(stormkit::wsi::Key data, FormatContext& ctx) const -> decltype(ctx.out()) {
-                return formatter<basic_string_view<CharT>,
-                                 CharT>::format(stormkit::wsi::toStringView(data), ctx);
+                return formatter<basic_string_view<CharT>, CharT>::format(
+                    stormkit::wsi::toStringView(data),
+                    ctx);
             }
         };
 
@@ -305,8 +306,9 @@ export {
             template<class FormatContext>
             auto format(stormkit::wsi::MouseButton data, FormatContext& ctx) const
                 -> decltype(ctx.out()) {
-                return formatter<basic_string_view<CharT>,
-                                 CharT>::format(stormkit::wsi::toStringView(data), ctx);
+                return formatter<basic_string_view<CharT>, CharT>::format(
+                    stormkit::wsi::toStringView(data),
+                    ctx);
             }
         };
 
@@ -316,8 +318,9 @@ export {
             template<class FormatContext>
             auto format(stormkit::wsi::Monitor::Flags data, FormatContext& ctx) const
                 -> decltype(ctx.out()) {
-                return formatter<basic_string_view<CharT>,
-                                 CharT>::format(stormkit::wsi::toStringView(data), ctx);
+                return formatter<basic_string_view<CharT>, CharT>::format(
+                    stormkit::wsi::toStringView(data),
+                    ctx);
             }
         };
 

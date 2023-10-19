@@ -2,9 +2,15 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-export module Test;
+module;
 
-import <stormkit/Core/PlatformMacro.hpp>;
+#include <stormkit/Core/PlatformMacro.hpp>
+
+#ifdef STORMKIT_OS_WINDOWS
+    #include <windows.h>
+#endif
+
+export module Test;
 
 import std;
 
@@ -24,8 +30,8 @@ export namespace test {
     };
 
     struct TestSuite {
-        TestSuite(std::string              && name,
-                  std::vector<TestFunc>    && tests,
+        TestSuite(std::string&&               name,
+                  std::vector<TestFunc>&&     tests,
                   const std::source_location& location = std::source_location::current()) noexcept;
     };
 
@@ -143,8 +149,8 @@ namespace test {
         return failed_tests == 0;
     }
 
-    TestSuite::TestSuite(std::string              && name,
-                         std::vector<TestFunc>    && tests,
+    TestSuite::TestSuite(std::string&&               name,
+                         std::vector<TestFunc>&&     tests,
                          const std::source_location& location) noexcept {
         state.test_suites.emplace_back(
             std::make_unique<TestSuiteHolder>(std::move(name), std::move(tests), location));
@@ -222,16 +228,25 @@ namespace test {
         constexpr auto KRED = 12;
         constexpr auto KGRN = 2;
         constexpr auto KWHT = 15;
+        constexpr auto KYEL = 14;
     } // namespace
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto colorifyBegin(bool fail) noexcept -> void {
+    auto colorifyBegin(Status status) noexcept -> void {
         if (state.plain) return;
         auto output = GetStdHandle(STD_OUTPUT_HANDLE);
 
-        auto background = (fail) ? KRED : KRGN;
+        auto background = KBLA;
         auto text       = KBLA;
+        switch (status) {
+            case Status::PASSED: background = KGRN; break;
+            case Status::FAIL: background = KRED; break;
+            case Status::CHECKMARK: text = KGRN; break;
+            case Status::CROSSMARK: text = KRED; break;
+            case Status::NOTPASSED: background = KYEL; break;
+            default: std::unreachable();
+        }
 
         SetConsoleTextAttribute(output, (background << 4) + text);
     }
@@ -254,6 +269,7 @@ namespace test {
             case Status::CHECKMARK: std::print("\033[32m"); break;
             case Status::CROSSMARK: std::print("\033[33m"); break;
             case Status::NOTPASSED: std::print("\033[30;41m"); break;
+            default: std::unreachable();
         }
     }
 

@@ -25,6 +25,36 @@ namespace stormkit::core {
             a.get();
         };
 
+        template<class T, class U>
+        concept Is = std::same_as<T, U> or std::derived_from<T, U>;
+
+        template<class T, class U>
+        concept IsPure = Is<std::remove_cvref_t<T>, std::remove_cvref_t<U>>;
+
+        template<class T, class... U>
+        concept IsOneOf = (Is<T, U> or ...);
+
+        template<class T, class U>
+        concept IsNot = not Is<T, U>;
+
+        template<class T, class U>
+        concept IsNotPure = IsNot<std::remove_cvref_t<T>, std::remove_cvref_t<U>>;
+
+        template<class T>
+        concept IsByte = Is<T, std::byte>;
+
+        template<class T>
+        concept IsBytePure = IsPure<T, std::byte>;
+
+        template<class T>
+        concept IsNotByte = not IsByte<T>;
+
+        template<class T>
+        concept IsNotBytePure = not IsBytePure<T>;
+
+        template<class T>
+        concept IsStringLike = std::convertible_to<T, std::string_view>;
+
         template<class T>
         concept IsRawPointer = std::is_pointer_v<T>;
 
@@ -54,37 +84,41 @@ namespace stormkit::core {
         concept IsIndirection = IsLValueReference<T> or IsPointer<T>;
 
         template<class T>
+        concept IsRawIndirection = IsLValueReference<T> or IsRawPointer<T>;
+
+        template<class T>
         concept IsPolymorphic = std::is_polymorphic_v<T>;
 
-        // clang-format off
         template<class T>
         concept IsNotIndirection = not IsIndirection<T>;
-        // clang-format on
 
-        // clang-format off
         template<class T>
-        concept IsArithmetic = (std::integral<std::remove_cvref_t<T>>
-                                    or std::floating_point<std::remove_cvref_t<T>>)
-                                   and not IsPointer<T>;
-        // clang-format on
+        concept IsEnumeration = std::is_enum_v<T> and IsNotByte<T>;
+
+        template<class T>
+        concept IsEnumerationPure = IsEnumeration<std::remove_cvref_t<T>>;
+
+        template<typename T>
+        concept IsIntegral = std::integral<T>;
+
+        template<typename T>
+        concept IsIntegralPure = IsIntegral<std::remove_cvref_t<T>>;
+
+        template<typename T>
+        concept IsFloatingPoint = std::floating_point<T>;
+
+        template<typename T>
+        concept IsFloatingPointPure = IsFloatingPoint<std::remove_cvref_t<T>>;
+
+        template<class T>
+        concept IsArithmetic =
+            (IsIntegral<T> or IsFloatingPoint<T>)and not IsPointer<T> and not IsEnumeration<T>;
+
+        template<class T>
+        concept IsArithmeticPure = IsArithmetic<std::remove_cvref_t<T>>;
 
         template<class T>
         concept IsPreIncrementable = requires(T& a) { a.operator--(); };
-
-        template<class T, class U>
-        concept Is = std::same_as<std::remove_cvref_t<T>, std::remove_cvref_t<U>> or
-                     std::derived_from<std::remove_cvref_t<T>, std::remove_cvref_t<U>>;
-
-        template<class T, class... U>
-        concept IsOneOf = (Is<T, U> or ...);
-
-        // clang-format off
-        template<class T, class U>
-        concept IsNot = not Is<T, U>;
-        // clang-format on
-
-        template<class T>
-        concept IsStringLike = std::convertible_to<T, std::string_view>;
 
         template<class T>
         concept IsBooleanTestable = details::IsBooleanTestable<T> && requires(T&& t) {
@@ -126,28 +160,26 @@ namespace stormkit::core {
             IsOneOf<T, char, signed char, unsigned char, wchar_t, char8_t, char16_t, char32_t>;
 
         template<class T>
+        concept IsCharacterPure = IsCharacter<std::remove_cvref_t<T>>;
+
+        template<class T>
         concept IsColorComponent = Is<T, float> or Is<T, std::uint8_t>;
-
-        template<class T>
-        concept IsByte = Is<T, std::byte>;
-
-        // clang-format off
-        template<class T>
-        concept IsNotByte = not IsByte<T>;
-        // clang-format on
-
-        // clang-format off
-        template<class T>
-        concept IsEnumeration = std::is_enum_v<T> and not Is<T, std::byte>;
-        // clang-format on
 
         template<class T>
         concept IsConst = std::is_const_v<T>;
 
-        // clang-format off
         template<class T>
         concept IsNotConst = std::is_const_v<T>;
-        // clang-format on
+
+        template<class From, typename To>
+        concept IsBraceInitializableTo = requires(From&& from) { To { std::forward<From>(from) }; };
+
+        template<typename To, typename From>
+        concept IsNarrowing =
+            IsArithmetic<To> and IsArithmetic<From> and IsBraceInitializableTo<From, To>;
+
+        template<typename To, typename From>
+        concept IsNarrowingPure = IsNarrowing<std::remove_cvref_t<To>, std::remove_cvref_t<From>>;
     } // namespace stormkit::core
 
 #ifndef STORMKIT_NO_MODULES

@@ -118,7 +118,7 @@ namespace stormkit::wsi::linux::common {
     inline auto getXKBContext() noexcept -> XKBContextScoped {
         if (!xkb_context_instance) [[unlikely]] {
             xkb_context_instance = xkb_context_new(XKB_CONTEXT_NO_FLAGS);
-            dlog("New xkb context {}", core::as<void *>(xkb_context_instance));
+            dlog("New xkb context {}", std::bit_cast<void *>(xkb_context_instance));
         }
 
         core::ensures(xkb_context_instance);

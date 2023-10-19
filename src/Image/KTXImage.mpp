@@ -4,6 +4,11 @@
 
 module;
 
+#include <glm/glm.hpp>
+
+#include <glm/gtc/quaternion.hpp>
+#include <glm/integer.hpp>
+
 #include <gli/gli.hpp>
 
 export module stormkit.Image:KTXImage;

@@ -43,7 +43,7 @@ namespace stormkit::core {
     ////////////////////////////////////////
     inline auto asciiToUtf16(std::string_view input) -> std::u16string {
         auto output = std::u16string {};
-#if not defined(STORMKIT_OS_MACOS)
+#if not defined(STORMKIT_COMPILER_CLANG)
         auto state  = std::mbstate_t {};
         output.resize(std::size(input));
 
@@ -65,7 +65,7 @@ namespace stormkit::core {
     ////////////////////////////////////////
     inline auto utf16ToAscii(std::u16string_view input) -> std::string {
         auto output = std::string {};
-#if not defined(STORMKIT_OS_MACOS)
+#if not defined(STORMKIT_COMPILER_CLANG)
         auto state  = std::mbstate_t {};
         output.resize(std::size(input));
 
@@ -94,7 +94,7 @@ namespace stormkit::core {
                                     MB_CUR_MAX,
                                     &state)) > 0u)
             input_it += len;
-#elif defined(STORMKIT_OS_MACOS)
+#elif defined(STORMKIT_COMPILER_CLANG)
         output = std::bit_cast<wchar_t*>(std::data(input));
 #else
         while ((len = std::mbrtoc8(std::bit_cast<char8_t *>(std::data(output)) + i++,
@@ -116,10 +116,10 @@ namespace stormkit::core {
 
 #if defined(STORMKIT_COMPILER_MSVC)
         for (const auto& c : input) std::c16rtomb(std::data(output), core::as<char16_t>(c), &state);
-#elif defined(STORMKIT_OS_MACOS)
+#elif defined(STORMKIT_COMPILER_CLANG)
         output = std::bit_cast<char*>(std::data(input));
 #else
-        for (const auto& c : input) std::c8rtomb(std::data(output), core::as<char>(c), &state);
+        for (const auto& c : input) std::c8rtomb(std::data(output), core::narrow<char>(c), &state);
 #endif
 
         return output;
@@ -130,12 +130,12 @@ namespace stormkit::core {
     inline auto asciiToUtf8(std::string_view input) -> std::u8string {
         auto state  = std::mbstate_t {};
         auto output = std::u8string {};
-        output.resize(std::size(input) * as<RangeExtent>(MB_LEN_MAX));
+        output.resize(std::size(input) * narrow<RangeExtent>(MB_LEN_MAX));
 
 #if defined(STORMKIT_COMPILER_MSVC)
         auto bytes = toByteSpan(output);
         std::ranges::copy(asByteView(input), std::ranges::begin(bytes));
-#elif defined(STORMKIT_OS_MACOS)
+#elif defined(STORMKIT_COMPILER_CLANG)
         output = std::bit_cast<char8_t*>(std::data(input));
 #else
         auto len      = 0ull;
@@ -163,7 +163,7 @@ namespace stormkit::core {
 #if defined(STORMKIT_COMPILER_MSVC)
         auto bytes = toByteSpan(output);
         std::ranges::copy(asByteView(input), std::ranges::begin(bytes));
-#elif defined(STORMKIT_OS_MACOS)
+#elif defined(STORMKIT_COMPILER_CLANG)
         output = std::bit_cast<char*>(std::data(input));
 #else
         for (const auto& c : input) std::c8rtomb(std::data(output), c, &state);

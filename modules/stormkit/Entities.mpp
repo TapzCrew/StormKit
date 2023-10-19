@@ -234,7 +234,7 @@ namespace stormkit::entities {
     template<class Result>
     constexpr auto componentHash(std::string_view str) noexcept -> Result {
         return std::empty(str) ? 0xcbf29ce484222325UL
-                               : (core::as<core::Hash64>(str[0]) ^
+                               : (core::narrow<core::Hash64>(str[0]) ^
                                   componentHash<Result>(str.substr(1, std::size(str) - 1))) *
                                      0x100000001b3UL;
     }
@@ -244,7 +244,7 @@ namespace stormkit::entities {
     constexpr auto componentHash(const char *str, core::RangeExtent size) noexcept
         -> Component::Type {
         return size == 0 ? 0xcbf29ce484222325UL
-                         : (core::as<core::RangeExtent>(str[0]) ^
+                         : (core::narrow<core::RangeExtent>(str[0]) ^
                             componentHash(std::string_view { str + 1, size - 1 })) *
                                0x100000001b3UL;
     }

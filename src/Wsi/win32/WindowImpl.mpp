@@ -10,15 +10,14 @@ export module stormkit.Wsi:Win32.WindowImpl;
 
 import std;
 
+import <stormkit/Core/PlatformMacro.hpp>;
+
 import stormkit.Core;
 
-import :Event;
-import :Monitor;
-import :Window;
-import :WindowStyle;
 import :Types;
 
 import :Common.WindowImplBase;
+import :Win32.Utils;
 
 export namespace stormkit::wsi::win32 {
     class WindowImpl: public ::stormkit::wsi::common::WindowImplBase {
@@ -64,20 +63,20 @@ export namespace stormkit::wsi::win32 {
         [[nodiscard]] auto mouseHided() const noexcept -> bool;
         [[nodiscard]] auto fullscreen() const noexcept -> bool;
 
-        auto setKeyRepeatEnabled(bool enabled) noexcept -> void;
+        auto               setKeyRepeatEnabled(bool enabled) noexcept -> void;
         [[nodiscard]] auto keyRepeatEnabled() const noexcept -> bool;
 
         auto setVirtualKeyboardVisible(bool visible) noexcept -> void;
 
-        auto setMousePosition(const core::math::Vector2I& position) noexcept -> void;
+        auto        setMousePosition(const core::math::Vector2I& position) noexcept -> void;
         static auto setMousePositionOnDesktop(WM wm, const core::math::Vector2U& position) noexcept
             -> void;
 
         [[nodiscard]] static auto getMonitorSettings(WM wm) -> std::vector<Monitor>;
 
       private:
-        static auto CALLBACK globalOnEvent(HWND handle,
-                                           UINT message,
+        static auto CALLBACK globalOnEvent(HWND   handle,
+                                           UINT   message,
                                            WPARAM w_param,
                                            LPARAM l_param) -> LRESULT;
 
@@ -92,18 +91,18 @@ export namespace stormkit::wsi::win32 {
 
         WindowStyle m_style;
 
-        LONG m_last_style;
-        LONG m_last_style_ex;
-        mutable core::math::ExtentU m_current_size = { 0u, 0u };
-        core::math::ExtentU m_last_size            = { 0u, 0u };
-        core::math::Vector2U m_last_position       = { 0u, 0u };
+        LONG                        m_last_style;
+        LONG                        m_last_style_ex;
+        mutable core::math::ExtentU m_current_size  = { 0u, 0u };
+        core::math::ExtentU         m_last_size     = { 0u, 0u };
+        core::math::Vector2U        m_last_position = { 0u, 0u };
 
         HWND m_window_handle = nullptr;
 
         std::string m_title;
-        bool m_mouse_locked       = false;
-        bool m_mouse_hided        = false;
-        bool m_key_repeat_enabled = false;
+        bool        m_mouse_locked       = false;
+        bool        m_mouse_hided        = false;
+        bool        m_key_repeat_enabled = false;
     };
 } // namespace stormkit::wsi::win32
 
@@ -112,85 +111,27 @@ export namespace stormkit::wsi::win32 {
 ////////////////////////////////////////////////////////////////////
 
 namespace stormkit::wsi::win32 {
-    /////////////////////////////////////
-    /////////////////////////////////////
-    inline auto WindowImpl::close() noexcept -> void {
-        m_is_open    = false;
-        m_is_visible = false;
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    inline auto WindowImpl::title() const noexcept -> const std::string& {
-        return m_title;
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    inline auto WindowImpl::isOpen() const noexcept -> bool {
-        return m_is_open;
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    inline auto WindowImpl::visible() const noexcept -> bool {
-        return m_is_visible;
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    inline auto WindowImpl::mouseLocked() const noexcept -> bool {
-        return m_mouse_locked;
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    inline auto WindowImpl::mouseHided() const noexcept -> bool {
-        return m_mouse_hided;
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    inline auto WindowImpl::fullscreen() const noexcept -> bool {
-        return m_is_fullscreen;
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    inline auto WindowImpl::keyRepeatEnabled() const noexcept -> bool {
-        return m_key_repeat_enabled;
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    inline auto WindowImpl::nativeHandle() const noexcept -> NativeHandle {
-        return static_cast<NativeHandle>(win32Handles());
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    inline auto WindowImpl::win32Handles() const noexcept -> HWND {
-        return m_window_handle;
-    }
-} // namespace stormkit::wsi::win32
-
-namespace stormkit::wsi::win32 {
     namespace {
         constexpr auto CLASS_NAME = L"Stormkit_Window";
-    }
 
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto fromStdString(std::string_view str) -> std::wstring {
-        const auto size =
-            core::as<std::size_t>(MultiByteToWideChar(CP_UTF8, 0, std::data(str), -1, nullptr, 0));
-        auto wstr = std::wstring {};
-        wstr.resize(size);
+        /////////////////////////////////////
+        /////////////////////////////////////
+        auto fromStdString(std::string_view str) -> std::wstring {
+            const auto size = core::as<std::size_t>(
+                MultiByteToWideChar(CP_UTF8, 0, std::data(str), -1, nullptr, 0));
+            auto wstr = std::wstring {};
+            wstr.resize(size);
 
-        MultiByteToWideChar(CP_UTF8, 0, std::data(str), -1, std::data(wstr), core::as<int>(size));
+            MultiByteToWideChar(CP_UTF8,
+                                0,
+                                std::data(str),
+                                -1,
+                                std::data(wstr),
+                                core::as<int>(size));
 
-        return wstr;
-    }
+            return wstr;
+        }
+    } // namespace
 
     /////////////////////////////////////
     /////////////////////////////////////
@@ -199,10 +140,10 @@ namespace stormkit::wsi::win32 {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    WindowImpl::WindowImpl(WM wm,
-                           std::string title,
+    WindowImpl::WindowImpl(WM                         wm,
+                           std::string                title,
                            const core::math::ExtentU& size,
-                           WindowStyle style)
+                           WindowStyle                style)
         : WindowImpl { wm } {
         create(std::move(title), size, style);
     }
@@ -267,6 +208,67 @@ namespace stormkit::wsi::win32 {
 
         m_last_size    = size;
         m_current_size = size;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto WindowImpl::close() noexcept -> void {
+        m_is_open    = false;
+        m_is_visible = false;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto WindowImpl::title() const noexcept -> const std::string& {
+        return m_title;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto WindowImpl::isOpen() const noexcept -> bool {
+        return m_is_open;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto WindowImpl::visible() const noexcept -> bool {
+        return m_is_visible;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto WindowImpl::mouseLocked() const noexcept -> bool {
+        return m_mouse_locked;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto WindowImpl::mouseHided() const noexcept -> bool {
+        return m_mouse_hided;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto WindowImpl::fullscreen() const noexcept -> bool {
+        return m_is_fullscreen;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto WindowImpl::keyRepeatEnabled() const noexcept -> bool {
+        return m_key_repeat_enabled;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto WindowImpl::nativeHandle() const noexcept -> NativeHandle {
+        return static_cast<NativeHandle>(win32Handles());
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto WindowImpl::win32Handles() const noexcept -> HWND {
+        return m_window_handle;
     }
 
     /////////////////////////////////////
@@ -416,13 +418,11 @@ namespace stormkit::wsi::win32 {
     /////////////////////////////////////
     /////////////////////////////////////
     auto WindowImpl::setKeyRepeatEnabled([[maybe_unused]] bool enabled) noexcept -> void {
-        elog("win32::WindowImpl::setKeyRepeatEnabled isn't yet implemented");
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     auto WindowImpl::setVirtualKeyboardVisible([[maybe_unused]] bool visible) noexcept -> void {
-        elog("win32::WindowImpl::setVirtualKeyboardVisible isn't yet implemented");
     }
 
     /////////////////////////////////////
@@ -435,7 +435,7 @@ namespace stormkit::wsi::win32 {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto WindowImpl::setMousePositionOnDesktop([[maybe_unused]] WM wm,
+    auto WindowImpl::setMousePositionOnDesktop([[maybe_unused]] WM         wm,
                                                const core::math::Vector2U& position) noexcept
         -> void {
         SetCursorPos(position.x, position.y);
@@ -443,10 +443,10 @@ namespace stormkit::wsi::win32 {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto loadMonitor(HMONITOR _monitor,
-                     [[maybe_unused]] HDC hdc,
+    auto loadMonitor(HMONITOR                _monitor,
+                     [[maybe_unused]] HDC    hdc,
                      [[maybe_unused]] LPRECT rect,
-                     LPARAM data) -> BOOL {
+                     LPARAM                  data) -> BOOL {
         if (_monitor == nullptr) return TRUE;
 
         auto& monitors = *reinterpret_cast<std::vector<Monitor> *>(data);

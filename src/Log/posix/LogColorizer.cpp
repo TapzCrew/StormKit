@@ -38,6 +38,7 @@ namespace stormkit::log::details {
             case Severity::Error: std::print(output, "{}{}{}", KBLCK, KINV, KYEL); break;
             case Severity::Fatal: std::print(output, "{}{}{}", KBLCK, KINV, KRED); break;
             case Severity::Debug: std::print(output, "{}{}{}", KBLCK, KINV, KCYN); break;
+            default: std::unreachable();
         }
     }
 
