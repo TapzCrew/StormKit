@@ -2,7 +2,7 @@ name: macOS
 
 on:
   pull_request:
-    branches: [develop]
+    branches: [main, develop]
     paths-ignore:
       - '.github/workflows/Linux.yml'
       - '.github/workflows/Windows-LLVM.yml'

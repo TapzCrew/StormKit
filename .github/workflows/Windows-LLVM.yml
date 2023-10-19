@@ -2,7 +2,7 @@ name: Windows-LLVM
 
 on:
   pull_request:
-    branches: [develop]
+    branches: [main, develop]
     paths-ignore:
       - '.github/workflows/Windows-MSVC.yml'
       - '.github/workflows/Linux.yml'
