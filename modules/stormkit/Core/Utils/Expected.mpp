@@ -36,6 +36,8 @@ export namespace stormkit::core::monadic {
 
     template<typename T>
     [[nodiscard]] constexpr auto as() noexcept -> decltype(auto);
+    template<typename T>
+    [[nodiscard]] constexpr auto narrow() noexcept -> decltype(auto);
     [[nodiscard]] constexpr auto discard() noexcept -> decltype(auto);
     [[nodiscard]] constexpr auto set(auto& output) noexcept -> decltype(auto);
     [[nodiscard]] constexpr auto emplaceTo(auto& container) noexcept -> decltype(auto);
@@ -98,6 +100,15 @@ namespace stormkit::core::monadic {
     STORMKIT_FORCE_INLINE constexpr auto as() noexcept -> decltype(auto) {
         return [](auto&& value) noexcept -> decltype(auto) {
             return core::as<T>(std::forward<decltype(value)>(value));
+        };
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<typename T>
+    STORMKIT_FORCE_INLINE constexpr auto narrow() noexcept -> decltype(auto) {
+        return [](auto&& value) noexcept -> decltype(auto) {
+            return core::narrow<T>(std::forward<decltype(value)>(value));
         };
     }
 
