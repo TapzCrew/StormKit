@@ -189,11 +189,6 @@ package("vulkan-memory-allocator-hpp", function()
 
 	on_install("windows|x86", "windows|x64", "linux", "macosx", "mingw", "android", "iphoneos", function(package)
 		os.cp("include", package:installdir())
-		if package:gitref() or package:version():ge("3.0.1") then
-			package:add("deps", "vulkan-hpp >= 1.3.234")
-		else
-			package:add("deps", "vulkan-hpp < 1.3.234")
-		end
 	end)
 end)
 
@@ -206,6 +201,30 @@ package("frozen", function()
 
 	on_install(function(package)
 		import("package.tools.xmake").install(package, {enable_module=true})
+	end)
+end)
+
+package("unordered_dense", function()
+	set_urls("https://github.com/Arthapz/unordered_dense.git")
+
+	on_install(function(package)
+    -- XMake currently doesn't install .cpp modules
+    os.cp(path.join("src", "ankerl.unordered_dense.cpp"), path.join("src", "ankerl.unordered_dense.cppm"))
+    -- needed because of clang fallback dependency scanner
+    io.replace(path.join("include", "ankerl", "unordered_dense.h"), "#    error ankerl::unordered_dense requires C++17 or higher", "", {plain = true})
+    io.writefile("xmake.lua", [[
+    option("enable_std_import", { defines = "ANKERL_UNORDERED_DENSE_USE_STD_IMPORT" })
+    target("unordered_dense")
+        set_languages("c++latest")
+        set_kind("static")
+
+        add_includedirs("include")
+        add_headerfiles("include/(ankerl/**.h)")
+
+        add_files("src/*.cppm", { install = true })
+        set_policy("build.c++.modules", true)
+    ]])
+		import("package.tools.xmake").install(package, {})
 	end)
 end)
 
@@ -375,7 +394,7 @@ if has_config("enable_gpu") then
 	add_requires("vulkan-memory-allocator-hpp master", { system = false })
 end
 
-add_defines("FROZEN_DONT_INCLUDE_STL")
+add_defines("FROZEN_DONT_INCLUDE_STL", "ANKERL_UNORDERED_DENSE_USE_STD_IMPORT")
 
 ---------------------------- targets ----------------------------
 for name, module in pairs(modules) do
