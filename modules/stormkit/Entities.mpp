@@ -20,7 +20,7 @@ export namespace stormkit::entities {
     };
 
     struct Component {
-        using Type = core::UInt16;
+        using Type = core::UInt64;
 
         static constexpr Type INVALID_TYPE = 0;
         static constexpr Type TYPE         = INVALID_TYPE;
