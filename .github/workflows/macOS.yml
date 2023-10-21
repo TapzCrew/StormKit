@@ -93,5 +93,5 @@ jobs:
         id: upload
         uses: actions/upload-artifact@v1
         with:
-          name: Linux-x64-${{ matrix.kind }}-${{ matrix.mode }}
+          name: macOS-x64-${{ matrix.kind }}-${{ matrix.mode }}
           path: ${{ runner.workspace }}/output
