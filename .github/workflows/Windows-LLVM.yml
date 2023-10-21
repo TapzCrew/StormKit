@@ -100,6 +100,7 @@ jobs:
         run: |
           xmake install -vD --installdir="${{ runner.workspace }}/output"
           cp "${{ runner.workspace }}/StormKit/llvm2/lib/c++.dll" "${{ runner.workspace }}/output/bin/"
+          rmdir /s /q "StormKit"
 
       - name: Upload artifacts
         id: upload
