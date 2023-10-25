@@ -69,7 +69,7 @@ modules = {
 	wsi = {
 		modulename = "Wsi",
 		public_deps = { "stormkit-core" },
-    deps = { "stormkit-log" },
+		deps = { "stormkit-log" },
 		packages = is_plat("linux") and {
 			"libxkbcommon",
 			"libxkbcommon-x11",
@@ -197,10 +197,11 @@ package("frozen", function()
 	set_description("A header-only, constexpr alternative to gperf for C++14 users")
 	set_license("Apache-2.0")
 
-	set_urls("https://github.com/Arthapz/frozen.git")
+	-- set_urls("https://github.com/Arthapz/frozen.git")
+	set_sourcedir("../frozen")
 
 	on_install(function(package)
-		import("package.tools.xmake").install(package, {enable_module=true})
+		import("package.tools.xmake").install(package, { enable_module = true, enable_std_import = true })
 	end)
 end)
 
@@ -208,11 +209,18 @@ package("unordered_dense", function()
 	set_urls("https://github.com/Arthapz/unordered_dense.git")
 
 	on_install(function(package)
-    -- XMake currently doesn't install .cpp modules
-    os.cp(path.join("src", "ankerl.unordered_dense.cpp"), path.join("src", "ankerl.unordered_dense.cppm"))
-    -- needed because of clang fallback dependency scanner
-    io.replace(path.join("include", "ankerl", "unordered_dense.h"), "#    error ankerl::unordered_dense requires C++17 or higher", "", {plain = true})
-    io.writefile("xmake.lua", [[
+		-- XMake currently doesn't install .cpp modules
+		os.cp(path.join("src", "ankerl.unordered_dense.cpp"), path.join("src", "ankerl.unordered_dense.cppm"))
+		-- needed because of clang fallback dependency scanner
+		io.replace(
+			path.join("include", "ankerl", "unordered_dense.h"),
+			"#    error ankerl::unordered_dense requires C++17 or higher",
+			"",
+			{ plain = true }
+		)
+		io.writefile(
+			"xmake.lua",
+			[[
     option("enable_std_import", { defines = "ANKERL_UNORDERED_DENSE_USE_STD_IMPORT" })
     target("unordered_dense")
         set_languages("c++latest")
@@ -223,7 +231,8 @@ package("unordered_dense", function()
 
         add_files("src/*.cppm", { install = true })
         set_policy("build.c++.modules", true)
-    ]])
+    ]]
+		)
 		import("package.tools.xmake").install(package, {})
 	end)
 end)
@@ -272,6 +281,16 @@ option("enable_applications", { default = false, category = "root menu/others" }
 option("enable_tests", { default = false, category = "root menu/others" })
 
 option("libc++", { default = false, category = "root menu/build" })
+option("std_module", function()
+	set_default(false)
+	set_category("root menu/build")
+	add_deps("libc++")
+	after_check(function(option)
+		if option:dep("libc++"):enabled() then
+			option:enable(true)
+		end
+	end)
+end)
 option("sanitizers", { default = false, category = "root menu/build" })
 option("mold", { default = false, category = "root menu/build" })
 
@@ -328,10 +347,6 @@ add_mxflags("-fstrict-aliasing", "-Wstrict-aliasing", { tools = { "clang", "gcc"
 add_cxflags("clang::-Wno-missing-field-initializers")
 add_mxflags("clang::-Wno-missing-field-initializers")
 
-if not is_plat("windows") and not is_plat("macosx") then
-	add_syslinks("stdc++_libbacktrace")
-end
-
 set_symbols("hidden")
 set_optimize("fastest")
 if is_mode("debug") then
@@ -363,13 +378,17 @@ if is_plat("windows") then
 	add_defines("_CRT_SECURE_NO_WARNINGS")
 end
 
+set_policy("build.c++.clang.fallbackscanner", true)
+set_policy("build.c++.gcc.fallbackscanner", true)
+
 if get_config("libc++") then
 	add_cxxflags("-stdlib=libc++", "-fexperimental-library", { force = true })
 	add_ldflags("-stdlib=libc++", "-fexperimental-library", { force = true })
 	add_shflags("-stdlib=libc++", "-fexperimental-library", { force = true })
 	add_mxxflags("-stdlib=libc++", "-fexperimental-library", { force = true })
-	set_policy("build.c++.clang.fallbackscanner", true)
+end
 
+if get_config("std_module") then
 	target("stdmodules")
 	do
 		set_kind("object")
@@ -379,6 +398,7 @@ if get_config("libc++") then
 
 		add_cxxflags("-Wno-reserved-module-identifier")
 		set_policy("build.c++.clang.fallbackscanner", false)
+		set_policy("build.c++.gcc.fallbackscanner", false)
 	end
 	target_end()
 end
@@ -394,7 +414,7 @@ if has_config("enable_gpu") then
 	add_requires("vulkan-memory-allocator-hpp master", { system = false })
 end
 
-add_defines("FROZEN_DONT_INCLUDE_STL", "ANKERL_UNORDERED_DENSE_USE_STD_IMPORT")
+-- add_defines("FROZEN_DONT_INCLUDE_STL", "ANKERL_UNORDERED_DENSE_USE_STD_IMPORT")
 
 ---------------------------- targets ----------------------------
 for name, module in pairs(modules) do
