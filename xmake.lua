@@ -149,7 +149,7 @@ modules = {
 			-- "VULKAN_HPP_NO_EXCEPTIONS", uncomment when vk::raii is supported without exceptions
 		},
 		custom = function()
-			add_packages("vulkan-header", "vulkan-memory-allocator", "vulkan-memory-allocator-hpp")
+			add_packages("vulkan-headers", "vulkan-memory-allocator", "vulkan-memory-allocator-hpp")
 			if is_plat("linux") then
 				add_defines("VK_USE_PLATFORM_XCB_KHR")
 				add_defines("VK_USE_PLATFORM_WAYLAND_KHR")
@@ -409,7 +409,7 @@ if get_config("sanitizers") then
 end
 
 if has_config("enable_gpu") then
-	add_requires("vulkan-headers main", { system = false })
+	add_requires("vulkan-headers main", {system = false})
 	add_requires("vulkan-memory-allocator master", { system = false })
 	add_requires("vulkan-memory-allocator-hpp master", { system = false })
 end
@@ -425,6 +425,10 @@ for name, module in pairs(modules) do
 	if name == "core" or name == "main" or get_config("enable_" .. name) then
 		target("stormkit-" .. name, function()
 			set_group("libraries")
+
+			if module.custom then
+				module.custom()
+			end
 
 			if name == "main" then
 				set_kind("static")
@@ -544,10 +548,6 @@ for name, module in pairs(modules) do
 			if module.frameworks then
 				add_frameworks(module.frameworks, { public = is_kind("static") })
 			end
-			if module.custom then
-				module.custom()
-			end
-
 			if get_config("libc++") then
 				add_deps("stdmodules")
 			end
