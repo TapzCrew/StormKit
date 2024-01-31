@@ -4,15 +4,14 @@
 
 module;
 
-#define WIN32_LEAN_AND_MEAN
-#define __SPECSTRINGS_STRICT_LEVEL 0
+#include <stormkit/Core/PlatformMacro.hpp>
+
 #include <windows.h>
 
 export module stormkit.Core:Utils.DynamicLoaderImpl;
 
 import std;
 
-import <stormkit/Core/PlatformMacro.hpp>;
 
 import :Utils.Expected;
 import :Utils.Numerics;

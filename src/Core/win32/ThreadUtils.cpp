@@ -1,6 +1,5 @@
 module;
 
-#define __SPECSTRINGS_STRICT_LEVEL 0
 #include <windows.h>
 #undef __nullnullterminated
 

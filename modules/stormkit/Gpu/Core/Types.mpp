@@ -2,15 +2,19 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
+module;
+
+#include <stormkit/Core/PlatformMacro.hpp>
+
+#include <stormkit/Core/HashMacro.hpp>
+
 export module stormkit.Gpu:Core.Types;
 
 import std;
 
 import stormkit.Core;
 
-import <stormkit/Core/FlagsMacro.hpp>;
-import <stormkit/Core/HashMacro.hpp>;
-import <stormkit/Core/PlatformMacro.hpp>;
+#include <stormkit/Core/FlagsMacro.hpp>
 
 import :Vulkan;
 

@@ -17,15 +17,15 @@ import :Severity;
 
 namespace stormkit::log::details {
     namespace {
-        constexpr auto KBLA = 0;
-        constexpr auto KRED = 12;
-        constexpr auto KGRN = 2;
-        constexpr auto KYEL = 14;
-        constexpr auto KBLU = 9;
-        constexpr auto KMAG = 13;
-        constexpr auto KCYN = 11;
-        constexpr auto KWHT = 15;
-        constexpr auto KGRS = 8;
+        [[maybe_unused]] constexpr auto KBLA = 0;
+        [[maybe_unused]] constexpr auto KRED = 12;
+        [[maybe_unused]] constexpr auto KGRN = 2;
+        [[maybe_unused]] constexpr auto KYEL = 14;
+        [[maybe_unused]] constexpr auto KBLU = 9;
+        [[maybe_unused]] constexpr auto KMAG = 13;
+        [[maybe_unused]] constexpr auto KCYN = 11;
+        [[maybe_unused]] constexpr auto KWHT = 15;
+        [[maybe_unused]] constexpr auto KGRS = 8;
     } // namespace
 
     /////////////////////////////////////

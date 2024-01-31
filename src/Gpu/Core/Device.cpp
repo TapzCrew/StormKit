@@ -13,8 +13,8 @@ import std;
 import stormkit.Core;
 import stormkit.Log;
 
-import <stormkit/Log/LogMacro.hpp>;
-import <stormkit/Gpu/Core/VulkanMacro.hpp>;
+#include <stormkit/Log/LogMacro.hpp>
+#include <stormkit/Gpu/Core/VulkanMacro.hpp>
 
 import :Core.Device;
 import :Core.Sync;
@@ -194,7 +194,7 @@ namespace stormkit::gpu {
                                      .setPEnabledFeatures(&enabled_features);
 
         vkCreate<vk::raii::Device>(m_physical_device->vkHandle(), create_info)
-            .transform(core::set(m_vk_device))
+            .transform(core::monadic::set(m_vk_device))
             .transform([this]() noexcept -> VulkanExpected<void> {
                 VULKAN_HPP_DEFAULT_DISPATCHER.init(*vkHandle());
 
@@ -203,7 +203,7 @@ namespace stormkit::gpu {
                         vma::functionsFromDispatcher(this->instance().vkHandle().getDispatcher(),
                                                      vkHandle().getDispatcher());
                 } catch (const vk::SystemError& err) {
-                    return std::unexpected { core::as<vk::Result>(err.code().value()) };
+                    return std::unexpected { core::narrow<vk::Result>(err.code().value()) };
                 }
 
                 const auto alloc_create_info =
@@ -216,12 +216,12 @@ namespace stormkit::gpu {
                 try {
                     m_vma_allocator = vma::createAllocatorUnique(alloc_create_info);
                 } catch (const vk::SystemError& err) {
-                    return std::unexpected { core::as<vk::Result>(err.code().value()) };
+                    return std::unexpected { core::narrow<vk::Result>(err.code().value()) };
                 }
 
                 return {};
             })
-            .transform_error(core::map(core::as<Result>(), core::throwError()));
+            .transform_error(core::monadic::map(core::monadic::as<Result>(), core::throwError()));
 
         setObjectName(*this,
                       std::format("StormKit:Device ({})", m_physical_device->info().device_name));
@@ -241,8 +241,8 @@ namespace stormkit::gpu {
                       vk_fences,
                       wait_all,
                       std::chrono::duration_cast<std::chrono::nanoseconds>(timeout).count())
-            .transform(core::as<Result>())
-            .transform_error(core::as<Result>());
+            .transform(core::monadic::as<Result>())
+            .transform_error(core::monadic::as<Result>());
     }
 
     /////////////////////////////////////
@@ -253,7 +253,7 @@ namespace stormkit::gpu {
             fences | std::views::transform(toVkHandle()) | std::ranges::to<std::vector>();
 
         return vkCall(*m_vk_device, &vk::raii::Device::resetFences, vk_fences)
-            .transform_error(core::as<Result>());
+            .transform_error(core::monadic::as<Result>());
     }
 
     /////////////////////////////////////
@@ -264,11 +264,11 @@ namespace stormkit::gpu {
         if (!vkHandle().getDispatcher()->vkSetDebugUtilsObjectNameEXT) return {};
 
         const auto info = vk::DebugUtilsObjectNameInfoEXT {}
-                              .setObjectType(core::as<vk::ObjectType>(type))
+                              .setObjectType(core::narrow<vk::ObjectType>(type))
                               .setObjectHandle(object)
                               .setPObjectName(std::data(name));
 
         return vkCall(*m_vk_device, &vk::raii::Device::setDebugUtilsObjectNameEXT, info)
-            .transform_error(core::as<Result>());
+            .transform_error(core::monadic::as<Result>());
     }
 } // namespace stormkit::gpu

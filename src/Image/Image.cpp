@@ -223,8 +223,8 @@ namespace stormkit::image {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto Image::loadFromFile(std::filesystem::path filepath, Image::Codec codec) noexcept
-        -> std::expected<void, Error> {
+    auto Image::loadFromFile(std::filesystem::path filepath,
+                             Image::Codec          codec) noexcept -> std::expected<void, Error> {
         filepath = std::filesystem::canonical(filepath);
 
         core::expects(codec != Image::Codec::Unknown);
@@ -355,8 +355,8 @@ namespace stormkit::image {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto Image::loadFromMemory(std::span<const core::Byte> data, Image::Codec codec) noexcept
-        -> std::expected<void, Error> {
+    auto Image::loadFromMemory(std::span<const core::Byte> data,
+                               Image::Codec codec) noexcept -> std::expected<void, Error> {
         core::expects(codec != Image::Codec::Unknown);
         core::expects(!std::empty(data));
 

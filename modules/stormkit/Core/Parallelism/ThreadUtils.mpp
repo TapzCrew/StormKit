@@ -2,11 +2,14 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
+module;
+
+#include <stormkit/Core/PlatformMacro.hpp>
+
 export module stormkit.Core:Parallelism.ThreadUtils;
 
 import std;
 
-import <stormkit/Core/PlatformMacro.hpp>;
 
 export namespace stormkit::core {
     STORMKIT_API auto setCurrentThreadName(std::string_view name) -> void;

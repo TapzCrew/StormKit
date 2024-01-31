@@ -2,6 +2,10 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
+module;
+
+#include <stormkit/Core/FlagsMacro.hpp>
+
 export module stormkit.Log:Severity;
 
 import std;
@@ -10,7 +14,6 @@ import frozen;
 
 import stormkit.Core;
 
-import <stormkit/Core/FlagsMacro.hpp>;
 
 export {
     namespace stormkit::log {

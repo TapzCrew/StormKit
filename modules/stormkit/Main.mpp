@@ -5,5 +5,5 @@
 export module stormkit.Main;
 
 // clang-format off
-export import <stormkit/Main/MainMacro.hpp>;
+
 // clang-format on

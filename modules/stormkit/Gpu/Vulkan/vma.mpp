@@ -58,6 +58,7 @@ export namespace VMA_HPP_NAMESPACE {
 export namespace VMA_HPP_NAMESPACE {
     using VMA_HPP_NAMESPACE::UniqueAllocation;
     using VMA_HPP_NAMESPACE::UniqueAllocator;
+    using VMA_HPP_NAMESPACE::createAllocatorUnique;
     using VMA_HPP_NAMESPACE::UniqueBuffer;
     using VMA_HPP_NAMESPACE::UniqueImage;
     using VMA_HPP_NAMESPACE::UniquePool;

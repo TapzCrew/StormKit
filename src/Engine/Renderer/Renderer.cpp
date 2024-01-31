@@ -11,7 +11,7 @@ import stormkit.Core;
 import stormkit.Log;
 import stormkit.Wsi;
 
-import <stormkit/Log/LogMacro.hpp>;
+#include <stormkit/Log/LogMacro.hpp>
 
 import :Renderer;
 import :Vulkan.Utils;
@@ -289,7 +289,7 @@ namespace stormkit::engine {
         try {
             m_instance = vk::raii::Instance { m_context, create_info };
         } catch (const vk::SystemError& err) {
-            return std::unexpected { core::as<vk::Result>(err.code().value()) };
+            return std::unexpected { core::narrow<vk::Result>(err.code().value()) };
         }
 
         VULKAN_HPP_DEFAULT_DISPATCHER.init(*m_instance.get());
@@ -319,7 +319,7 @@ namespace stormkit::engine {
                         &debugCallback));
 
         return vkCreate<vk::raii::DebugUtilsMessengerEXT>(m_instance, create_info)
-            .transform(core::set(m_messenger));
+            .transform(core::monadic::set(m_messenger));
     }
 
     /////////////////////////////////////
@@ -456,7 +456,7 @@ namespace stormkit::engine {
         try {
             m_device = vk::raii::Device { m_physical_device, create_info };
         } catch (const vk::SystemError& err) {
-            return std::unexpected { core::as<vk::Result>(err.code().value()) };
+            return std::unexpected { core::narrow<vk::Result>(err.code().value()) };
         }
 
         VULKAN_HPP_DEFAULT_DISPATCHER.init(*m_device.get());

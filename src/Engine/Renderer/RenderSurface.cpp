@@ -126,7 +126,7 @@ namespace stormkit::engine {
             try {
                 m_surface = vk::raii::SurfaceKHR { instance, create_info };
             } catch (const vk::SystemError& err) {
-                return std::unexpected { core::as<vk::Result>(err.code().value()) };
+                return std::unexpected { core::narrow<vk::Result>(err.code().value()) };
             }
         } else if (window->wm() == wsi::WM::Wayland) {
             struct Handles {
@@ -142,7 +142,7 @@ namespace stormkit::engine {
             try {
                 m_surface = vk::raii::SurfaceKHR { instance, create_info };
             } catch (const vk::SystemError& err) {
-                return std::unexpected { core::as<vk::Result>(err.code().value()) };
+                return std::unexpected { core::narrow<vk::Result>(err.code().value()) };
             }
         }
 #else
@@ -150,7 +150,7 @@ namespace stormkit::engine {
         try {
             m_surface = vk::raii::SurfaceKHR { instance, create_info };
         } catch (const vk::SystemError& err) {
-            return std::unexpected { core::as<vk::Result>(err.code().value()) };
+            return std::unexpected { core::narrow<vk::Result>(err.code().value()) };
         }
 #endif
 
@@ -208,7 +208,7 @@ namespace stormkit::engine {
 
             m_images = m_swapchain->getImages();
         } catch (const vk::SystemError& err) {
-            return std::unexpected { core::as<vk::Result>(err.code().value()) };
+            return std::unexpected { core::narrow<vk::Result>(err.code().value()) };
         }
         // switch (buffering) {
         //     case Buffering::Simple: m_buffering_count = 1u; break;

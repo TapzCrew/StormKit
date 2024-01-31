@@ -4,13 +4,15 @@
 
 module;
 
+
+#include <stormkit/Core/PlatformMacro.hpp>
+
 export module stormkit.Engine:Renderer.GraphResource;
 
 import std;
 
 import stormkit.Core;
 
-import <stormkit/Core/PlatformMacro.hpp>;
 
 import :Vulkan;
 

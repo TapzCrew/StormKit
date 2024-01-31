@@ -9,11 +9,11 @@ module;
 #include <glm/gtc/quaternion.hpp>
 #include <glm/integer.hpp>
 
+#include <stormkit/Core/HashMacro.hpp>
+
 export module stormkit.Core:Utils.Math;
 
 import std;
-
-import <stormkit/Core/HashMacro.hpp>;
 
 import :Meta;
 import :Hash;
@@ -312,26 +312,26 @@ export {
                 /// \param factor UnderlyingType factor to multiply
                 /// \returns A newly constructed extent equal to this extent multiplied with
                 /// `factor`
-                [[nodiscard]] constexpr auto operator*(UnderlyingType factor) const noexcept
-                    -> Extent<UnderlyingType>;
+                [[nodiscard]] constexpr auto
+                    operator*(UnderlyingType factor) const noexcept -> Extent<UnderlyingType>;
 
                 /// \brief Divide an extent with a factor.
                 /// \param factor UnderlyingType factor to divide
                 /// \returns A newly constructed extent equal to this extent Divided with `factor`
-                [[nodiscard]] constexpr auto operator/(UnderlyingType factor) const noexcept
-                    -> Extent<UnderlyingType>;
+                [[nodiscard]] constexpr auto
+                    operator/(UnderlyingType factor) const noexcept -> Extent<UnderlyingType>;
 
                 /// \brief Multiply this extent with a factor.
                 /// \param factor UnderlyingType factor to multiply
                 /// \returns A reference to this after the multiplication with `factor`
-                [[nodiscard]] constexpr auto operator*=(UnderlyingType factor) noexcept
-                    -> Extent<UnderlyingType>&;
+                [[nodiscard]] constexpr auto
+                    operator*=(UnderlyingType factor) noexcept -> Extent<UnderlyingType>&;
 
                 /// \brief Divide this extent with a factor.
                 /// \param factor UnderlyingType factor to divide
                 /// \returns A reference to this after the division with `factor`
-                [[nodiscard]] constexpr auto operator/=(UnderlyingType factor) noexcept
-                    -> Extent<UnderlyingType>&;
+                [[nodiscard]] constexpr auto
+                    operator/=(UnderlyingType factor) noexcept -> Extent<UnderlyingType>&;
 
                 /// \output_section Publics member
                 /// \brief Width attribute.
@@ -445,8 +445,8 @@ namespace stormkit::core {
         /////////////////////////////////////
         /////////////////////////////////////
         template<IsArithmetic T>
-        constexpr auto Extent<T>::operator<=>(const Extent<T>& other) const noexcept
-            -> OrderingType {
+        constexpr auto
+            Extent<T>::operator<=>(const Extent<T>& other) const noexcept -> OrderingType {
             if (auto ret = width <=> other.width; ret != 0) return ret;
             if (auto ret = height <=> other.height; ret != 0) return ret;
             if (auto ret = depth <=> other.depth; ret != 0) return ret;

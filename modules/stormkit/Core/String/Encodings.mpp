@@ -7,11 +7,12 @@ module;
 #include <climits>
 #include <cstdlib>
 
+#include <stormkit/Core/PlatformMacro.hpp>
+
 export module stormkit.Core:String.Encodings;
 
 import std;
 
-import <stormkit/Core/PlatformMacro.hpp>;
 
 import :Utils.AsCast;
 import :Utils.Numerics;

@@ -21,14 +21,14 @@ namespace stormkit::gpu {
         const auto attachments =
             m_description.attachments | std::views::transform([](auto&& attachment) {
                 return vk::AttachmentDescription {}
-                    .setFormat(core::as<vk::Format>(attachment.format))
-                    .setSamples(core::as<vk::SampleCountFlagBits>(attachment.samples))
-                    .setLoadOp(core::as<vk::AttachmentLoadOp>(attachment.load_op))
-                    .setStoreOp(core::as<vk::AttachmentStoreOp>(attachment.store_op))
-                    .setStencilLoadOp(core::as<vk::AttachmentLoadOp>(attachment.stencil_load_op))
-                    .setStencilStoreOp(core::as<vk::AttachmentStoreOp>(attachment.stencil_store_op))
-                    .setInitialLayout(core::as<vk::ImageLayout>(attachment.source_layout))
-                    .setFinalLayout(core::as<vk::ImageLayout>(attachment.destination_layout));
+                    .setFormat(core::narrow<vk::Format>(attachment.format))
+                    .setSamples(core::narrow<vk::SampleCountFlagBits>(attachment.samples))
+                    .setLoadOp(core::narrow<vk::AttachmentLoadOp>(attachment.load_op))
+                    .setStoreOp(core::narrow<vk::AttachmentStoreOp>(attachment.store_op))
+                    .setStencilLoadOp(core::narrow<vk::AttachmentLoadOp>(attachment.stencil_load_op))
+                    .setStencilStoreOp(core::narrow<vk::AttachmentStoreOp>(attachment.stencil_store_op))
+                    .setInitialLayout(core::narrow<vk::ImageLayout>(attachment.source_layout))
+                    .setFinalLayout(core::narrow<vk::ImageLayout>(attachment.destination_layout));
             }) |
             std::ranges::to<std::vector>();
 
@@ -53,14 +53,14 @@ namespace stormkit::gpu {
                     depth_attachment_ref =
                         vk::AttachmentReference {}
                             .setAttachment(attachment_ref.attachment_id)
-                            .setLayout(core::as<vk::ImageLayout>(attachment_ref.layout));
+                            .setLayout(core::narrow<vk::ImageLayout>(attachment_ref.layout));
                     continue;
                 }
 
                 const auto vk_attachment_ref =
                     vk::AttachmentReference {}
                         .setAttachment(attachment_ref.attachment_id)
-                        .setLayout(core::as<vk::ImageLayout>(attachment_ref.layout));
+                        .setLayout(core::narrow<vk::ImageLayout>(attachment_ref.layout));
 
                 if (m_description.attachments[attachment_ref.attachment_id].resolve)
                     resolve_attachment_ref.emplace_back(std::move(vk_attachment_ref));
@@ -70,7 +70,7 @@ namespace stormkit::gpu {
 
             subpasses.emplace_back(
                 vk::SubpassDescription {}
-                    .setPipelineBindPoint(core::as<vk::PipelineBindPoint>(subpass.bind_point))
+                    .setPipelineBindPoint(core::narrow<vk::PipelineBindPoint>(subpass.bind_point))
                     .setColorAttachmentCount(
                         core::as<core::UInt32>(std::size(color_attachment_ref)))
                     .setPColorAttachments(std::data(color_attachment_ref))
@@ -96,7 +96,7 @@ namespace stormkit::gpu {
                                      .setDependencies(subpasses_deps);
 
         return vkCreate<vk::raii::RenderPass>(toRaiiVkHandle()(device()), create_info)
-            .transform(core::set(m_vk_render_pass));
+            .transform(core::monadic::set(m_vk_render_pass));
     }
 
     /////////////////////////////////////

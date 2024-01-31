@@ -2,14 +2,18 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
+module;
+
+#include <stormkit/Core/PlatformMacro.hpp>
+
+#include <stormkit/Core/MemoryMacro.hpp>
+
 export module stormkit.Entities;
 
 import std;
 
 import stormkit.Core;
 
-import <stormkit/Core/MemoryMacro.hpp>;
-import <stormkit/Core/PlatformMacro.hpp>;
 
 export namespace stormkit::entities {
     using Entity                         = core::UInt32;

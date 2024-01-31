@@ -9,7 +9,7 @@ import std;
 import stormkit.Core;
 import stormkit.Log;
 
-import <stormkit/Log/LogMacro.hpp>;
+#include <stormkit/Log/LogMacro.hpp>
 
 import :Vulkan;
 import :Core;
@@ -37,10 +37,9 @@ namespace stormkit::gpu {
         const auto create_info = vk::PipelineCacheCreateInfo {};
 
         return vkCreate<vk::raii::PipelineCache>(this->device().vkHandle(), create_info)
-            .transform(core::set(m_vk_pipeline_cache))
-            .transform([this]() noexcept -> void {
+            .transform(core::monadic::set(m_vk_pipeline_cache))
+            .transform([this] noexcept -> void {
                 ilog("Created new pipeline cache at {}", m_path.string());
-                return;
             });
     }
 
@@ -99,7 +98,7 @@ namespace stormkit::gpu {
         const auto create_info = vk::PipelineCacheCreateInfo {}.setInitialData<core::Byte>(data);
 
         return vkCreate<vk::raii::PipelineCache>(this->device().vkHandle(), create_info)
-            .transform(core::set(m_vk_pipeline_cache))
+            .transform(core::monadic::set(m_vk_pipeline_cache))
             .transform([this]() noexcept -> void {
                 ilog("Loading pipeline cache {}", m_path.string());
                 return;

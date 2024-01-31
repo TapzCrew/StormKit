@@ -13,8 +13,8 @@ import std;
 import stormkit.Core;
 import stormkit.Log;
 
-import <stormkit/Core/PlatformMacro.hpp>;
-import <stormkit/Log/LogMacro.hpp>;
+#include <stormkit/Core/PlatformMacro.hpp>
+#include <stormkit/Log/LogMacro.hpp>
 
 import :Vulkan;
 
@@ -35,7 +35,8 @@ namespace stormkit::gpu {
         constexpr auto STORMKIT_VK_VERSION =
             vkMakeVersion<core::Int32>(core::STORMKIT_MAJOR_VERSION,
                                        core::STORMKIT_MINOR_VERSION,
-                                       core::STORMKIT_PATCH_VERSION);
+                                       core::STORMKIT_PATCH_VERSION
+                                       );
 
         inline constexpr auto BASE_EXTENSIONS =
             std::array { "VK_KHR_get_physical_device_properties2" };
@@ -185,7 +186,7 @@ namespace stormkit::gpu {
                                      .setPEnabledLayerNames(validation_layers);
 
         return vkCreate<vk::raii::Instance>(m_vk_context, create_info)
-            .transform(core::set(m_vk_instance))
+            .transform(core::monadic::set(m_vk_instance))
             .transform([this]() noexcept { VULKAN_HPP_DEFAULT_DISPATCHER.init(*m_vk_instance.get()); });
     }
 
@@ -211,7 +212,7 @@ namespace stormkit::gpu {
                         &debugCallback));
 
         return vkCreate<vk::raii::DebugUtilsMessengerEXT>(m_vk_instance, create_info)
-            .transform(core::set(m_vk_messenger));
+            .transform(core::monadic::set(m_vk_messenger));
     }
 
     /////////////////////////////////////
