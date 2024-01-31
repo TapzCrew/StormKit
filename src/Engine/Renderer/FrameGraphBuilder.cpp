@@ -8,8 +8,6 @@ import std;
 
 import stormkit.Core;
 
-import vulkan_hpp;
-
 import :Renderer.FrameGraphBuilder;
 import :Renderer.BakedFrameGraph;
 import :Renderer.GraphTask;

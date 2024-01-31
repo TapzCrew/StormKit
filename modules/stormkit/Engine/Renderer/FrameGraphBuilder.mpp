@@ -12,9 +12,6 @@ import std;
 
 import stormkit.Core;
 
-
-import :Vulkan;
-
 import :Renderer.BakedFrameGraph;
 import :Renderer.GraphID;
 import :Renderer.GraphTask;

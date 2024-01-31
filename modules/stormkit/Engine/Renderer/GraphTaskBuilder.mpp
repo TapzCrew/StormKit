@@ -12,7 +12,6 @@ import std;
 
 import stormkit.Core;
 
-
 import :Renderer.GraphTask;
 import :Renderer.GraphResource;
 import :Renderer.FrameGraphBuilder;

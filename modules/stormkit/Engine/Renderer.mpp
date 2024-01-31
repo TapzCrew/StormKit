@@ -15,7 +15,6 @@ import stormkit.Core;
 import stormkit.Wsi;
 
 import :Renderer.RenderSurface;
-import :Vulkan;
 
 export {
     namespace stormkit::engine {

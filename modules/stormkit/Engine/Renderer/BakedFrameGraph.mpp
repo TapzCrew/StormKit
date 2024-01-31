@@ -12,8 +12,6 @@ import std;
 
 import stormkit.Core;
 
-
-import :Vulkan;
 import :Renderer.GraphID;
 import :Renderer.RenderSurface;
 

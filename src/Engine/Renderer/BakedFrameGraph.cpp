@@ -5,7 +5,6 @@
 module stormkit.Engine;
 
 import std;
-import vulkan_hpp;
 
 import stormkit.Core;
 
