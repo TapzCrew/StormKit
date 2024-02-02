@@ -121,7 +121,7 @@ modules = {
   gpu = {
     modulename = "Gpu",
     has_headers = true,
-    public_packages = { "frozen", "vulkan-headers", "vulkan-memory-allocator", "vulkan-memory-allocator-hpp" },
+    public_packages = { "vulkan-headers", "vulkan-memory-allocator", "vulkan-memory-allocator-hpp" },
     public_deps = { "stormkit-core", "stormkit-log", "stormkit-wsi", "stormkit-image" },
     packages = is_plat("linux") and {
       "libxcb",
