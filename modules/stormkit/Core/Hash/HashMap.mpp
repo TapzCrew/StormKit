@@ -6,41 +6,20 @@ export module stormkit.Core:Hash.HashMap;
 
 import std;
 
-#ifdef STORMKIT_USE_ANKERL
-import <ankerl/unordered_dense.h>;
-#endif
+import ankerl.unordered_dense;
 
 export namespace stormkit::core {
-#ifdef STORMKIT_USE_ANKERL
     template<class Key,
              class T,
              class Hash                 = ankerl::unordered_dense::hash<Key>,
              class KeyEqual             = std::equal_to<Key>,
-             class AllocatorOrContainer = std::allocator<std::pair<const Key, T>>,
-             class Bucket               = ankerl::unordered_dense::bucket_type::standard>
+             class AllocatorOrContainer = std::allocator<std::pair<Key, T>>>
     using HashMap =
-        ankerl::unordered_dense::map<Key, T, Hash, KeyEqual, AllocatorOrContainer, Bucket>;
+        ankerl::unordered_dense::map<Key, T, Hash, KeyEqual, AllocatorOrContainer>;
 
     template<class Key,
              class Hash                 = ankerl::unordered_dense::hash<Key>,
              class KeyEqual             = std::equal_to<Key>,
-             class AllocatorOrContainer = std::allocator<Key>,
-             class Bucket               = ankerl::unordered_dense::bucket_type::standard>
-    using HashSet = ankerl::unordered_dense::set<Key, Hash, KeyEqual, AllocatorOrContainer, Bucket>;
-#else
-    template<class Key,
-             class T,
-             class Hash                 = std::hash<Key>,
-             class KeyEqual             = std::equal_to<Key>,
-             class AllocatorOrContainer = std::allocator<std::pair<const Key, T>>,
-             class Bucket               = void>
-    using HashMap = std::unordered_map<Key, T, Hash, KeyEqual, AllocatorOrContainer>;
-
-    template<class Key,
-             class Hash                 = std::hash<Key>,
-             class KeyEqual             = std::equal_to<Key>,
-             class AllocatorOrContainer = std::allocator<Key>,
-             class Bucket               = void>
-    using HashSet = std::unordered_set<Key, Hash, KeyEqual, AllocatorOrContainer>;
-#endif
+             class AllocatorOrContainer = std::allocator<Key>>
+    using HashSet = ankerl::unordered_dense::set<Key, Hash, KeyEqual, AllocatorOrContainer>;
 } // namespace stormkit::core

@@ -2,14 +2,16 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-export module stormkit.Gpu:Vulkan;
+module;
+
+#include <stormkit/Core/PlatformMacro.hpp>
+
+export module stormkit.Gpu.Vulkan;
 
 import std;
-
-import <stormkit/Core/PlatformMacro.hpp>;
 
 import stormkit.Core;
 
 export import vulkan_hpp;
 export import vma;
-export import :Vulkan.Utils;
+export import :Utils;

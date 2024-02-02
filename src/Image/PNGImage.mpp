@@ -7,11 +7,12 @@ module;
 #include <csetjmp>
 #include <cstdio>
 
+#include <png.h>
+
 export module stormkit.Image:PNGImage;
 
 import std;
 
-import <png.h>;
 
 import stormkit.Core;
 

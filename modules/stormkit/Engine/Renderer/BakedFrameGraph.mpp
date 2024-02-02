@@ -2,17 +2,18 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
+module;
+
+#include <stormkit/Core/PlatformMacro.hpp>
+
 export module stormkit.Engine:Renderer.BakedFrameGraph;
 
 import std;
 
 import stormkit.Core;
+import stormkit.Gpu;
 
-import <stormkit/Core/PlatformMacro.hpp>;
-
-import :Vulkan;
 import :Renderer.GraphID;
-import :Renderer.RenderSurface;
 
 export namespace stormkit::engine {
     class FrameGraphBuilder;
@@ -22,26 +23,27 @@ export namespace stormkit::engine {
             struct Task {
                 GraphID id;
 
-                vk::raii::CommandBuffer cmb;
+                gpu::CommandBuffer cmb;
 
-                std::vector<vk::ClearValue> clear_values = {};
-                vk::raii::RenderPass        renderpass;
-                vk::raii::Framebuffer       framebuffer;
+                std::vector<gpu::ClearValue> clear_values = {};
+                gpu::RenderPass        renderpass;
+                gpu::FrameBuffer       framebuffer;
             };
 
             std::vector<Task>                tasks;
-            std::vector<vk::raii::Image>     images      = {};
-            std::vector<vk::raii::ImageView> image_views = {};
-            std::vector<vk::raii::Buffer>    buffers     = {};
+            std::vector<gpu::Image>     images      = {};
+            std::vector<gpu::ImageView> image_views = {};
+            std::vector<gpu::Buffer>    buffers     = {};
 
-            core::DeferInit<vk::raii::CommandPool>   raster_command_pool;
-            core::DeferInit<vk::raii::CommandBuffer> main_cmb;
-            core::DeferInit<vk::raii::CommandBuffer> blit_cmb;
+            core::DeferInit<gpu::CommandPool>   raster_command_pool;
+            core::DeferInit<gpu::CommandBuffer> main_cmb;
+            core::DeferInit<gpu::CommandBuffer> blit_cmb;
 
-            core::DeferInit<vk::raii::Semaphore> semaphore;
+            core::DeferInit<gpu::Semaphore> semaphore;
         };
 
       public:
+        struct Frame {};
         BakedFrameGraph(const FrameGraphBuilder& builder,
                         Data                  && data,
                         BakedFrameGraph         *old = nullptr);
@@ -53,14 +55,14 @@ export namespace stormkit::engine {
         BakedFrameGraph(BakedFrameGraph&&) noexcept;
         auto operator=(BakedFrameGraph&&) noexcept -> BakedFrameGraph&;
 
-        auto execute(RenderSurface::Frame& frame) -> void;
+        auto execute(Frame& frame) -> void;
 
-        auto setBackbuffer(vk::raii::ImageView& backbuffer) -> void;
+        auto setBackbuffer(gpu::ImageView& backbuffer) -> void;
 
       private:
         const FrameGraphBuilder *m_builder = nullptr;
 
-        vk::raii::ImageView *m_backbuffer = nullptr;
+        gpu::ImageView *m_backbuffer = nullptr;
 
         Data m_data;
 

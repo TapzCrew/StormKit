@@ -2,7 +2,11 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-export module stormkit.Gpu:Vulkan.Utils;
+module;
+
+#include <stormkit/Core/PlatformMacro.hpp>
+
+export module stormkit.Gpu.Vulkan:Utils;
 
 import std;
 
@@ -11,7 +15,6 @@ import stormkit.Log;
 
 import vulkan_hpp;
 
-import <stormkit/Core/PlatformMacro.hpp>;
 
 export namespace stormkit::gpu {
     template<std::integral T>
@@ -21,7 +24,8 @@ export namespace stormkit::gpu {
     constexpr auto vkVersionPatch(std::integral auto version) noexcept -> core::UInt32;
 
     template<class T>
-    concept IsVulkanWrapper = requires(const T& t) { t.vkHandle(); };
+    concept IsVulkanWrapper =
+        requires(T&& t) { t.vkHandle(); } or requires(T&& t) { t->vkHandle(); };
 
     template<class T>
     concept IsVulkanFlagsType = vk::FlagTraits<T>::isBitmask;
@@ -49,6 +53,7 @@ export namespace stormkit::gpu {
 
     auto toRaiiVkHandle() noexcept -> decltype(auto);
     auto toVkHandle() noexcept -> decltype(auto);
+
 } // namespace stormkit::gpu
 
 ////////////////////////////////////////////////////////////////////
@@ -106,7 +111,7 @@ namespace stormkit::gpu {
     STORMKIT_FORCE_INLINE auto vkCreate(Args&&...args) noexcept -> VulkanExpected<T> try {
         return T { std::forward<Args>(args)... };
     } catch (const vk::SystemError& err) {
-        return std::unexpected { core::as<vk::Result>(err.code().value()) };
+        return std::unexpected { core::narrow<vk::Result>(err.code().value()) };
     }
 
     /////////////////////////////////////
@@ -118,7 +123,7 @@ namespace stormkit::gpu {
         auto func = std::mem_fn(std::forward<Func>(func_ref));
         return func(value, std::forward<Args>(args)...);
     } catch (const vk::SystemError& err) {
-        return std::unexpected { core::as<vk::Result>(err.code().value()) };
+        return std::unexpected { core::narrow<vk::Result>(err.code().value()) };
     }
 
     /////////////////////////////////////
@@ -131,30 +136,28 @@ namespace stormkit::gpu {
         func(value, std::forward<Args>(args)...);
         return {};
     } catch (const vk::SystemError& err) {
-        return std::unexpected { core::as<vk::Result>(err.code().value()) };
+        return std::unexpected { core::narrow<vk::Result>(err.code().value()) };
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE auto toRaiiVkHandle() noexcept -> decltype(auto) {
-        return [](auto&& value) noexcept -> decltype(auto) {
-            using T = decltype(value);
-            if constexpr (IsVulkanWrapper<core::PureType<T>>)
-                return std::forward<T>(value).vkHandle();
-            else if constexpr (core::IsFancyPointer<core::PureType<T>>)
+        return []<IsVulkanWrapper T>(T&& value) noexcept -> decltype(auto) {
+            if constexpr (core::IsPointer<core::PureType<T>>)
                 return std::forward<T>(value)->vkHandle();
+            else
+                return std::forward<T>(value).vkHandle();
         };
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE auto toVkHandle() noexcept -> decltype(auto) {
-        return [](auto&& value) noexcept -> decltype(auto) {
-            using T = decltype(value);
-            if constexpr (IsVulkanWrapper<core::PureType<T>>)
-                return *(std::forward<T>(value).vkHandle());
-            else if constexpr (core::IsFancyPointer<core::PureType<T>>)
+        return []<IsVulkanWrapper T>(T&& value) noexcept -> decltype(auto) {
+            if constexpr (core::IsPointer<core::PureType<T>>)
                 return *(std::forward<T>(value)->vkHandle());
+            else
+                return *(std::forward<T>(value).vkHandle());
         };
     }
 } // namespace stormkit::gpu

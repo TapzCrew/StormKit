@@ -2,17 +2,20 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
+module;
+
+#include <stormkit/Core/PlatformMacro.hpp>
+
 export module stormkit.Gpu:Resource.Shader;
 
 import std;
 
-import <stormkit/Core/PlatformMacro.hpp>;
 
 import stormkit.Core;
 
 import :Core;
 
-import :Vulkan;
+import stormkit.Gpu.Vulkan;
 
 namespace stormkit::gpu {
     class STORMKIT_API Shader: public DeviceObject {
@@ -192,8 +195,8 @@ namespace stormkit::gpu {
         const auto create_info = vk::ShaderModuleCreateInfo {}.setCode(m_source);
 
         vkCreate<vk::raii::ShaderModule>(this->device().vkHandle(), create_info)
-            .transform(core::set(m_vk_shader_module))
-            .transform_error(core::map(core::as<Result>(), core::throwError()));
+            .transform(core::monadic::set(m_vk_shader_module))
+            .transform_error(core::monadic::map(core::monadic::as<Result>(), core::throwError()));
     }
 
     /////////////////////////////////////

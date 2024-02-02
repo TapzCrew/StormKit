@@ -2,16 +2,19 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
+module;
+
+#include <stormkit/Core/PlatformMacro.hpp>
+
 export module stormkit.Gpu:Resource.Buffer;
 
 import std;
 
-import <stormkit/Core/PlatformMacro.hpp>;
 
 import stormkit.Core;
 
 import :Core;
-import :Vulkan;
+import stormkit.Gpu.Vulkan;
 
 export namespace stormkit::gpu {
     class STORMKIT_API Buffer: public DeviceObject {
@@ -158,10 +161,10 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE auto Buffer::map(core::RangeOffset offset) noexcept -> decltype(auto) {
         core::expects(m_vma_allocation.operator bool());
-        core::expects(offset < m_size);
+        core::expects(offset < core::as<core::RangeOffset>(m_size));
 
         if (!m_mapped_pointer) {
-            device().vmaAllocator().mapMemory(*m_vma_allocation,
+            auto _ = device().vmaAllocator().mapMemory(*m_vma_allocation,
                                               std::bit_cast<void **>(&m_mapped_pointer));
             m_mapped_pointer += offset;
         }
@@ -224,7 +227,7 @@ namespace stormkit::gpu {
     STORMKIT_FORCE_INLINE auto Buffer::flush(core::RangeOffset offset, core::RangeExtent size)
         -> void {
         core::expects(m_vma_allocation.operator bool());
-        core::expects(offset < m_size);
+        core::expects(offset <= core::as<core::RangeOffset>(m_size));
         core::expects(size <= m_size);
 
         device().vmaAllocator().flushAllocation(*m_vma_allocation, offset, size);

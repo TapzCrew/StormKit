@@ -4,8 +4,11 @@
 
 module;
 
-#include <xkbcommon/xkbcommon-keysyms.h>
-#include <xkbcommon/xkbcommon.h>
+
+
+#include <stormkit/Log/LogMacro.hpp>
+
+#include <stormkit/Core/MemoryMacro.hpp>
 
 export module stormkit.Wsi:Linux.Common.XKB;
 
@@ -14,8 +17,6 @@ import std;
 import stormkit.Core;
 import stormkit.Log;
 
-import <stormkit/Core/MemoryMacro.hpp>;
-import <stormkit/Log/LogMacro.hpp>;
 
 import :Types;
 

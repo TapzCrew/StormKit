@@ -6,11 +6,12 @@ module;
 
 #include <windows.h>
 
+#include <stormkit/Core/PlatformMacro.hpp>
+
 export module stormkit.Wsi:Win32.WindowImpl;
 
 import std;
 
-import <stormkit/Core/PlatformMacro.hpp>;
 
 import stormkit.Core;
 

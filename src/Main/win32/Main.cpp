@@ -2,7 +2,6 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#define __SPECSTRINGS_STRICT_LEVEL 0
 #include <windows.h>
 #undef __nullnullterminated
 
@@ -11,7 +10,7 @@
 
 import std;
 
-import <stormkit/Core/PlatformMacro.hpp>;
+#include <stormkit/Core/PlatformMacro.hpp>
 
 import stormkit.Core;
 
@@ -33,8 +32,9 @@ auto __stdcall main(int argc, char **argv) -> int {
     setvbuf(stdout, nullptr, _IOFBF, BUF_SIZE);
 
     auto args = std::vector<std::string_view> {};
+    args.reserve(argc);
 
-    for (auto i : stormkit::core::range(argc)) args.emplace_back(argv[i]);
+    for (auto &&i : stormkit::core::range(argc)) args.emplace_back(argv[i]);
 
     return userMain(args);
 }

@@ -2,11 +2,13 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
+module;
+
+#include <stormkit/Core/PlatformMacro.hpp>
+
 export module stormkit.Engine:Core.Application;
 
 import std;
-
-import <stormkit/Core/PlatformMacro.hpp>;
 
 import stormkit.Core;
 import stormkit.Entities;
@@ -39,9 +41,9 @@ export namespace stormkit::engine {
         template<typename T>
         using Expected = std::expected<T, ApplicationError>;
 
-        Application(std::string_view application_name,
+        Application(std::string_view           application_name,
                     const core::math::ExtentU& window_extent,
-                    std::string window_title,
+                    std::string                window_title,
                     PrivateTag);
         ~Application();
 
@@ -51,11 +53,11 @@ export namespace stormkit::engine {
         Application(Application&&) noexcept;
         auto operator=(Application&&) noexcept -> Application&;
 
-        static auto create(std::string_view application_name,
+        static auto create(std::string_view           application_name,
                            const core::math::ExtentU& window_extent,
-                           std::string window_title = DEFAULT_WINDOW_TITLE) noexcept
+                           std::string                window_title = DEFAULT_WINDOW_TITLE) noexcept
             -> Expected<Application>;
-        static auto allocate(std::string_view application_name,
+        static auto allocate(std::string_view           application_name,
                              const core::math::ExtentU& window_extent,
                              std::string window_title = DEFAULT_WINDOW_TITLE) noexcept
             -> Expected<std::unique_ptr<Application>>;
@@ -67,8 +69,8 @@ export namespace stormkit::engine {
         auto update() -> void;
 
       private:
-        core::DeferInit<wsi::Window> m_window;
-        core::DeferInit<Renderer> m_renderer;
+        core::DeferInit<wsi::Window>       m_window;
+        core::DeferInit<Renderer>          m_renderer;
         core::DeferInit<wsi::EventHandler> m_event_handler;
 
         core::DeferInit<entities::EntityManager> m_world;
@@ -82,22 +84,23 @@ export namespace stormkit::engine {
 namespace stormkit::engine {
     ////////////////////////////////////////
     ////////////////////////////////////////
-    inline Application::~Application() = default;
+    STORMKIT_FORCE_INLINE Application::~Application() = default;
 
     ////////////////////////////////////////
     ////////////////////////////////////////
-    inline Application::Application(Application&&) noexcept = default;
+    STORMKIT_FORCE_INLINE Application::Application(Application&&) noexcept = default;
 
     ////////////////////////////////////////
     ////////////////////////////////////////
-    inline auto Application::operator=(Application&&) noexcept -> Application& = default;
+    STORMKIT_FORCE_INLINE auto
+        Application::operator=(Application&&) noexcept -> Application& = default;
 
     ////////////////////////////////////////
     ////////////////////////////////////////
-    inline auto Application::create(std::string_view application_name,
-                                    const core::math::ExtentU& window_extent,
-                                    std::string window_title) noexcept
-        -> Expected<Application> try {
+    STORMKIT_FORCE_INLINE auto
+        Application::create(std::string_view           application_name,
+                            const core::math::ExtentU& window_extent,
+                            std::string window_title) noexcept -> Expected<Application> try {
         return Application { application_name,
                              window_extent,
                              std::move(window_title),
@@ -106,31 +109,32 @@ namespace stormkit::engine {
 
     ////////////////////////////////////////
     ////////////////////////////////////////
-    inline auto Application::allocate(std::string_view application_name,
-                                      const core::math::ExtentU& window_extent,
-                                      std::string window_title) noexcept
+    STORMKIT_FORCE_INLINE auto Application::allocate(std::string_view           application_name,
+                                                     const core::math::ExtentU& window_extent,
+                                                     std::string window_title) noexcept
         -> Expected<std::unique_ptr<Application>> try {
-        return std::move(std::make_unique<Application>(application_name,
-                                                       window_extent,
-                                                       std::move(window_title),
-                                                       PrivateTag {}));
+        return std::make_unique<Application>(application_name,
+                                             window_extent,
+                                             std::move(window_title),
+                                             PrivateTag {});
     } catch (ApplicationError err) { return std::unexpected { err }; }
 
     ////////////////////////////////////////
     ////////////////////////////////////////
-    inline auto Application::world(this auto& self) noexcept -> decltype(auto) {
+    STORMKIT_FORCE_INLINE auto Application::world(this auto& self) noexcept -> decltype(auto) {
         return self.m_world.get();
     }
 
     ////////////////////////////////////////
     ////////////////////////////////////////
-    inline auto Application::window(this auto& self) noexcept -> decltype(auto) {
+    STORMKIT_FORCE_INLINE auto Application::window(this auto& self) noexcept -> decltype(auto) {
         return self.m_window.get();
     }
 
     ////////////////////////////////////////
     ////////////////////////////////////////
-    inline auto Application::eventHandler(this auto& self) noexcept -> decltype(auto) {
+    STORMKIT_FORCE_INLINE auto
+        Application::eventHandler(this auto& self) noexcept -> decltype(auto) {
         return self.m_event_handler.get();
     }
 

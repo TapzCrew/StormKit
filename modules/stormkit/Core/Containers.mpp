@@ -4,7 +4,6 @@
 
 export module stormkit.Core:Containers;
 
-export import :Containers.FrozenMap;
 export import :Containers.RingBuffer;
 export import :Containers.Tree;
 export import :Containers.Utils;

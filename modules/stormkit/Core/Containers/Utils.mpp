@@ -18,6 +18,12 @@ export namespace stormkit::core {
     template<std::ranges::range T, std::ranges::range... U>
     constexpr auto concat(const T& first, const U&...others) noexcept -> std::vector<RangeType<T>>;
 
+    template<std::ranges::range T, std::ranges::range... U>
+    constexpr auto moveAndMerge(T& output, U&&...ranges) noexcept -> void;
+
+    template<std::ranges::range T, std::ranges::range... U>
+    constexpr auto moveAndConcat(T&& first, U&&...others) noexcept -> std::vector<RangeType<T>>;
+
     template<class T, typename... Args>
         requires((core::Is<T, Args> and ...) or (std::convertible_to<T, Args> and ...) or
                  (std::constructible_from<T, Args> and ...))
@@ -44,9 +50,11 @@ export namespace stormkit::core {
                                             Pred,
                                             Proj1,
                                             Proj2>
-    constexpr auto
-        findFirstNotOf(R1&& first, R2&& second, Pred pred = {}, Proj1 proj1 = {}, Proj2 proj2 = {})
-            -> decltype(auto) {
+    constexpr auto findFirstNotOf(R1&&  first,
+                                  R2&&  second,
+                                  Pred  pred  = {},
+                                  Proj1 proj1 = {},
+                                  Proj2 proj2 = {}) -> decltype(auto) {
         auto first1 = std::ranges::begin(first);
         auto last1  = std::ranges::end(first);
         auto first2 = std::ranges::begin(second);
@@ -87,6 +95,24 @@ namespace stormkit::core {
     constexpr auto concat(const T& first, const U&...others) noexcept -> std::vector<RangeType<T>> {
         auto output = std::vector<RangeType<T>> {};
         merge(output, first, others...);
+
+        return output;
+    }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    template<std::ranges::range T, std::ranges::range... U>
+    constexpr auto moveAndMerge(T& output, U&&...ranges) noexcept -> void {
+        output.reserve(std::size(output) + (std::ranges::size(ranges) + ...));
+        (std::ranges::move(std::forward<U>(ranges), std::back_inserter(output)), ...);
+    }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    template<std::ranges::range T, std::ranges::range... U>
+    constexpr auto moveAndConcat(T&& first, U&&...others) noexcept -> std::vector<RangeType<T>> {
+        auto output = std::vector<RangeType<T>> {};
+        moveAndMerge(output, std::forward<T>(first), std::forward<U>(others)...);
 
         return output;
     }

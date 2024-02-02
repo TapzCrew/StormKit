@@ -2,13 +2,16 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
+module;
+
+#include <stormkit/Core/PlatformMacro.hpp>
+
 export module stormkit.Log:ConsoleLogger;
 
 import std;
 
 import stormkit.Core;
 
-import <stormkit/Core/PlatformMacro.hpp>;
 
 import :Logger;
 import :Severity;

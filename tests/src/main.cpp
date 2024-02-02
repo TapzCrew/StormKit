@@ -8,7 +8,7 @@ import std;
 
 import Test;
 
-import <stormkit/Main/MainMacro.hpp>;
+#include <stormkit/Main/MainMacro.hpp>
 
 auto main(std::span<const std::string_view> args) noexcept -> int {
     test::parseArgs(args);

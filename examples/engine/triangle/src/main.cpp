@@ -11,8 +11,8 @@ import stormkit.Wsi;
 
 import App;
 
-import <stormkit/Main/MainMacro.hpp>;
-import <stormkit/Core/PlatformMacro.hpp>;
+#include <stormkit/Main/MainMacro.hpp>
+#include <stormkit/Core/PlatformMacro.hpp>
 
 ////////////////////////////////////////
 ////////////////////////////////////////

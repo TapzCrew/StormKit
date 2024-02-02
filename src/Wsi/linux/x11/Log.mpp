@@ -2,6 +2,10 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
+module;
+
+#include <stormkit/Log/LogMacro.hpp>
+
 export module stormkit.Wsi:Linux.X11.Log;
 
 import std;
@@ -9,7 +13,6 @@ import std;
 import stormkit.Core;
 import stormkit.Log;
 
-import <stormkit/Log/LogMacro.hpp>;
 
 export namespace stormkit::wsi::linux::x11 {
     IN_MODULE_LOGGER("StormKit.Wsi.Linux.X11")

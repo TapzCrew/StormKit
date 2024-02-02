@@ -16,7 +16,7 @@ namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
     DynamicLoader::DynamicLoader(DynamicLoader&& other) noexcept
-        : m_impl { std::move(other.m_impl) }, m_filepath { std::move(other.m_filepath) } {
+        : m_filepath { std::move(other.m_filepath) }, m_impl { std::move(other.m_impl) } {
     }
 
     /////////////////////////////////////

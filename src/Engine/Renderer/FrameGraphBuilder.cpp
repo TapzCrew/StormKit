@@ -7,8 +7,7 @@ module stormkit.Engine;
 import std;
 
 import stormkit.Core;
-
-import vulkan_hpp;
+import stormkit.Gpu;
 
 import :Renderer.FrameGraphBuilder;
 import :Renderer.BakedFrameGraph;
@@ -34,8 +33,8 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto FrameGraphBuilder::createFrameGraph(const vk::raii::Device& device, BakedFrameGraph *old)
-        -> BakedFrameGraph {
+    auto FrameGraphBuilder::createFrameGraph(const gpu::Device& device,
+                                             BakedFrameGraph   *old) -> BakedFrameGraph {
         auto data = allocatePhysicalResources(device);
 
         return BakedFrameGraph { *this, std::move(data), old };
@@ -43,7 +42,7 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto FrameGraphBuilder::allocateFrameGraph(const vk::raii::Device& device, BakedFrameGraph *old)
+    auto FrameGraphBuilder::allocateFrameGraph(const gpu::Device& device, BakedFrameGraph *old)
         -> std::unique_ptr<BakedFrameGraph> {
         auto data = allocatePhysicalResources(device);
 
@@ -116,17 +115,17 @@ namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     auto FrameGraphBuilder::buildPhysicalDescriptions() noexcept -> void {
-        auto layouts = core::HashMap<GraphID, vk::ImageLayout> {};
+        auto layouts = core::HashMap<GraphID, gpu::ImageLayout> {};
         m_preprocessed_framegraph =
             m_tasks | std::views::filter([](const auto& task) noexcept {
                 return not(task.refCount() == 0 and not task.cullImune());
             }) |
             std::views::transform([&layouts, this](const auto& task) noexcept -> decltype(auto) {
-                return Pass { .id          = task.id(),
-                              .vulkan_data = buildRenderPassPhysicalDescription(task, layouts),
-                              .name        = task.name(),
-                              .buffers     = buildBufferPhysicalDescriptions(task),
-                              .images      = buildImagePhysicalDescriptions(task) };
+                return Pass { .id         = task.id(),
+                              .renderpass = buildRenderPassPhysicalDescription(task, layouts),
+                              .name       = task.name(),
+                              .buffers    = buildBufferPhysicalDescriptions(task),
+                              .images     = buildImagePhysicalDescriptions(task) };
             }) |
             std::ranges::to<std::vector>();
     }
@@ -145,35 +144,33 @@ namespace stormkit::engine {
                    const auto& resource    = getResource<ImageDescription>(id);
                    const auto& description = resource.description();
 
-                   const auto usages = [&description]() noexcept {
-                       if (isDepthStencilFormat(description.format))
-                           return vk::ImageUsageFlagBits::eDepthStencilAttachment |
-                                  vk::ImageUsageFlagBits::eTransferSrc;
+                   const auto usages = [&description] noexcept {
+                       if (gpu::isDepthStencilFormat(description.format))
+                           return gpu::ImageUsageFlag::Depth_Stencil_Attachment |
+                                  gpu::ImageUsageFlag::Transfert_Src;
 
-                       return vk::ImageUsageFlagBits::eColorAttachment |
-                              vk::ImageUsageFlagBits::eTransferSrc;
+                       return gpu::ImageUsageFlag::Color_Attachment |
+                              gpu::ImageUsageFlag::Transfert_Src;
                    }();
 
-                   const auto clear_value = [&description]() noexcept -> decltype(auto) {
-                       if (isDepthStencilFormat(description.format))
-                           return vk::ClearValue {}.setDepthStencil(vk::ClearDepthStencilValue {});
+                   const auto clear_value = [&description] noexcept -> gpu::ClearValue {
+                       if (gpu::isDepthStencilFormat(description.format))
+                           return gpu::ClearDepthStencil {};
 
-                       return vk::ClearValue {}.setColor(
-                           vk::ClearColorValue { core::RGBColorDef::Black<float> });
+                       return gpu::ClearColor {};
                    }();
 
                    const auto& name = resource.name();
 
                    return ImageInfo { .id = id,
                                       .create_info =
-                                          vk::ImageCreateInfo {}
-                                              .setExtent(vk::Extent3D { description.extent.width,
-                                                                        description.extent.height,
-                                                                        description.extent.depth })
-                                              .setFormat(description.format)
-                                              .setArrayLayers(description.layers)
-                                              .setImageType(description.type)
-                                              .setUsage(usages),
+                                          gpu::Image::CreateInfo {
+                                              .extent = description.extent,
+                                              .format = description.format,
+                                              .layers = description.layers,
+                                              .type   = description.type,
+                                              .usages = usages,
+                                          },
                                       .clear_value = clear_value,
                                       .name        = name };
                }) |
@@ -194,18 +191,17 @@ namespace stormkit::engine {
                    const auto& resource    = getResource<BufferDescription>(id);
                    const auto& description = resource.description();
 
-                   const auto usages = vk::BufferUsageFlagBits::eTransferSrc |
-                                       vk::BufferUsageFlagBits::eStorageBuffer;
+                   const auto usages =
+                       gpu::BufferUsageFlag::Transfert_Src | gpu::BufferUsageFlag::Storage;
 
                    const auto& name = resource.name();
 
-                   return BufferInfo {
-                       .id = id,
-                       .create_info =
-                           vk::BufferCreateInfo {}.setUsage(usages).setSize(description.size),
-                       //.setMemoryProperty(vk::MemoryPropertyFlagBits::eDeviceLocal),
-                       .name = name
-                   };
+                   return BufferInfo { .id = id,
+                                       .create_info =
+                                           gpu::Buffer::CreateInfo { .usages = usages,
+                                                                     .size   = description.size },
+                                       //.setMemoryProperty(gpu::MemoryPropertyFlag::eDeviceLocal),
+                                       .name = name };
                }) |
                std::ranges::to<std::vector>();
     }
@@ -213,8 +209,8 @@ namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     auto FrameGraphBuilder::buildRenderPassPhysicalDescription(
-        const GraphTask                        & task,
-        core::HashMap<GraphID, vk::ImageLayout>& layouts) noexcept -> VulkanRenderPassData {
+        const GraphTask&                          task,
+        core::HashMap<GraphID, gpu::ImageLayout>& layouts) noexcept -> RenderPassData {
         auto to_remove = std::vector<GraphID> {};
 
         const auto creates =
@@ -226,61 +222,63 @@ namespace stormkit::engine {
                 const auto& resource    = getResource<ImageDescription>(id);
                 const auto& description = resource.description();
 
-                auto attachment_description =
-                    vk::AttachmentDescription { .format          = description.format,
-                                                .loadOp          = vk::AttachmentLoadOp::eClear,
-                                                .storeOp         = vk::AttachmentStoreOp::eStore,
-                                                .stencilLoad_op  = vk::AttachmentLoadOp::eDontCare,
-                                                .stencilStore_op = vk::AttachmentStoreOp::eDontCare,
-                                                .sourceLayout    = vk::ImageLayout::eUndefined,
-                                                .destinationLayout =
-                                                    vk::ImageLayout::eColorAttachmentOptimal };
+                auto attachment_description = gpu::AttachmentDescription {
+                    .format             = description.format,
+                    .load_op            = gpu::AttachmentLoadOperation::Clear,
+                    .store_op           = gpu::AttachmentStoreOperation::Store,
+                    .stencil_load_op    = gpu::AttachmentLoadOperation::Dont_Care,
+                    .stencil_store_op   = gpu::AttachmentStoreOperation::Dont_Care,
+                    .source_layout      = gpu::ImageLayout::Undefined,
+                    .destination_layout = gpu::ImageLayout::Color_Attachment_Optimal
+                };
 
                 if (isDepthStencilFormat(description.format)) [[unlikely]] {
-                    std::swap(attachment_description.loadOp, attachment_description.stencilLoadOp);
-                    std::swap(attachment_description.storeOp,
-                              attachment_description.stencilStoreOp);
-                    attachment_description.destinationLayout =
-                        vk::ImageLayout::eDepthStencilAttachmentOptimal;
+                    std::swap(attachment_description.load_op,
+                              attachment_description.stencil_load_op);
+                    std::swap(attachment_description.store_op,
+                              attachment_description.stencil_store_op);
+                    attachment_description.destination_layout =
+                        gpu::ImageLayout::Depth_Stencil_Attachment_Optimal;
                 }
 
-                layouts[id] = attachment_description.destinationLayout;
+                layouts[id] = attachment_description.destination_layout;
 
                 return attachment_description;
             }) |
             std::ranges::to<std::vector>();
 
-        const auto writes =
-            task.writes() | std::views::filter([this](const auto id) noexcept {
-                const auto& resource = getResource(id);
-                return core::is<GraphImage>(resource);
-            }) |
-            std::views::transform([&, this](const auto id) {
-                const auto& resource    = getResource<ImageDescription>(id);
-                const auto& description = resource.description();
+        const auto writes = task.writes() | std::views::filter([this](const auto id) noexcept {
+                                const auto& resource = getResource(id);
+                                return core::is<GraphImage>(resource);
+                            }) |
+                            std::views::transform([&, this](const auto id) {
+                                const auto& resource    = getResource<ImageDescription>(id);
+                                const auto& description = resource.description();
 
-                auto attachment_description =
-                    vk::AttachmentDescription { .format         = description.format,
-                                                .loadOp         = vk::AttachmentLoadOp::eClear,
-                                                .storeOp        = vk::AttachmentStoreOp::eStore,
-                                                .stencilLoadOp  = vk::AttachmentLoadOp::eDontCare,
-                                                .stencilStoreOp = vk::AttachmentStoreOp::eDontCare,
-                                                .sourceLayout   = layouts.at(id),
-                                                .destinationLayout = layouts.at(id) };
+                                auto attachment_description = gpu::AttachmentDescription {
+                                    .format             = description.format,
+                                    .load_op            = gpu::AttachmentLoadOperation::Clear,
+                                    .store_op           = gpu::AttachmentStoreOperation::Store,
+                                    .stencil_load_op    = gpu::AttachmentLoadOperation::Dont_Care,
+                                    .stencil_store_op   = gpu::AttachmentStoreOperation::Dont_Care,
+                                    .source_layout      = layouts.at(id),
+                                    .destination_layout = layouts.at(id)
+                                };
 
-                if (isDepthStencilFormat(description.format)) [[unlikely]] {
-                    std::swap(attachment_description.loadOp, attachment_description.stencilLoadOp);
-                    std::swap(attachment_description.storeOp,
-                              attachment_description.stencilStoreOp);
-                    attachment_description.destinationLayout =
-                        vk::ImageLayout::eDepthStencilAttachmentOptimal;
-                }
+                                if (isDepthStencilFormat(description.format)) [[unlikely]] {
+                                    std::swap(attachment_description.load_op,
+                                              attachment_description.stencil_load_op);
+                                    std::swap(attachment_description.store_op,
+                                              attachment_description.stencil_store_op);
+                                    attachment_description.destination_layout =
+                                        gpu::ImageLayout::Depth_Stencil_Attachment_Optimal;
+                                }
 
-                layouts[id] = attachment_description.destinationLayout;
+                                layouts[id] = attachment_description.destination_layout;
 
-                return attachment_description;
-            }) |
-            std::ranges::to<std::vector>();
+                                return attachment_description;
+                            }) |
+                            std::ranges::to<std::vector>();
 
         const auto reads =
             task.reads() | std::views::filter([this](const auto id) noexcept {
@@ -291,87 +289,75 @@ namespace stormkit::engine {
                 const auto& resource    = getResource<ImageDescription>(id);
                 const auto& description = resource.description();
 
-                auto attachment_description =
-                    vk::AttachmentDescription { .format         = description.format,
-                                                .loadOp         = vk::AttachmentLoadOp::eLoad,
-                                                .storeOp        = vk::AttachmentStoreOp::eDontCare,
-                                                .stencilLoadOp  = vk::AttachmentLoadOp::eDontCare,
-                                                .stencilStoreOp = vk::AttachmentStoreOp::eDontCare,
-                                                .initialLayout  = layouts.at(id),
-                                                .finalLayout    = layouts.at(id) };
+                auto attachment_description = gpu::AttachmentDescription {
+                    .format             = description.format,
+                    .load_op            = gpu::AttachmentLoadOperation::Load,
+                    .store_op           = gpu::AttachmentStoreOperation::Dont_Care,
+                    .stencil_load_op    = gpu::AttachmentLoadOperation::Dont_Care,
+                    .stencil_store_op   = gpu::AttachmentStoreOperation::Dont_Care,
+                    .source_layout      = layouts.at(id),
+                    .destination_layout = layouts.at(id)
+                };
 
-                if (std::ranges::any_of(writes, core::binaryToUnary(id, std::equal_to {}))) {
+                if (std::ranges::any_of(task.writes(),
+                                        core::toUnary(core::monadic::isEqual(), id))) {
                     to_remove.emplace_back(id);
-                    attachment_description.storeOp = vk::AttachmentStoreOp::eStore;
+                    attachment_description.store_op = gpu::AttachmentStoreOperation::Store;
                 }
 
                 if (isDepthStencilFormat(description.format)) [[unlikely]] {
-                    std::swap(attachment_description.loadOp, attachment_description.stencilLoadOp);
-                    std::swap(attachment_description.storeOp,
-                              attachment_description.stencilStoreOp);
-                    attachment_description.finalLayout =
-                        vk::ImageLayout::eDepthStencilAttachmentOptimal;
+                    std::swap(attachment_description.load_op,
+                              attachment_description.stencil_load_op);
+                    std::swap(attachment_description.store_op,
+                              attachment_description.stencil_store_op);
+                    attachment_description.destination_layout =
+                        gpu::ImageLayout::Depth_Stencil_Attachment_Optimal;
                 }
 
-                layouts[id] = attachment_description.finalLayout;
+                layouts[id] = attachment_description.destination_layout;
 
                 return attachment_description;
             }) |
             std::ranges::to<std::vector>();
 
-        auto output = VulkanRenderPassData {};
-        output.attachment_descriptions =
-            core::merge(std::move(creates), std::move(reads), std::move(writes));
-        output.render_pass_create_info =
-            vk::RenderPassCreateInfo {}.setAttachments(output.attachment_descriptions);
+        auto output = RenderPassData {};
+        output.description.attachments =
+            core::moveAndConcat(std::move(creates), std::move(reads), std::move(writes));
 
-        auto& color_attachment_ref = output.color_attachment_refs.emplace_back();
-        color_attachment_ref.reserve(std::size(output.attachment_descriptions));
-        auto& depth_attachment_ref   = output.color_attachment_refs.emplace_back();
-        auto& resolve_attachment_ref = output.resolve_attachment_refs.emplace_back();
+        auto color_refs = std::vector<gpu::Subpass::Ref> {};
+        color_refs.reserve(std::size(output.description.attachments));
 
-        for (auto&& [i, attachment] : output.attachment_descriptions | std::views::enumerate) {
-            auto attachment_ref = &color_attachment_ref;
-
-            if (isDepthFormat(attachment.format)) attachment_ref = &depth_attachment_ref;
-
-            attachment_ref->emplace_back(
-                vk::AttachmentReference {} .setAttachment(i).setLayout(attachment.destinationLayout);
+        auto depth_attachment_ref = std::optional<gpu::Subpass::Ref> {};
+        for (auto&& [i, attachment] : output.description.attachments | std::views::enumerate) {
+            if (isDepthFormat(attachment.format))
+                depth_attachment_ref =
+                    gpu::Subpass::Ref { .attachment_id = core::as<core::UInt32>(i),
+                                        .layout        = attachment.destination_layout };
+            else
+                color_refs.emplace_back(
+                    gpu::Subpass::Ref { .attachment_id = core::as<core::UInt32>(i),
+                                        .layout        = attachment.destination_layout });
         }
 
         // TODO support multiple subpasses
-        output.subpasses.emplace_back(
-            vk::SubpassDescription {}
-                .setPipelineBindPoint((task.type() == GraphTask::Type::Graphics)
-                                          ? vk::PipelineBindPoint::eGraphics
-                                          : vk::PipelineBindPoint::eCompute)
-                .setColorAttachments(color_attachment_ref)
-                .setDepthAttachments(depth_attachment_ref)
-                .setResolveAttachments(resolve_attachment_ref));
-
-        output.subpasses_deps.emplace_back(
-            vk::SubpassDependency {}
-                .setSrcSubpass(vk::SubpassExternal)
-                .setDstSubpass(0)
-                .setSrcStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput)
-                .setDstStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput)
-                .dstAccessMask(vk::AccessFlagBits::eColorAttachmentRead |
-                               vk::AccessFlagBits::eColorAttachmentWrite));
-
-        output.setSubpasses(output.subpass_descriptions);
-        output.setDependencies(output.subpass_dependencies);
+        output.description.subpasses.emplace_back(
+            gpu::Subpass { .bind_point            = task.type() == GraphTask::Type::Graphics
+                                                        ? gpu::PipelineBindPoint::Graphics
+                                                        : gpu::PipelineBindPoint::Compute,
+                           .color_attachment_refs = std::move(color_refs),
+                           .depth_attachment_ref  = std::move(depth_attachment_ref) });
 
         return output;
     }
 
-    auto FrameGraphBuilder::allocatePhysicalResources(const vk::raii::Device& device)
+    auto FrameGraphBuilder::allocatePhysicalResources(const gpu::Device& device)
         -> BakedFrameGraph::Data {
         using Data = BakedFrameGraph::Data;
 
-        auto output                = Data {};
-        output.raster_command_pool = vk::raii::CommandPool {};
-        output.main_cmb            = createCommandBuffer(device, output.raster_command_pool);
-        output.blit_cmb            = createCommandBuffer(device, output.raster_command_pool);
+        auto output = Data {};
+        // output.raster_command_pool = gpu::CommandPool::create(device, device.rasterQueue());
+        // output.main_cmb            = output.raster_command_pool.
+        // output.blit_cmb            = createCommandBuffer(device, output.raster_command_pool);
 
         // auto future = core::parallelTransform(
         //     m_thread_pool,
@@ -381,7 +367,7 @@ namespace stormkit::engine {
         //         task.id   = pass.id;
         //
         //         for (const auto& info : pass.buffers) {
-        //             auto create_info = vk::BufferCreateInfo{}
+        //             auto create_info = gpu::BufferCreateInfo{}
         //             auto& buffer =
         //                 output.buffers.emplace_back(device.createBuffer(info.create_info));
         //             device.setObjectName(buffer, std::format("FrameGraph:{}", info.name));
@@ -408,8 +394,9 @@ namespace stormkit::engine {
         //         if (pass.description) { // TODO support of async Compute and Transfert queue
         //             task.renderpass = device.allocateRenderPass(*pass.description);
         //             device.setObjectName(*task.renderpass, std::format("{}:RenderPass",
-        //             pass.name)); task.framebuffer = task.renderpass->allocateFramebuffer(extent,
-        //             attachments); device.setObjectName(*task.framebuffer,
+        //             pass.name)); task.framebuffer =
+        //             task.renderpass->allocateFramebuffer(extent, attachments);
+        //             device.setObjectName(*task.framebuffer,
         //                                  std::format("{}:FrameBuffer", pass.name));
         //
         //             {
@@ -426,14 +413,14 @@ namespace stormkit::engine {
         //
         //         auto& graph_task = getTask(pass.id);
         //
-        //         const auto inheritance_info = vk::CommandBufferInheritanceInfo {
+        //         const auto inheritance_info = gpu::CommandBufferInheritanceInfo {
         //         }
         //         const auto secondary_begin_info =
-        //             vk::CommandBufferBeginInfo {}
+        //             gpu::CommandBufferBeginInfo {}
         //                 .setIneri
         //
         //                     task.commandbuffer->begin(false,
-        //                                               vk::InheritanceInfo {
+        //                                               gpu::InheritanceInfo {
         //                                                   task.renderpass.get(),
         //                                                   0,
         //                                                   task.framebuffer.get() });

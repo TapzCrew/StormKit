@@ -8,7 +8,7 @@ import std;
 
 import stormkit.Core;
 
-import :Vulkan;
+import stormkit.Gpu.Vulkan;
 
 namespace stormkit::gpu {
     static auto vendorNameByID(core::UInt64 ID) -> std::string_view {
@@ -29,7 +29,7 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     PhysicalDevice::PhysicalDevice(vk::raii::PhysicalDevice physical_device,
-                                   const Instance         & instance)
+                                   const Instance&          instance)
         : InstanceObject { instance }, m_vk_physical_device { std::move(physical_device) } {
         const auto properties = m_vk_physical_device.getProperties();
         const auto features   = m_vk_physical_device.getFeatures();
@@ -58,7 +58,7 @@ namespace stormkit::gpu {
         std::ranges::copy(properties.pipelineCacheUUID,
                           std::ranges::begin(m_device_info.pipeline_cache_uuid));
 
-        m_device_info.type = core::as<PhysicalDeviceType>(properties.deviceType);
+        m_device_info.type = core::narrow<PhysicalDeviceType>(properties.deviceType);
 
         m_capabilities.limits.max_image_dimension_1D    = properties.limits.maxImageDimension1D;
         m_capabilities.limits.max_image_dimension_2D    = properties.limits.maxImageDimension2D;
@@ -189,31 +189,31 @@ namespace stormkit::gpu {
         m_capabilities.limits.max_framebuffer_height = properties.limits.maxFramebufferHeight;
         m_capabilities.limits.max_framebuffer_layers = properties.limits.maxFramebufferLayers;
         m_capabilities.limits.framebuffer_color_sample_counts =
-            core::as<SampleCountFlag>(properties.limits.framebufferColorSampleCounts.
-                                      operator vk::SampleCountFlags::MaskType());
+            core::narrow<SampleCountFlag>(properties.limits.framebufferColorSampleCounts
+                                              .operator vk::SampleCountFlags::MaskType());
         m_capabilities.limits.framebuffer_depth_sample_counts =
-            core::as<SampleCountFlag>(properties.limits.framebufferDepthSampleCounts.
-                                      operator vk::SampleCountFlags::MaskType());
+            core::narrow<SampleCountFlag>(properties.limits.framebufferDepthSampleCounts
+                                              .operator vk::SampleCountFlags::MaskType());
         m_capabilities.limits.framebuffer_stencil_sample_counts =
-            core::as<SampleCountFlag>(properties.limits.framebufferStencilSampleCounts.
-                                      operator vk::SampleCountFlags::MaskType());
+            core::narrow<SampleCountFlag>(properties.limits.framebufferStencilSampleCounts
+                                              .operator vk::SampleCountFlags::MaskType());
         m_capabilities.limits.framebuffer_no_attachments_sample_counts =
-            core::as<SampleCountFlag>(properties.limits.framebufferNoAttachmentsSampleCounts.
-                                      operator vk::SampleCountFlags::MaskType());
+            core::narrow<SampleCountFlag>(properties.limits.framebufferNoAttachmentsSampleCounts
+                                              .operator vk::SampleCountFlags::MaskType());
         m_capabilities.limits.max_color_attachments = properties.limits.maxColorAttachments;
         m_capabilities.limits.sampled_image_color_sample_counts =
-            core::as<SampleCountFlag>(properties.limits.sampledImageColorSampleCounts.
-                                      operator vk::SampleCountFlags::MaskType());
+            core::narrow<SampleCountFlag>(properties.limits.sampledImageColorSampleCounts
+                                              .operator vk::SampleCountFlags::MaskType());
         m_capabilities.limits.sampled_image_integer_sample_counts =
-            core::as<SampleCountFlag>(properties.limits.sampledImageIntegerSampleCounts.
-                                      operator vk::SampleCountFlags::MaskType());
+            core::narrow<SampleCountFlag>(properties.limits.sampledImageIntegerSampleCounts
+                                              .operator vk::SampleCountFlags::MaskType());
         m_capabilities.limits.sampled_image_depth_sample_counts =
-            core::as<SampleCountFlag>(properties.limits.sampledImageDepthSampleCounts.
-                                      operator vk::SampleCountFlags::MaskType());
+            core::narrow<SampleCountFlag>(properties.limits.sampledImageDepthSampleCounts
+                                              .operator vk::SampleCountFlags::MaskType());
         m_capabilities.limits.sampled_image_stencil_sample_counts =
-            core::as<SampleCountFlag>(properties.limits.sampledImageStencilSampleCounts.
-                                      operator vk::SampleCountFlags::MaskType());
-        m_capabilities.limits.storage_image_sample_counts = core::as<SampleCountFlag>(
+            core::narrow<SampleCountFlag>(properties.limits.sampledImageStencilSampleCounts
+                                              .operator vk::SampleCountFlags::MaskType());
+        m_capabilities.limits.storage_image_sample_counts = core::narrow<SampleCountFlag>(
             properties.limits.storageImageSampleCounts.operator vk::SampleCountFlags::MaskType());
         m_capabilities.limits.max_sample_mask_words = properties.limits.maxSampleMaskWords;
         m_capabilities.limits.timestamp_compute_and_engine =
@@ -305,7 +305,7 @@ namespace stormkit::gpu {
         m_capabilities.features.inherited_queries           = features.inheritedQueries;
 
         m_extensions = m_vk_physical_device.enumerateDeviceExtensionProperties() |
-                       std::views::transform([](auto&& extension) {
+                       std::views::transform([](auto&& extension) noexcept {
                            const auto string_size =
                                std::char_traits<char>::length(extension.extensionName);
 
@@ -321,16 +321,17 @@ namespace stormkit::gpu {
 
         m_vk_memory_properties = m_vk_physical_device.getMemoryProperties();
         m_memory_properties =
-            m_vk_memory_properties.memoryTypes | std::views::transform([](auto&& property) {
-                return core::as<MemoryPropertyFlag>(
+            m_vk_memory_properties.memoryTypes |
+            std::views::transform([](auto&& property) noexcept {
+                return core::narrow<MemoryPropertyFlag>(
                     property.propertyFlags.operator vk::MemoryPropertyFlags::MaskType());
             }) |
             std::ranges::to<std::vector>();
 
         m_queue_families =
             m_vk_physical_device.getQueueFamilyProperties() |
-            std::views::transform([](auto&& family) {
-                return QueueFamily { .flags = core::as<QueueFlag>(
+            std::views::transform([](auto&& family) noexcept {
+                return QueueFamily { .flags = core::narrow<QueueFlag>(
                                          family.queueFlags.operator vk::QueueFlags::MaskType()),
                                      .count = family.queueCount };
             }) |

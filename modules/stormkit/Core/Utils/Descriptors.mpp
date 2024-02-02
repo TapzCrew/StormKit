@@ -6,11 +6,12 @@ module;
 
 #include <cstdio>
 
+#include <stormkit/Core/PlatformMacro.hpp>
+
 export module stormkit.Core:Utils.Descriptors;
 
 import std;
 
-import <stormkit/Core/PlatformMacro.hpp>;
 
 export namespace stormkit::core {
     [[nodiscard]] auto getSTDErr() noexcept -> std::FILE *;

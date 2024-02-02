@@ -6,13 +6,14 @@ module;
 
 #include "macOSWindow.hpp"
 
+#include <stormkit/Core/PlatformMacro.hpp>
+
 export module stormkit.Wsi:MacOS.WindowImpl;
 
 import std;
 
 import stormkit.Core;
 
-import <stormkit/Core/PlatformMacro.hpp>;
 
 import :Types;
 
