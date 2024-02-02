@@ -21,7 +21,7 @@ A C++23 compliant compiler with std module support and XMake is needed to build 
 
 ## Building
 ```
-> xmake f -m <release|debug|releasedbg> -k <shared|static> --runtimes=<c++_shared|c++_static|libstdc++_shared|libstdc++_static|MT|MD|MTd|MDd>"
+> xmake f -m <release|debug|releasedbg> -k <shared|static> --runtimes=<c++_shared|c++_static|libstdc++_shared|libstdc++_static|MT|MD|MTd|MDd>
 > xmake b
 ```
 
