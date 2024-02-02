@@ -1,6 +1,5 @@
 #include <stormkit/Core/PlatformMacro.hpp>
 
-#define VULKAN_HPP_STORAGE_SHARED
 #define VULKAN_HPP_STORAGE_SHARED_EXPORT
 
 #include <vulkan/vulkan_hpp_macros.hpp>

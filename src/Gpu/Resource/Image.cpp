@@ -10,7 +10,7 @@ import stormkit.Core;
 import stormkit.Image;
 
 import :Core;
-import :Vulkan;
+import stormkit.Gpu.Vulkan;
 
 import :Resource.Image;
 

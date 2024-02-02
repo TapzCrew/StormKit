@@ -8,7 +8,7 @@ import std;
 
 import stormkit.Core;
 
-import :Vulkan;
+import stormkit.Gpu.Vulkan;
 
 namespace stormkit::gpu {
     static auto vendorNameByID(core::UInt64 ID) -> std::string_view {

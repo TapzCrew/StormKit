@@ -6,13 +6,12 @@ module;
 
 #include <stormkit/Core/PlatformMacro.hpp>
 
-export module stormkit.Gpu:Vulkan;
+export module stormkit.Gpu.Vulkan;
 
 import std;
-
 
 import stormkit.Core;
 
 export import vulkan_hpp;
 export import vma;
-export import :Vulkan.Utils;
+export import :Utils;

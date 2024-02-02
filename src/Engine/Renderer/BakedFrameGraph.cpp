@@ -7,23 +7,23 @@ module stormkit.Engine;
 import std;
 
 import stormkit.Core;
+import stormkit.Gpu;
 
 import :Renderer.FrameGraphBuilder;
 import :Renderer.BakedFrameGraph;
-import :Renderer.RenderSurface;
 
 namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
-    BakedFrameGraph::BakedFrameGraph(const FrameGraphBuilder         & builder,
-                                     Data                           && data,
+    BakedFrameGraph::BakedFrameGraph(const FrameGraphBuilder&          builder,
+                                     Data&&                            data,
                                      [[maybe_unused]] BakedFrameGraph *old)
         : m_builder { &builder }, m_data { std::move(data) } {
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto BakedFrameGraph::execute(RenderSurface::Frame& frame) -> void {
+    auto BakedFrameGraph::execute(Frame& frame) -> void {
         core::expects(m_backbuffer);
 
         // {
@@ -42,7 +42,7 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto BakedFrameGraph::setBackbuffer(vk::raii::ImageView& backbuffer) -> void {
+    auto BakedFrameGraph::setBackbuffer(gpu::ImageView& backbuffer) -> void {
         // if (&backbuffer != m_backbuffer) {
         //     m_backbuffer = &backbuffer;
         //

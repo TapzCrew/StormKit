@@ -10,11 +10,21 @@ import stormkit.Core;
 
 import :Execution.RenderPass;
 
-import :Vulkan;
+import stormkit.Gpu.Vulkan;
 import :Core;
 import :Execution.RenderPass;
 
 namespace stormkit::gpu {
+    namespace monadic {
+        inline auto vkRef() noexcept -> decltype(auto) {
+            return [](auto&& attachment_ref) noexcept -> vk::AttachmentReference {
+                return vk::AttachmentReference {}
+                    .setAttachment(attachment_ref.attachment_id)
+                    .setLayout(core::narrow<vk::ImageLayout>(attachment_ref.layout));
+            };
+        }
+    } // namespace monadic
+
     /////////////////////////////////////
     /////////////////////////////////////
     auto RenderPass::doInitRenderPass() noexcept -> VulkanExpected<void> {
@@ -25,8 +35,10 @@ namespace stormkit::gpu {
                     .setSamples(core::narrow<vk::SampleCountFlagBits>(attachment.samples))
                     .setLoadOp(core::narrow<vk::AttachmentLoadOp>(attachment.load_op))
                     .setStoreOp(core::narrow<vk::AttachmentStoreOp>(attachment.store_op))
-                    .setStencilLoadOp(core::narrow<vk::AttachmentLoadOp>(attachment.stencil_load_op))
-                    .setStencilStoreOp(core::narrow<vk::AttachmentStoreOp>(attachment.stencil_store_op))
+                    .setStencilLoadOp(
+                        core::narrow<vk::AttachmentLoadOp>(attachment.stencil_load_op))
+                    .setStencilStoreOp(
+                        core::narrow<vk::AttachmentStoreOp>(attachment.stencil_store_op))
                     .setInitialLayout(core::narrow<vk::ImageLayout>(attachment.source_layout))
                     .setFinalLayout(core::narrow<vk::ImageLayout>(attachment.destination_layout));
             }) |
@@ -44,29 +56,13 @@ namespace stormkit::gpu {
         subpasses_deps.reserve(std::size(m_description.subpasses));
 
         for (const auto& subpass : m_description.subpasses) {
-            auto& color_attachment_ref = color_attachment_refs.emplace_back();
-            color_attachment_ref.reserve(std::size(subpass.attachment_refs));
-            auto& resolve_attachment_ref = resolve_attachment_refs.emplace_back();
-
-            for (const auto& attachment_ref : subpass.attachment_refs) {
-                if (isDepthFormat(m_description.attachments[attachment_ref.attachment_id].format)) {
-                    depth_attachment_ref =
-                        vk::AttachmentReference {}
-                            .setAttachment(attachment_ref.attachment_id)
-                            .setLayout(core::narrow<vk::ImageLayout>(attachment_ref.layout));
-                    continue;
-                }
-
-                const auto vk_attachment_ref =
-                    vk::AttachmentReference {}
-                        .setAttachment(attachment_ref.attachment_id)
-                        .setLayout(core::narrow<vk::ImageLayout>(attachment_ref.layout));
-
-                if (m_description.attachments[attachment_ref.attachment_id].resolve)
-                    resolve_attachment_ref.emplace_back(std::move(vk_attachment_ref));
-                else
-                    color_attachment_ref.emplace_back(std::move(vk_attachment_ref));
-            }
+            auto& color_attachment_ref = color_attachment_refs.emplace_back(
+                subpass.color_attachment_refs | std::views::transform(monadic::vkRef()) | std::ranges::to<std::vector>());
+            auto& resolve_attachment_ref = resolve_attachment_refs.emplace_back(
+                subpass.resolve_attachment_refs | std::views::transform(monadic::vkRef()) |
+                std::ranges::to<std::vector>());
+            if (subpass.depth_attachment_ref)
+                depth_attachment_ref = monadic::vkRef()(*subpass.depth_attachment_ref);
 
             subpasses.emplace_back(
                 vk::SubpassDescription {}
@@ -101,9 +97,9 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto
-        RenderPassDescription::isCompatible(const RenderPassDescription& description) const noexcept
-        -> bool {
+    // TODO finish this
+    auto RenderPassDescription::isCompatible(
+        const RenderPassDescription& description) const noexcept -> bool {
         if (std::size(subpasses) == std::size(description.subpasses)) return false;
 
         for (auto i : core::range(std::size(subpasses))) {
@@ -112,12 +108,13 @@ namespace stormkit::gpu {
 
             if (subpass_1.bind_point != subpass_2.bind_point) return false;
 
-            const auto attachment_refs_count = std::min(std::size(subpass_1.attachment_refs),
-                                                        std::size(subpass_2.attachment_refs));
+            const auto color_attachment_refs_count =
+                std::min(std::size(subpass_1.color_attachment_refs),
+                         std::size(subpass_2.color_attachment_refs));
 
-            for (auto j = 0u; j < attachment_refs_count; ++j) {
-                const auto& attachment_ref_1 = subpass_1.attachment_refs[j];
-                const auto& attachment_ref_2 = subpass_2.attachment_refs[j];
+            for (auto j = 0u; j < color_attachment_refs_count; ++j) {
+                const auto& attachment_ref_1 = subpass_1.color_attachment_refs[j];
+                const auto& attachment_ref_2 = subpass_2.color_attachment_refs[j];
 
                 if (attachment_ref_1.layout != attachment_ref_2.layout) return false;
 

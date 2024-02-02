@@ -10,7 +10,6 @@ export module stormkit.Core:Utils.Monadic;
 
 import std;
 
-
 import :Meta;
 
 import :Utils.AsCast;
@@ -39,13 +38,15 @@ export namespace stormkit::core::monadic {
 
     [[nodiscard]] constexpr auto map(auto&& first, auto&& second) noexcept -> decltype(auto);
 
-    [[nodiscard]] constexpr auto either(std::regular_invocable<Anything> auto&&...visitors) noexcept
-        -> decltype(auto);
+    [[nodiscard]] constexpr auto
+        either(std::regular_invocable<Anything> auto&&...visitors) noexcept -> decltype(auto);
 
     template<typename T>
     [[nodiscard]] constexpr auto either(IsUnaryPredicate<T> auto&& predicate,
-                                        std::invocable<T> auto  && true_,
+                                        std::invocable<T> auto&&   true_,
                                         std::invocable<T> auto&& false_) noexcept -> decltype(auto);
+
+    [[nodiscard]] constexpr auto isEqual() noexcept -> decltype(auto);
 
     [[nodiscard]] constexpr auto clone() noexcept -> decltype(auto);
 
@@ -108,8 +109,8 @@ namespace stormkit::core::monadic {
     template<typename T,
              std::invocable<T&&>                                First,
              std::invocable<std::invoke_result_t<First, T&&>&&> Second>
-    STORMKIT_FORCE_INLINE constexpr auto map(First&& first, Second&& second) noexcept
-        -> decltype(auto) {
+    STORMKIT_FORCE_INLINE constexpr auto map(First&&  first,
+                                             Second&& second) noexcept -> decltype(auto) {
         return
             [first  = std::forward<decltype(first)>(first),
              second = std::forward<decltype(second)>(second)](T&& args) noexcept -> decltype(auto) {
@@ -119,8 +120,8 @@ namespace stormkit::core::monadic {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE constexpr auto map(auto&& first, auto&& second) noexcept
-        -> decltype(auto) {
+    STORMKIT_FORCE_INLINE constexpr auto map(auto&& first,
+                                             auto&& second) noexcept -> decltype(auto) {
         return [first  = std::forward<decltype(first)>(first),
                 second = std::forward<decltype(second)>(second)](
                    auto&&...args) noexcept -> decltype(auto) {
@@ -131,15 +132,22 @@ namespace stormkit::core::monadic {
     /////////////////////////////////////
     /////////////////////////////////////
     template<typename T>
-    STORMKIT_FORCE_INLINE constexpr auto either(IsUnaryPredicate<T> auto&& predicate,
-                                                std::invocable<T> auto  && true_,
-                                                std::invocable<T> auto  && false_) noexcept
-        -> decltype(auto) {
+    STORMKIT_FORCE_INLINE constexpr auto
+        either(IsUnaryPredicate<T> auto&& predicate,
+               std::invocable<T> auto&&   true_,
+               std::invocable<T> auto&&   false_) noexcept -> decltype(auto) {
         [predicate = std::move(predicate), true_ = std::move(true_), false_ = std::move(false_)](
             auto&& elem) noexcept -> decltype(auto) {
             if (predicate(elem)) return first(std::forward<decltype(elem)>(elem));
             return second(elem);
         };
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE constexpr auto isEqual() noexcept -> decltype(auto) {
+        return
+            [](const auto& first, const auto& second) noexcept { return core::isEqual(first, second); };
     }
 
     /////////////////////////////////////

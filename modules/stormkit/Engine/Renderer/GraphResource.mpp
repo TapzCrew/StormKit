@@ -4,7 +4,6 @@
 
 module;
 
-
 #include <stormkit/Core/PlatformMacro.hpp>
 
 export module stormkit.Engine:Renderer.GraphResource;
@@ -12,6 +11,7 @@ export module stormkit.Engine:Renderer.GraphResource;
 import std;
 
 import stormkit.Core;
+import stormkit.Gpu;
 
 import :Renderer.GraphID;
 
@@ -22,12 +22,12 @@ export namespace stormkit::engine {
 
     struct ImageDescription {
         core::math::ExtentU extent;
-        vk::ImageType       type;
-        vk::Format          format;
+        gpu::ImageType      type;
+        gpu::PixelFormat    format;
 
         core::UInt32 layers = 1u;
 
-        std::optional<vk::ClearValue> clear_value;
+        std::optional<gpu::ClearValue> clear_value;
     };
 
     template<class T>
@@ -108,8 +108,8 @@ namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     template<ResourceDescriptionType D>
-    STORMKIT_FORCE_INLINE auto GraphResource<D>::operator=(GraphResource&& other) noexcept
-        -> GraphResource& = default;
+    STORMKIT_FORCE_INLINE auto
+        GraphResource<D>::operator=(GraphResource&& other) noexcept -> GraphResource& = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
@@ -142,16 +142,16 @@ namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     template<ResourceDescriptionType D>
-    STORMKIT_FORCE_INLINE auto GraphResource<D>::writers() const noexcept
-        -> const std::vector<GraphID>& {
+    STORMKIT_FORCE_INLINE auto
+        GraphResource<D>::writers() const noexcept -> const std::vector<GraphID>& {
         return m_writers;
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<ResourceDescriptionType D>
-    STORMKIT_FORCE_INLINE auto GraphResource<D>::readers() const noexcept
-        -> const std::vector<GraphID>& {
+    STORMKIT_FORCE_INLINE auto
+        GraphResource<D>::readers() const noexcept -> const std::vector<GraphID>& {
         return m_readers;
     }
 
@@ -165,8 +165,8 @@ namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     template<ResourceDescriptionType D>
-    STORMKIT_FORCE_INLINE auto GraphResource<D>::description() const noexcept
-        -> const Description& {
+    STORMKIT_FORCE_INLINE auto
+        GraphResource<D>::description() const noexcept -> const Description& {
         return m_description;
     }
 } // namespace stormkit::engine

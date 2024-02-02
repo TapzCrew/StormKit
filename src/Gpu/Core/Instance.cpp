@@ -16,7 +16,7 @@ import stormkit.Log;
 #include <stormkit/Core/PlatformMacro.hpp>
 #include <stormkit/Log/LogMacro.hpp>
 
-import :Vulkan;
+import stormkit.Gpu.Vulkan;
 
 namespace stormkit::gpu {
     LOGGER("stormkit.Gpu")
@@ -28,7 +28,7 @@ namespace stormkit::gpu {
             "VK_LAYER_MESA_overlay",
 #endif
         };
-        constexpr auto VALIDATION_FEATURES =
+        [[maybe_unused]] constexpr auto VALIDATION_FEATURES =
             std::array { vk::ValidationFeatureEnableEXT::eBestPractices,
                          vk::ValidationFeatureEnableEXT::eGpuAssisted };
 

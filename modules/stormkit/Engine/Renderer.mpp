@@ -10,38 +10,17 @@ export module stormkit.Engine:Renderer;
 
 import std;
 
-
 import stormkit.Core;
 import stormkit.Wsi;
-
-import :Renderer.RenderSurface;
+import stormkit.Gpu;
 
 export {
     namespace stormkit::engine {
-        enum class RendererErrorType {
-            FailedToInitializeRenderBackend
-        };
-
-        struct RendererError {
-            RendererErrorType type;
-            std::string reason;
-        };
-
-        enum class Buffering {
-            Simple,
-            Double,
-            Triple,
-            Swapchain
-        };
-
         class STORMKIT_API Renderer final {
             struct PrivateTag {};
 
-            template<typename T>
-            using Expected = std::expected<T, RendererError>;
-
           public:
-            Renderer(std::string_view application_name,
+            Renderer(std::string_view                                 application_name,
                      std::optional<core::NakedRef<const wsi::Window>> window,
                      PrivateTag);
             ~Renderer();
@@ -52,51 +31,30 @@ export {
             Renderer(Renderer&&) noexcept;
             auto operator=(Renderer&&) noexcept -> Renderer&;
 
-            static auto create(std::string_view application_name,
+            static auto create(std::string_view                                 application_name,
                                std::optional<core::NakedRef<const wsi::Window>> window) noexcept
-                -> Expected<Renderer>;
-            static auto allocate(std::string_view application_name,
+                -> gpu::Expected<Renderer>;
+            static auto allocate(std::string_view                                 application_name,
                                  std::optional<core::NakedRef<const wsi::Window>> window) noexcept
-                -> Expected<std::unique_ptr<Renderer>>;
+                -> gpu::Expected<std::unique_ptr<Renderer>>;
 
             auto startRendering() noexcept -> void;
 
           private:
-            auto doInitVulkan(std::string_view,
-                              std::optional<core::NakedRef<const wsi::Window>>) noexcept
-                -> Expected<void>;
-            auto doInitInstance(std::string_view) noexcept -> VulkanExpected<void>;
-            auto doInitDebugReportCallback() noexcept -> VulkanExpected<void>;
-            auto doInitDevice() noexcept -> VulkanExpected<void>;
+            auto doInit(std::string_view, std::optional<core::NakedRef<const wsi::Window>>) noexcept
+                -> gpu::Expected<void>;
+            auto doInitInstance(std::string_view) noexcept -> gpu::Expected<void>;
+            auto doInitDevice() noexcept -> gpu::Expected<void>;
 
             auto threadLoop(std::stop_token) noexcept -> void;
 
-            bool m_validation_layers_enabled = false;
-            core::DeferInit<vk::raii::Context> m_context;
-            core::DeferInit<vk::raii::Instance> m_instance;
-            core::DeferInit<vk::raii::DebugUtilsMessengerEXT> m_messenger;
-            core::DeferInit<vk::raii::PhysicalDevice> m_physical_device;
-            core::DeferInit<vk::raii::Device> m_device;
-
-            core::DeferInit<vk::raii::Queue> m_raster_queue;
-            core::DeferInit<vk::raii::Queue> m_compute_queue;
-            core::DeferInit<vk::raii::Queue> m_transfert_queue;
-
-            core::DeferInit<RenderSurface> m_render_surface;
+            bool                           m_validation_layers_enabled = false;
+            core::DeferInit<gpu::Instance> m_instance;
+            core::DeferInit<gpu::Device>   m_device;
 
             std::jthread m_render_thread;
         };
     } // namespace stormkit::engine
-
-    namespace std {
-        template<typename CharT>
-        struct formatter<stormkit::engine::RendererError, CharT>
-            : public formatter<basic_string<CharT>, CharT> {
-            template<class FormatContext>
-            auto format(const stormkit::engine::RendererError& data, FormatContext& ctx) const
-                -> decltype(ctx.out());
-        };
-    } // namespace std
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -106,87 +64,47 @@ export {
 namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
-    inline Renderer::Renderer(std::string_view application_name,
-                              std::optional<core::NakedRef<const wsi::Window>> window,
-                              PrivateTag) {
-        doInitVulkan(application_name, std::move(window)).transform_error(core::throwError());
+    STORMKIT_FORCE_INLINE
+    Renderer::Renderer(std::string_view                                 application_name,
+                       std::optional<core::NakedRef<const wsi::Window>> window,
+                       PrivateTag) {
+        doInit(application_name, std::move(window)).transform_error(core::throwError());
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline Renderer::~Renderer() = default;
+    STORMKIT_FORCE_INLINE Renderer::~Renderer() = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline Renderer::Renderer(Renderer&&) noexcept = default;
+    STORMKIT_FORCE_INLINE Renderer::Renderer(Renderer&&) noexcept = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto Renderer::operator=(Renderer&&) noexcept -> Renderer& = default;
+    STORMKIT_FORCE_INLINE auto Renderer::operator=(Renderer&&) noexcept -> Renderer& = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto Renderer::create(std::string_view application_name,
-                                 std::optional<core::NakedRef<const wsi::Window>> window) noexcept
-        -> Expected<Renderer> try {
-        return std::move(Renderer { application_name, std::move(window), PrivateTag {} });
-    } catch (RendererError err) { return std::unexpected { err }; }
+    STORMKIT_FORCE_INLINE auto
+        Renderer::create(std::string_view                                 application_name,
+                         std::optional<core::NakedRef<const wsi::Window>> window) noexcept
+        -> gpu::Expected<Renderer> try {
+        return Renderer { application_name, std::move(window), PrivateTag {} };
+    } catch (const gpu::Result& err) { return std::unexpected { err }; }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto Renderer::allocate(std::string_view application_name,
-                                   std::optional<core::NakedRef<const wsi::Window>> window) noexcept
-        -> Expected<std::unique_ptr<Renderer>> try {
+    STORMKIT_FORCE_INLINE auto
+        Renderer::allocate(std::string_view                                 application_name,
+                           std::optional<core::NakedRef<const wsi::Window>> window) noexcept
+        -> gpu::Expected<std::unique_ptr<Renderer>> try {
         return std::make_unique<Renderer>(application_name, std::move(window), PrivateTag {});
-    } catch (RendererError err) { return std::unexpected { err }; }
+    } catch (const gpu::Result& err) { return std::unexpected { err }; }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto Renderer::startRendering() noexcept -> void {
+    STORMKIT_FORCE_INLINE auto Renderer::startRendering() noexcept -> void {
         m_render_thread = std::jthread { std::bind_front(&Renderer::threadLoop, this) };
         core::setThreadName(m_render_thread, "StormKit:RenderThread");
     }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    inline auto
-        Renderer::doInitVulkan(std::string_view application_name,
-                               std::optional<core::NakedRef<const wsi::Window>> window) noexcept
-        -> Expected<void> {
-        return doInitInstance(application_name)
-            .and_then([this]() noexcept { return doInitDebugReportCallback(); })
-            .and_then([this]() noexcept { return doInitDevice(); })
-            .and_then([this, window = std::move(window)]() noexcept {
-                return RenderSurface::create(m_instance,
-                                             m_physical_device,
-                                             m_device,
-                                             std::move(window))
-                    .transform(
-                        [this](auto&& surface) -> void { m_render_surface = std::move(surface); });
-            })
-            .transform_error([this](auto&& error) noexcept {
-                return RendererError { RendererErrorType::FailedToInitializeRenderBackend,
-                                       vk::to_string(error) };
-            });
-    }
-
 } // namespace stormkit::engine
-
-namespace std {
-    /////////////////////////////////////
-    /////////////////////////////////////
-    template<class CharT>
-    template<class FormatContext>
-    auto formatter<stormkit::engine::RendererError, CharT>::format(
-        const stormkit::engine::RendererError& data,
-        FormatContext& ctx) const -> decltype(ctx.out()) {
-        auto out = std::string { "(" };
-        out += std::format("{}", data.type);
-        out += ", ";
-        out += data.reason;
-        out += ")";
-
-        return formatter<basic_string<CharT>, CharT>::format(out, ctx);
-    }
-
-} // namespace std

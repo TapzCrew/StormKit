@@ -11,7 +11,7 @@ import stormkit.Log;
 
 #include <stormkit/Log/LogMacro.hpp>
 
-import :Vulkan;
+import stormkit.Gpu.Vulkan;
 import :Core;
 import :Execution.Pipeline;
 

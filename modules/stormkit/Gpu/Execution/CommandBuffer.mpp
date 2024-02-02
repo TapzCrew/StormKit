@@ -16,7 +16,7 @@ import frozen;
 
 import stormkit.Core;
 
-import :Vulkan;
+import stormkit.Gpu.Vulkan;
 import :Core;
 import :Resource;
 
@@ -252,8 +252,10 @@ export namespace stormkit::gpu {
     };
 
     class STORMKIT_API CommandPool: public DeviceObject, public QueueObject {
+        struct Tag {};
+
       public:
-        CommandPool(const Device& device, const Queue& queue);
+        CommandPool(const Device& device, const Queue& queue, Tag);
         ~CommandPool();
 
         CommandPool(const CommandPool&)             = delete;
@@ -261,6 +263,11 @@ export namespace stormkit::gpu {
 
         CommandPool(CommandPool&&) noexcept;
         auto operator=(CommandPool&&) noexcept -> CommandPool&;
+
+        [[nodiscard]] static auto create(const Device& device,
+                                         const Queue&  queue) noexcept -> Expected<CommandPool>;
+        [[nodiscard]] static auto allocate(const Device& device, const Queue& queue) noexcept
+            -> Expected<std::unique_ptr<CommandPool>>;
 
         [[nodiscard]] auto vkHandle() const noexcept -> const vk::raii::CommandPool&;
 
@@ -1192,6 +1199,22 @@ namespace stormkit::gpu {
         CommandBuffer::vkHandle() const noexcept -> const vk::raii::CommandBuffer& {
         return m_vk_command_buffer;
     }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto
+        CommandPool::create(const Device& device,
+                            const Queue&  queue) noexcept -> Expected<CommandPool> try {
+        return CommandPool { device, queue, Tag {} };
+    } catch (const Result& result) { return std::unexpected(result); }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto CommandPool::allocate(const Device& device,
+                                                     const Queue&  queue) noexcept
+        -> Expected<std::unique_ptr<CommandPool>> try {
+        return std::make_unique<CommandPool>(device, queue, Tag {});
+    } catch (const Result& result) { return std::unexpected(result); }
 
     /////////////////////////////////////
     /////////////////////////////////////

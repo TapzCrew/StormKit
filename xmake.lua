@@ -17,6 +17,7 @@ modules = {
 
       add_files("modules/stormkit/Core.mpp")
       add_files("$(buildir)/.gens/modules/stormkit/Core/Configuration.mpp", { always_added = true, public = true })
+      add_cxflags("clang::-Wno-language-extension-token")
 
       on_config(function(target)
         local output, errors = os.iorunv("git", { "rev-parse", "--abbrev-ref", "HEAD" })
@@ -55,6 +56,9 @@ modules = {
     modulename = "Main",
     has_headers = true,
     deps = { "stormkit-core" },
+    custom = function()
+        add_cxflags("-Wno-main")
+    end
   },
   wsi = {
     modulename = "Wsi",
@@ -117,7 +121,7 @@ modules = {
   gpu = {
     modulename = "Gpu",
     has_headers = true,
-    public_packages = { "frozen" },
+    public_packages = { "frozen", "vulkan-headers", "vulkan-memory-allocator", "vulkan-memory-allocator-hpp" },
     public_deps = { "stormkit-core", "stormkit-log", "stormkit-wsi", "stormkit-image" },
     packages = is_plat("linux") and {
       "libxcb",
@@ -134,7 +138,6 @@ modules = {
       -- "VULKAN_HPP_NO_EXCEPTIONS", uncomment when vk::raii is supported without exceptions
     },
     custom = function()
-      add_packages("vulkan-headers", "vulkan-memory-allocator", "vulkan-memory-allocator-hpp")
       if is_plat("linux") then
         add_defines("VK_USE_PLATFORM_XCB_KHR")
         add_defines("VK_USE_PLATFORM_WAYLAND_KHR")
@@ -247,7 +250,7 @@ option(
   { default = true, category = "root menu/modules", deps = { "enable_log", "enable_image", "enable_wsi" } }
 )
 option("enable_engine", {
-  default = false,
+  default = true,
   category = "root menu/modules",
   deps = { "enable_log", "enable-entities", "enable_image", "enable_wsi", "enable_gpu" },
 })
@@ -287,7 +290,7 @@ add_cxflags("-fstrict-aliasing", "-Wstrict-aliasing", { tools = { "clang", "gcc"
 add_mxflags("-fstrict-aliasing", "-Wstrict-aliasing", { tools = { "clang", "gcc" } })
 
 add_cxflags("clang::-Wno-missing-field-initializers", "clang::-Wno-include-angled-in-module-purview",
-  "clang::-Wno-unknown-attributes")
+  "clang::-Wno-unknown-attributes", "-Wno-deprecated-declarations")
 add_mxflags("clang::-Wno-missing-field-initializers")
 
 set_symbols("hidden")
@@ -475,9 +478,6 @@ for name, module in pairs(modules) do
 
       if module.frameworks then
         add_frameworks(module.frameworks, { public = is_kind("static") })
-      end
-      if get_config("libc++") then
-        add_deps("stdmodules")
       end
       if is_mode("release") then
           set_policy("build.optimization.lto", true)

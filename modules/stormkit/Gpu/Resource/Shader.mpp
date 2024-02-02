@@ -15,7 +15,7 @@ import stormkit.Core;
 
 import :Core;
 
-import :Vulkan;
+import stormkit.Gpu.Vulkan;
 
 namespace stormkit::gpu {
     class STORMKIT_API Shader: public DeviceObject {

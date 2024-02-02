@@ -18,7 +18,7 @@ import stormkit.Log;
 
 import :Core.Device;
 import :Core.Sync;
-import :Vulkan;
+import stormkit.Gpu.Vulkan;
 
 using namespace std::literals;
 

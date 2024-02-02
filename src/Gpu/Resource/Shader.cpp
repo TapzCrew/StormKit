@@ -9,7 +9,7 @@ import std;
 import stormkit.Core;
 
 import :Core;
-import :Vulkan;
+import stormkit.Gpu.Vulkan;
 
 import :Resource.Shader;
 

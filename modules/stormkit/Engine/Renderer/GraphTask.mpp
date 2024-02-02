@@ -11,6 +11,7 @@ export module stormkit.Engine:Renderer.GraphTask;
 import std;
 
 import stormkit.Core;
+import stormkit.Gpu;
 
 import :Renderer.GraphResource;
 import :Renderer.GraphID;
@@ -52,8 +53,8 @@ export namespace stormkit::engine {
 
         std::function<void(std::byte&, GraphTaskBuilder&)> onSetup;
         std::function<void(const std::byte&,
-                           std::optional<core::NakedRef<vk::raii::RenderPass>> renderpass,
-                           vk::raii::CommandBuffer                           & cmb)>
+                           std::optional<core::NakedRef<gpu::RenderPass>> renderpass,
+                           gpu::CommandBuffer                           & cmb)>
             onExecute;
 
       private:

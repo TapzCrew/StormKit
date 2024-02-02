@@ -8,7 +8,7 @@ import std;
 
 import stormkit.Core;
 
-import :Vulkan;
+import stormkit.Gpu.Vulkan;
 import :Core;
 import :Execution.Pipeline;
 import :Execution.RenderPass;

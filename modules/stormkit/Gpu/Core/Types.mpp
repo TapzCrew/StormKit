@@ -16,7 +16,7 @@ import stormkit.Core;
 
 #include <stormkit/Core/FlagsMacro.hpp>
 
-import :Vulkan;
+import stormkit.Gpu.Vulkan;
 
 export {
     namespace stormkit::gpu {
@@ -1021,15 +1021,14 @@ export {
         [[nodiscard]] constexpr auto isDepthFormat(PixelFormat format) noexcept -> bool;
 
         [[nodiscard]] constexpr auto getChannelCountFor(PixelFormat format) noexcept -> core::UInt8;
-        [[nodiscard]] constexpr auto getArraySizeByChannelFor(PixelFormat format) noexcept
-            -> core::UInt8;
-
-        [[nodiscard]] auto computeMipLevel(const core::math::ExtentU& extent) noexcept
-            -> core::UInt32;
         [[nodiscard]] constexpr auto
-            computeUniformBufferOffsetAlignement(core::RangeExtent         size,
-                                                 const RenderCapabilities& capabilities) noexcept
-            -> core::RangeExtent;
+            getArraySizeByChannelFor(PixelFormat format) noexcept -> core::UInt8;
+
+        [[nodiscard]] auto
+            computeMipLevel(const core::math::ExtentU& extent) noexcept -> core::UInt32;
+        [[nodiscard]] constexpr auto computeUniformBufferOffsetAlignement(
+            core::RangeExtent         size,
+            const RenderCapabilities& capabilities) noexcept -> core::RangeExtent;
 
         [[nodiscard]] auto toString(const PhysicalDeviceInfo& data) noexcept;
 
@@ -1037,14 +1036,24 @@ export {
         [[nodiscard]] constexpr auto as(From&&) noexcept -> To;
 
         template<>
-        [[nodiscard]] constexpr auto
-            as<vk::Extent3D, const core::math::ExtentU&>(const core::math::ExtentU& extent) noexcept
-            -> vk::Extent3D;
+        [[nodiscard]] constexpr auto as<vk::Viewport, const gpu::Viewport&>(
+            const gpu::Viewport& viewport) noexcept -> vk::Viewport;
 
         template<>
-        [[nodiscard]] constexpr auto
-            as<vk::Extent2D, const core::math::ExtentU&>(const core::math::ExtentU& extent) noexcept
-            -> vk::Extent2D;
+        [[nodiscard]] constexpr auto as<vk::Extent3D, const core::math::ExtentU&>(
+            const core::math::ExtentU& extent) noexcept -> vk::Extent3D;
+
+        template<>
+        [[nodiscard]] constexpr auto as<core::math::ExtentU, const vk::Extent3D&>(
+            const vk::Extent3D& extent) noexcept -> core::math::ExtentU;
+
+        template<>
+        [[nodiscard]] constexpr auto as<vk::Extent2D, const core::math::ExtentU&>(
+            const core::math::ExtentU& extent) noexcept -> vk::Extent2D;
+
+        template<>
+        [[nodiscard]] constexpr auto as<core::math::ExtentU, const vk::Extent2D&>(
+            const vk::Extent2D& extent) noexcept -> core::math::ExtentU;
 
         template<>
         [[nodiscard]] constexpr auto as<vk::Offset3D, const core::math::Vector3I&>(
@@ -1053,7 +1062,15 @@ export {
         template<>
         [[nodiscard]] constexpr auto as<vk::Offset2D, const core::math::Vector2I&>(
             const core::math::Vector2I& offset) noexcept -> vk::Offset2D;
-    } // namespace stormkit::core
+
+        template<>
+        [[nodiscard]] constexpr auto as<core::math::Vector3I, const vk::Offset3D&>(
+            const vk::Offset3D& offset) noexcept -> core::math::Vector3I;
+
+        template<>
+        [[nodiscard]] constexpr auto as<core::math::Vector2I, const vk::Offset2D&>(
+            const vk::Offset2D& offset) noexcept -> core::math::Vector2I;
+    } // namespace stormkit::gpu
 
     FLAG_ENUM(stormkit::gpu::QueueFlag)
     FLAG_ENUM(stormkit::gpu::ShaderStageFlag)
@@ -1098,8 +1115,8 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     template<typename T>
-    STORMKIT_FORCE_INLINE auto ParentRef<T>::operator=(const ParentRef&) noexcept
-        -> ParentRef& = default;
+    STORMKIT_FORCE_INLINE auto
+        ParentRef<T>::operator=(const ParentRef&) noexcept -> ParentRef& = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
@@ -1109,8 +1126,8 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     template<typename T>
-    STORMKIT_FORCE_INLINE auto ParentRef<T>::operator=(ParentRef&&) noexcept
-        -> ParentRef& = default;
+    STORMKIT_FORCE_INLINE auto
+        ParentRef<T>::operator=(ParentRef&&) noexcept -> ParentRef& = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
@@ -1153,8 +1170,8 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE constexpr auto getChannelCountFor(PixelFormat format) noexcept
-        -> core::UInt8 {
+    STORMKIT_FORCE_INLINE constexpr auto
+        getChannelCountFor(PixelFormat format) noexcept -> core::UInt8 {
         switch (format) {
             case PixelFormat::R8_SNorm:
             case PixelFormat::R8_UNorm:
@@ -1230,8 +1247,8 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE constexpr auto getArraySizeByChannelFor(PixelFormat format) noexcept
-        -> core::UInt8 {
+    STORMKIT_FORCE_INLINE constexpr auto
+        getArraySizeByChannelFor(PixelFormat format) noexcept -> core::UInt8 {
         switch (format) {
             case PixelFormat::R8_SNorm:
             case PixelFormat::R8_UNorm:
@@ -1297,25 +1314,27 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE constexpr Viewport::operator vk::Viewport() const noexcept {
-        return { .x        = position.x,
-                 .y        = position.y,
-                 .width    = extent.width,
-                 .height   = extent.height,
-                 .minDepth = depth.x,
-                 .maxDepth = depth.y };
+        return vk::Viewport {}
+            .setX(position.x)
+            .setY(position.y)
+            .setWidth(extent.width)
+            .setHeight(extent.height)
+            .setMinDepth(depth.x)
+            .setMaxDepth(depth.y);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE constexpr Scissor::operator vk::Rect2D() const noexcept {
-        return vk::Rect2D { .offset = { offset.x, offset.y },
-                            .extent = { extent.width, extent.height } };
+        return vk::Rect2D {}
+            .setOffset(as<vk::Offset2D>(offset))
+            .setExtent(as<vk::Extent2D>(extent));
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto computeMipLevel(const core::math::ExtentU& extent) noexcept
-        -> core::UInt32 {
+    STORMKIT_FORCE_INLINE auto
+        computeMipLevel(const core::math::ExtentU& extent) noexcept -> core::UInt32 {
         const auto as_float = core::math::ExtentF { extent };
 
         return core::narrow<core::UInt32>(core::math::floor(
@@ -1325,10 +1344,9 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE constexpr auto
-        computeUniformBufferOffsetAlignement(core::RangeExtent         size,
-                                             const RenderCapabilities& capabilities) noexcept
-        -> core::RangeExtent {
+    STORMKIT_FORCE_INLINE constexpr auto computeUniformBufferOffsetAlignement(
+        core::RangeExtent         size,
+        const RenderCapabilities& capabilities) noexcept -> core::RangeExtent {
         const auto min_ubo_align = capabilities.limits.min_uniform_buffer_offset_alignment;
 
         if (min_ubo_align > 0) size = (size + min_ubo_align - 1) & ~(min_ubo_align - 1);
@@ -1362,33 +1380,81 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
+    template<typename To, typename From>
+    STORMKIT_FORCE_INLINE constexpr auto as(From&&) noexcept -> To {
+        static_assert(true, "Not yet implemented");
+        return To {};
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
     template<>
-    STORMKIT_FORCE_INLINE constexpr auto
-        as<vk::Extent3D>(const core::math::ExtentU& extent) noexcept -> vk::Extent3D {
+    [[nodiscard]] constexpr auto as<vk::Viewport, const gpu::Viewport&>(
+        const gpu::Viewport& viewport) noexcept -> vk::Viewport {
+        return viewport.operator vk::Viewport();
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<>
+    STORMKIT_FORCE_INLINE constexpr auto as<vk::Extent3D, const core::math::ExtentU&>(
+        const core::math::ExtentU& extent) noexcept -> vk::Extent3D {
         return vk::Extent3D { extent.width, extent.height, extent.depth };
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<>
-    STORMKIT_FORCE_INLINE constexpr auto
-        as<vk::Extent2D>(const core::math::ExtentU& extent) noexcept -> vk::Extent2D {
+    STORMKIT_FORCE_INLINE constexpr auto as<core::math::ExtentU, const vk::Extent3D&>(
+        const vk::Extent3D& extent) noexcept -> core::math::ExtentU {
+        return { extent.width, extent.height, extent.depth };
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<>
+    STORMKIT_FORCE_INLINE constexpr auto as<vk::Extent2D, const core::math::ExtentU&>(
+        const core::math::ExtentU& extent) noexcept -> vk::Extent2D {
         return vk::Extent2D { extent.width, extent.height };
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<>
-    STORMKIT_FORCE_INLINE constexpr auto
-        as<vk::Offset3D>(const core::math::Vector3I& extent) noexcept -> vk::Offset3D {
+    STORMKIT_FORCE_INLINE constexpr auto as<core::math::ExtentU, const vk::Extent2D&>(
+        const vk::Extent2D& extent) noexcept -> core::math::ExtentU {
+        return { extent.width, extent.height };
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<>
+    STORMKIT_FORCE_INLINE constexpr auto as<vk::Offset3D, const core::math::Vector3I&>(
+        const core::math::Vector3I& extent) noexcept -> vk::Offset3D {
         return vk::Offset3D { extent.x, extent.y, extent.z };
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<>
-    STORMKIT_FORCE_INLINE constexpr auto
-        as<vk::Offset2D>(const core::math::Vector2I& extent) noexcept -> vk::Offset2D {
+    STORMKIT_FORCE_INLINE constexpr auto as<vk::Offset2D, const core::math::Vector2I&>(
+        const core::math::Vector2I& extent) noexcept -> vk::Offset2D {
         return vk::Offset2D { extent.x, extent.y };
     }
-} // namespace stormkit::core
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<>
+    STORMKIT_FORCE_INLINE constexpr auto as<core::math::Vector3I, const vk::Offset3D&>(
+        const vk::Offset3D& offset) noexcept -> core::math::Vector3I {
+        return { offset.x, offset.y, offset.z };
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<>
+    STORMKIT_FORCE_INLINE constexpr auto as<core::math::Vector2I, const vk::Offset2D&>(
+        const vk::Offset2D& offset) noexcept -> core::math::Vector2I {
+        return { offset.x, offset.y };
+    }
+} // namespace stormkit::gpu
