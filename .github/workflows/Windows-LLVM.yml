@@ -51,7 +51,7 @@ jobs:
         id: cache_llvm
         uses: actions/cache@v3.2.2
         with:
-          path: ${{ runner.workspace }}/StormKit/llvm2/
+          path: ${{ runner.workspace }}/StormKit/llvm/
           key: ${{ matrix.os }}-llvm
           restore-keys: |
             ${{ matrix.os }}-llvm
@@ -59,9 +59,9 @@ jobs:
       - name: Download and Uncompress LLVM
         if: ${{ steps.cache_llvm.outputs.cache-hit != 'true' }}
         run: |
-          C:/msys64/usr/bin/wget 'http://86.221.35.29:1337/llvm-win.7z'
-          7z x llvm-win.7z
-          rm llvm-win.7z
+          C:/msys64/usr/bin/wget 'https://github.com/Arthapz/llvm-patched/raw/main/windows/llvm-x64.7z'
+          7z x llvm-x64.7z
+          rm llvm-x64.7z
 
       - name: Set xmake env
         run: echo "XMAKE_GLOBALDIR=${{ runner.workspace }}/xmake-global" >> $env:GITHUB_ENV
@@ -88,18 +88,18 @@ jobs:
       - name: Configure & Build
         id: build_llvm
         run: |
-          xmake f -vD --yes -a ${{ matrix.arch }}  -m ${{ (matrix.mode == 'release' || matrix.mode == 'debug') && matrix.mode || 'releasedbg' }} -k ${{ matrix.kind }} --enable_examples=y --enable_tests=y --enable_gpu=n --libc++=y --toolchain=llvm --sdk="${{ runner.workspace }}/StormKit/llvm2/" --libc++=y --cxxflags="-stdlib=libc++ -fno-delayed-template-parsing -cxx-isystem${{ runner.workspace }}/StormKit/llvm2/include/c++/v1" --ldflags="-stdlib=libc++ -L${{ runner.workspace }}/StormKit/llvm2/lib" --shflags="-stdlib=libc++ -L${{ runner.workspace }}/StormKit/llvm2/lib"
+          xmake f -vD --yes -a ${{ matrix.arch }}  -m ${{ (matrix.mode == 'release' || matrix.mode == 'debug') && matrix.mode || 'releasedbg' }} -k ${{ matrix.kind }} --enable_examples=y --toolchain=llvm --sdk="${{ runner.workspace }}/StormKit/llvm/" --runtimes="c++_shared"
           xmake b -vD
 
       - name: Tests
         run: |
-          cp "${{ runner.workspace }}/StormKit/llvm2/lib/c++.dll" "${{ runner.workspace }}/StormKit/build/windows/${{ matrix.arch }}/${{ (matrix.mode == 'release' || matrix.mode == 'debug') && matrix.mode || 'releasedbg' }}/"
+          cp "${{ runner.workspace }}/StormKit/llvm/lib/c++.dll" "${{ runner.workspace }}/StormKit/build/windows/${{ matrix.arch }}/${{ (matrix.mode == 'release' || matrix.mode == 'debug') && matrix.mode || 'releasedbg' }}/"
           xmake test -vD
 
       - name: Installation
         run: |
           xmake install -vD --installdir="${{ runner.workspace }}/output"
-          cp "${{ runner.workspace }}/StormKit/llvm2/lib/c++.dll" "${{ runner.workspace }}/output/bin/"
+          cp "${{ runner.workspace }}/StormKit/llvm/lib/c++.dll" "${{ runner.workspace }}/output/bin/"
           rmdir /s /q "StormKit"
 
       - name: Upload artifacts
