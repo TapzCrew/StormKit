@@ -3,6 +3,7 @@ do
 	set_kind("binary")
 	set_languages("cxxlatest", "clatest")
 	add_deps("stormkit-core", "stormkit-main", "stormkit-log")
+  set_policy("build.c++.modules.tryreuse", false)
 
 	if is_mode("debug") then
 		add_defines("STORMKIT_BUILD_DEBUG")
@@ -13,6 +14,10 @@ do
 	end
 
 	add_files("src/main.cpp")
+
+  if is_plat("windows") then
+      add_ldflags("-Wl,/SUBSYSTEM:CONSOLE", {force = true})
+  end
 
 	if has_config("mold") then
 		add_ldflags("-Wl,-fuse-ld=mold")
