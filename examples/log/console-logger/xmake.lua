@@ -3,7 +3,6 @@ do
 	set_kind("binary")
 	set_languages("cxxlatest", "clatest")
 	add_deps("stormkit-core", "stormkit-main", "stormkit-log")
-  set_policy("build.c++.modules.tryreuse", false)
 
 	if is_mode("debug") then
 		add_defines("STORMKIT_BUILD_DEBUG")
