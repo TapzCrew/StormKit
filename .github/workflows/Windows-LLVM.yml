@@ -69,7 +69,7 @@ jobs:
       - name: Install xmake
         uses: xmake-io/github-action-setup-xmake@v1
         with:
-          xmake-version: "Arthapz/xmake#branch@modules"
+          xmake-version: "branch@modules"
           actions-cache-folder: .xmake-cache-${{ steps.cache_key.outputs.key }}
 
       - name: Update xmake repository
