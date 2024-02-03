@@ -136,7 +136,7 @@ modules = {
       "VULKAN_HPP_NO_STRUCT_CONSTRUCTORS",
       "VULKAN_HPP_NO_UNION_CONSTRUCTORS",
       "VULKAN_HPP_STORAGE_SHARED",
-      -- "VULKAN_HPP_NO_EXCEPTIONS", uncomment when vk::raii is supported without exceptions
+      "VULKAN_HPP_NO_EXCEPTIONS"
     },
     custom = function()
       if is_plat("linux") then
@@ -148,38 +148,6 @@ modules = {
     end,
   },
 }
-
-package("vulkan-memory-allocator", function()
-  set_kind("library", { headeronly = true })
-  set_homepage("https://gpuopen-librariesandsdks.github.io/VulkanMemoryAllocator/html/")
-  set_description("Easy to integrate Vulkan memory allocation library.")
-  set_license("MIT")
-
-  add_urls(
-    "https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator/archive/refs/tags/$(version).tar.gz",
-    "https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git"
-  )
-
-  on_install("windows", "linux", "mingw", "macosx", "iphoneos", "android", function(package)
-    os.cp("include/vk_mem_alloc.h", package:installdir("include"))
-  end)
-end)
-
-package("vulkan-memory-allocator-hpp", function()
-  set_kind("library", { headeronly = true })
-  set_homepage("https://gpuopen-librariesandsdks.github.io/VulkanMemoryAllocator/html/")
-  set_description("C++ bindings for VulkanMemoryAllocator.")
-  set_license("CC0")
-
-  add_urls(
-    "https://github.com/YaaZ/VulkanMemoryAllocator-Hpp/archive/refs/tags/$(version).tar.gz",
-    "https://github.com/YaaZ/VulkanMemoryAllocator-Hpp.git"
-  )
-
-  on_install("windows|x86", "windows|x64", "linux", "macosx", "mingw", "android", "iphoneos", function(package)
-    os.cp("include", package:installdir())
-  end)
-end)
 
 package("frozen", function()
   set_homepage("https://github.com/serge-sans-paille/frozen")
@@ -326,7 +294,7 @@ if is_plat("windows") then
   add_defines("WIN32_LEAN_AND_MEAN")
   add_defines("__SPECSTRINGS_STRICT_LEVEL=0")
   add_defines("NOMINMAX")
-  add_cxflags("-fansi-escape-codes")
+  add_cxflags("clang::-fansi-escape-codes")
 end
 
 add_cxxflags("clang::-fexperimental-library", { force = true })
@@ -340,9 +308,9 @@ if get_config("sanitizers") then
 end
 
 if has_config("enable_gpu") then
-  add_requires("vulkan-headers main", { system = false })
-  add_requires("vulkan-memory-allocator master", { system = false })
-  add_requires("vulkan-memory-allocator-hpp master", { system = false })
+  add_requireconfs("vulkan-headers", { override = true, system = false })
+  add_requireconfs("vulkan-memory-allocator", { override = true, version = "master", system = false })
+  add_requireconfs("vulkan-memory-allocator-hpp", { override = true, version = "master", system = false, configs = { use_vulkanheaders = true }})
 end
 
 -- add_defines("FROZEN_DONT_INCLUDE_STL", "ANKERL_UNORDERED_DENSE_USE_STD_IMPORT")
