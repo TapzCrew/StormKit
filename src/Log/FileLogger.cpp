@@ -12,7 +12,9 @@ import :FileLogger;
 
 using namespace std::literals;
 
-constexpr auto LOG_FILE_NAME = "log.txt";
+namespace {
+    constexpr auto LOG_FILE_NAME = "log.txt";
+}
 
 namespace stormkit::log {
     ////////////////////////////////////////
@@ -30,9 +32,9 @@ namespace stormkit::log {
 
     ////////////////////////////////////////
     ////////////////////////////////////////
-    FileLogger::FileLogger(LogClock::time_point start,
+    FileLogger::FileLogger(LogClock::time_point  start,
                            std::filesystem::path path,
-                           Severity log_level)
+                           Severity              log_level)
         : Logger { std::move(start), log_level }, m_base_path { std::move(path) } {
         if (not std::filesystem::exists(m_base_path))
             std::filesystem::create_directory(m_base_path);
@@ -63,9 +65,9 @@ namespace stormkit::log {
 
     ////////////////////////////////////////
     ////////////////////////////////////////
-    auto FileLogger::write([[maybe_unused]] Severity severity,
+    auto FileLogger::write([[maybe_unused]] Severity      severity,
                            [[maybe_unused]] const Module& m,
-                           [[maybe_unused]] const char *string) -> void {
+                           [[maybe_unused]] const char   *string) -> void {
         const auto now = LogClock::now();
         const auto time =
             std::chrono::duration_cast<std::chrono::seconds>(now - m_start_time).count();
