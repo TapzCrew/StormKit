@@ -14,6 +14,10 @@ do
 
 	add_files("src/main.cpp")
 
+  if is_plat("windows") then
+      add_ldflags("-Wl,/SUBSYSTEM:CONSOLE", {force = true})
+  end
+
 	if has_config("mold") then
 		add_ldflags("-Wl,-fuse-ld=mold")
 		add_shflags("-Wl,-fuse-ld=mold")

@@ -15,7 +15,6 @@ import stormkit.Log;
 
 import vulkan_hpp;
 
-
 export namespace stormkit::gpu {
     template<std::integral T>
     constexpr auto vkMakeVersion(T major, T minor, T patch) noexcept -> core::UInt32;
@@ -39,17 +38,16 @@ export namespace stormkit::gpu {
     template<typename T>
     using VulkanExpected = std::expected<T, vk::Result>;
 
-    template<typename T, typename... Args>
-    auto vkCreate(Args&&...args) noexcept -> VulkanExpected<T>;
+    template<typename T, typename Func, typename... Args>
+        requires(core::Is<std::invoke_result_t<Func, T *, Args...>, vk::Result>)
+    auto vkCall(T& object, Func&& func, Args&&...args) noexcept -> VulkanExpected<vk::Result>;
 
     template<typename T, typename Func, typename... Args>
-        requires(not core::Is<std::invoke_result_t<Func, T *, Args...>, void>)
-    auto vkCall(T& value, Func&& func_ref, Args&&...args) noexcept
-        -> VulkanExpected<std::invoke_result_t<Func, T *, Args...>>;
-
-    template<typename T, typename Func, typename... Args>
-        requires(core::Is<std::invoke_result_t<Func, T *, Args...>, void>)
-    auto vkCall(T& object, Func&& func, Args&&...args) noexcept -> VulkanExpected<void>;
+        requires(core::Is<std::invoke_result_t<Func, T *, Args...>, vk::Result>)
+    auto vkCall(T&                          object,
+                Func&&                      func,
+                std::span<const vk::Result> possible_results,
+                Args&&...args) noexcept -> VulkanExpected<vk::Result>;
 
     auto toRaiiVkHandle() noexcept -> decltype(auto);
     auto toVkHandle() noexcept -> decltype(auto);
@@ -64,29 +62,29 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     template<std::integral T>
-    STORMKIT_FORCE_INLINE constexpr auto vkMakeVersion(T major, T minor, T patch) noexcept
-        -> core::UInt32 {
+    STORMKIT_FORCE_INLINE constexpr auto
+        vkMakeVersion(T major, T minor, T patch) noexcept -> core::UInt32 {
         return vkVersionMajor(major) | vkVersionMinor(minor) | vkVersionPatch(patch);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE constexpr auto vkVersionMajor(std::integral auto version) noexcept
-        -> core::UInt32 {
+    STORMKIT_FORCE_INLINE constexpr auto
+        vkVersionMajor(std::integral auto version) noexcept -> core::UInt32 {
         return core::as<core::UInt32>(version >> 22u);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE constexpr auto vkVersionMinor(std::integral auto version) noexcept
-        -> core::UInt32 {
+    STORMKIT_FORCE_INLINE constexpr auto
+        vkVersionMinor(std::integral auto version) noexcept -> core::UInt32 {
         return core::as<core::UInt32>((version >> 12u) & 0x3ffu);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE constexpr auto vkVersionPatch(std::integral auto version) noexcept
-        -> core::UInt32 {
+    STORMKIT_FORCE_INLINE constexpr auto
+        vkVersionPatch(std::integral auto version) noexcept -> core::UInt32 {
         return core::as<core::UInt32>(version & 0xfffu);
     }
 
@@ -100,43 +98,38 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     template<IsVulkanFlagsType T>
-    STORMKIT_FORCE_INLINE constexpr auto checkFlag(vk::Flags<T> value, vk::Flags<T> flag) noexcept
-        -> bool {
+    STORMKIT_FORCE_INLINE constexpr auto checkFlag(vk::Flags<T> value,
+                                                   vk::Flags<T> flag) noexcept -> bool {
         return (value & flag) == flag;
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    template<typename T, typename... Args>
-    STORMKIT_FORCE_INLINE auto vkCreate(Args&&...args) noexcept -> VulkanExpected<T> try {
-        return T { std::forward<Args>(args)... };
-    } catch (const vk::SystemError& err) {
-        return std::unexpected { core::narrow<vk::Result>(err.code().value()) };
+    template<typename T, typename Func, typename... Args>
+        requires(core::Is<std::invoke_result_t<Func, T *, Args...>, vk::Result>)
+    STORMKIT_FORCE_INLINE auto
+        vkCall(T& value, Func&& func_ref, Args&&...args) noexcept -> VulkanExpected<vk::Result> {
+        return vkCall<T, Func, Args...>(value,
+                                        std::forward<Func>(func_ref),
+                                        { vk::Result::eSuccess },
+                                        std::forward<Args>(args)...);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<typename T, typename Func, typename... Args>
-        requires(not core::Is<std::invoke_result_t<Func, T *, Args...>, void>)
-    STORMKIT_FORCE_INLINE auto vkCall(T& value, Func&& func_ref, Args&&...args) noexcept
-        -> VulkanExpected<std::invoke_result_t<Func, T *, Args...>> try {
+        requires(core::Is<std::invoke_result_t<Func, T *, Args...>, vk::Result>)
+    STORMKIT_FORCE_INLINE auto vkCall(T&                          value,
+                                      Func&&                      func_ref,
+                                      std::span<const vk::Result> possible_results,
+                                      Args&&...args) noexcept -> VulkanExpected<vk::Result> {
         auto func = std::mem_fn(std::forward<Func>(func_ref));
-        return func(value, std::forward<Args>(args)...);
-    } catch (const vk::SystemError& err) {
-        return std::unexpected { core::narrow<vk::Result>(err.code().value()) };
-    }
 
-    /////////////////////////////////////
-    /////////////////////////////////////
-    template<typename T, typename Func, typename... Args>
-        requires(core::Is<std::invoke_result_t<Func, T *, Args...>, void>)
-    STORMKIT_FORCE_INLINE auto vkCall(T& value, Func&& func_ref, Args&&...args) noexcept
-        -> VulkanExpected<void> try {
-        auto func = std::mem_fn(std::forward<Func>(func_ref));
-        func(value, std::forward<Args>(args)...);
-        return {};
-    } catch (const vk::SystemError& err) {
-        return std::unexpected { core::narrow<vk::Result>(err.code().value()) };
+        const auto result = func(value, std::forward<Args>(args)...);
+        if (std::ranges::any_of(possible_results, core::toUnary(core::monadic::isEqual(), result)))
+            return result;
+
+        return std::unexpected { result };
     }
 
     /////////////////////////////////////

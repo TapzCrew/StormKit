@@ -58,6 +58,7 @@ modules = {
     deps = { "stormkit-core" },
     custom = function()
         add_cxflags("-Wno-main")
+        set_strip("debug")
     end
   },
   wsi = {
@@ -121,13 +122,13 @@ modules = {
   gpu = {
     modulename = "Gpu",
     has_headers = true,
-    public_packages = { "frozen", "vulkan-headers", "vulkan-memory-allocator", "vulkan-memory-allocator-hpp" },
+    public_packages = { "vulkan-headers", "vulkan-memory-allocator", "vulkan-memory-allocator-hpp" },
     public_deps = { "stormkit-core", "stormkit-log", "stormkit-wsi", "stormkit-image" },
     packages = is_plat("linux") and {
       "libxcb",
       "wayland",
     } or nil,
-    defines = {
+    public_defines = {
       "VK_NO_PROTOTYPES",
       "VMA_DYNAMIC_VULKAN_FUNCTIONS=1",
       "VMA_STATIC_VULKAN_FUNCTIONS=0",
@@ -135,7 +136,8 @@ modules = {
       "VULKAN_HPP_NO_STRUCT_CONSTRUCTORS",
       "VULKAN_HPP_NO_UNION_CONSTRUCTORS",
       "VULKAN_HPP_STORAGE_SHARED",
-      -- "VULKAN_HPP_NO_EXCEPTIONS", uncomment when vk::raii is supported without exceptions
+      "VULKAN_HPP_NO_EXCEPTIONS",
+      "VULKAN_HPP_NO_CONSTRUCTORS"
     },
     custom = function()
       if is_plat("linux") then
@@ -148,48 +150,16 @@ modules = {
   },
 }
 
-package("vulkan-memory-allocator", function()
-  set_kind("library", { headeronly = true })
-  set_homepage("https://gpuopen-librariesandsdks.github.io/VulkanMemoryAllocator/html/")
-  set_description("Easy to integrate Vulkan memory allocation library.")
-  set_license("MIT")
-
-  add_urls(
-    "https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator/archive/refs/tags/$(version).tar.gz",
-    "https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git"
-  )
-
-  on_install("windows", "linux", "mingw", "macosx", "iphoneos", "android", function(package)
-    os.cp("include/vk_mem_alloc.h", package:installdir("include"))
-  end)
-end)
-
-package("vulkan-memory-allocator-hpp", function()
-  set_kind("library", { headeronly = true })
-  set_homepage("https://gpuopen-librariesandsdks.github.io/VulkanMemoryAllocator/html/")
-  set_description("C++ bindings for VulkanMemoryAllocator.")
-  set_license("CC0")
-
-  add_urls(
-    "https://github.com/YaaZ/VulkanMemoryAllocator-Hpp/archive/refs/tags/$(version).tar.gz",
-    "https://github.com/YaaZ/VulkanMemoryAllocator-Hpp.git"
-  )
-
-  on_install("windows|x86", "windows|x64", "linux", "macosx", "mingw", "android", "iphoneos", function(package)
-    os.cp("include", package:installdir())
-  end)
-end)
-
 package("frozen", function()
   set_homepage("https://github.com/serge-sans-paille/frozen")
   set_description("A header-only, constexpr alternative to gperf for C++14 users")
   set_license("Apache-2.0")
 
-  -- set_urls("https://github.com/Arthapz/frozen.git")
-  set_sourcedir("../frozen")
+  set_urls("https://github.com/Arthapz/frozen.git")
+  -- set_sourcedir("../frozen")
 
   on_install(function(package)
-    import("package.tools.xmake").install(package, { enable_module = true, enable_std_import = true })
+    import("package.tools.xmake").install(package, { enable_module = true, enable_std_import = true, enable_tests = false, enable_benchmark = false })
   end)
 end)
 
@@ -325,7 +295,7 @@ if is_plat("windows") then
   add_defines("WIN32_LEAN_AND_MEAN")
   add_defines("__SPECSTRINGS_STRICT_LEVEL=0")
   add_defines("NOMINMAX")
-  add_cxflags("-fansi-escape-codes")
+  add_cxflags("clang::-fansi-escape-codes")
 end
 
 add_cxxflags("clang::-fexperimental-library", { force = true })
@@ -339,9 +309,9 @@ if get_config("sanitizers") then
 end
 
 if has_config("enable_gpu") then
-  add_requires("vulkan-headers main", { system = false })
-  add_requires("vulkan-memory-allocator master", { system = false })
-  add_requires("vulkan-memory-allocator-hpp master", { system = false })
+  add_requireconfs("vulkan-headers", { override = true, system = false })
+  add_requireconfs("vulkan-memory-allocator", { override = true, version = "master", system = false })
+  add_requireconfs("vulkan-memory-allocator-hpp", { override = true, version = "master", system = false, configs = { use_vulkanheaders = true }})
 end
 
 -- add_defines("FROZEN_DONT_INCLUDE_STL", "ANKERL_UNORDERED_DENSE_USE_STD_IMPORT")
@@ -455,6 +425,10 @@ for name, module in pairs(modules) do
         add_defines(module.defines)
       end
 
+      if module.public_defines then
+        add_defines(module.public_defines, { public = true })
+      end
+
       if module.cxxflags then
         add_cxxflags(module.cxxflags)
         add_mxxflags(module.cxxflags)
@@ -480,7 +454,7 @@ for name, module in pairs(modules) do
         add_frameworks(module.frameworks, { public = is_kind("static") })
       end
       if is_mode("release") then
-          set_policy("build.optimization.lto", true)
+          -- set_policy("build.optimization.lto", true)
       end
     end)
   end

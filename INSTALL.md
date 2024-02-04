@@ -1,12 +1,16 @@
 # Installation
 
-A C++23 compliant compiler is needed to build StormKit and XMake build system
+A C++23 compliant compiler with std module support and XMake is needed to build StormKit
 
 ## Dependencies
 ### StormKit-core module
 - [glm](https://github.com/g-truc/glm)
+- [frozen](https://github.com/serge-sans-paille/frozen)
+- [unordered_dense](github.com/martinus/unordered_dense)
+- [magic_enum](https://github.com/Neargye/magic_enum)
 
 ### StormKit-image module
+- [gli](https://github.com/g-truc/gli)
 - [LibPNG >= 1.6](http://www.libpng.org/pub/png/libpng.html)
 - [LibJPEG-turbo](https://www.libjpeg-turbo.org)
 
@@ -15,12 +19,9 @@ A C++23 compliant compiler is needed to build StormKit and XMake build system
 - [VulkanMemoryAllocator](https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator)
 - [VulkanMemoryAllocator-hpp](https://github.com/YaaZ/VulkanMemoryAllocator-Hpp)
 
-### StormKit-engine module
-- [gli](https://github.com/g-truc/gli)
-
 ## Building
 ```
-> xmake f -m <release|debug|releasedbg> -k <shared|static>
+> xmake f -m <release|debug|releasedbg> -k <shared|static> --runtimes=<c++_shared|c++_static|libstdc++_shared|libstdc++_static|MT|MD|MTd|MDd>
 > xmake b
 ```
 

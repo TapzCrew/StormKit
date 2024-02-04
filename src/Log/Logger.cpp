@@ -19,9 +19,8 @@ namespace stormkit::log {
 #else
         constexpr auto DEFAULT_SEVERITY = Severity::Info | Severity::Error | Severity::Fatal;
 #endif
+        Logger *logger = nullptr;
     } // namespace
-
-    static Logger *logger = nullptr;
 
     /////////////////////////////////////
     /////////////////////////////////////

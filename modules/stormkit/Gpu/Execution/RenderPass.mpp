@@ -202,7 +202,7 @@ namespace stormkit::gpu {
                                      .setHeight(m_extent.height)
                                      .setLayers(1);
 
-        vkCreate<vk::raii::Framebuffer>(toRaiiVkHandle()(device()), create_info)
+        device().vkHandle().createFramebuffer(create_info)
             .transform(core::monadic::set(m_vk_framebuffer))
             .transform_error(core::monadic::map(core::monadic::as<Result>(), core::throwError()));
     }

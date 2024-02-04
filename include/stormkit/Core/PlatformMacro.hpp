@@ -118,11 +118,11 @@ extern "C" {
 
 #ifndef STORMKIT_STATIC
     #ifdef STORMKIT_BUILD
-        #define STORMKIT_PUBLIC STORMKIT_EXPORT
+        #define STORMKIT_API STORMKIT_EXPORT
     #else
-        #define STORMKIT_PUBLIC STORMKIT_IMPORT
+        #define STORMKIT_API STORMKIT_IMPORT
     #endif
-    #define STORMKIT_API STORMKIT_EXPORT
+    // #define STORMKIT_API STORMKIT_EXPORT
 #else
     #define STORMKIT_PUBLIC
     #define STORMKIT_API

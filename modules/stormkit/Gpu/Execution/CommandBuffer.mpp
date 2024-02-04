@@ -52,8 +52,7 @@ export namespace stormkit::gpu {
         auto submit(std::span<core::NakedRef<const CommandBuffer>> commandbuffers,
                     std::span<core::NakedRef<const Semaphore>>     wait_semaphores   = {},
                     std::span<core::NakedRef<const Semaphore>>     signal_semaphores = {},
-                    core::OptionalRef<const Fence> fence = std::nullopt) const noexcept
-            -> Expected<void>;
+                    core::OptionalRef<const Fence> fence = std::nullopt) const noexcept -> void;
 
         [[nodiscard]] auto entry() const noexcept -> const Device::QueueEntry&;
 
@@ -111,11 +110,10 @@ export namespace stormkit::gpu {
         CommandBuffer(CommandBuffer&&) noexcept;
         auto operator=(CommandBuffer&&) noexcept -> CommandBuffer&;
 
-        auto reset() noexcept -> Expected<void>;
+        auto reset() noexcept -> void;
         auto submit(std::span<core::NakedRef<const Semaphore>> wait_semaphores   = {},
                     std::span<core::NakedRef<const Semaphore>> signal_semaphores = {},
-                    core::OptionalRef<const Fence>             fence = std::nullopt) const noexcept
-            -> Expected<void>;
+                    core::OptionalRef<const Fence> fence = std::nullopt) const noexcept -> void;
 
         [[nodiscard]] auto state() const noexcept -> State;
         [[nodiscard]] auto level() const noexcept -> CommandBufferLevel;
@@ -351,7 +349,9 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE Queue::Queue(const Device& device, const Device::QueueEntry& entry, Tag)
         : DeviceObject { device }, m_entry { entry } {
-        vkCall(toRaiiVkHandle()(this->device()), &vk::raii::Device::getQueue, entry.id, 0)
+        this->device()
+            .vkHandle()
+            .getQueue(entry.id, 0)
             .transform(core::monadic::set(m_vk_queue))
             .transform_error(core::monadic::map(core::monadic::as<Result>(), core::throwError()));
     }
@@ -384,7 +384,7 @@ namespace stormkit::gpu {
         Queue::submit(std::span<core::NakedRef<const CommandBuffer>> command_buffers,
                       std::span<core::NakedRef<const Semaphore>>     wait_semaphores,
                       std::span<core::NakedRef<const Semaphore>>     signal_semaphores,
-                      core::OptionalRef<const Fence> fence) const noexcept -> Expected<void> {
+                      core::OptionalRef<const Fence>                 fence) const noexcept -> void {
         const auto vk_command_buffers =
             command_buffers | std::views::transform(toVkHandle()) | std::ranges::to<std::vector>();
         const auto vk_wait_semaphores =
@@ -402,8 +402,7 @@ namespace stormkit::gpu {
                          core::monadic::map(toVkHandle(), core::monadic::init<vk::Fence>()),
                          core::monadic::init<vk::Fence>());
 
-        return vkCall(toRaiiVkHandle()(*this), &vk::raii::Queue::submit, submit_infos, vk_fence)
-            .transform_error(core::monadic::as<Result>());
+        vkHandle().submit(submit_infos, vk_fence);
     }
 
     /////////////////////////////////////
@@ -445,12 +444,9 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto CommandBuffer::reset() noexcept -> Expected<void> {
-        return vkCall(toRaiiVkHandle()(*this),
-                      &vk::raii::CommandBuffer::reset,
-                      vk::CommandBufferResetFlagBits {})
-            .transform([this]() noexcept { m_state = State::Initial; })
-            .transform_error(core::monadic::as<Result>());
+    STORMKIT_FORCE_INLINE auto CommandBuffer::reset() noexcept -> void {
+        vkHandle().reset(vk::CommandBufferResetFlagBits {});
+        m_state = State::Initial;
     }
 
     /////////////////////////////////////
@@ -459,10 +455,10 @@ namespace stormkit::gpu {
     auto CommandBuffer::submit(std::span<core::NakedRef<const Semaphore>> wait_semaphores,
                                std::span<core::NakedRef<const Semaphore>> signal_semaphores,
                                core::OptionalRef<const Fence>             fence) const noexcept
-        -> Expected<void> {
+        -> void {
         auto cmbs = std::array { core::NakedRef<const CommandBuffer> { *this } };
 
-        return queue().submit(cmbs, wait_semaphores, signal_semaphores, std::move(fence));
+        queue().submit(cmbs, wait_semaphores, signal_semaphores, std::move(fence));
     }
 
     /////////////////////////////////////

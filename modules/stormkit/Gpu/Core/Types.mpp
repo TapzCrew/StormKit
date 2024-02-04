@@ -977,9 +977,6 @@ export {
         using ClearValue = std::variant<ClearColor, ClearDepthStencil>;
         using SpirvID    = core::UInt32;
 
-        template<class T>
-        using Expected = std::expected<T, Result>;
-
         template<typename T>
         class ParentRef {
           public:
@@ -997,6 +994,9 @@ export {
           private:
             core::NakedRef<const T> m_parent;
         };
+
+        template<class T>
+        using Expected = std::expected<T, Result>;
 
         class Instance;
 

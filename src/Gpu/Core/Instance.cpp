@@ -35,8 +35,7 @@ namespace stormkit::gpu {
         constexpr auto STORMKIT_VK_VERSION =
             vkMakeVersion<core::Int32>(core::STORMKIT_MAJOR_VERSION,
                                        core::STORMKIT_MINOR_VERSION,
-                                       core::STORMKIT_PATCH_VERSION
-                                       );
+                                       core::STORMKIT_PATCH_VERSION);
 
         inline constexpr auto BASE_EXTENSIONS =
             std::array { "VK_KHR_get_physical_device_properties2" };
@@ -136,7 +135,7 @@ namespace stormkit::gpu {
         m_vk_context = vk::raii::Context();
 
         const auto exts = m_vk_context->enumerateInstanceExtensionProperties();
-        m_extensions    = exts | std::views::transform([](auto   &&extension) noexcept {
+        m_extensions    = exts | std::views::transform([](auto&& extension) noexcept {
                            return std::string { extension.extensionName };
                        }) |
                        std::ranges::to<std::vector>();
@@ -185,9 +184,10 @@ namespace stormkit::gpu {
                                      .setPEnabledExtensionNames(instance_extensions)
                                      .setPEnabledLayerNames(validation_layers);
 
-        return vkCreate<vk::raii::Instance>(m_vk_context, create_info)
+        return m_vk_context->createInstance(create_info)
             .transform(core::monadic::set(m_vk_instance))
-            .transform([this]() noexcept { VULKAN_HPP_DEFAULT_DISPATCHER.init(*m_vk_instance.get()); });
+            .transform(
+                [this]() noexcept { VULKAN_HPP_DEFAULT_DISPATCHER.init(*m_vk_instance.get()); });
     }
 
     /////////////////////////////////////
@@ -211,21 +211,19 @@ namespace stormkit::gpu {
                     std::bit_cast<decltype(vk::DebugUtilsMessengerCreateInfoEXT::pfnUserCallback)>(
                         &debugCallback));
 
-        return vkCreate<vk::raii::DebugUtilsMessengerEXT>(m_vk_instance, create_info)
+        return m_vk_instance->createDebugUtilsMessengerEXT(create_info)
             .transform(core::monadic::set(m_vk_messenger));
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     auto Instance::doRetrievePhysicalDevices() noexcept -> VulkanExpected<void> {
-        return vkCall(*m_vk_instance, &vk::raii::Instance::enumeratePhysicalDevices)
-            .transform([this](auto&& physical_devices) {
-                m_physical_devices =
-                    std::forward<decltype(physical_devices)>(physical_devices) |
-                    std::views::transform([this](auto&& physical_device) {
-                        return PhysicalDevice { std::move(physical_device), *this };
-                    }) |
-                    std::ranges::to<std::vector>();
-            });
+        return m_vk_instance->enumeratePhysicalDevices().transform([this](auto&& physical_devices) {
+            m_physical_devices = std::forward<decltype(physical_devices)>(physical_devices) |
+                                 std::views::transform([this](auto&& physical_device) {
+                                     return PhysicalDevice { std::move(physical_device), *this };
+                                 }) |
+                                 std::ranges::to<std::vector>();
+        });
     }
 } // namespace stormkit::gpu

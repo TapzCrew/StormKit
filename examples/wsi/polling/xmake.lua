@@ -15,6 +15,7 @@ do
 	add_files("src/main.cpp")
 	if is_plat("windows") then
 		add_files("win32/*.manifest")
+    add_ldflags("-Wl,/SUBSYSTEM:WINDOWS", {force = true})
 	end
 
 	if has_config("mold") then
