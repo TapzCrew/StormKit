@@ -128,7 +128,7 @@ modules = {
       "libxcb",
       "wayland",
     } or nil,
-    defines = {
+    public_defines = {
       "VK_NO_PROTOTYPES",
       "VMA_DYNAMIC_VULKAN_FUNCTIONS=1",
       "VMA_STATIC_VULKAN_FUNCTIONS=0",
@@ -136,7 +136,8 @@ modules = {
       "VULKAN_HPP_NO_STRUCT_CONSTRUCTORS",
       "VULKAN_HPP_NO_UNION_CONSTRUCTORS",
       "VULKAN_HPP_STORAGE_SHARED",
-      "VULKAN_HPP_NO_EXCEPTIONS"
+      "VULKAN_HPP_NO_EXCEPTIONS",
+      "VULKAN_HPP_NO_CONSTRUCTORS"
     },
     custom = function()
       if is_plat("linux") then
@@ -422,6 +423,10 @@ for name, module in pairs(modules) do
 
       if module.defines then
         add_defines(module.defines)
+      end
+
+      if module.public_defines then
+        add_defines(module.public_defines, { public = true })
       end
 
       if module.cxxflags then

@@ -57,7 +57,8 @@ namespace stormkit::gpu {
 
         for (const auto& subpass : m_description.subpasses) {
             auto& color_attachment_ref = color_attachment_refs.emplace_back(
-                subpass.color_attachment_refs | std::views::transform(monadic::vkRef()) | std::ranges::to<std::vector>());
+                subpass.color_attachment_refs | std::views::transform(monadic::vkRef()) |
+                std::ranges::to<std::vector>());
             auto& resolve_attachment_ref = resolve_attachment_refs.emplace_back(
                 subpass.resolve_attachment_refs | std::views::transform(monadic::vkRef()) |
                 std::ranges::to<std::vector>());
@@ -91,7 +92,9 @@ namespace stormkit::gpu {
                                      .setSubpasses(subpasses)
                                      .setDependencies(subpasses_deps);
 
-        return vkCreate<vk::raii::RenderPass>(toRaiiVkHandle()(device()), create_info)
+        return device()
+            .vkHandle()
+            .createRenderPass(create_info)
             .transform(core::monadic::set(m_vk_render_pass));
     }
 

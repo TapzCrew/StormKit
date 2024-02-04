@@ -13,6 +13,7 @@ import std;
 import :Meta;
 
 import :Utils.AsCast;
+import :Utils.Functional;
 
 export namespace stormkit::core::monadic {
     struct Anything {

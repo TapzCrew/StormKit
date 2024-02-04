@@ -19,12 +19,11 @@ namespace stormkit::gpu {
     Buffer::Buffer(const Device& device, const CreateInfo& info, bool persistently_mapped, Tag)
         : DeviceObject { device }, m_usages { info.usages }, m_size { info.size },
           m_is_persistently_mapped { persistently_mapped } {
-        const auto create_info = vk::BufferCreateInfo {}
-                                     .setSize(m_size)
-                                     .setUsage(core::narrow<vk::BufferUsageFlagBits>(m_usages))
-                                     .setSharingMode(vk::SharingMode::eExclusive);
-
-        vkCreate<vk::raii::Buffer>(this->device().vkHandle(), create_info)
+        this->device()
+            .vkHandle()
+            .createBuffer({ .size        = m_size,
+                            .usage       = core::narrow<vk::BufferUsageFlagBits>(m_usages),
+                            .sharingMode = vk::SharingMode::eExclusive })
             .transform(core::monadic::set(m_vk_buffer))
             .transform([this, &info]() noexcept -> VulkanExpected<void> {
                 const auto requirements = m_vk_buffer->getMemoryRequirements();
@@ -34,12 +33,14 @@ namespace stormkit::gpu {
 
                 auto&& allocator = this->device().vmaAllocator();
 
-                try {
-                    m_vma_allocation = allocator.allocateMemoryUnique(requirements, allocate_info);
-                    allocator.bindBufferMemory(*m_vma_allocation, *m_vk_buffer.get());
-                } catch (const vk::SystemError& err) {
-                    return std::unexpected { core::narrow<vk::Result>(err.code().value()) };
-                }
+                auto&& [error, m_vma_allocation] =
+                    allocator.allocateMemoryUnique(requirements, allocate_info);
+                if (error != vk::Result::eSuccess)
+                    return std::unexpected { core::narrow<vk::Result>(error) };
+
+                error = allocator.bindBufferMemory(*m_vma_allocation, *m_vk_buffer.get());
+                if (error != vk::Result::eSuccess)
+                    return std::unexpected { core::narrow<vk::Result>(error) };
 
                 if (m_is_persistently_mapped) [[maybe_unused]]
                     auto _ = map(0u);
@@ -53,7 +54,7 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     auto Buffer::findMemoryType(core::UInt                                     type_filter,
                                 vk::MemoryPropertyFlags                        properties,
-                                const vk::PhysicalDeviceMemoryProperties     & mem_properties,
+                                const vk::PhysicalDeviceMemoryProperties&      mem_properties,
                                 [[maybe_unused]] const vk::MemoryRequirements& mem_requirements)
         -> core::UInt {
         for (auto i : core::range(mem_properties.memoryTypeCount)) {

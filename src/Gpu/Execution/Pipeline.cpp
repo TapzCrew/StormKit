@@ -17,11 +17,10 @@ import :Execution.RasterPipelineState;
 namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
-    auto Pipeline::doInitRasterPipeline(
-        const PipelineLayout                             & layout,
-        const RenderPass                                 & render_pass,
-        std::optional<core::NakedRef<const PipelineCache>> pipeline_cache) noexcept
-        -> VulkanExpected<void> {
+    auto Pipeline::doInitRasterPipeline(const PipelineLayout& layout,
+                                        const RenderPass&     render_pass,
+                                        std::optional<core::NakedRef<const PipelineCache>>
+                                            pipeline_cache) noexcept -> VulkanExpected<void> {
         const auto& state = core::as<RasterPipelineState>(m_state);
 
         const auto binding_descriptions =
@@ -30,7 +29,8 @@ namespace stormkit::gpu {
                 return vk::VertexInputBindingDescription {}
                     .setBinding(binding_description.binding)
                     .setStride(binding_description.stride)
-                    .setInputRate(core::narrow<vk::VertexInputRate>(binding_description.input_rate));
+                    .setInputRate(
+                        core::narrow<vk::VertexInputRate>(binding_description.input_rate));
             }) |
             std::ranges::to<std::vector>();
 
@@ -51,7 +51,8 @@ namespace stormkit::gpu {
 
         const auto input_assembly =
             vk::PipelineInputAssemblyStateCreateInfo {}
-                .setTopology(core::narrow<vk::PrimitiveTopology>(state.input_assembly_state.topology))
+                .setTopology(
+                    core::narrow<vk::PrimitiveTopology>(state.input_assembly_state.topology))
                 .setPrimitiveRestartEnable(state.input_assembly_state.primitive_restart_enable);
 
         const auto viewports = state.viewport_state.viewports |
@@ -81,8 +82,10 @@ namespace stormkit::gpu {
             vk::PipelineRasterizationStateCreateInfo {}
                 .setDepthClampEnable(state.rasterization_state.depth_clamp_enable)
                 .setRasterizerDiscardEnable(state.rasterization_state.rasterizer_discard_enable)
-                .setPolygonMode(core::narrow<vk::PolygonMode>(state.rasterization_state.polygon_mode))
-                .setCullMode(core::narrow<vk::CullModeFlagBits>(state.rasterization_state.cull_mode))
+                .setPolygonMode(
+                    core::narrow<vk::PolygonMode>(state.rasterization_state.polygon_mode))
+                .setCullMode(
+                    core::narrow<vk::CullModeFlagBits>(state.rasterization_state.cull_mode))
                 .setFrontFace(core::narrow<vk::FrontFace>(state.rasterization_state.front_face))
                 .setLineWidth(state.rasterization_state.line_width);
 
@@ -122,22 +125,23 @@ namespace stormkit::gpu {
                                      state.color_blend_state.blend_constants[2],
                                      state.color_blend_state.blend_constants[3] });
 
-        const auto states =
-            state.dynamic_state.dynamics |
-            std::views::transform([](auto&& s) noexcept { return core::narrow<vk::DynamicState>(s); }) |
-            std::ranges::to<std::vector>();
+        const auto states = state.dynamic_state.dynamics |
+                            std::views::transform([](auto&& s) noexcept {
+                                return core::narrow<vk::DynamicState>(s);
+                            }) |
+                            std::ranges::to<std::vector>();
 
         const auto dynamic_state = vk::PipelineDynamicStateCreateInfo {}.setDynamicStates(states);
 
-        const auto shaders = state.shader_state.shaders |
-                             std::views::transform([](auto&& shader) noexcept {
-                                 static auto NAME = "main";
-                                 return vk::PipelineShaderStageCreateInfo {}
-                                     .setStage(core::narrow<vk::ShaderStageFlagBits>(shader->type()))
-                                     .setModule(toVkHandle()(shader))
-                                     .setPName(NAME);
-                             }) |
-                             std::ranges::to<std::vector>();
+        const auto shaders =
+            state.shader_state.shaders | std::views::transform([](auto&& shader) noexcept {
+                static auto NAME = "main";
+                return vk::PipelineShaderStageCreateInfo {}
+                    .setStage(core::narrow<vk::ShaderStageFlagBits>(shader->type()))
+                    .setModule(toVkHandle()(shader))
+                    .setPName(NAME);
+            }) |
+            std::ranges::to<std::vector>();
 
         const auto depth_stencil =
             vk::PipelineDepthStencilStateCreateInfo {}
@@ -170,13 +174,14 @@ namespace stormkit::gpu {
 
         const auto vk_pipeline_cache =
             core::either(pipeline_cache,
-                         core::monadic::map(toRaiiVkHandle(),
-                                                            core::monadic::init<OptCache>()),
+                         core::monadic::map(toRaiiVkHandle(), core::monadic::init<OptCache>()),
                          core::monadic::init<OptCache>(nullptr));
 
-        return vkCreate<vk::raii::Pipeline>(toRaiiVkHandle()(device()),
-                                            vk_pipeline_cache,
-                                            create_info)
-            .transform(core::monadic::set(m_vk_pipeline));
+        return device()
+            .vkHandle()
+            .createGraphicsPipelines(vk_pipeline_cache, create_info)
+            .transform([this](auto&& pipelines) noexcept {
+                m_vk_pipeline = std::move(pipelines.front());
+            });
     }
 } // namespace stormkit::gpu

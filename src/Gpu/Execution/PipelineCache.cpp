@@ -34,9 +34,9 @@ namespace stormkit::gpu {
         std::ranges::copy(physical_device_infos.pipeline_cache_uuid,
                           std::ranges::begin(m_serialized.uuid.value));
 
-        const auto create_info = vk::PipelineCacheCreateInfo {};
-
-        return vkCreate<vk::raii::PipelineCache>(this->device().vkHandle(), create_info)
+        return this->device()
+            .vkHandle()
+            .createPipelineCache({})
             .transform(core::monadic::set(m_vk_pipeline_cache))
             .transform([this] noexcept -> void {
                 ilog("Created new pipeline cache at {}", m_path.string());
@@ -97,7 +97,9 @@ namespace stormkit::gpu {
 
         const auto create_info = vk::PipelineCacheCreateInfo {}.setInitialData<core::Byte>(data);
 
-        return vkCreate<vk::raii::PipelineCache>(this->device().vkHandle(), create_info)
+        return this->device()
+            .vkHandle()
+            .createPipelineCache(create_info)
             .transform(core::monadic::set(m_vk_pipeline_cache))
             .transform([this]() noexcept -> void {
                 ilog("Loading pipeline cache {}", m_path.string());
@@ -108,24 +110,21 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     auto PipelineCache::saveCache() -> void {
-        vkCall(*m_vk_pipeline_cache, &vk::raii::PipelineCache::getData)
-            .transform([this](auto&& data) noexcept {
-                m_serialized.guard.data_size = std::size(data);
-                m_serialized.guard.data_hash = 0u;
+        auto data                    = m_vk_pipeline_cache->getData();
+        m_serialized.guard.data_size = std::size(data);
+        m_serialized.guard.data_hash = 0u;
 
-                for (auto v : data) core::hashCombine(m_serialized.guard.data_hash, v);
+        for (auto v : data) core::hashCombine(m_serialized.guard.data_hash, v);
 
-                auto stream = std::ofstream { m_path.string(), std::ios::binary | std::ios::trunc };
-                core::write(stream, core::asByteView(m_serialized.guard));
+        auto stream = std::ofstream { m_path.string(), std::ios::binary | std::ios::trunc };
 
-                core::write(stream, core::asByteView(m_serialized.infos));
-                core::write(stream, core::asByteView(m_serialized.uuid.value));
-                core::write(stream, core::asByteView(data));
-                ilog("Saving pipeline cache at {}", m_path.string());
-            })
-            .transform_error([this](auto&& error) noexcept {
-                ilog("Failed to save pipeline cache at {}, reason: {}", m_path.string(), error);
-                return error;
-            });
+        core::write(stream, core::asByteView(m_serialized.guard));
+
+        core::write(stream, core::asByteView(m_serialized.infos));
+        core::write(stream, core::asByteView(m_serialized.uuid.value));
+        core::write(stream, core::asByteView(data));
+        ilog("Saving pipeline cache at {}", m_path.string());
+        // elog("Failed to save pipeline cache at {}, reason: {}", m_path.string(), error);
+        // return error;
     }
 } // namespace stormkit::gpu

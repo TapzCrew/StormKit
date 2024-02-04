@@ -218,25 +218,24 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE Sampler::Sampler(const Device& device, const Settings& settings, Tag)
         : DeviceObject { device }, m_settings { settings } {
-        auto create_info =
-            vk::SamplerCreateInfo {}
-                .setMagFilter(core::narrow<vk::Filter>(m_settings.mag_filter))
-                .setMinFilter(core::narrow<vk::Filter>(m_settings.min_filter))
-                .setMipmapMode(core::narrow<vk::SamplerMipmapMode>(m_settings.mipmap_mode))
-                .setAddressModeU(core::narrow<vk::SamplerAddressMode>(m_settings.address_mode_u))
-                .setAddressModeV(core::narrow<vk::SamplerAddressMode>(m_settings.address_mode_v))
-                .setAddressModeW(core::narrow<vk::SamplerAddressMode>(m_settings.address_mode_w))
-                .setMipLodBias(m_settings.mip_lod_bias)
-                .setAnisotropyEnable(m_settings.enable_anisotropy)
-                .setMaxAnisotropy(m_settings.max_anisotropy)
-                .setCompareEnable(m_settings.compare_enable)
-                .setCompareOp(core::narrow<vk::CompareOp>(m_settings.compare_operation))
-                .setMinLod(m_settings.min_lod)
-                .setMaxLod(m_settings.max_lod)
-                .setBorderColor(core::narrow<vk::BorderColor>(m_settings.border_color))
-                .setUnnormalizedCoordinates(m_settings.unnormalized_coordinates);
-
-        vkCreate<vk::raii::Sampler>(this->device().vkHandle(), std::move(create_info))
+        this->device()
+            .vkHandle()
+            .createSampler(
+                { .magFilter    = core::narrow<vk::Filter>(m_settings.mag_filter),
+                  .minFilter    = core::narrow<vk::Filter>(m_settings.min_filter),
+                  .mipmapMode   = core::narrow<vk::SamplerMipmapMode>(m_settings.mipmap_mode),
+                  .addressModeU = core::narrow<vk::SamplerAddressMode>(m_settings.address_mode_u),
+                  .addressModeV = core::narrow<vk::SamplerAddressMode>(m_settings.address_mode_v),
+                  .addressModeW = core::narrow<vk::SamplerAddressMode>(m_settings.address_mode_w),
+                  .mipLodBias   = m_settings.mip_lod_bias,
+                  .anisotropyEnable = m_settings.enable_anisotropy,
+                  .maxAnisotropy    = m_settings.max_anisotropy,
+                  .compareEnable    = m_settings.compare_enable,
+                  .compareOp        = core::narrow<vk::CompareOp>(m_settings.compare_operation),
+                  .minLod           = m_settings.min_lod,
+                  .maxLod           = m_settings.max_lod,
+                  .borderColor      = core::narrow<vk::BorderColor>(m_settings.border_color),
+                  .unnormalizedCoordinates = m_settings.unnormalized_coordinates })
             .transform_error(core::monadic::map(core::monadic::as<Result>(), core::throwError()));
     }
 
@@ -304,20 +303,18 @@ namespace stormkit::gpu {
                 .setBaseArrayLayer(m_subresource_range.base_array_layer)
                 .setLayerCount(m_subresource_range.layer_count);
 
-        const auto components = vk::ComponentMapping {}
-                                    .setR(vk::ComponentSwizzle::eR)
-                                    .setG(vk::ComponentSwizzle::eG)
-                                    .setB(vk::ComponentSwizzle::eB)
-                                    .setA(vk::ComponentSwizzle::eA);
-
-        const auto create_info = vk::ImageViewCreateInfo {}
-                                     .setImage(*this->image().vkHandle())
-                                     .setViewType(core::narrow<vk::ImageViewType>(m_type))
-                                     .setFormat(core::narrow<vk::Format>(this->image().format()))
-                                     .setComponents(components)
-                                     .setSubresourceRange(vk_subresource_range);
-
-        vkCreate<vk::raii::ImageView>(this->device().vkHandle(), create_info)
+        this->device()
+            .vkHandle()
+            .createImageView({
+                .image            = *this->image().vkHandle(),
+                .viewType         = core::narrow<vk::ImageViewType>(m_type),
+                .format           = core::narrow<vk::Format>(this->image().format()),
+                .components       = { .r = vk::ComponentSwizzle::eR,
+                                      .g = vk::ComponentSwizzle::eG,
+                                      .b = vk::ComponentSwizzle::eB,
+                                      .a = vk::ComponentSwizzle::eA },
+                .subresourceRange = vk_subresource_range,
+            })
             .transform(core::monadic::set(m_vk_image_view))
             .transform_error(core::monadic::map(core::monadic::as<Result>(), core::throwError()));
     }
@@ -402,7 +399,9 @@ namespace stormkit::gpu {
                                      .setSharingMode(vk::SharingMode::eExclusive)
                                      .setInitialLayout(vk::ImageLayout::eUndefined);
 
-        vkCreate<vk::raii::Image>(this->device().vkHandle(), create_info)
+        this->device()
+            .vkHandle()
+            .createImage(create_info)
             .transform(core::monadic::set(m_vk_image))
             .transform([this, &info]() noexcept -> VulkanExpected<void> {
                 const auto requirements = m_vk_image->getMemoryRequirements();
@@ -412,12 +411,10 @@ namespace stormkit::gpu {
 
                 auto&& allocator = this->device().vmaAllocator();
 
-                try {
-                    m_vma_allocation = allocator.allocateMemoryUnique(requirements, allocate_info);
-                    allocator.bindImageMemory(*m_vma_allocation, *m_vk_image.get());
-                } catch (const vk::SystemError& err) {
-                    return std::unexpected { core::narrow<vk::Result>(err.code().value()) };
-                }
+                auto&& [error, m_vma_allocation] =
+                    allocator.allocateMemoryUnique(requirements, allocate_info);
+                if (error != vk::Result::eSuccess)
+                    return std::unexpected { core::narrow<vk::Result>(error) };
                 return {};
             })
             .transform_error(core::monadic::map(core::monadic::as<Result>(), core::throwError()));
@@ -425,10 +422,10 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE Image::Image(const Device&              device,
-                                       const core::math::ExtentU& extent,
-                                       gpu::PixelFormat           format,
-                                       [[maybe_unused]] vk::Image&&                image,
+    STORMKIT_FORCE_INLINE Image::Image(const Device&                device,
+                                       const core::math::ExtentU&   extent,
+                                       gpu::PixelFormat             format,
+                                       [[maybe_unused]] vk::Image&& image,
                                        Tag)
         : Image { device, CreateInfo { extent, format, 1u, 1u }, Tag {} } {
         // m_vk_image  = std::move(image);
