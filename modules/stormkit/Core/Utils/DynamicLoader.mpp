@@ -12,7 +12,6 @@ export module stormkit.Core:Utils.DynamicLoader;
 
 import std;
 
-
 import :Utils.Assert;
 import :Utils.Pimpl;
 

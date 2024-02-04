@@ -26,11 +26,11 @@ export namespace stormkit::core {
 
         /////////////////////////////////////
         /////////////////////////////////////
-        constexpr DynamicLoaderImpl() noexcept = default;
+        STORMKIT_FORCE_INLINE constexpr DynamicLoaderImpl() noexcept = default;
 
         /////////////////////////////////////
         /////////////////////////////////////
-        ~DynamicLoaderImpl() noexcept {
+        STORMKIT_FORCE_INLINE ~DynamicLoaderImpl() noexcept {
             if (m_library_handle) [[likely]]
                 m_library_handle = nullptr;
         }
@@ -45,7 +45,7 @@ export namespace stormkit::core {
 
         /////////////////////////////////////
         /////////////////////////////////////
-        DynamicLoaderImpl(DynamicLoaderImpl&& other) noexcept
+        STORMKIT_FORCE_INLINE DynamicLoaderImpl(DynamicLoaderImpl&& other) noexcept
             : m_library_handle { std::exchange(other.m_library_handle, nullptr) } {}
 
         /////////////////////////////////////

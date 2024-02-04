@@ -4,14 +4,21 @@
 
 module;
 
+#include <xkbcommon/xkbcommon.h>
 
+#include <wayland-client-protocol.h>
+#include <wayland-cursor.h>
+
+#include <xdg-shell.h>
+#include <pointer-constraints-unstable-v1.h>
+#include <relative-pointer-unstable-v1.h>
+#include <xdg-decoration-unstable-v1.h>
 
 #include <stormkit/Core/MemoryMacro.hpp>
 
 export module stormkit.Wsi:Linux.Wayland.WindowImpl;
 
 import std;
-
 
 import stormkit.Core;
 

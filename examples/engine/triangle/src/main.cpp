@@ -23,7 +23,7 @@ auto main(std::span<const std::string_view> args) -> int {
     // core::setupSignalHandler();
 
     auto logger = log::Logger::createLoggerInstance<log::ConsoleLogger>();
-    logger.ilog("Using StormKit {}.{}.{} (branch: {}, commit_hash: {}), built with {}",
+    logger.ilog("Using StormKit {}.{}.{}\n    branch: {}\n    commit_hash: {}\n    built with {}",
          core::STORMKIT_MAJOR_VERSION,
          core::STORMKIT_MINOR_VERSION,
          core::STORMKIT_PATCH_VERSION,

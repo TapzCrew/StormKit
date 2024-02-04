@@ -4,7 +4,7 @@
 
 module;
 
-
+#include <xkbcommon/xkbcommon.h>
 
 #include <stormkit/Log/LogMacro.hpp>
 

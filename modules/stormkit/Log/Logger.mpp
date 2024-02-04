@@ -147,7 +147,7 @@ namespace stormkit::log {
     ////////////////////////////////////////
     ////////////////////////////////////////
     template<class... Args>
-    auto Logger::log(Severity severity,
+    STORMKIT_FORCE_INLINE auto Logger::log(Severity severity,
                      const Module& m,
                      std::string_view format_string,
                      Args&&...param_args) -> void {

@@ -18,11 +18,22 @@ using namespace std::literals;
 namespace stormkit::engine {
     LOGGER("stormkit.Renderer")
 
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    auto Renderer::doInit(std::string_view application_name,
+                          std::optional<core::NakedRef<const wsi::Window>>) noexcept
+        -> gpu::Expected<void> {
+        ilog("Initializing Renderer");
+        return doInitInstance(application_name).and_then([this]() noexcept {
+            return doInitDevice();
+        });
+    }
+
     /////////////////////////////////////
     /////////////////////////////////////
     auto Renderer::doInitInstance(std::string_view application_name) noexcept
         -> gpu::Expected<void> {
-        ilog("Initializing Renderer");
     }
 
     /////////////////////////////////////
