@@ -62,4 +62,4 @@ namespace stormkit::engine {
     /////////////////////////////////////
     inline auto RenderSystem::onMessageReceived(const entities::Message& message) -> void {
     }
-} // namespace stormkit::gpu
+} // namespace stormkit::engine

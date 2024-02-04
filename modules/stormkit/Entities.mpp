@@ -14,7 +14,6 @@ import std;
 
 import stormkit.Core;
 
-
 export namespace stormkit::entities {
     using Entity                         = core::UInt32;
     inline constexpr auto INVALID_ENTITY = Entity { 0 };
@@ -58,7 +57,7 @@ export namespace stormkit::entities {
     } // namespace literals
 
     struct Message {
-        core::UInt32 id;
+        core::UInt32        id;
         std::vector<Entity> entities;
     };
 
@@ -73,9 +72,9 @@ export namespace stormkit::entities {
         MessageBus(MessageBus&&);
         auto operator=(MessageBus&&) -> MessageBus&;
 
-        auto push(Message&& message) -> void;
+        auto               push(Message              &&message) -> void;
         [[nodiscard]] auto top() const -> const Message&;
-        auto pop() -> void;
+        auto               pop() -> void;
 
         [[nodiscard]] auto empty() const noexcept -> bool;
 
@@ -121,13 +120,13 @@ export namespace stormkit::entities {
       protected:
         virtual auto onMessageReceived(const Message& message) -> void = 0;
 
-        EntityManager *m_manager;
+        EntityManager        *m_manager;
         core::HashSet<Entity> m_entities;
 
         friend class EntityManager;
 
       private:
-        core::UInt32 m_priority;
+        core::UInt32   m_priority;
         ComponentTypes m_types;
     };
 
@@ -207,18 +206,18 @@ export namespace stormkit::entities {
         auto removeFromSystems(Entity e) -> void;
         auto getNeededEntities(System& system) -> void;
 
-        Entity m_next_valid_entity = 1;
+        Entity             m_next_valid_entity = 1;
         std::queue<Entity> m_free_entities;
 
-        core::HashSet<Entity> m_entities;
+        core::HashSet<Entity>       m_entities;
         mutable std::vector<Entity> m_cached_entities;
-        mutable bool m_cached_entities_dirty = true;
+        mutable bool                m_cached_entities_dirty = true;
 
         core::HashSet<Entity> m_added_entities;
         core::HashSet<Entity> m_updated_entities;
         core::HashSet<Entity> m_removed_entities;
 
-        core::HashMap<Entity, std::vector<Component::Type>> m_registered_components_for_entities;
+        core::HashMap<Entity, std::vector<Component::Type>>  m_registered_components_for_entities;
         std::set<std::unique_ptr<System>, System::Predicate> m_systems;
         core::HashMap<ComponentKey, std::unique_ptr<Component>> m_components;
 

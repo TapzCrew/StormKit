@@ -7,10 +7,10 @@
 
 #include <stormkit/Core/PlatformMacro.hpp>
 
-#include <string>
 #include <cstdint>
-#include <vector>
 #include <functional>
+#include <string>
+#include <vector>
 
 #ifdef __OBJC__
 @class StormKitWindowController;
@@ -19,7 +19,7 @@ using StormKitWindowControllerPtr = StormKitWindowController *;
 using ViewPtr = StormKitView *;
 #else
 using StormKitWindowControllerPtr = void *;
-using ViewPtr                  = void *;
+using ViewPtr                     = void *;
 #endif
 
 namespace stormkit::wsi::macos {
@@ -31,24 +31,30 @@ namespace stormkit::wsi::macos {
 
         struct Monitor {
             enum class Flags {
-                None = 0,
+                None    = 0,
                 Primary = 1
             };
 
-            Flags flags = Flags::None;
+            Flags       flags = Flags::None;
             std::string name;
 
-            struct Extent { std::uint32_t width; std::uint32_t height; };
+            struct Extent {
+                std::uint32_t width;
+                std::uint32_t height;
+            };
 
             std::vector<Extent> extents;
 
             void *handle = nullptr;
         };
 
-        macOSWindow(std::string title, std::uint32_t width, std::uint32_t height, int style) noexcept;
+        macOSWindow(std::string   title,
+                    std::uint32_t width,
+                    std::uint32_t height,
+                    int           style) noexcept;
         ~macOSWindow();
 
-        macOSWindow(const macOSWindow&) noexcept = delete;
+        macOSWindow(const macOSWindow&) noexcept                    = delete;
         auto operator=(const macOSWindow&) noexcept -> macOSWindow& = delete;
 
         macOSWindow(macOSWindow&&) noexcept;
@@ -75,18 +81,18 @@ namespace stormkit::wsi::macos {
 
         [[nodiscard]] auto visible() const noexcept -> bool;
 
-        [[nodiscard]] auto macOSHandles() const noexcept -> const Handles &;
+        [[nodiscard]] auto macOSHandles() const noexcept -> const Handles&;
 
         [[nodiscard]] auto mouseLocked() const noexcept -> bool;
         [[nodiscard]] auto mouseHided() const noexcept -> bool;
         [[nodiscard]] auto fullscreen() const noexcept -> bool;
 
-        auto setKeyRepeatEnabled(bool enabled) noexcept -> void;
+        auto               setKeyRepeatEnabled(bool enabled) noexcept -> void;
         [[nodiscard]] auto keyRepeatEnabled() const noexcept -> bool;
 
         auto setVirtualKeyboardVisible(bool visible) noexcept -> void;
 
-        auto setMousePosition(std::int32_t width, std::int32_t height) noexcept -> void;
+        auto        setMousePosition(std::int32_t width, std::int32_t height) noexcept -> void;
         static auto setMousePositionOnDesktop(std::uint32_t width, std::uint32_t height) noexcept
             -> void;
 
@@ -106,32 +112,31 @@ namespace stormkit::wsi::macos {
         std::function<void()> closeEvent;
 
         std::function<void(std::uint32_t, std::uint32_t)> resizeEvent;
-        std::function<void()> minimizeEvent;
-        std::function<void()> maximizeEvent;
+        std::function<void()>                             minimizeEvent;
+        std::function<void()>                             maximizeEvent;
 
         std::function<void()> lostFocusEvent;
         std::function<void()> gainedFocusEvent;
 
       private:
-
         StormKitWindowControllerPtr m_controller;
 
         Handles m_handles;
 
         std::string m_title;
 
-        std::uint32_t m_width = 0;
+        std::uint32_t m_width  = 0;
         std::uint32_t m_height = 0;
 
-        bool m_visible = false;
-        bool m_mouse_locked = false;
-        bool m_mouse_hided = false;
-        bool m_fullscreen = false;
+        bool m_visible            = false;
+        bool m_mouse_locked       = false;
+        bool m_mouse_hided        = false;
+        bool m_fullscreen         = false;
         bool m_key_repeat_enabled = false;
     };
 
     auto initCocoaProcess() -> void;
-} // namespace storm::window::details
+} // namespace stormkit::wsi::macos
 
 ////////////////////////////////////////////////////////////////////
 ///                      IMPLEMENTATION                          ///
@@ -171,8 +176,8 @@ namespace stormkit::wsi::macos {
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE auto macOSWindow::keyRepeatEnabled() const noexcept -> bool {
-         return m_key_repeat_enabled;
+        return m_key_repeat_enabled;
     }
-}
+} // namespace stormkit::wsi::macos
 
 #endif

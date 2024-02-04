@@ -8,8 +8,8 @@ import stormkit.Core;
 import stormkit.Log;
 import stormkit.Wsi;
 
-#include <stormkit/Main/MainMacro.hpp>
 #include <stormkit/Log/LogMacro.hpp>
+#include <stormkit/Main/MainMacro.hpp>
 
 NAMED_LOGGER(logger, "StormKit.Examples.Log.EventHandler");
 

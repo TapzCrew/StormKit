@@ -50,11 +50,9 @@ export namespace stormkit::core {
                                             Pred,
                                             Proj1,
                                             Proj2>
-    constexpr auto findFirstNotOf(R1&&  first,
-                                  R2&&  second,
-                                  Pred  pred  = {},
-                                  Proj1 proj1 = {},
-                                  Proj2 proj2 = {}) -> decltype(auto) {
+    constexpr auto
+        findFirstNotOf(R1&& first, R2&& second, Pred pred = {}, Proj1 proj1 = {}, Proj2 proj2 = {})
+            -> decltype(auto) {
         auto first1 = std::ranges::begin(first);
         auto last1  = std::ranges::end(first);
         auto first2 = std::ranges::begin(second);

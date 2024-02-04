@@ -14,7 +14,6 @@ import frozen;
 
 import stormkit.Core;
 
-
 export {
     namespace stormkit::wsi {
         enum class WM {

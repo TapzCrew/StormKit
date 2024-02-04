@@ -14,8 +14,6 @@ import std;
 
 import stormkit.Core;
 
-
-
 import stormkit.Gpu.Vulkan;
 
 import :Core.Types;
@@ -40,9 +38,11 @@ export namespace stormkit::gpu {
         auto operator=(Instance&&) noexcept -> Instance&;
 
         [[nodiscard]] static auto create(std::string app_name = "",
-                    bool verbose = (core::STORMKIT_BUILD_TYPE == "Debug")) noexcept -> Expected<Instance>;
-        [[nodiscard]] static auto allocate(std::string app_name = "",
-                      bool verbose = (core::STORMKIT_BUILD_TYPE == "Debug")) noexcept
+                                         bool        verbose  = (core::STORMKIT_BUILD_TYPE ==
+                                                         "Debug")) noexcept -> Expected<Instance>;
+        [[nodiscard]] static auto
+            allocate(std::string app_name = "",
+                     bool        verbose  = (core::STORMKIT_BUILD_TYPE == "Debug")) noexcept
             -> Expected<std::unique_ptr<Instance>>;
 
         [[nodiscard]] auto physicalDevices() const noexcept -> const std::vector<PhysicalDevice>&;
@@ -83,13 +83,13 @@ export namespace stormkit::gpu {
         auto doRetrievePhysicalDevices() noexcept -> VulkanExpected<void>;
 
         std::string m_app_name;
-        bool m_validation_layers_enabled;
+        bool        m_validation_layers_enabled;
 
         core::DeferInit<vk::raii::Context>                m_vk_context;
         core::DeferInit<vk::raii::Instance>               m_vk_instance;
         core::DeferInit<vk::raii::DebugUtilsMessengerEXT> m_vk_messenger;
 
-        std::vector<std::string> m_extensions;
+        std::vector<std::string>    m_extensions;
         std::vector<PhysicalDevice> m_physical_devices;
     };
 
@@ -170,14 +170,16 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto Instance::create(std::string app_name, bool enable_validation) noexcept
+    STORMKIT_FORCE_INLINE auto Instance::create(std::string app_name,
+                                                bool        enable_validation) noexcept
         -> Expected<Instance> try {
         return Instance { std::move(app_name), enable_validation, Tag {} };
     } catch (Result result) { return std::unexpected(result); }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto Instance::allocate(std::string app_name, bool enable_validation) noexcept
+    STORMKIT_FORCE_INLINE auto Instance::allocate(std::string app_name,
+                                                  bool        enable_validation) noexcept
         -> Expected<std::unique_ptr<Instance>> try {
         return std::make_unique<Instance>(std::move(app_name), enable_validation, Tag {});
     } catch (Result result) { return std::unexpected(result); }

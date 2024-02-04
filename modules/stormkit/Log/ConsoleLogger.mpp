@@ -12,7 +12,6 @@ import std;
 
 import stormkit.Core;
 
-
 import :Logger;
 import :Severity;
 

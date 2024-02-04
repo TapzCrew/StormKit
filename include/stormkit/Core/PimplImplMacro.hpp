@@ -8,7 +8,7 @@
 #define PIMPL_IMPLEMENTATION                                                   \
     namespace stormkit::core {                                                 \
         template<class T, bool Defer>                                          \
-        Pimpl<T, Defer>::Pimpl() noexcept(not Defer) {                            \
+        Pimpl<T, Defer>::Pimpl() noexcept(not Defer) {                         \
             if constexpr (Defer) init();                                       \
         }                                                                      \
         template<class T, bool Defer>                                          \

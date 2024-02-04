@@ -12,7 +12,6 @@ export module stormkit.Core:Meta.NamedType;
 
 import std;
 
-
 // import :Hash;
 import :Utils.Numerics;
 
@@ -236,6 +235,7 @@ namespace stormkit::core {
     template<class T, class Tag>
     constexpr auto NamedType<T, Tag>::operator=(NamedType &&) noexcept(
         std::is_nothrow_move_assignable_v<UnderlyingType>) -> NamedType & = default;
+
     // clang-format on
 
     // template<class T, class Tag>

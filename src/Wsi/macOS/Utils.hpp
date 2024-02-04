@@ -10,6 +10,6 @@ namespace stormkit::wsi::macos {
     auto localizedKey(char code) noexcept -> int;
     auto nonLocalizedKey(unsigned short code) noexcept -> int;
     auto usageToVirtualCode(int usage) noexcept -> int;
-} // namespace storm::window::details
+} // namespace stormkit::wsi::macos
 
 #endif

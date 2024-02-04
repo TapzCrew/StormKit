@@ -15,9 +15,9 @@
             checkVkError(_result, STORMKIT_STRINGIFY(line)); \
         } while (false);
 #else
-    #define CHECK_VK_ERROR(line)                  \
-        {                                         \
-            const auto _result = line;            \
+    #define CHECK_VK_ERROR(line)                            \
+        {                                                   \
+            const auto _result = line;                      \
             core::ensures(_result == vk::Result::eSuccess); \
         }
 #endif

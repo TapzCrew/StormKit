@@ -13,7 +13,6 @@ import std;
 import stormkit.Core;
 import stormkit.Log;
 
-
 export {
     struct Vertex {
         stormkit::core::math::Vector2F position;

@@ -18,15 +18,15 @@ namespace storm::window {
         InputHandlerImpl();
         ~InputHandlerImpl();
 
-        InputHandlerImpl(InputHandlerImpl &&);
-        InputHandlerImpl &operator=(InputHandlerImpl &&);
+        InputHandlerImpl(InputHandlerImpl&&);
+        InputHandlerImpl& operator=(InputHandlerImpl&&);
 
         static bool isKeyPressed(Key key);
         static bool isMouseButtonPressed(MouseButton button);
         static void setMousePosition(core::math::Vector2U position);
-        static void setMousePosition(core::math::Vector2U position, const Window &relative_to);
+        static void setMousePosition(core::math::Vector2U position, const Window& relative_to);
         static core::math::Vector2U getMousePosition();
-        static core::math::Vector2U getMousePosition(const Window &relative_to);
+        static core::math::Vector2U getMousePosition(const Window& relative_to);
 
         static void setVirtualKeyboardVisible(bool visible);
 

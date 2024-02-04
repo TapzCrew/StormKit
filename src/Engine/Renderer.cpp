@@ -18,7 +18,6 @@ using namespace std::literals;
 namespace stormkit::engine {
     LOGGER("stormkit.Renderer")
 
-
     /////////////////////////////////////
     /////////////////////////////////////
     auto Renderer::doInit(std::string_view application_name,

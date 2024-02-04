@@ -135,7 +135,7 @@ namespace stormkit::gpu {
         m_vk_context = vk::raii::Context();
 
         const auto exts = m_vk_context->enumerateInstanceExtensionProperties();
-        m_extensions    = exts | std::views::transform([](auto&& extension) noexcept {
+        m_extensions    = exts | std::views::transform([](auto   &&extension) noexcept {
                            return std::string { extension.extensionName };
                        }) |
                        std::ranges::to<std::vector>();

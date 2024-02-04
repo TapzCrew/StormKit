@@ -33,8 +33,8 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto FrameGraphBuilder::createFrameGraph(const gpu::Device& device,
-                                             BakedFrameGraph   *old) -> BakedFrameGraph {
+    auto FrameGraphBuilder::createFrameGraph(const gpu::Device& device, BakedFrameGraph *old)
+        -> BakedFrameGraph {
         auto data = allocatePhysicalResources(device);
 
         return BakedFrameGraph { *this, std::move(data), old };
@@ -209,7 +209,7 @@ namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     auto FrameGraphBuilder::buildRenderPassPhysicalDescription(
-        const GraphTask&                          task,
+        const GraphTask                         & task,
         core::HashMap<GraphID, gpu::ImageLayout>& layouts) noexcept -> RenderPassData {
         auto to_remove = std::vector<GraphID> {};
 

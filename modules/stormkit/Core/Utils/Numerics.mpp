@@ -10,7 +10,6 @@ export module stormkit.Core:Utils.Numerics;
 
 import std;
 
-
 import :Meta.Traits;
 import :Meta.Concepts;
 import :Utils.AsCast;

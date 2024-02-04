@@ -27,8 +27,8 @@ Renderer::Renderer(Renderer&&) noexcept = default;
 auto Renderer::operator=(Renderer&&) noexcept -> Renderer& = default;
 
 auto Renderer::renderFrame() -> void {
-    const auto& surface_extent = m_surface->extent();
-    const auto surface_extentf = core::math::ExtentF { surface_extent };
+    const auto& surface_extent  = m_surface->extent();
+    const auto  surface_extentf = core::math::ExtentF { surface_extent };
 
     if (m_surface->needRecreate()) {
         m_surface->recreate();
@@ -51,7 +51,7 @@ auto Renderer::renderFrame() -> void {
 
     auto sets = core::makeConstObserverStaticArray(m_board.descriptor_set);
 
-    auto frame          = std::move(m_surface->acquireNextFrame().value());
+    auto  frame         = std::move(m_surface->acquireNextFrame().value());
     auto& framebuffer   = m_framebuffers[frame.image_index];
     auto& commandbuffer = m_command_buffers[frame.image_index];
 
@@ -130,8 +130,8 @@ auto Renderer::doInitBaseRenderObjects() -> void {
 }
 
 auto Renderer::doInitMeshRenderObjects() -> void {
-    const auto& surface_extent = m_surface->extent();
-    const auto surface_extentf = core::math::ExtentF { surface_extent };
+    const auto& surface_extent  = m_surface->extent();
+    const auto  surface_extentf = core::math::ExtentF { surface_extent };
 
     m_board.vertex_shader   = m_device->allocateShader(SHADER_DATA, gpu::ShaderStageFlag::Vertex);
     m_board.fragment_shader = m_device->allocateShader(SHADER_DATA, gpu::ShaderStageFlag::Fragment);
@@ -148,11 +148,9 @@ auto Renderer::doInitMeshRenderObjects() -> void {
                                           .stages  = gpu::ShaderStageFlag::Fragment,
                                           .descriptor_count = 1 });
     m_descriptor_set_layout->bake();
-    m_descriptor_pool =
-        m_device->allocateDescriptorPool(std::array { gpu::DescriptorPool::Size {
-                                             gpu::DescriptorType::Combined_Image_Sampler,
-                                             1 } },
-                                         1);
+    m_descriptor_pool = m_device->allocateDescriptorPool(
+        std::array { gpu::DescriptorPool::Size { gpu::DescriptorType::Combined_Image_Sampler, 1 } },
+        1);
 
     m_render_pass = m_device->allocateRenderPass(description);
 
@@ -211,9 +209,9 @@ auto Renderer::doInitMeshRenderObjects() -> void {
 }
 
 auto Renderer::doInitPerFrameObjects() -> void {
-    const auto& surface_extent = m_surface->extent();
-    const auto surface_extentf = core::math::ExtentF { surface_extent };
-    const auto buffering_count = m_surface->bufferingCount();
+    const auto& surface_extent  = m_surface->extent();
+    const auto  surface_extentf = core::math::ExtentF { surface_extent };
+    const auto  buffering_count = m_surface->bufferingCount();
 
     m_surface_views.clear();
     m_surface_views.reserve(std::size(m_surface->images()));
@@ -223,8 +221,8 @@ auto Renderer::doInitPerFrameObjects() -> void {
     m_framebuffers.reserve(buffering_count);
 
     for (auto i : core::range(buffering_count)) {
-        const auto& image_view = m_surface_views[i];
-        auto attachments       = core::makeConstRefArray(image_view);
+        const auto& image_view  = m_surface_views[i];
+        auto        attachments = core::makeConstRefArray(image_view);
 
         m_framebuffers.emplace_back(*m_render_pass, surface_extent, std::move(attachments));
     }

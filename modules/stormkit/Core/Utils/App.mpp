@@ -12,7 +12,6 @@ export module stormkit.Core:Utils.App;
 
 import std;
 
-
 import :Utils.Numerics;
 
 export namespace stormkit::core {

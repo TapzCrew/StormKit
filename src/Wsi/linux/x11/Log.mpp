@@ -13,7 +13,6 @@ import std;
 import stormkit.Core;
 import stormkit.Log;
 
-
 export namespace stormkit::wsi::linux::x11 {
     IN_MODULE_LOGGER("StormKit.Wsi.Linux.X11")
 } // namespace stormkit::wsi::linux::x11

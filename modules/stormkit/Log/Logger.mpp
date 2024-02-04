@@ -40,8 +40,8 @@ export namespace stormkit::log {
         [[nodiscard]] static auto allocateLoggerInstance(Args&&...param_args) -> std::unique_ptr<T>;
 
         template<class... Args>
-        static auto log(Severity severity,
-                        const Module& module,
+        static auto log(Severity         severity,
+                        const Module   & module,
                         std::string_view format_string,
                         Args&&...param_args) -> void;
 
@@ -69,7 +69,7 @@ export namespace stormkit::log {
 
       protected:
         LogClock::time_point m_start_time;
-        Severity m_log_level;
+        Severity             m_log_level;
     };
 
     struct Module {
@@ -135,7 +135,8 @@ namespace stormkit::log {
     ////////////////////////////////////////
     ////////////////////////////////////////
     template<class T, typename... Args>
-    STORMKIT_FORCE_INLINE auto Logger::allocateLoggerInstance(Args&&...param_args) -> std::unique_ptr<T> {
+    STORMKIT_FORCE_INLINE auto Logger::allocateLoggerInstance(Args&&...param_args)
+        -> std::unique_ptr<T> {
         using LogClock = std::chrono::high_resolution_clock;
         static_assert(std::is_base_of<Logger, T>::value, "T must inherit Logger");
 
@@ -147,14 +148,14 @@ namespace stormkit::log {
     ////////////////////////////////////////
     ////////////////////////////////////////
     template<class... Args>
-    STORMKIT_FORCE_INLINE auto Logger::log(Severity severity,
-                     const Module& m,
-                     std::string_view format_string,
-                     Args&&...param_args) -> void {
+    STORMKIT_FORCE_INLINE auto Logger::log(Severity         severity,
+                                           const Module   & m,
+                                           std::string_view format_string,
+                                           Args&&...param_args) -> void {
         core::expects(hasLogger());
 
-        const auto format  = format_string;
-        auto memory_buffer = std::string {};
+        const auto format        = format_string;
+        auto       memory_buffer = std::string {};
         std::vformat_to(std::back_inserter(memory_buffer),
                         format,
                         std::make_format_args(param_args...));
@@ -165,9 +166,10 @@ namespace stormkit::log {
     ////////////////////////////////////////
     ////////////////////////////////////////
     template<class... Args>
-    STORMKIT_FORCE_INLINE auto Logger::log(Severity severity, std::string_view format_string, Args&&...param_args)
-        -> void {
-        log(severity, Module{}, format_string, std::forward<Args>(param_args)...);
+    STORMKIT_FORCE_INLINE auto Logger::log(Severity         severity,
+                                           std::string_view format_string,
+                                           Args&&...param_args) -> void {
+        log(severity, Module {}, format_string, std::forward<Args>(param_args)...);
     }
 
     ////////////////////////////////////////

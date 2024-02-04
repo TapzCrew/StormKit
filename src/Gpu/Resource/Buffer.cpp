@@ -54,7 +54,7 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     auto Buffer::findMemoryType(core::UInt                                     type_filter,
                                 vk::MemoryPropertyFlags                        properties,
-                                const vk::PhysicalDeviceMemoryProperties&      mem_properties,
+                                const vk::PhysicalDeviceMemoryProperties     & mem_properties,
                                 [[maybe_unused]] const vk::MemoryRequirements& mem_requirements)
         -> core::UInt {
         for (auto i : core::range(mem_properties.memoryTypeCount)) {

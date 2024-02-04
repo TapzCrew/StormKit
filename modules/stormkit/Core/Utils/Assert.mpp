@@ -12,7 +12,6 @@ import std;
 
 import :Utils.Descriptors;
 
-
 export namespace stormkit::core {
     enum class AssertType {
         Assert,

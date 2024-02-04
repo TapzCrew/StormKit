@@ -14,8 +14,7 @@ export namespace stormkit::core {
              class Hash                 = ankerl::unordered_dense::hash<Key>,
              class KeyEqual             = std::equal_to<Key>,
              class AllocatorOrContainer = std::allocator<std::pair<Key, T>>>
-    using HashMap =
-        ankerl::unordered_dense::map<Key, T, Hash, KeyEqual, AllocatorOrContainer>;
+    using HashMap = ankerl::unordered_dense::map<Key, T, Hash, KeyEqual, AllocatorOrContainer>;
 
     template<class Key,
              class Hash                 = ankerl::unordered_dense::hash<Key>,

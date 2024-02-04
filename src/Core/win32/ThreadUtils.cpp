@@ -12,10 +12,10 @@ inline constexpr auto MS_VC_EXCEPTION = DWORD { 0x406D1388 };
 #pragma pack(push, 8)
 
 struct ThreadNameInfo {
-    DWORD dwType = 0x1000;
+    DWORD  dwType = 0x1000;
     LPCSTR szName;
-    DWORD dwThreadID;
-    DWORD dwFlags = 0;
+    DWORD  dwThreadID;
+    DWORD  dwFlags = 0;
 };
 
 #pragma pack(pop)

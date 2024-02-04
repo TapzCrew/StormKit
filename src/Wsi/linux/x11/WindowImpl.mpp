@@ -5,8 +5,8 @@
 module;
 
 extern "C" {
-#include <xkbcommon/xkbcommon.h>
 #include <xkbcommon/xkbcommon-x11.h>
+#include <xkbcommon/xkbcommon.h>
 
 #include <xcb/xcb.h>
 #pragma GCC diagnostic push
@@ -15,11 +15,11 @@ extern "C" {
 #include <xcb/xkb.h>
 #undef explicit
 #pragma GCC diagnostic pop
+#include <xcb/randr.h>
+#include <xcb/xcb_icccm.h>
 #include <xcb/xcb_keysyms.h>
 #include <xcb/xfixes.h>
 #include <xcb/xinput.h>
-#include <xcb/xcb_icccm.h>
-#include <xcb/randr.h>
 }
 
 #include <stormkit/Core/MemoryMacro.hpp>
@@ -50,10 +50,10 @@ export namespace stormkit::wsi::linux::x11 {
     class WindowImpl: public ::stormkit::wsi::common::WindowImplBase {
       public:
         struct Handles {
-            xcb_connection_t *connection;
-            xcb_window_t window;
+            xcb_connection_t  *connection;
+            xcb_window_t       window;
             xcb_key_symbols_t *key_symbols;
-            xkb_state *state;
+            xkb_state         *state;
         };
 
         WindowImpl();
@@ -95,12 +95,12 @@ export namespace stormkit::wsi::linux::x11 {
         [[nodiscard]] auto mouseHidden() const noexcept -> bool;
         [[nodiscard]] auto fullscreen() const noexcept -> bool;
 
-        auto setKeyRepeatEnabled(bool enabled) noexcept -> void;
+        auto               setKeyRepeatEnabled(bool enabled) noexcept -> void;
         [[nodiscard]] auto keyRepeatEnabled() const noexcept -> bool;
 
         auto setVirtualKeyboardVisible(bool visible) noexcept -> void;
 
-        auto setMousePosition(const core::math::Vector2I& position) noexcept -> void;
+        auto        setMousePosition(const core::math::Vector2I       &position) noexcept -> void;
         static auto setMousePositionOnDesktop(const core::math::Vector2U& position) noexcept
             -> void;
 
@@ -112,13 +112,13 @@ export namespace stormkit::wsi::linux::x11 {
 
         auto handleKeyEvent(xcb_keycode_t keycode, bool up) noexcept -> void;
 
-        XCBConnectionScoped m_connection       = nullptr;
+        XCBConnectionScoped      m_connection  = nullptr;
         common::XKBContextScoped m_xkb_context = nullptr;
-        XCBWindowScoped m_window;
-        XCBKeySymbolsScoped m_key_symbols;
+        XCBWindowScoped          m_window;
+        XCBKeySymbolsScoped      m_key_symbols;
 
         common::XKBKeymapScoped m_xkb_keymap;
-        common::XKBStateScoped m_xkb_state;
+        common::XKBStateScoped  m_xkb_state;
 
         common::XKBMods m_xkb_mods;
 
@@ -126,14 +126,14 @@ export namespace stormkit::wsi::linux::x11 {
             uint32_t flags       = 0;
             uint32_t functions   = 0;
             uint32_t decorations = 0;
-            int32_t input_mode   = 0;
+            int32_t  input_mode  = 0;
             uint32_t state       = 0;
         } m_window_hints;
 
         std::string m_title;
-        bool m_mouse_locked = false;
-        bool m_mouse_hided  = false;
-        bool m_fullscreen   = false;
+        bool        m_mouse_locked = false;
+        bool        m_mouse_hided  = false;
+        bool        m_fullscreen   = false;
 
         core::math::ExtentU m_extent;
 
@@ -145,7 +145,7 @@ export namespace stormkit::wsi::linux::x11 {
 
         Handles m_handles;
 
-        core::math::Vector2I m_locked_mouse_position;
+        core::math::Vector2I         m_locked_mouse_position;
         mutable core::math::Vector2I m_mouse_position;
     };
 } // namespace stormkit::wsi::linux::x11
@@ -290,7 +290,7 @@ namespace stormkit::wsi::linux::x11 {
         m_window.reset(xcb_generate_id(m_connection));
 
         core::UInt32 value_list[] = { screen->white_pixel, screen->black_pixel, EVENTS };
-        auto cookie =
+        auto         cookie =
             xcb_create_window_checked(m_connection,
                                       XCB_COPY_FROM_PARENT,
                                       m_window,
@@ -700,7 +700,7 @@ namespace stormkit::wsi::linux::x11 {
         auto connection = getXCBConnection();
 
         const auto default_screen_id = 0;
-        auto root_window             = defaultRootWindow(connection, default_screen_id);
+        auto       root_window       = defaultRootWindow(connection, default_screen_id);
 
         xcb_warp_pointer(connection, XCB_NONE, root_window, 0, 0, 0, 0, position.x, position.y);
 
@@ -771,7 +771,7 @@ namespace stormkit::wsi::linux::x11 {
     /////////////////////////////////////
     /////////////////////////////////////
     auto WindowImpl::processEvents(xcb_generic_event_t *event) -> void {
-        auto *xevent             = event;
+        auto      *xevent        = event;
         const auto response_type = xevent->response_type & ~0x80;
 
         switch (response_type) {

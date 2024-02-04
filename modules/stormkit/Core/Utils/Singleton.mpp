@@ -16,7 +16,7 @@ export namespace stormkit::core {
         Singleton(Singleton&&)      = delete;
         Singleton(const Singleton&) = delete;
 
-        auto operator=(Singleton&&) -> Singleton&      = delete;
+        auto operator=(Singleton&&) -> Singleton     & = delete;
         auto operator=(const Singleton&) -> Singleton& = delete;
 
       protected:

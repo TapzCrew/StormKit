@@ -26,7 +26,7 @@ export namespace stormkit::image::details {
     [[nodiscard]] auto loadJPG(std::span<const core::Byte> data) noexcept
         -> std::expected<image::Image, image::Image::Error>;
 
-    [[nodiscard]] auto saveJPG(const image::Image& image,
+    [[nodiscard]] auto saveJPG(const image::Image         & image,
                                const std::filesystem::path& filepath) noexcept
         -> std::expected<void, image::Image::Error>;
 
@@ -44,7 +44,7 @@ namespace stormkit::image::details {
     namespace jpg {
         struct ErrorData {
             std::jmp_buf setjmp_buffer;
-            std::string msg;
+            std::string  msg;
         };
 
         /////////////////////////////////////
@@ -68,7 +68,7 @@ namespace stormkit::image::details {
     /////////////////////////////////////
     auto loadJPG(std::span<const core::Byte> data) noexcept
         -> std::expected<image::Image, image::Image::Error> {
-        auto image_memory    = std::vector<core::Byte> {};
+        auto          image_memory = std::vector<core::Byte> {};
         volatile auto format = Format {}; // NOTE volatile for error: variable ‘format’ might be
                                           // clobbered by ‘longjmp’ or ‘vfork’ [-Werror=clobbered]
         auto extent    = core::math::ExtentU {};
@@ -165,7 +165,7 @@ namespace stormkit::image::details {
                     Error { .reason = Reason::Failed_To_Save, .str_error = error_data.msg });
             }
 
-            auto data          = image_rgb.data(0, 0, 0);
+            auto        data   = image_rgb.data(0, 0, 0);
             const auto& extent = image_rgb.extent(0);
 
             jpeg_create_compress(&info);
@@ -223,12 +223,12 @@ namespace stormkit::image::details {
         info.client_data     = &error_data;
         error_mgr.error_exit = jpg::error_callback;
 
-        auto data          = image_rgb.data(0, 0, 0);
+        auto        data   = image_rgb.data(0, 0, 0);
         const auto& extent = image_rgb.extent(0);
 
         jpeg_create_compress(&info);
 
-        using ulong = unsigned long;
+        using ulong   = unsigned long;
         auto out_size = ulong { 0 };
         jpeg_mem_dest(&info, &output_ptr, &out_size);
 

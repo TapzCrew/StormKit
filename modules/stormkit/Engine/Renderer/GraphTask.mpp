@@ -19,7 +19,7 @@ import :Renderer.GraphID;
 export namespace stormkit::engine {
     class GraphTaskBuilder;
 
-    class STORMKIT_API GraphTask { 
+    class STORMKIT_API GraphTask {
       public:
         enum class Type {
             Graphics,

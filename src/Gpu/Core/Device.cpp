@@ -49,8 +49,8 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     Device::Device(const PhysicalDevice& physical_device,
-                   const Instance&       instance,
-                   const Info&           info,
+                   const Instance      & instance,
+                   const Info          & info,
                    Tag)
         : InstanceObject { instance }, m_physical_device { &physical_device } {
         const auto& queue_families = m_physical_device->queueFamilies();
@@ -225,7 +225,7 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     auto Device::waitForFences(std::span<const core::NakedRef<const Fence>> fences,
                                bool                                         wait_all,
-                               const std::chrono::milliseconds&             timeout) const noexcept
+                               const std::chrono::milliseconds            & timeout) const noexcept
         -> Expected<Result> {
         const auto vk_fences =
             fences | std::views::transform(toVkHandle()) | std::ranges::to<std::vector>();

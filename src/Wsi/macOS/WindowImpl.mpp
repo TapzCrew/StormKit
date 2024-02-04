@@ -14,7 +14,6 @@ import std;
 
 import stormkit.Core;
 
-
 import :Types;
 
 import :Common.WindowImplBase;
@@ -22,14 +21,14 @@ import :Common.WindowImplBase;
 export namespace stormkit::wsi::macos {
     class WindowImpl: public ::stormkit::wsi::common::WindowImplBase {
       public:
-         WindowImpl(WM wm) noexcept;
-         WindowImpl(WM wm, std::string title, const core::math::ExtentU& size, WindowStyle style);
+        WindowImpl(WM wm) noexcept;
+        WindowImpl(WM wm, std::string title, const core::math::ExtentU& size, WindowStyle style);
         ~WindowImpl();
 
-             WindowImpl(const WindowImpl&) noexcept               = delete;
+        WindowImpl(const WindowImpl&) noexcept                    = delete;
         auto operator=(const WindowImpl&) noexcept -> WindowImpl& = delete;
 
-             WindowImpl(WindowImpl&&) noexcept;
+        WindowImpl(WindowImpl&&) noexcept;
         auto operator=(WindowImpl&&) noexcept -> WindowImpl&;
 
         auto create(std::string title, const core::math::ExtentU& size, WindowStyle style) -> void;
@@ -67,7 +66,7 @@ export namespace stormkit::wsi::macos {
 
         auto setVirtualKeyboardVisible(bool visible) noexcept -> void;
 
-        auto        setMousePosition(const core::math::Vector2I& position) noexcept -> void;
+        auto        setMousePosition(const core::math::Vector2I       &position) noexcept -> void;
         static auto setMousePositionOnDesktop(WM wm, const core::math::Vector2U& position) noexcept
             -> void;
 
@@ -115,50 +114,41 @@ namespace stormkit::wsi::macos {
     STORMKIT_FORCE_INLINE auto WindowImpl::create(std::string                title,
                                                   const core::math::ExtentU& size,
                                                   WindowStyle                style) -> void {
-        m_window = std::make_unique<macOSWindow>(std::move(title),
-                                                 size.width,
-                                                 size.height,
-                                                 core::narrow<int>(core::as<core::Underlying>(style)));
+        m_window =
+            std::make_unique<macOSWindow>(std::move(title),
+                                          size.width,
+                                          size.height,
+                                          core::narrow<int>(core::as<core::Underlying>(style)));
 
         m_window->mouseDownEvent = [this](int button, core::Int32 x, core::Int32 y) noexcept {
-            WindowImplBase::mouseDownEvent(core::as<MouseButton>(core::narrow<core::UInt8>(button)), x, y);
+            WindowImplBase::mouseDownEvent(core::as<MouseButton>(core::narrow<core::UInt8>(button)),
+                                           x,
+                                           y);
         };
         m_window->mouseUpEvent = [this](int button, core::Int32 x, core::Int32 y) noexcept {
-            WindowImplBase::mouseUpEvent(core::as<MouseButton>(core::narrow<core::UInt8>(button)), x, y);
+            WindowImplBase::mouseUpEvent(core::as<MouseButton>(core::narrow<core::UInt8>(button)),
+                                         x,
+                                         y);
         };
         m_window->mouseMoveEvent = [this](core::Int32 x, core::Int32 y) noexcept {
             WindowImplBase::mouseMoveEvent(x, y);
         };
-        m_window->mouseEnteredEvent = [this]() noexcept {
-            WindowImplBase::mouseEnteredEvent();
-        };
-        m_window->mouseExitedEvent = [this]() noexcept {
-            WindowImplBase::mouseExitedEvent();
-        };
-        m_window->keyDownEvent = [this](int key, char c) noexcept {
+        m_window->mouseEnteredEvent = [this]() noexcept { WindowImplBase::mouseEnteredEvent(); };
+        m_window->mouseExitedEvent  = [this]() noexcept { WindowImplBase::mouseExitedEvent(); };
+        m_window->keyDownEvent      = [this](int key, char c) noexcept {
             WindowImplBase::keyDownEvent(core::as<Key>(core::narrow<core::UInt8>(key)), c);
         };
         m_window->keyUpEvent = [this](int key, char c) noexcept {
             WindowImplBase::keyUpEvent(core::as<Key>(core::narrow<core::UInt8>(key)), c);
         };
-        m_window->closeEvent = [this]() noexcept {
-            WindowImplBase::closeEvent();
-        };
+        m_window->closeEvent  = [this]() noexcept { WindowImplBase::closeEvent(); };
         m_window->resizeEvent = [this](core::UInt32 width, core::UInt32 height) noexcept {
             WindowImplBase::resizeEvent(width, height);
         };
-        m_window->minimizeEvent = [this]() noexcept {
-            WindowImplBase::minimizeEvent();
-        };
-        m_window->maximizeEvent = [this]() noexcept {
-            WindowImplBase::maximizeEvent();
-        };
-        m_window->lostFocusEvent = [this]() noexcept {
-            WindowImplBase::lostFocusEvent();
-        };
-        m_window->gainedFocusEvent = [this]() noexcept {
-            WindowImplBase::gainedFocusEvent();
-        };
+        m_window->minimizeEvent    = [this]() noexcept { WindowImplBase::minimizeEvent(); };
+        m_window->maximizeEvent    = [this]() noexcept { WindowImplBase::maximizeEvent(); };
+        m_window->lostFocusEvent   = [this]() noexcept { WindowImplBase::lostFocusEvent(); };
+        m_window->gainedFocusEvent = [this]() noexcept { WindowImplBase::gainedFocusEvent(); };
     }
 
     /////////////////////////////////////
@@ -282,7 +272,7 @@ namespace stormkit::wsi::macos {
                                       return core::math::ExtentU { extent.width, extent.height };
                                   }) |
                                   std::ranges::to<std::vector>(),
-                       .handle  = monitor.handle,
+                       .handle = monitor.handle,
                    };
                }) |
                std::ranges::to<std::vector>();

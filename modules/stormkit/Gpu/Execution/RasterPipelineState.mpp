@@ -10,7 +10,6 @@ export module stormkit.Gpu:Execution.RasterPipelineState;
 
 import std;
 
-
 import stormkit.Core;
 
 import :Core;

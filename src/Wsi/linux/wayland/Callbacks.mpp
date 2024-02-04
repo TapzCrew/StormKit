@@ -21,10 +21,10 @@ import :Linux.Wayland.Log;
 namespace stormkit::wsi::linux::wayland {
     /////////////////////////////////////
     /////////////////////////////////////
-    auto registryHandler(void *data,
+    auto registryHandler(void        *data,
                          wl_registry *registry,
                          core::UInt32 id,
-                         const char *interface,
+                         const char  *interface,
                          core::UInt32 version) noexcept -> void;
 
     /////////////////////////////////////
@@ -42,11 +42,11 @@ namespace stormkit::wsi::linux::wayland {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto toplevelConfigureHandler(void *data,
+    auto toplevelConfigureHandler(void         *data,
                                   xdg_toplevel *xdg_tl,
-                                  core::Int32 width,
-                                  core::Int32 height,
-                                  wl_array *states) noexcept -> void;
+                                  core::Int32   width,
+                                  core::Int32   height,
+                                  wl_array     *states) noexcept -> void;
 
     /////////////////////////////////////
     /////////////////////////////////////
@@ -61,11 +61,11 @@ namespace stormkit::wsi::linux::wayland {
     /////////////////////////////////////
     auto shellPingHandler(void *data, xdg_wm_base *xdg_shell, core::UInt32 serial) noexcept -> void;
 
-    auto shellSurfaceConfigureHandler(void *data,
+    auto shellSurfaceConfigureHandler(void             *data,
                                       wl_shell_surface *shell_surface,
-                                      core::UInt32 edges,
-                                      core::Int32 width,
-                                      core::Int32 height) noexcept -> void;
+                                      core::UInt32      edges,
+                                      core::Int32       width,
+                                      core::Int32       height) noexcept -> void;
 
     /////////////////////////////////////
     /////////////////////////////////////
@@ -74,14 +74,14 @@ namespace stormkit::wsi::linux::wayland {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto relativePointerRelativeMotionHandler(void *data,
+    auto relativePointerRelativeMotionHandler(void                    *data,
                                               zwp_relative_pointer_v1 *pointer,
-                                              core::UInt32 time_hi,
-                                              core::UInt32 time_lw,
-                                              wl_fixed_t dx,
-                                              wl_fixed_t dy,
-                                              wl_fixed_t dx_unaccel,
-                                              wl_fixed_t dy_unaccel) noexcept -> void;
+                                              core::UInt32             time_hi,
+                                              core::UInt32             time_lw,
+                                              wl_fixed_t               dx,
+                                              wl_fixed_t               dy,
+                                              wl_fixed_t               dx_unaccel,
+                                              wl_fixed_t               dy_unaccel) noexcept -> void;
 
     /////////////////////////////////////
     /////////////////////////////////////

@@ -10,7 +10,6 @@ export module stormkit.Core:Utils.AsCast;
 
 import std;
 
-
 import :Utils.Assert;
 import :Meta.Concepts;
 import :Meta.Traits;
@@ -259,8 +258,7 @@ namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
     template<Is<Underlying> To, IsEnumeration From>
-    STORMKIT_FORCE_INLINE constexpr auto as(const From& value) noexcept
-        -> UnderlyingType<From> {
+    STORMKIT_FORCE_INLINE constexpr auto as(const From& value) noexcept -> UnderlyingType<From> {
         using T = UnderlyingType<From>;
         return static_cast<T>(value);
     }

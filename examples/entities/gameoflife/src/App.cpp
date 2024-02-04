@@ -141,7 +141,7 @@ auto App::handleMouse(const stormkit::wsi::MouseButtonPushedEventData& event) ->
 
     const auto cells = m_entities.entitiesWithComponent<PositionComponent>();
     const auto it    = std::ranges::find_if(cells, [&](const auto e) {
-        const auto& position = m_entities.getComponent<PositionComponent>(e);
+        const auto   &position = m_entities.getComponent<PositionComponent>(e);
 
         return position.x == x && position.y == y;
     });
@@ -152,7 +152,7 @@ auto App::handleMouse(const stormkit::wsi::MouseButtonPushedEventData& event) ->
 }
 
 auto App::createCell(stormkit::core::UInt32 x, stormkit::core::UInt32 y) -> void {
-    auto e         = m_entities.makeEntity();
+    auto  e        = m_entities.makeEntity();
     auto& position = m_entities.addComponent<PositionComponent>(e);
 
     position.x = x;

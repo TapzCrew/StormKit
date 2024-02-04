@@ -101,8 +101,9 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     // TODO finish this
-    auto RenderPassDescription::isCompatible(
-        const RenderPassDescription& description) const noexcept -> bool {
+    auto
+        RenderPassDescription::isCompatible(const RenderPassDescription& description) const noexcept
+        -> bool {
         if (std::size(subpasses) == std::size(description.subpasses)) return false;
 
         for (auto i : core::range(std::size(subpasses))) {

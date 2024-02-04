@@ -10,7 +10,6 @@ export module stormkit.Core:Utils.Flags;
 
 import std;
 
-
 import :Utils.AsCast;
 import :Meta;
 

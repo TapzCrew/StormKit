@@ -32,7 +32,7 @@ auto __stdcall main(int argc, char **argv) -> int {
     auto args = std::vector<std::string_view> {};
     args.reserve(argc);
 
-    for (auto &&i : stormkit::core::range(argc)) args.emplace_back(argv[i]);
+    for (auto&& i : stormkit::core::range(argc)) args.emplace_back(argv[i]);
 
     return userMain(args);
 }
@@ -53,7 +53,7 @@ auto __stdcall WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) -> int {
     auto args = std::vector<std::string_view> {};
     args.reserve(argc);
 
-    for (auto &&i : stormkit::core::range(argc)) args.emplace_back(argv[i]);
+    for (auto&& i : stormkit::core::range(argc)) args.emplace_back(argv[i]);
 
     return userMain(args);
 }

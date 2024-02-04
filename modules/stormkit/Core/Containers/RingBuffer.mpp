@@ -10,7 +10,6 @@ export module stormkit.Core:Containers.RingBuffer;
 
 import std;
 
-
 import :Utils.Assert;
 import :Utils.Numerics;
 import :Utils.Byte;

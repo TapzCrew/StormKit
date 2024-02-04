@@ -13,7 +13,6 @@ export module stormkit.Image:PNGImage;
 
 import std;
 
-
 import stormkit.Core;
 
 import :Image;
@@ -22,7 +21,7 @@ export namespace stormkit::image::details {
     [[nodiscard]] auto loadPNG(std::span<const core::Byte> data) noexcept
         -> std::expected<image::Image, image::Image::Error>;
 
-    [[nodiscard]] auto savePNG(const image::Image& image,
+    [[nodiscard]] auto savePNG(const image::Image         & image,
                                const std::filesystem::path& filepath) noexcept
         -> std::expected<void, image::Image::Error>;
 
@@ -39,7 +38,7 @@ namespace stormkit::image::details {
 
     namespace png {
         struct ReadParam {
-            core::RangeExtent readed;
+            core::RangeExtent            readed;
             std::span<const core::Byte>& data;
         };
 

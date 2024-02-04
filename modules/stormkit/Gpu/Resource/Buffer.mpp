@@ -10,7 +10,6 @@ export module stormkit.Gpu:Resource.Buffer;
 
 import std;
 
-
 import stormkit.Core;
 
 import :Core;
@@ -165,7 +164,7 @@ namespace stormkit::gpu {
 
         if (!m_mapped_pointer) {
             auto _ = device().vmaAllocator().mapMemory(*m_vma_allocation,
-                                              std::bit_cast<void **>(&m_mapped_pointer));
+                                                       std::bit_cast<void **>(&m_mapped_pointer));
             m_mapped_pointer += offset;
         }
 

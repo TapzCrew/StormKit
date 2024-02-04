@@ -20,7 +20,6 @@ import stormkit.Core;
 
 import :Linux.X11.Log;
 
-
 #define STORMKIT_XCB_SCOPED(name, type)                                \
     struct name##Scoped {                                              \
         name##Scoped(type *handle) noexcept;                           \
@@ -64,33 +63,33 @@ export namespace stormkit::wsi::linux::x11 {
 
 #undef STORMKIT_XCB_SCOPED
 
-#define STORMKIT_XCB_SCOPED(name, type, var, global, deleter)                       \
-    name##Scoped::name##Scoped(type *handle) noexcept : m_handle { handle } {       \
-        if (m_handle != nullptr) var++;                                             \
-    }                                                                               \
-                                                                                    \
-    name##Scoped::~name##Scoped() noexcept {                                        \
-        if (m_handle != nullptr) {                                                  \
-            var--;                                                                  \
-                                                                                    \
-            if (var == 0) {                                                         \
-                deleter(m_handle);                                                  \
-                m_handle = nullptr;                                                 \
-                global   = nullptr;                                                 \
-            }                                                                       \
-        }                                                                           \
-    }                                                                               \
-                                                                                    \
-    name##Scoped::name##Scoped(name##Scoped&& other) noexcept                       \
-        : m_handle { std::exchange(other.m_handle, nullptr) } {                     \
-    }                                                                               \
-                                                                                    \
-    auto name##Scoped::operator=(name##Scoped && other) noexcept -> name##Scoped& { \
-        if (this == &other) return *this;                                           \
-                                                                                    \
-        m_handle = std::exchange(other.m_handle, nullptr);                          \
-                                                                                    \
-        return *this;                                                               \
+#define STORMKIT_XCB_SCOPED(name, type, var, global, deleter)                      \
+    name##Scoped::name##Scoped(type *handle) noexcept : m_handle { handle } {      \
+        if (m_handle != nullptr) var++;                                            \
+    }                                                                              \
+                                                                                   \
+    name##Scoped::~name##Scoped() noexcept {                                       \
+        if (m_handle != nullptr) {                                                 \
+            var--;                                                                 \
+                                                                                   \
+            if (var == 0) {                                                        \
+                deleter(m_handle);                                                 \
+                m_handle = nullptr;                                                \
+                global   = nullptr;                                                \
+            }                                                                      \
+        }                                                                          \
+    }                                                                              \
+                                                                                   \
+    name##Scoped::name##Scoped(name##Scoped&& other) noexcept                      \
+        : m_handle { std::exchange(other.m_handle, nullptr) } {                    \
+    }                                                                              \
+                                                                                   \
+    auto name##Scoped::operator=(name##Scoped&& other) noexcept -> name##Scoped& { \
+        if (this == &other) return *this;                                          \
+                                                                                   \
+        m_handle = std::exchange(other.m_handle, nullptr);                         \
+                                                                                   \
+        return *this;                                                              \
     }
 
 namespace stormkit::wsi::linux::x11 {
@@ -201,7 +200,7 @@ namespace stormkit::wsi::linux::x11 {
 
         using CStr            = const char *;
         const auto *extension = CStr { nullptr };
-        const auto str_error  = xcb_errors_get_name_for_error(ctx, error->major_code, &extension);
+        const auto  str_error = xcb_errors_get_name_for_error(ctx, error->major_code, &extension);
 
         return std::format("{} extension: {} major: {} minor: {}\n",
                            str_error,

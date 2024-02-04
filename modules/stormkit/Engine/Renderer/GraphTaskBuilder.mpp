@@ -65,7 +65,7 @@ namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE
-        GraphTaskBuilder::GraphTaskBuilder(const GraphTaskBuilder& other) noexcept = default;
+    GraphTaskBuilder::GraphTaskBuilder(const GraphTaskBuilder& other) noexcept = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
@@ -75,7 +75,7 @@ namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE
-        GraphTaskBuilder::GraphTaskBuilder(GraphTaskBuilder&& other) noexcept = default;
+    GraphTaskBuilder::GraphTaskBuilder(GraphTaskBuilder&& other) noexcept = default;
 
     /////////////////////////////////////
     /////////////////////////////////////

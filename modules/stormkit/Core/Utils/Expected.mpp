@@ -10,7 +10,6 @@ export module stormkit.Core:Utils.Expected;
 
 import std;
 
-
 import :Meta;
 
 import :Utils.AsCast;

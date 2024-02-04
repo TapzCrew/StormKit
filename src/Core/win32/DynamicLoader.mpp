@@ -12,7 +12,6 @@ export module stormkit.Core:Utils.DynamicLoaderImpl;
 
 import std;
 
-
 import :Utils.Expected;
 import :Utils.Numerics;
 import :Utils.AsCast;
@@ -37,7 +36,7 @@ export namespace stormkit::core {
 
         /////////////////////////////////////
         /////////////////////////////////////
-        DynamicLoaderImpl(const DynamicLoaderImpl&)                    = delete;
+        DynamicLoaderImpl(const DynamicLoaderImpl&) = delete;
 
         /////////////////////////////////////
         /////////////////////////////////////
@@ -50,7 +49,8 @@ export namespace stormkit::core {
 
         /////////////////////////////////////
         /////////////////////////////////////
-        STORMKIT_FORCE_INLINE auto operator=(DynamicLoaderImpl&& other) noexcept -> DynamicLoaderImpl& {
+        STORMKIT_FORCE_INLINE auto operator=(DynamicLoaderImpl&& other) noexcept
+            -> DynamicLoaderImpl& {
             if (&other == this) [[unlikely]]
                 return *this;
 

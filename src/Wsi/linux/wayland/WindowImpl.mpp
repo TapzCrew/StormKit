@@ -9,10 +9,10 @@ module;
 #include <wayland-client-protocol.h>
 #include <wayland-cursor.h>
 
-#include <xdg-shell.h>
 #include <pointer-constraints-unstable-v1.h>
 #include <relative-pointer-unstable-v1.h>
 #include <xdg-decoration-unstable-v1.h>
+#include <xdg-shell.h>
 
 #include <stormkit/Core/MemoryMacro.hpp>
 
@@ -101,22 +101,22 @@ namespace stormkit::wsi::linux::wayland {
         nullptr);
 
     struct Globals {
-        WLDisplayScoped display;
-        WLRegistryScoped registry;
-        WLCompositorScoped compositor;
+        WLDisplayScoped             display;
+        WLRegistryScoped            registry;
+        WLCompositorScoped          compositor;
         std::vector<WLOutputScoped> outputs;
 
-        XDGShellScoped xdg_shell;
+        XDGShellScoped             xdg_shell;
         XDGDecorationManagerScoped xdg_decoration_manager;
 
         WLShellScoped wayland_shell;
 
-        WLShmScoped shm;
-        WLSeatScoped seat;
-        std::vector<WLPointerScoped> pointers;
-        std::vector<WLKeyboardScoped> keyboards;
-        std::vector<WLTouchScoped> touchscreens;
-        WPPointerConstraintsScoped pointer_constraints;
+        WLShmScoped                    shm;
+        WLSeatScoped                   seat;
+        std::vector<WLPointerScoped>   pointers;
+        std::vector<WLKeyboardScoped>  keyboards;
+        std::vector<WLTouchScoped>     touchscreens;
+        WPPointerConstraintsScoped     pointer_constraints;
         WPRelativePointerManagerScoped relative_pointer_manager;
 
         core::HashMap<wl_output *, Monitor> monitors;
@@ -133,13 +133,13 @@ export namespace stormkit::wsi::linux::wayland {
 
         struct KeyState {
             xkb_keysym_t key;
-            bool down;
+            bool         down;
         };
 
         struct MouseState {
             struct MouseButtonState {
                 std::uint32_t button;
-                bool down;
+                bool          down;
             };
 
             std::array<MouseButtonState, 5> button_state;
@@ -187,12 +187,12 @@ export namespace stormkit::wsi::linux::wayland {
         [[nodiscard]] auto mouseHidden() const noexcept -> bool;
         [[nodiscard]] auto fullscreen() const noexcept -> bool;
 
-        auto setKeyRepeatEnabled(bool enabled) noexcept -> void;
+        auto               setKeyRepeatEnabled(bool enabled) noexcept -> void;
         [[nodiscard]] auto keyRepeatEnabled() const noexcept -> bool;
 
         auto setVirtualKeyboardVisible(bool visible) noexcept -> void;
 
-        auto setMousePosition(const core::math::Vector2I& position) noexcept -> void;
+        auto        setMousePosition(const core::math::Vector2I       &position) noexcept -> void;
         static auto setMousePositionOnDesktop(const core::math::Vector2U& position) noexcept
             -> void;
 
@@ -203,52 +203,52 @@ export namespace stormkit::wsi::linux::wayland {
         auto surfaceConfigure(xdg_surface *surface, std::uint32_t serial) noexcept -> void;
 
         auto toplevelConfigure(xdg_toplevel *xdg_tl,
-                               std::int32_t width,
-                               std::int32_t height,
-                               wl_array *state) noexcept -> void;
+                               std::int32_t  width,
+                               std::int32_t  height,
+                               wl_array     *state) noexcept -> void;
         auto toplevelClose(xdg_toplevel *xdg_tl) noexcept -> void;
 
         auto shellSurfaceConfigure(wl_shell_surface *xdg_tl,
-                                   std::uint32_t edges,
-                                   std::int32_t width,
-                                   std::int32_t height) noexcept -> void;
+                                   std::uint32_t     edges,
+                                   std::int32_t      width,
+                                   std::int32_t      height) noexcept -> void;
 
         auto seatCapabilities(wl_seat *seat, std::uint32_t capabilities) noexcept -> void;
 
-        auto pointerEnter(wl_pointer *pointer,
+        auto pointerEnter(wl_pointer   *pointer,
                           std::uint32_t serial,
-                          wl_surface *surface,
-                          wl_fixed_t surface_x,
-                          wl_fixed_t surface_y) noexcept -> void;
+                          wl_surface   *surface,
+                          wl_fixed_t    surface_x,
+                          wl_fixed_t    surface_y) noexcept -> void;
         auto pointerLeave(wl_pointer *pointer, std::uint32_t serial, wl_surface *surface) noexcept
             -> void;
-        auto pointerMotion(wl_pointer *pointer,
+        auto pointerMotion(wl_pointer   *pointer,
                            std::uint32_t time,
-                           wl_fixed_t surface_x,
-                           wl_fixed_t surface_y) noexcept -> void;
-        auto pointerButton(wl_pointer *pointer,
+                           wl_fixed_t    surface_x,
+                           wl_fixed_t    surface_y) noexcept -> void;
+        auto pointerButton(wl_pointer   *pointer,
                            std::uint32_t serial,
                            std::uint32_t time,
                            std::uint32_t button,
                            std::uint32_t state) noexcept -> void;
 
-        auto keyboardKeymap(wl_keyboard *keyboard,
+        auto keyboardKeymap(wl_keyboard  *keyboard,
                             std::uint32_t format,
-                            std::int32_t fd,
+                            std::int32_t  fd,
                             std::uint32_t size) noexcept -> void;
-        auto keyboardEnter(wl_keyboard *keyboard,
+        auto keyboardEnter(wl_keyboard  *keyboard,
                            std::uint32_t serial,
-                           wl_surface *surface,
-                           wl_array *keys) noexcept -> void;
-        auto keyboardLeave(wl_keyboard *keyboard,
+                           wl_surface   *surface,
+                           wl_array     *keys) noexcept -> void;
+        auto keyboardLeave(wl_keyboard  *keyboard,
                            std::uint32_t serial,
-                           wl_surface *surface) noexcept -> void;
-        auto keyboardKey(wl_keyboard *keyboard,
+                           wl_surface   *surface) noexcept -> void;
+        auto keyboardKey(wl_keyboard  *keyboard,
                          std::uint32_t serial,
                          std::uint32_t time,
                          std::uint32_t key,
                          std::uint32_t state) noexcept -> void;
-        auto keyboardModifiers(wl_keyboard *keyboard,
+        auto keyboardModifiers(wl_keyboard  *keyboard,
                                std::uint32_t serial,
                                std::uint32_t mods_depressed,
                                std::uint32_t mods_latched,
@@ -259,12 +259,12 @@ export namespace stormkit::wsi::linux::wayland {
                                 std::int32_t delay) noexcept -> void;
 
         auto relativePointerRelativeMotion(zwp_relative_pointer_v1 *pointer,
-                                           std::uint32_t time_hi,
-                                           std::uint32_t time_lw,
-                                           wl_fixed_t dx,
-                                           wl_fixed_t dy,
-                                           wl_fixed_t dx_unaccel,
-                                           wl_fixed_t dy_unaccel) noexcept -> void;
+                                           std::uint32_t            time_hi,
+                                           std::uint32_t            time_lw,
+                                           wl_fixed_t               dx,
+                                           wl_fixed_t               dy,
+                                           wl_fixed_t               dx_unaccel,
+                                           wl_fixed_t               dy_unaccel) noexcept -> void;
 
       private:
         auto createXDGShell() noexcept -> void;
@@ -274,29 +274,29 @@ export namespace stormkit::wsi::linux::wayland {
 
         // Base Surface
         WLOutputRefScoped m_current_output;
-        WLSurfaceScoped m_surface;
-        WLShmPoolScoped m_shm_pool;
+        WLSurfaceScoped   m_surface;
+        WLShmPoolScoped   m_shm_pool;
 
         // Cursor
         WLCursorThemeScoped m_cursor_theme;
-        WLSurfaceScoped m_cursor_surface;
-        WLBufferScoped m_cursor_buffer;
+        WLSurfaceScoped     m_cursor_surface;
+        WLBufferScoped      m_cursor_buffer;
 
         // WL_Shell
         WLShellSurfaceScoped m_wlshell_surface;
 
         // XDG
-        XDGSurfaceScoped m_xdg_surface;
+        XDGSurfaceScoped  m_xdg_surface;
         XDGTopLevelScoped m_xdg_toplevel;
 
         // Events
-        WLPointerRefScoped m_pointer;
-        std::uint32_t m_pointer_serial = 0u;
+        WLPointerRefScoped  m_pointer;
+        std::uint32_t       m_pointer_serial = 0u;
         WLKeyboardRefScoped m_keyboard;
-        WLTouchRefScoped m_touchscreen;
+        WLTouchRefScoped    m_touchscreen;
 
         // WP
-        WPLockedPointerScoped m_locked_pointer;
+        WPLockedPointerScoped   m_locked_pointer;
         WPRelativePointerScoped m_relative_pointer;
 
         // Fake Buffer
@@ -304,14 +304,14 @@ export namespace stormkit::wsi::linux::wayland {
 
         // XKB
         common::XKBContextScoped m_xkb_context;
-        common::XKBKeymapScoped m_xkb_keymap;
-        common::XKBStateScoped m_xkb_state;
+        common::XKBKeymapScoped  m_xkb_keymap;
+        common::XKBStateScoped   m_xkb_state;
 
         common::XKBMods m_xkb_mods;
 
         std::string m_title;
-        bool m_mouse_locked = false;
-        bool m_fullscreen   = false;
+        bool        m_mouse_locked = false;
+        bool        m_fullscreen   = false;
 
         core::math::ExtentU m_extent;
 
@@ -323,9 +323,9 @@ export namespace stormkit::wsi::linux::wayland {
 
         Handles m_handles;
 
-        core::math::Vector2I m_locked_mouse_position;
+        core::math::Vector2I         m_locked_mouse_position;
         mutable core::math::Vector2I m_mouse_position;
-        core::math::ExtentU m_fullscreen_extent = {};
+        core::math::ExtentU          m_fullscreen_extent = {};
 
         std::array<KeyState, 102> m_keyboard_state;
 

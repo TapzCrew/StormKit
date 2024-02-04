@@ -12,7 +12,6 @@ export module stormkit.Core:Utils.Descriptors;
 
 import std;
 
-
 export namespace stormkit::core {
     [[nodiscard]] auto getSTDErr() noexcept -> std::FILE *;
     [[nodiscard]] auto getSTDOut() noexcept -> std::FILE *;

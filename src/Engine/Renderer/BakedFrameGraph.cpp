@@ -15,8 +15,8 @@ import :Renderer.BakedFrameGraph;
 namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
-    BakedFrameGraph::BakedFrameGraph(const FrameGraphBuilder&          builder,
-                                     Data&&                            data,
+    BakedFrameGraph::BakedFrameGraph(const FrameGraphBuilder         & builder,
+                                     Data                           && data,
                                      [[maybe_unused]] BakedFrameGraph *old)
         : m_builder { &builder }, m_data { std::move(data) } {
     }

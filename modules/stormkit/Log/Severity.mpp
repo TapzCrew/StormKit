@@ -67,7 +67,8 @@ namespace stormkit::log {
 
     ////////////////////////////////////////
     ////////////////////////////////////////
-    STORMKIT_FORCE_INLINE constexpr auto toStringView(Severity severity) noexcept -> std::string_view {
+    STORMKIT_FORCE_INLINE constexpr auto toStringView(Severity severity) noexcept
+        -> std::string_view {
         const auto it = details::SEVERITY_TO_STRING.find(severity);
         core::expects(it != std::ranges::cend(details::SEVERITY_TO_STRING));
 
