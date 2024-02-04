@@ -131,10 +131,9 @@ namespace stormkit::gpu {
         const auto device_extensions =
             m_physical_device->vkHandle().enumerateDeviceExtensionProperties();
 
-        device_logger.dlog("Device extensions -----------");
-        for (const auto& ext : device_extensions)
-            device_logger.dlog("{}", std::string_view { ext.extensionName });
-        device_logger.dlog("-------------------------------");
+        device_logger.dlog("Device extensions: {}", device_extensions | std::views::transform([](auto&& ext) {
+                                     return std::string_view { ext.extensionName };
+                                 }));
 
         const auto swapchain_available = [&] {
             for (const auto& ext : SWAPCHAIN_EXTENSIONS) {
@@ -144,8 +143,6 @@ namespace stormkit::gpu {
                     return false;
                 }
             }
-
-            device_logger.ilog("Swapchain supported !");
 
             return true;
         }();
@@ -158,8 +155,6 @@ namespace stormkit::gpu {
                     return false;
                 }
             }
-
-            device_logger.ilog("Raytracing supported !");
 
             return true;
         }();

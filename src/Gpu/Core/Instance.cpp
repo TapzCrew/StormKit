@@ -140,9 +140,7 @@ namespace stormkit::gpu {
                        }) |
                        std::ranges::to<std::vector>();
 
-        dlog("Instance extensions -----------");
-        for (auto&& str : m_extensions) dlog("	{}", str);
-        dlog("-------------------------------");
+        dlog("Instance extensions: {}", m_extensions);
 
         const auto validation_layers = [this]() noexcept {
             auto output = std::vector<core::CZString> {};

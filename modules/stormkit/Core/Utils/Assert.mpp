@@ -115,7 +115,7 @@ namespace stormkit::core {
                     auto st = std::stacktrace::current();
                     std::println(stderr, "{}", std::to_string(st));
 #else
-                    std::println(stderr, "No stacktrace support");
+                    std::println(stderr, "No <stacktrace> support !");
 #endif
                 }
 
