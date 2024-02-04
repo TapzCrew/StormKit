@@ -2,7 +2,7 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-#include "Utils.hpp"    
+#include "Utils.hpp"
 
 #include <cstdint>
 #include <utility>
@@ -15,122 +15,122 @@
 #import <IOKit/hid/IOHIDManager.h>
 
 namespace stormkit::wsi::macos {
-        enum class Key {
-            A = 0,
-            B,
-            C,
-            D,
-            E,
-            F,
-            G,
-            H,
-            I,
-            J,
-            K,
-            L,
-            M,
-            N,
-            O,
-            P,
-            Q,
-            R,
-            S,
-            T,
-            U,
-            V,
-            W,
-            X,
-            Y,
-            Z,
-            Num0,
-            Num1,
-            Num2,
-            Num3,
-            Num4,
-            Num5,
-            Num6,
-            Num7,
-            Num8,
-            Num9,
-            Escape,
-            L_Control,
-            L_Shift,
-            L_Alt,
-            L_System,
-            R_Control,
-            R_Shift,
-            R_Alt,
-            R_System,
-            Menu,
-            L_Bracket,
-            R_Bracket,
-            Semi_Colon,
-            Comma,
-            Period,
-            Quote,
-            Slash,
-            Back_Slash,
-            Tilde,
-            Equal,
-            Hyphen,
-            Space,
-            Enter,
-            Back_Space,
-            Tab,
-            Page_Up,
-            Page_Down,
-            Begin,
-            End,
-            Home,
-            Insert,
-            Delete,
-            Add,
-            Substract,
-            Multiply,
-            Divide,
-            Left,
-            Right,
-            Up,
-            Down,
-            Numpad0,
-            Numpad1,
-            Numpad2,
-            Numpad3,
-            Numpad4,
-            Numpad5,
-            Numpad6,
-            Numpad7,
-            Numpad8,
-            Numpad9,
-            F1,
-            F2,
-            F3,
-            F4,
-            F5,
-            F6,
-            F7,
-            F8,
-            F9,
-            F10,
-            F11,
-            F12,
-            F13,
-            F14,
-            F15,
-            Pause,
-            KeyCount,
-            Unknow = std::numeric_limits<std::uint8_t>::max(),
-        };
+    enum class Key {
+        A = 0,
+        B,
+        C,
+        D,
+        E,
+        F,
+        G,
+        H,
+        I,
+        J,
+        K,
+        L,
+        M,
+        N,
+        O,
+        P,
+        Q,
+        R,
+        S,
+        T,
+        U,
+        V,
+        W,
+        X,
+        Y,
+        Z,
+        Num0,
+        Num1,
+        Num2,
+        Num3,
+        Num4,
+        Num5,
+        Num6,
+        Num7,
+        Num8,
+        Num9,
+        Escape,
+        L_Control,
+        L_Shift,
+        L_Alt,
+        L_System,
+        R_Control,
+        R_Shift,
+        R_Alt,
+        R_System,
+        Menu,
+        L_Bracket,
+        R_Bracket,
+        Semi_Colon,
+        Comma,
+        Period,
+        Quote,
+        Slash,
+        Back_Slash,
+        Tilde,
+        Equal,
+        Hyphen,
+        Space,
+        Enter,
+        Back_Space,
+        Tab,
+        Page_Up,
+        Page_Down,
+        Begin,
+        End,
+        Home,
+        Insert,
+        Delete,
+        Add,
+        Substract,
+        Multiply,
+        Divide,
+        Left,
+        Right,
+        Up,
+        Down,
+        Numpad0,
+        Numpad1,
+        Numpad2,
+        Numpad3,
+        Numpad4,
+        Numpad5,
+        Numpad6,
+        Numpad7,
+        Numpad8,
+        Numpad9,
+        F1,
+        F2,
+        F3,
+        F4,
+        F5,
+        F6,
+        F7,
+        F8,
+        F9,
+        F10,
+        F11,
+        F12,
+        F13,
+        F14,
+        F15,
+        Pause,
+        KeyCount,
+        Unknow = std::numeric_limits<std::uint8_t>::max(),
+    };
 
-        enum class MouseButton {
-            Left = 0,
-            Right,
-            Middle,
-            Button1,
-            Button2,
-            ButtonCount,
-            Unknow = std::numeric_limits<std::uint8_t>::max(),
-        };
+    enum class MouseButton {
+        Left = 0,
+        Right,
+        Middle,
+        Button1,
+        Button2,
+        ButtonCount,
+        Unknow = std::numeric_limits<std::uint8_t>::max(),
+    };
     /////////////////////////////////////
     /////////////////////////////////////
     auto mouseButton(int button) noexcept -> int {
@@ -140,8 +140,7 @@ namespace stormkit::wsi::macos {
             case 2: return static_cast<int>(MouseButton::Middle);
             case 3: return static_cast<int>(MouseButton::Button1);
             case 4: return static_cast<int>(MouseButton::Button2);
-            default:
-        return static_cast<int>(MouseButton::Unknow);
+            default: return static_cast<int>(MouseButton::Unknow);
         }
 
         std::unreachable();
@@ -155,55 +154,55 @@ namespace stormkit::wsi::macos {
         switch (code) {
             case 'a': [[fallthrough]];
             case 'A': return static_cast<int>(Key::A);
-            case 'b':[[fallthrough]];
+            case 'b': [[fallthrough]];
             case 'B': return static_cast<int>(Key::B);
-            case 'c':[[fallthrough]];
+            case 'c': [[fallthrough]];
             case 'C': return static_cast<int>(Key::C);
-            case 'd':[[fallthrough]];
+            case 'd': [[fallthrough]];
             case 'D': return static_cast<int>(Key::D);
-            case 'e':[[fallthrough]];
+            case 'e': [[fallthrough]];
             case 'E': return static_cast<int>(Key::E);
-            case 'f':[[fallthrough]];
+            case 'f': [[fallthrough]];
             case 'F': return static_cast<int>(Key::F);
-            case 'g':[[fallthrough]];
+            case 'g': [[fallthrough]];
             case 'G': return static_cast<int>(Key::G);
-            case 'h':[[fallthrough]];
+            case 'h': [[fallthrough]];
             case 'H': return static_cast<int>(Key::H);
-            case 'i':[[fallthrough]];
+            case 'i': [[fallthrough]];
             case 'I': return static_cast<int>(Key::I);
-            case 'j':[[fallthrough]];
+            case 'j': [[fallthrough]];
             case 'J': return static_cast<int>(Key::J);
-            case 'k':[[fallthrough]];
+            case 'k': [[fallthrough]];
             case 'K': return static_cast<int>(Key::K);
-            case 'l':[[fallthrough]];
+            case 'l': [[fallthrough]];
             case 'L': return static_cast<int>(Key::L);
-            case 'm':[[fallthrough]];
+            case 'm': [[fallthrough]];
             case 'M': return static_cast<int>(Key::M);
-            case 'n':[[fallthrough]];
+            case 'n': [[fallthrough]];
             case 'N': return static_cast<int>(Key::N);
-            case 'o':[[fallthrough]];
+            case 'o': [[fallthrough]];
             case 'O': return static_cast<int>(Key::O);
-            case 'p':[[fallthrough]];
+            case 'p': [[fallthrough]];
             case 'P': return static_cast<int>(Key::P);
-            case 'q':[[fallthrough]];
+            case 'q': [[fallthrough]];
             case 'Q': return static_cast<int>(Key::Q);
-            case 'r':[[fallthrough]];
+            case 'r': [[fallthrough]];
             case 'R': return static_cast<int>(Key::R);
-            case 's':[[fallthrough]];
+            case 's': [[fallthrough]];
             case 'S': return static_cast<int>(Key::S);
-            case 't':[[fallthrough]];
+            case 't': [[fallthrough]];
             case 'T': return static_cast<int>(Key::T);
-            case 'u':[[fallthrough]];
+            case 'u': [[fallthrough]];
             case 'U': return static_cast<int>(Key::U);
-            case 'v':[[fallthrough]];
+            case 'v': [[fallthrough]];
             case 'V': return static_cast<int>(Key::V);
-            case 'w':[[fallthrough]];
+            case 'w': [[fallthrough]];
             case 'W': return static_cast<int>(Key::W);
-            case 'x':[[fallthrough]];
+            case 'x': [[fallthrough]];
             case 'X': return static_cast<int>(Key::X);
-            case 'y':[[fallthrough]];
+            case 'y': [[fallthrough]];
             case 'Y': return static_cast<int>(Key::Y);
-            case 'z':[[fallthrough]];
+            case 'z': [[fallthrough]];
             case 'Z': return static_cast<int>(Key::Z);
         }
 
@@ -563,4 +562,4 @@ namespace stormkit::wsi::macos {
 
         return 0xff;
     }
-}
+} // namespace stormkit::wsi::macos

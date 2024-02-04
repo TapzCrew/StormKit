@@ -20,10 +20,10 @@ namespace stormkit::wsi::macos {
          withHeight:(std::uint32_t)height
           withStyle:(int)style
           withTitle:(std::string)title
-      withRequester:(stormkit::wsi::macos::macOSWindow *)_requester;
+      withRequester:(stormkit::wsi::macos::macOSWindow*)_requester;
 - (void)dealloc;
 
-- (void)setRequester:(stormkit::wsi::macos::macOSWindow *)requester;
+- (void)setRequester:(stormkit::wsi::macos::macOSWindow*)requester;
 
 - (void)close;
 - (BOOL)isVisible;
@@ -32,17 +32,17 @@ namespace stormkit::wsi::macos {
 - (void)hideWindow;
 
 - (void)processEvent;
-- (StormKitView *)nativeHandle;
+- (StormKitView*)nativeHandle;
 
 - (NSSize)size;
 
 - (BOOL)windowShouldClose:(id)sender;
 
 - (void)windowWillClose:(id)sender;
-- (NSSize)windowWillResize:(NSWindow *)sender toSize:(NSSize)frameSize;
+- (NSSize)windowWillResize:(NSWindow*)sender toSize:(NSSize)frameSize;
 
-- (void)windowDidMiniaturize:(NSNotification *)notification;
-- (void)windowDidDeminiaturize:(NSNotification *)notification;
+- (void)windowDidMiniaturize:(NSNotification*)notification;
+- (void)windowDidDeminiaturize:(NSNotification*)notification;
 
 - (void)setMousePosition:(NSPoint)point;
 - (void)setWindowTitle:(std::string)title;

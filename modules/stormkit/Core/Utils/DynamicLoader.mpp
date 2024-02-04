@@ -42,7 +42,7 @@ export namespace stormkit::core {
             -> Expected<std::function<Signature>>;
 
         template<class Signature>
-        [[nodiscard]] auto cFunc(std::string_view name) const noexcept -> Expected<Signature *>;
+        [[nodiscard]] auto cFunc(std::string_view name) const noexcept -> Expected<Signature*>;
 
         [[nodiscard]] auto filepath() const noexcept -> const std::filesystem::path&;
 
@@ -52,7 +52,7 @@ export namespace stormkit::core {
         DynamicLoader() noexcept;
 
         auto doLoad(std::filesystem::path filepath) -> Expected<void>;
-        auto doGetFunc(std::string_view name) const -> Expected<void *>;
+        auto doGetFunc(std::string_view name) const -> Expected<void*>;
 
         std::filesystem::path m_filepath;
 
@@ -95,11 +95,11 @@ namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
     template<class Signature>
-    auto DynamicLoader::cFunc(std::string_view name) const noexcept -> Expected<Signature *> {
+    auto DynamicLoader::cFunc(std::string_view name) const noexcept -> Expected<Signature*> {
         expects(not std::empty(name));
 
         return doGetFunc(name).transform(
-            [](auto&& value) { return std::bit_cast<Signature *>(value); });
+            [](auto&& value) { return std::bit_cast<Signature*>(value); });
     }
 
     /////////////////////////////////////

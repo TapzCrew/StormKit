@@ -30,8 +30,8 @@ export namespace test {
     };
 
     struct TestSuite {
-        TestSuite(std::string              && name,
-                  std::vector<TestFunc>    && tests,
+        TestSuite(std::string&&               name,
+                  std::vector<TestFunc>&&     tests,
                   const std::source_location& location = std::source_location::current()) noexcept;
     };
 
@@ -149,8 +149,8 @@ namespace test {
         return failed_tests == 0;
     }
 
-    TestSuite::TestSuite(std::string              && name,
-                         std::vector<TestFunc>    && tests,
+    TestSuite::TestSuite(std::string&&               name,
+                         std::vector<TestFunc>&&     tests,
                          const std::source_location& location) noexcept {
         state.test_suites.emplace_back(
             std::make_unique<TestSuiteHolder>(std::move(name), std::move(tests), location));

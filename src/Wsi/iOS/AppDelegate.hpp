@@ -12,7 +12,7 @@
 
 @interface AppDelegate: UIResponder<UIApplicationDelegate>
 
-@property (nonatomic) storm::window::WindowImpl *window;
+@property (nonatomic) storm::window::WindowImpl* window;
 
 @end
 

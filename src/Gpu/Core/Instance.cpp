@@ -62,7 +62,7 @@ namespace stormkit::gpu {
         auto debugCallback(vk::DebugUtilsMessageSeverityFlagsEXT         severity,
                            vk::DebugUtilsMessageTypeFlagsEXT             type,
                            const vk::DebugUtilsMessengerCallbackDataEXT& callback_data,
-                           [[maybe_unused]] void                        *user_data) -> bool {
+                           [[maybe_unused]] void*                        user_data) -> bool {
             auto message = std::format("[{}] {}", vk::to_string(severity), callback_data.pMessage);
 
             if (checkFlag(severity, vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo)) ilog(message);
@@ -135,7 +135,7 @@ namespace stormkit::gpu {
         m_vk_context = vk::raii::Context();
 
         const auto exts = m_vk_context->enumerateInstanceExtensionProperties();
-        m_extensions    = exts | std::views::transform([](auto   &&extension) noexcept {
+        m_extensions    = exts | std::views::transform([](auto&& extension) noexcept {
                            return std::string { extension.extensionName };
                        }) |
                        std::ranges::to<std::vector>();

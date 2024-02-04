@@ -24,12 +24,11 @@ export namespace stormkit::core {
             -> DeferInit&;
 
         template<typename... Args>
-        auto
-            construct(Args&&...args) noexcept(noexcept(std::is_nothrow_constructible_v<T, Args...>))
-                -> void;
+        auto construct(Args&&... args) noexcept(
+            noexcept(std::is_nothrow_constructible_v<T, Args...>)) -> void;
 
         template<typename... Args>
-        auto constructWithNarrowing(Args&&...args) noexcept(
+        auto constructWithNarrowing(Args&&... args) noexcept(
             noexcept(std::is_nothrow_constructible_v<T, Args...>)) -> void;
 
         auto operator=(T&& value) noexcept(noexcept(std::is_nothrow_move_constructible_v<T>))
@@ -39,7 +38,7 @@ export namespace stormkit::core {
         [[nodiscard]] constexpr auto operator->(this auto&& self) noexcept -> decltype(auto);
         [[nodiscard]] constexpr auto operator*(this auto&& self) noexcept -> decltype(auto);
 
-        [[nodiscard]] constexpr operator T &() noexcept;
+        [[nodiscard]] constexpr operator T&() noexcept;
         [[nodiscard]] constexpr operator const T &() const noexcept;
 
         [[nodiscard]] auto initialized() const noexcept -> bool;
@@ -105,7 +104,7 @@ namespace stormkit::core {
     ////////////////////////////////////////
     template<typename T>
     template<typename... Args>
-    auto DeferInit<T>::construct(Args&&...args) noexcept(
+    auto DeferInit<T>::construct(Args&&... args) noexcept(
         noexcept(std::is_nothrow_constructible_v<T, Args...>)) -> void {
         reset();
 
@@ -118,7 +117,7 @@ namespace stormkit::core {
     ////////////////////////////////////////
     template<typename T>
     template<typename... Args>
-    auto DeferInit<T>::constructWithNarrowing(Args&&...args) noexcept(
+    auto DeferInit<T>::constructWithNarrowing(Args&&... args) noexcept(
         noexcept(std::is_nothrow_constructible_v<T, Args...>)) -> void {
         reset();
 
@@ -164,7 +163,7 @@ namespace stormkit::core {
 
         using U = LikeCVType<decltype(self), T>;
 
-        return *std::launder(std::bit_cast<U *>(std::data(self.m_data)));
+        return *std::launder(std::bit_cast<U*>(std::data(self.m_data)));
     }
 
     /////////////////////////////////////
@@ -175,7 +174,7 @@ namespace stormkit::core {
 
         using U = LikeCVType<decltype(self), T>;
 
-        return std::launder(std::bit_cast<U *>(std::data(self.m_data)));
+        return std::launder(std::bit_cast<U*>(std::data(self.m_data)));
     }
 
     /////////////////////////////////////
@@ -188,7 +187,7 @@ namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
     template<typename T>
-    constexpr DeferInit<T>::operator T &() noexcept {
+    constexpr DeferInit<T>::operator T&() noexcept {
         return get();
     }
 

@@ -77,25 +77,25 @@ namespace stormkit::wsi::linux::wayland {
 
     STORMKIT_RAII_CAPSULE_OPAQUE(
         WLOutputRef,
-        wl_output *,
+        wl_output*,
         []() noexcept { return nullptr; },
         [](auto) noexcept {},
         nullptr);
     STORMKIT_RAII_CAPSULE_OPAQUE(
         WLPointerRef,
-        wl_pointer *,
+        wl_pointer*,
         []() noexcept { return nullptr; },
         [](auto) noexcept {},
         nullptr);
     STORMKIT_RAII_CAPSULE_OPAQUE(
         WLKeyboardRef,
-        wl_keyboard *,
+        wl_keyboard*,
         []() noexcept { return nullptr; },
         [](auto) noexcept {},
         nullptr);
     STORMKIT_RAII_CAPSULE_OPAQUE(
         WLTouchRef,
-        wl_touch *,
+        wl_touch*,
         []() noexcept { return nullptr; },
         [](auto) noexcept {},
         nullptr);
@@ -119,7 +119,7 @@ namespace stormkit::wsi::linux::wayland {
         WPPointerConstraintsScoped     pointer_constraints;
         WPRelativePointerManagerScoped relative_pointer_manager;
 
-        core::HashMap<wl_output *, Monitor> monitors;
+        core::HashMap<wl_output*, Monitor> monitors;
     };
 } // namespace stormkit::wsi::linux::wayland
 
@@ -127,8 +127,8 @@ export namespace stormkit::wsi::linux::wayland {
     class WindowImpl: public ::stormkit::wsi::common::WindowImplBase {
       public:
         struct Handles {
-            wl_display *display;
-            wl_surface *surface;
+            wl_display* display;
+            wl_surface* surface;
         };
 
         struct KeyState {
@@ -192,73 +192,73 @@ export namespace stormkit::wsi::linux::wayland {
 
         auto setVirtualKeyboardVisible(bool visible) noexcept -> void;
 
-        auto        setMousePosition(const core::math::Vector2I       &position) noexcept -> void;
+        auto        setMousePosition(const core::math::Vector2I& position) noexcept -> void;
         static auto setMousePositionOnDesktop(const core::math::Vector2U& position) noexcept
             -> void;
 
         [[nodiscard]] static auto getMonitorSettings() -> std::vector<Monitor>;
 
-        auto surfaceOutputEnter(wl_surface *surface, wl_output *output) noexcept -> void;
+        auto surfaceOutputEnter(wl_surface* surface, wl_output* output) noexcept -> void;
 
-        auto surfaceConfigure(xdg_surface *surface, std::uint32_t serial) noexcept -> void;
+        auto surfaceConfigure(xdg_surface* surface, std::uint32_t serial) noexcept -> void;
 
-        auto toplevelConfigure(xdg_toplevel *xdg_tl,
+        auto toplevelConfigure(xdg_toplevel* xdg_tl,
                                std::int32_t  width,
                                std::int32_t  height,
-                               wl_array     *state) noexcept -> void;
-        auto toplevelClose(xdg_toplevel *xdg_tl) noexcept -> void;
+                               wl_array*     state) noexcept -> void;
+        auto toplevelClose(xdg_toplevel* xdg_tl) noexcept -> void;
 
-        auto shellSurfaceConfigure(wl_shell_surface *xdg_tl,
+        auto shellSurfaceConfigure(wl_shell_surface* xdg_tl,
                                    std::uint32_t     edges,
                                    std::int32_t      width,
                                    std::int32_t      height) noexcept -> void;
 
-        auto seatCapabilities(wl_seat *seat, std::uint32_t capabilities) noexcept -> void;
+        auto seatCapabilities(wl_seat* seat, std::uint32_t capabilities) noexcept -> void;
 
-        auto pointerEnter(wl_pointer   *pointer,
+        auto pointerEnter(wl_pointer*   pointer,
                           std::uint32_t serial,
-                          wl_surface   *surface,
+                          wl_surface*   surface,
                           wl_fixed_t    surface_x,
                           wl_fixed_t    surface_y) noexcept -> void;
-        auto pointerLeave(wl_pointer *pointer, std::uint32_t serial, wl_surface *surface) noexcept
+        auto pointerLeave(wl_pointer* pointer, std::uint32_t serial, wl_surface* surface) noexcept
             -> void;
-        auto pointerMotion(wl_pointer   *pointer,
+        auto pointerMotion(wl_pointer*   pointer,
                            std::uint32_t time,
                            wl_fixed_t    surface_x,
                            wl_fixed_t    surface_y) noexcept -> void;
-        auto pointerButton(wl_pointer   *pointer,
+        auto pointerButton(wl_pointer*   pointer,
                            std::uint32_t serial,
                            std::uint32_t time,
                            std::uint32_t button,
                            std::uint32_t state) noexcept -> void;
 
-        auto keyboardKeymap(wl_keyboard  *keyboard,
+        auto keyboardKeymap(wl_keyboard*  keyboard,
                             std::uint32_t format,
                             std::int32_t  fd,
                             std::uint32_t size) noexcept -> void;
-        auto keyboardEnter(wl_keyboard  *keyboard,
+        auto keyboardEnter(wl_keyboard*  keyboard,
                            std::uint32_t serial,
-                           wl_surface   *surface,
-                           wl_array     *keys) noexcept -> void;
-        auto keyboardLeave(wl_keyboard  *keyboard,
+                           wl_surface*   surface,
+                           wl_array*     keys) noexcept -> void;
+        auto keyboardLeave(wl_keyboard*  keyboard,
                            std::uint32_t serial,
-                           wl_surface   *surface) noexcept -> void;
-        auto keyboardKey(wl_keyboard  *keyboard,
+                           wl_surface*   surface) noexcept -> void;
+        auto keyboardKey(wl_keyboard*  keyboard,
                          std::uint32_t serial,
                          std::uint32_t time,
                          std::uint32_t key,
                          std::uint32_t state) noexcept -> void;
-        auto keyboardModifiers(wl_keyboard  *keyboard,
+        auto keyboardModifiers(wl_keyboard*  keyboard,
                                std::uint32_t serial,
                                std::uint32_t mods_depressed,
                                std::uint32_t mods_latched,
                                std::uint32_t mods_locked,
                                std::uint32_t group) noexcept -> void;
-        auto keyboardRepeatInfo(wl_keyboard *keyboard,
+        auto keyboardRepeatInfo(wl_keyboard* keyboard,
                                 std::int32_t rate,
                                 std::int32_t delay) noexcept -> void;
 
-        auto relativePointerRelativeMotion(zwp_relative_pointer_v1 *pointer,
+        auto relativePointerRelativeMotion(zwp_relative_pointer_v1* pointer,
                                            std::uint32_t            time_hi,
                                            std::uint32_t            time_lw,
                                            wl_fixed_t               dx,

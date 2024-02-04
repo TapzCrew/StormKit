@@ -39,10 +39,10 @@ using namespace stormkit::wsi::macos;
          withWindow:(NSWindow *)window {
     self = [super initWithFrame:frame];
 
-    window_handle       = window;
+    window_handle   = window;
     is_mouse_inside = NO;
-    native_event   = nullptr;
-    requester     = _requester;
+    native_event    = nullptr;
+    requester       = _requester;
 
     return self;
 }
@@ -83,7 +83,9 @@ using namespace stormkit::wsi::macos;
 /////////////////////////////////////
 /////////////////////////////////////
 - (void)handleMouseDown:(NSEvent *)event {
-    requester->mouseDownEvent(mouseButton([event buttonNumber]), event.locationInWindow.x, event.locationInWindow.y);
+    requester->mouseDownEvent(mouseButton([event buttonNumber]),
+                              event.locationInWindow.x,
+                              event.locationInWindow.y);
 }
 
 /////////////////////////////////////
@@ -113,7 +115,9 @@ using namespace stormkit::wsi::macos;
 /////////////////////////////////////
 /////////////////////////////////////
 - (void)handleMouseUp:(NSEvent *)event {
-    requester->mouseUpEvent(mouseButton([event buttonNumber]), event.locationInWindow.x, event.locationInWindow.y);
+    requester->mouseUpEvent(mouseButton([event buttonNumber]),
+                            event.locationInWindow.x,
+                            event.locationInWindow.y);
 }
 
 /////////////////////////////////////
@@ -205,10 +209,8 @@ using namespace stormkit::wsi::macos;
 
     NSUInteger opts = (NSTrackingMouseEnteredAndExited | NSTrackingActiveAlways |
                        NSTrackingMouseMoved | NSTrackingEnabledDuringMouseDrag);
-    tracking_area    = [[NSTrackingArea alloc] initWithRect:[self bounds]
-                                                options:opts
-                                                  owner:self
-                                               userInfo:nil];
+    tracking_area =
+        [[NSTrackingArea alloc] initWithRect:[self bounds] options:opts owner:self userInfo:nil];
     [self addTrackingArea:tracking_area];
 }
 
@@ -240,7 +242,7 @@ using namespace stormkit::wsi::macos;
 /////////////////////////////////////
 /////////////////////////////////////
 - (CGDirectDisplayID)displayId {
-    auto screen    = [[self window] screen];
+    auto screen     = [[self window] screen];
     auto display_id = [[screen deviceDescription] objectForKey:@"NSScreenNumber"];
 
     return [display_id intValue];

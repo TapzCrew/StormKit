@@ -19,7 +19,7 @@ export namespace stormkit::core {
 
     template<IsOptionalType T>
     [[nodiscard]] constexpr auto
-        either(T                                                    && optional,
+        either(T&&                                                     optional,
                std::invocable<typename PureType<T>::value_type> auto&& true_,
                std::invocable auto&& false_) noexcept -> decltype(auto);
 
@@ -28,7 +28,7 @@ export namespace stormkit::core {
 
     template<typename Func, typename... Args>
     // requires(std::invocable<Func, Args...>)
-    [[nodiscard]] constexpr auto toUnary(Func&& func, Args&&...args) noexcept -> decltype(auto);
+    [[nodiscard]] constexpr auto toUnary(Func&& func, Args&&... args) noexcept -> decltype(auto);
 } // namespace stormkit::core
 
 ////////////////////////////////////////////////////////////////////
@@ -49,7 +49,7 @@ namespace stormkit::core {
     /////////////////////////////////////
     template<IsOptionalType T>
     STORMKIT_FORCE_INLINE constexpr auto
-        either(T                                                    && optional,
+        either(T&&                                                     optional,
                std::invocable<typename PureType<T>::value_type> auto&& true_,
                std::invocable auto&& false_) noexcept -> decltype(auto) {
         if (optional != std::nullopt) return true_(*std::forward<T>(optional));
@@ -67,7 +67,7 @@ namespace stormkit::core {
     /////////////////////////////////////
     template<typename Func, typename... Args>
     // requires(std::invocable<Func, Args...>)
-    STORMKIT_FORCE_INLINE constexpr auto toUnary(Func&& func, Args&&...args) noexcept
+    STORMKIT_FORCE_INLINE constexpr auto toUnary(Func&& func, Args&&... args) noexcept
         -> decltype(auto) {
         return [_func = std::forward<Func>(func), ... _args = std::forward<Args>(args)](
                    auto&& first) noexcept(noexcept(func(first, std::forward<Args>(args)...))) {

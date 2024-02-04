@@ -18,7 +18,7 @@ export namespace stormkit::core {
 
     [[nodiscard]] auto toString(auto&& value) noexcept -> std::string;
 
-    [[nodiscard]] auto toCZString(std::string_view value) noexcept -> const char *;
+    [[nodiscard]] auto toCZString(std::string_view value) noexcept -> const char*;
 
     template<std::size_t N>
     struct ConstexprString {
@@ -92,7 +92,7 @@ namespace stormkit::core {
 
     ////////////////////////////////////////
     ////////////////////////////////////////
-    inline auto toCZString(std::string_view value) noexcept -> const char * {
+    inline auto toCZString(std::string_view value) noexcept -> const char* {
         return std::data(value);
     }
 } // namespace stormkit::core

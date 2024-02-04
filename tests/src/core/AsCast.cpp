@@ -81,9 +81,9 @@ namespace {
 
                                     auto bar = std::unique_ptr<Foo> { std::make_unique<Bar>() };
 
-                                    expects((as<Bar *>(bar.get())->foo() == 1));
+                                    expects((as<Bar*>(bar.get())->foo() == 1));
                                     expects((as<Bar&>(bar.get()).foo() == 1));
-                                    expects((as<Bar *>(*bar)->foo() == 1));
+                                    expects((as<Bar*>(*bar)->foo() == 1));
                                     expects((as<Bar&>(*bar).foo() == 1));
                                 } },
                               { "AsCast.ByteAs",
@@ -95,19 +95,19 @@ namespace {
                                     };
 
                                     auto bar          = Foo { 9, 3, 'x' };
-                                    auto bar_byte_ptr = as<std::byte *>(&bar);
+                                    auto bar_byte_ptr = as<std::byte*>(&bar);
                                     expects(bar_byte_ptr != nullptr);
 
-                                    bar_byte_ptr = as<std::byte *>(bar);
+                                    bar_byte_ptr = as<std::byte*>(bar);
                                     expects(bar_byte_ptr != nullptr);
 
-                                    auto bar_ptr = as<Foo *>(bar_byte_ptr);
+                                    auto bar_ptr = as<Foo*>(bar_byte_ptr);
                                     expects(bar_ptr != nullptr);
                                     expects(bar_ptr->a == 9);
                                     expects(bar_ptr->b == 3);
                                     expects(bar_ptr->c == 'x');
 
-                                    bar_ptr = as<Foo *>(*bar_byte_ptr);
+                                    bar_ptr = as<Foo*>(*bar_byte_ptr);
                                     expects(bar_ptr != nullptr);
                                     expects(bar_ptr->a == 9);
                                     expects(bar_ptr->b == 3);

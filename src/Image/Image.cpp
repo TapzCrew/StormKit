@@ -107,8 +107,8 @@ namespace stormkit::image {
             data.resize(std::size(bytes) * destination_count);
 
             if (source_count == 1u and destination_count == 2u) {
-                const auto input_it  = std::bit_cast<const core::UInt8 *>(std::data(data));
-                auto       output_it = std::bit_cast<core::UInt16 *>(std::data(data));
+                const auto input_it  = std::bit_cast<const core::UInt8*>(std::data(data));
+                auto       output_it = std::bit_cast<core::UInt16*>(std::data(data));
 
                 for (auto i : core::range(std::size(bytes)))
                     output_it[i] = core::map<core::UInt16>(input_it[i],
@@ -117,8 +117,8 @@ namespace stormkit::image {
                                                            BYTE_2_MIN,
                                                            BYTE_2_MAX);
             } else if (source_count == 1u and destination_count == 4u) {
-                const auto input_it  = std::bit_cast<const core::UInt8 *>(std::data(data));
-                auto       output_it = std::bit_cast<core::UInt32 *>(std::data(data));
+                const auto input_it  = std::bit_cast<const core::UInt8*>(std::data(data));
+                auto       output_it = std::bit_cast<core::UInt32*>(std::data(data));
 
                 for (auto i : core::range(std::size(bytes)))
                     output_it[i] = core::map<core::UInt32>(input_it[i],
@@ -127,8 +127,8 @@ namespace stormkit::image {
                                                            BYTE_4_MIN,
                                                            BYTE_4_MAX);
             } else if (source_count == 2u and destination_count == 1u) {
-                const auto input_it  = std::bit_cast<const core::UInt16 *>(std::data(data));
-                auto       output_it = std::bit_cast<core::UInt8 *>(std::data(data));
+                const auto input_it  = std::bit_cast<const core::UInt16*>(std::data(data));
+                auto       output_it = std::bit_cast<core::UInt8*>(std::data(data));
 
                 for (auto i : core::range(std::size(bytes)))
                     output_it[i] = core::map<core::UInt8>(input_it[i],
@@ -137,8 +137,8 @@ namespace stormkit::image {
                                                           BYTE_1_MIN,
                                                           BYTE_1_MAX);
             } else if (source_count == 2u and destination_count == 4u) {
-                const auto input_it  = std::bit_cast<const core::UInt16 *>(std::data(data));
-                auto       output_it = std::bit_cast<core::UInt32 *>(std::data(data));
+                const auto input_it  = std::bit_cast<const core::UInt16*>(std::data(data));
+                auto       output_it = std::bit_cast<core::UInt32*>(std::data(data));
 
                 for (auto i : core::range(std::size(bytes)))
                     output_it[i] = core::map<core::UInt32>(input_it[i],
@@ -147,8 +147,8 @@ namespace stormkit::image {
                                                            BYTE_4_MIN,
                                                            BYTE_4_MAX);
             } else if (source_count == 4u and destination_count == 1u) {
-                const auto input_it  = std::bit_cast<const core::UInt32 *>(std::data(data));
-                auto       output_it = std::bit_cast<core::UInt8 *>(std::data(data));
+                const auto input_it  = std::bit_cast<const core::UInt32*>(std::data(data));
+                auto       output_it = std::bit_cast<core::UInt8*>(std::data(data));
 
                 for (auto i : core::range(std::size(bytes)))
                     output_it[i] = core::map<core::UInt8>(input_it[i],
@@ -157,8 +157,8 @@ namespace stormkit::image {
                                                           BYTE_1_MIN,
                                                           BYTE_1_MAX);
             } else if (source_count == 4u and destination_count == 2u) {
-                const auto input_it  = std::bit_cast<const core::UInt32 *>(std::data(data));
-                auto       output_it = std::bit_cast<core::UInt16 *>(std::data(data));
+                const auto input_it  = std::bit_cast<const core::UInt32*>(std::data(data));
+                auto       output_it = std::bit_cast<core::UInt16*>(std::data(data));
 
                 for (auto i : core::range(std::size(bytes)))
                     output_it[i] = core::map<core::UInt16>(input_it[i],

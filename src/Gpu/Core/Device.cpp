@@ -49,8 +49,8 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     Device::Device(const PhysicalDevice& physical_device,
-                   const Instance      & instance,
-                   const Info          & info,
+                   const Instance&       instance,
+                   const Info&           info,
                    Tag)
         : InstanceObject { instance }, m_physical_device { &physical_device } {
         const auto& queue_families = m_physical_device->queueFamilies();
@@ -97,7 +97,7 @@ namespace stormkit::gpu {
         }();
 
         const auto queues = [&] {
-            auto q = std::vector<const Queue_ *> {};
+            auto q = std::vector<const Queue_*> {};
             q.reserve(3);
 
             if (raster_queue.id) q.push_back(&raster_queue);
@@ -179,11 +179,11 @@ namespace stormkit::gpu {
         const auto acceleration_feature = vk::PhysicalDeviceAccelerationStructureFeaturesKHR {};
         const auto rt_pipeline_feature =
             vk::PhysicalDeviceRayTracingPipelineFeaturesKHR {}.setPNext(
-                std::bit_cast<void *>(&acceleration_feature));
+                std::bit_cast<void*>(&acceleration_feature));
 
-        const auto next = [&]() -> void * {
+        const auto next = [&]() -> void* {
             if (raytracing_available and info.enable_raytracing)
-                return std::bit_cast<void *>(&rt_pipeline_feature);
+                return std::bit_cast<void*>(&rt_pipeline_feature);
             return nullptr;
         }();
 
@@ -225,7 +225,7 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     auto Device::waitForFences(std::span<const core::NakedRef<const Fence>> fences,
                                bool                                         wait_all,
-                               const std::chrono::milliseconds            & timeout) const noexcept
+                               const std::chrono::milliseconds&             timeout) const noexcept
         -> Expected<Result> {
         const auto vk_fences =
             fences | std::views::transform(toVkHandle()) | std::ranges::to<std::vector>();

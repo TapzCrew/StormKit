@@ -14,7 +14,7 @@ export namespace stormkit::image::details {
     [[nodiscard]] auto loadPPM(std::span<const core::Byte> data) noexcept
         -> std::expected<image::Image, image::Image::Error>;
 
-    [[nodiscard]] auto savePPM(const image::Image         & image,
+    [[nodiscard]] auto savePPM(const image::Image&          image,
                                image::Image::CodecArgs      args,
                                const std::filesystem::path& filepath) noexcept
         -> std::expected<void, image::Image::Error>;
@@ -42,7 +42,7 @@ namespace stormkit::image::details {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto savePPM(const image::Image         & image,
+    auto savePPM(const image::Image&          image,
                  image::Image::CodecArgs      args,
                  const std::filesystem::path& filepath) noexcept
         -> std::expected<void, image::Image::Error> {

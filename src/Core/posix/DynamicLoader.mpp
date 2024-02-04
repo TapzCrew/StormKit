@@ -74,7 +74,7 @@ export namespace stormkit::core {
 
         /////////////////////////////////////
         /////////////////////////////////////
-        STORMKIT_FORCE_INLINE auto doGetFunc(std::string_view name) const -> Expected<void *> {
+        STORMKIT_FORCE_INLINE auto doGetFunc(std::string_view name) const -> Expected<void*> {
             core::expects(m_library_handle);
             auto func = ::dlsym(m_library_handle, std::data(name));
 
@@ -86,6 +86,6 @@ export namespace stormkit::core {
         }
 
       private:
-        void *m_library_handle = nullptr;
+        void* m_library_handle = nullptr;
     };
 } // namespace stormkit::core

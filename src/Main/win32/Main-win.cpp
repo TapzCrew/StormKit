@@ -18,7 +18,7 @@ namespace {
 
 extern auto userMain(std::span<const std::string_view>) -> int;
 
-auto __stdcall main(int argc, char **argv) -> int {
+auto __stdcall main(int argc, char** argv) -> int {
     std::locale::global(std::locale { "" });
     SetConsoleOutputCP(CP_UTF8);
     SetConsoleCP(CP_UTF8);

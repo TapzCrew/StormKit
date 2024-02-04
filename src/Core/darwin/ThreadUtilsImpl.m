@@ -1,12 +1,12 @@
 #import "ThreadUtilsImpl.h"
 
-#import <Foundation/NSThread.h>
 #import <Foundation/NSString.h>
+#import <Foundation/NSThread.h>
 
 ////////////////////////////////////////
 ////////////////////////////////////////
 void setThreadName(NSThread *id, const char *name) {
-    [id setName: [NSString stringWithCString: name]];
+    [id setName:[NSString stringWithCString:name]];
 }
 
 ////////////////////////////////////////

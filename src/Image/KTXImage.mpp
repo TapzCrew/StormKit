@@ -23,7 +23,7 @@ export namespace stormkit::image::details {
     [[nodiscard]] auto loadKTX(std::span<const core::Byte> data) noexcept
         -> std::expected<image::Image, image::Image::Error>;
 
-    [[nodiscard]] auto saveKTX(const image::Image         & image,
+    [[nodiscard]] auto saveKTX(const image::Image&          image,
                                const std::filesystem::path& filepath) noexcept
         -> std::expected<void, image::Image::Error>;
 
@@ -109,8 +109,7 @@ namespace stormkit::image::details {
     /////////////////////////////////////
     auto loadKTX(std::span<const core::Byte> data) noexcept
         -> std::expected<image::Image, image::Image::Error> {
-        auto image =
-            gli::load_ktx(reinterpret_cast<const char *>(std::data(data)), std::size(data));
+        auto image = gli::load_ktx(reinterpret_cast<const char*>(std::data(data)), std::size(data));
 
         const auto faces      = core::as<core::UInt32>(image.faces());
         const auto layers     = core::as<core::UInt32>(image.layers());

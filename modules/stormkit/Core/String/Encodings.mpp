@@ -49,13 +49,13 @@ namespace stormkit::core {
 
         auto len      = 0ull;
         auto input_it = std::data(input);
-        while ((len = std::mbrtoc16(std::bit_cast<char16_t *>(std::data(output)),
+        while ((len = std::mbrtoc16(std::bit_cast<char16_t*>(std::data(output)),
                                     input_it,
                                     MB_CUR_MAX,
                                     &state)) > 0ull)
             input_it += len;
 #else
-        output = std::bit_cast<char16_t *>(std::data(input));
+        output = std::bit_cast<char16_t*>(std::data(input));
 #endif
 
         return output;
@@ -70,9 +70,9 @@ namespace stormkit::core {
         output.resize(std::size(input));
 
         for (const auto& c : input)
-            std::c16rtomb(std::bit_cast<char *>(std::data(output)), c, &state);
+            std::c16rtomb(std::bit_cast<char*>(std::data(output)), c, &state);
 #else
-        output = std::bit_cast<char *>(std::data(input));
+        output = std::bit_cast<char*>(std::data(input));
 #endif
 
         return output;
@@ -89,15 +89,15 @@ namespace stormkit::core {
         [[maybe_unused]] auto input_it = std::data(input);
         [[maybe_unused]] auto i        = 0;
 #if defined(STORMKIT_COMPILER_MSVC)
-        while ((len = std::mbrtoc16(std::bit_cast<char16_t *>(std::data(output)) + i++,
+        while ((len = std::mbrtoc16(std::bit_cast<char16_t*>(std::data(output)) + i++,
                                     input_it,
                                     MB_CUR_MAX,
                                     &state)) > 0u)
             input_it += len;
 #elif defined(STORMKIT_COMPILER_CLANG)
-        output = std::bit_cast<wchar_t *>(std::data(input));
+        output = std::bit_cast<wchar_t*>(std::data(input));
 #else
-        while ((len = std::mbrtoc8(std::bit_cast<char8_t *>(std::data(output)) + i++,
+        while ((len = std::mbrtoc8(std::bit_cast<char8_t*>(std::data(output)) + i++,
                                    input_it,
                                    MB_CUR_MAX,
                                    &state)) > 0ull)
@@ -117,7 +117,7 @@ namespace stormkit::core {
 #if defined(STORMKIT_COMPILER_MSVC)
         for (const auto& c : input) std::c16rtomb(std::data(output), core::as<char16_t>(c), &state);
 #elif defined(STORMKIT_COMPILER_CLANG)
-        output = std::bit_cast<char *>(std::data(input));
+        output = std::bit_cast<char*>(std::data(input));
 #else
         for (const auto& c : input) std::c8rtomb(std::data(output), core::narrow<char>(c), &state);
 #endif
@@ -136,12 +136,12 @@ namespace stormkit::core {
         auto bytes = toByteSpan(output);
         std::ranges::copy(asByteView(input), std::ranges::begin(bytes));
 #elif defined(STORMKIT_COMPILER_CLANG)
-        output = std::bit_cast<char8_t *>(std::data(input));
+        output = std::bit_cast<char8_t*>(std::data(input));
 #else
         auto len      = 0ull;
         auto input_it = std::data(input);
         auto i        = 0;
-        while ((len = std::mbrtoc8(std::bit_cast<char8_t *>(std::data(output)) + i++,
+        while ((len = std::mbrtoc8(std::bit_cast<char8_t*>(std::data(output)) + i++,
                                    input_it,
                                    MB_CUR_MAX,
                                    &state)) > 0ull)
@@ -164,7 +164,7 @@ namespace stormkit::core {
         auto bytes = toByteSpan(output);
         std::ranges::copy(asByteView(input), std::ranges::begin(bytes));
 #elif defined(STORMKIT_COMPILER_CLANG)
-        output = std::bit_cast<char *>(std::data(input));
+        output = std::bit_cast<char*>(std::data(input));
 #else
         for (const auto& c : input) std::c8rtomb(std::data(output), c, &state);
 #endif

@@ -14,12 +14,12 @@
 
 #ifdef __OBJC__
 @class StormKitWindowController;
-using StormKitWindowControllerPtr = StormKitWindowController *;
+using StormKitWindowControllerPtr = StormKitWindowController*;
 @class StormKitView;
-using ViewPtr = StormKitView *;
+using ViewPtr = StormKitView*;
 #else
-using StormKitWindowControllerPtr = void *;
-using ViewPtr                     = void *;
+using StormKitWindowControllerPtr = void*;
+using ViewPtr                     = void*;
 #endif
 
 namespace stormkit::wsi::macos {
@@ -45,7 +45,7 @@ namespace stormkit::wsi::macos {
 
             std::vector<Extent> extents;
 
-            void *handle = nullptr;
+            void* handle = nullptr;
         };
 
         macOSWindow(std::string   title,

@@ -15,7 +15,7 @@
 
 #define ALLOCATE_HELPERS(T)                                      \
     template<class... Args>                                      \
-    [[nodiscard]] static inline auto allocate(Args&&...args) {   \
+    [[nodiscard]] static inline auto allocate(Args&&... args) {  \
         return std::make_unique<T>(std::forward<Args>(args)...); \
     }
 
@@ -64,7 +64,7 @@
 #define STORMKIT_RAII_CAPSULE_OPAQUE(name, x, _constructor, _deleter, release_value) \
     struct name##Scoped {                                                            \
         template<class... Args>                                                      \
-        name##Scoped(Args&&...args) noexcept {                                       \
+        name##Scoped(Args&&... args) noexcept {                                      \
             m_handle = _constructor(std::forward<Args>(args)...);                    \
         }                                                                            \
         explicit name##Scoped(x v) noexcept {                                        \
@@ -109,7 +109,7 @@
 
 #define STORMKIT_RAII_CAPSULE(name, x, deleter)          \
     struct name##Deleter {                               \
-        auto operator()(x *ptr) const noexcept -> void { \
+        auto operator()(x* ptr) const noexcept -> void { \
             if (ptr) [[likely]]                          \
                 deleter(ptr);                            \
         }                                                \
@@ -117,7 +117,7 @@
     using name##Scoped = std::unique_ptr<x, name##Deleter>;
 #define STORMKIT_RAII_CAPSULE_PP(name, x, deleter)       \
     struct name##Deleter {                               \
-        auto operator()(x *ptr) const noexcept -> void { \
+        auto operator()(x* ptr) const noexcept -> void { \
             if (ptr) [[likely]]                          \
                 deleter(&ptr);                           \
         }                                                \
@@ -129,6 +129,6 @@
     noexcept(noexcept(expr))->decltype(expr) { \
         return expr;                           \
     }
-#define STORMKIT_OVERLOADS_OF(name) [&](auto&&...args) STORMKIT_RETURNS(name(FWD(args)...))
+#define STORMKIT_OVERLOADS_OF(name) [&](auto&&... args) STORMKIT_RETURNS(name(FWD(args)...))
 
 #endif

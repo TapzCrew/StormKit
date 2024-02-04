@@ -145,9 +145,9 @@ namespace stormkit::core {
         requires(IsPolymorphic<RawType<From>> and Is<To, RawType<From>>)
     STORMKIT_FORCE_INLINE constexpr auto is(From&& value) noexcept -> bool {
         if constexpr (IsLValueReference<From> and not IsPointer<PureType<From>>)
-            return dynamic_cast<const To *>(&std::forward<From>(value)) != nullptr;
+            return dynamic_cast<const To*>(&std::forward<From>(value)) != nullptr;
         else
-            return dynamic_cast<const To *>(std::to_address(std::forward<From>(value))) != nullptr;
+            return dynamic_cast<const To*>(std::to_address(std::forward<From>(value))) != nullptr;
     }
 
     /////////////////////////////////////

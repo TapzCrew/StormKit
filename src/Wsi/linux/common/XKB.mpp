@@ -22,7 +22,7 @@ import :Types;
 #define STORMKIT_XKB_SCOPED(name, type)                                \
     struct name##Scoped {                                              \
         name##Scoped() noexcept = default;                             \
-        name##Scoped(type *handle) noexcept;                           \
+        name##Scoped(type* handle) noexcept;                           \
         ~name##Scoped() noexcept;                                      \
                                                                        \
         name##Scoped(const name##Scoped&)                    = delete; \
@@ -31,12 +31,12 @@ import :Types;
         name##Scoped(name##Scoped&&) noexcept;                         \
         auto operator=(name##Scoped&&) noexcept -> name##Scoped&;      \
                                                                        \
-        operator type *() const noexcept {                             \
+        operator type*() const noexcept {                              \
             return m_handle;                                           \
         }                                                              \
                                                                        \
       private:                                                         \
-        type *m_handle = nullptr;                                      \
+        type* m_handle = nullptr;                                      \
     }
 
 export namespace stormkit::wsi::linux::common {
@@ -69,7 +69,7 @@ export namespace stormkit::wsi::linux::common {
 ////////////////////////////////////////////////////////////////////
 
 #define STORMKIT_XKB_SCOPED(name, type, var, global, deleter)                             \
-    inline name##Scoped::name##Scoped(type *handle) noexcept : m_handle { handle } {      \
+    inline name##Scoped::name##Scoped(type* handle) noexcept : m_handle { handle } {      \
         if (m_handle != nullptr) var++;                                                   \
     }                                                                                     \
                                                                                           \
@@ -98,7 +98,7 @@ export namespace stormkit::wsi::linux::common {
     }
 
 namespace stormkit::wsi::linux::common {
-    using XKBContextPtr = xkb_context *;
+    using XKBContextPtr = xkb_context*;
 
     IN_MODULE_LOGGER("StormKit.Wsi.Linux.XKB")
 
@@ -118,7 +118,7 @@ namespace stormkit::wsi::linux::common {
     inline auto getXKBContext() noexcept -> XKBContextScoped {
         if (!xkb_context_instance) [[unlikely]] {
             xkb_context_instance = xkb_context_new(XKB_CONTEXT_NO_FLAGS);
-            dlog("New xkb context {}", std::bit_cast<void *>(xkb_context_instance));
+            dlog("New xkb context {}", std::bit_cast<void*>(xkb_context_instance));
         }
 
         core::ensures(xkb_context_instance);

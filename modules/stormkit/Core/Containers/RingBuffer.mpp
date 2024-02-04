@@ -45,9 +45,8 @@ export namespace stormkit::core {
             -> bool;
 
         template<class... Args>
-        auto
-            emplace(Args&&...values) noexcept(std::is_nothrow_constructible_v<ValueType, Args&&...>)
-                -> void;
+        auto emplace(Args&&... values) noexcept(
+            std::is_nothrow_constructible_v<ValueType, Args&&...>) -> void;
 
         auto next() noexcept -> void;
 
@@ -209,7 +208,7 @@ namespace stormkit::core {
     ////////////////////////////////////////
     template<class T>
     template<class... Args>
-    auto RingBuffer<T>::emplace(Args&&...values) noexcept(
+    auto RingBuffer<T>::emplace(Args&&... values) noexcept(
         std::is_nothrow_constructible_v<ValueType, Args&&...>) -> void {
         if (m_count == m_capacity) pop();
 
@@ -262,7 +261,7 @@ namespace stormkit::core {
     template<class T>
     template<class Self>
     auto RingBuffer<T>::getPtr(this Self& self, ExtentType pos) noexcept -> auto&& {
-        using OutPtr    = std::conditional_t<std::is_const_v<Self>, const T *, T *>;
+        using OutPtr    = std::conditional_t<std::is_const_v<Self>, const T*, T*>;
         const auto addr = std::to_address(self.m_buffer[pos * sizeof(ValueType)]);
 
         return std::launder(std::bit_cast<OutPtr>(addr));

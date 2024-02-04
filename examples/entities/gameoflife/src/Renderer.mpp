@@ -38,14 +38,14 @@ export {
         auto doInitMeshRenderObjects() -> void;
         auto doInitPerFrameObjects() -> void;
 
-        const stormkit::wsi::Window *m_window = nullptr;
+        const stormkit::wsi::Window* m_window = nullptr;
 
         std::unique_ptr<stormkit::gpu::Instance> m_instance;
         std::unique_ptr<stormkit::gpu::Device>   m_device;
         std::unique_ptr<stormkit::gpu::Surface>  m_surface;
-        stormkit::gpu::Fence                    *m_current_fence = nullptr;
+        stormkit::gpu::Fence*                    m_current_fence = nullptr;
 
-        const stormkit::gpu::Queue           *m_queue = nullptr;
+        const stormkit::gpu::Queue*           m_queue = nullptr;
         std::vector<stormkit::gpu::ImageView> m_surface_views;
 
         std::unique_ptr<stormkit::gpu::DescriptorSetLayout> m_descriptor_set_layout;

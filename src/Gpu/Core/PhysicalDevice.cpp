@@ -29,7 +29,7 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     PhysicalDevice::PhysicalDevice(vk::raii::PhysicalDevice physical_device,
-                                   const Instance         & instance)
+                                   const Instance&          instance)
         : InstanceObject { instance }, m_vk_physical_device { std::move(physical_device) } {
         const auto properties = m_vk_physical_device.getProperties();
         const auto features   = m_vk_physical_device.getFeatures();

@@ -25,7 +25,7 @@ App::~App() {
     ilog("Cleaning");
 }
 
-auto App::run([[maybe_unused]] const int argc, [[maybe_unused]] const char **argv) -> core::Int32 {
+auto App::run([[maybe_unused]] const int argc, [[maybe_unused]] const char** argv) -> core::Int32 {
     using Clock = std::chrono::high_resolution_clock;
 
     using namespace stormkit::core::literals;
@@ -141,7 +141,7 @@ auto App::handleMouse(const stormkit::wsi::MouseButtonPushedEventData& event) ->
 
     const auto cells = m_entities.entitiesWithComponent<PositionComponent>();
     const auto it    = std::ranges::find_if(cells, [&](const auto e) {
-        const auto   &position = m_entities.getComponent<PositionComponent>(e);
+        const auto& position = m_entities.getComponent<PositionComponent>(e);
 
         return position.x == x && position.y == y;
     });

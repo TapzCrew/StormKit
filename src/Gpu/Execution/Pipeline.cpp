@@ -18,8 +18,8 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     auto Pipeline::doInitRasterPipeline(
-        const PipelineLayout                             & layout,
-        const RenderPass                                 & render_pass,
+        const PipelineLayout&                              layout,
+        const RenderPass&                                  render_pass,
         std::optional<core::NakedRef<const PipelineCache>> pipeline_cache) noexcept
         -> VulkanExpected<void> {
         const auto& state = core::as<RasterPipelineState>(m_state);

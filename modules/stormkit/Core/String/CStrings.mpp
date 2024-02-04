@@ -5,8 +5,8 @@
 export module stormkit.Core:String.CString;
 
 export namespace stormkit::core {
-    using CZString  = const char *;
-    using ZString   = char *;
-    using CWZString = const wchar_t *;
-    using WZString  = wchar_t *;
+    using CZString  = const char*;
+    using ZString   = char*;
+    using CWZString = const wchar_t*;
+    using WZString  = wchar_t*;
 } // namespace stormkit::core

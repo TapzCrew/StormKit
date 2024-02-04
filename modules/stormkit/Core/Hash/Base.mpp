@@ -23,7 +23,7 @@ export namespace stormkit::core {
     constexpr auto hashCombine(HashValue auto& hash, std::ranges::range auto&& range) noexcept;
 
     template<typename... Args>
-    constexpr auto hashCombine(HashValue auto& hash, Args&&...args) noexcept;
+    constexpr auto hashCombine(HashValue auto& hash, Args&&... args) noexcept;
 } // namespace stormkit::core
 
 ////////////////////////////////////////////////////////////////////
@@ -51,7 +51,7 @@ namespace stormkit::core {
     }
 
     template<typename... Args>
-    constexpr auto hashCombine(HashValue auto& hash, Args&&...args) noexcept {
+    constexpr auto hashCombine(HashValue auto& hash, Args&&... args) noexcept {
         (hashCombine(hash, std::forward<Args>(args)), ...);
     }
 } // namespace stormkit::core

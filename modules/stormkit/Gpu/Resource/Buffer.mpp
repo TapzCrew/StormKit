@@ -38,11 +38,11 @@ export namespace stormkit::gpu {
         Buffer(Buffer&&) noexcept;
         auto operator=(Buffer&&) noexcept -> Buffer&;
 
-        [[nodiscard]] static auto create(const Device    & device,
+        [[nodiscard]] static auto create(const Device&     device,
                                          const CreateInfo& info,
                                          bool              persistently_mapped = false) noexcept
             -> Expected<Buffer>;
-        [[nodiscard]] static auto allocate(const Device    & device,
+        [[nodiscard]] static auto allocate(const Device&     device,
                                            const CreateInfo& info,
                                            bool              persistently_mapped = false) noexcept
             -> Expected<std::unique_ptr<Buffer>>;
@@ -89,7 +89,7 @@ export namespace stormkit::gpu {
         core::RangeExtent m_size   = 0;
 
         bool        m_is_persistently_mapped = false;
-        core::Byte *m_mapped_pointer         = nullptr;
+        core::Byte* m_mapped_pointer         = nullptr;
     };
 
     struct BufferMemoryBarrier {
@@ -99,7 +99,7 @@ export namespace stormkit::gpu {
         core::UInt32 src_queue_family_index = QUEUE_FAMILY_IGNORED;
         core::UInt32 dst_queue_family_index = QUEUE_FAMILY_IGNORED;
 
-        const Buffer    & buffer;
+        const Buffer&     buffer;
         core::RangeExtent size;
         core::UInt64      offset = 0;
     };
@@ -124,7 +124,7 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto Buffer::create(const Device    & device,
+    STORMKIT_FORCE_INLINE auto Buffer::create(const Device&     device,
                                               const CreateInfo& info,
                                               bool              persistently_mapped) noexcept
         -> Expected<Buffer> try {
@@ -133,7 +133,7 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto Buffer::allocate(const Device    & device,
+    STORMKIT_FORCE_INLINE auto Buffer::allocate(const Device&     device,
                                                 const CreateInfo& info,
                                                 bool              persistently_mapped) noexcept
         -> Expected<std::unique_ptr<Buffer>> try {
@@ -164,7 +164,7 @@ namespace stormkit::gpu {
 
         if (!m_mapped_pointer) {
             auto _ = device().vmaAllocator().mapMemory(*m_vma_allocation,
-                                                       std::bit_cast<void **>(&m_mapped_pointer));
+                                                       std::bit_cast<void**>(&m_mapped_pointer));
             m_mapped_pointer += offset;
         }
 
@@ -184,7 +184,7 @@ namespace stormkit::gpu {
     STORMKIT_FORCE_INLINE auto Buffer::mapAs(core::RangeOffset offset) noexcept -> decltype(auto) {
         core::expects(m_vma_allocation.operator bool());
 
-        return std::bit_cast<T *>(map(offset));
+        return std::bit_cast<T*>(map(offset));
     }
 
     /////////////////////////////////////
@@ -195,7 +195,7 @@ namespace stormkit::gpu {
 
         using Byte = core::LikeCV<decltype(self), core::Byte>;
 
-        return std::bit_cast<Byte *>(self.m_mapped_pointer);
+        return std::bit_cast<Byte*>(self.m_mapped_pointer);
     }
 
     /////////////////////////////////////
@@ -207,7 +207,7 @@ namespace stormkit::gpu {
 
         using Byte = core::LikeCV<decltype(self), core::Byte>;
 
-        return std::span<Byte> { std::bit_cast<Byte *>(self.m_mapped_pointer), size };
+        return std::span<Byte> { std::bit_cast<Byte*>(self.m_mapped_pointer), size };
     }
 
     /////////////////////////////////////
@@ -218,7 +218,7 @@ namespace stormkit::gpu {
 
         using Type = core::LikeCV<decltype(self), T>;
 
-        return std::bit_cast<Type *>(self.data());
+        return std::bit_cast<Type*>(self.data());
     }
 
     /////////////////////////////////////

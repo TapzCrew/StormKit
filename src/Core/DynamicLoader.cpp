@@ -45,7 +45,7 @@ namespace stormkit::core {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto DynamicLoader::doGetFunc(std::string_view name) const -> Expected<void *> {
+    auto DynamicLoader::doGetFunc(std::string_view name) const -> Expected<void*> {
         return m_impl->doGetFunc(name);
     }
 } // namespace stormkit::core

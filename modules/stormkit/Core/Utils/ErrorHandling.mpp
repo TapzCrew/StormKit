@@ -18,7 +18,7 @@ import :Utils.Descriptors;
 export namespace stormkit::core {
     template<typename T>
     [[nodiscard]] constexpr auto
-        expectsWithMessage(std::string       && message,
+        expectsWithMessage(std::string&&        message,
                            std::source_location location = std::source_location::current()) noexcept
         -> decltype(auto); // optional overload
 
@@ -28,7 +28,7 @@ export namespace stormkit::core {
         -> decltype(auto); // optional overload
 
     [[nodiscard]] constexpr auto
-        expectsWithMessage(std::string       && message,
+        expectsWithMessage(std::string&&        message,
                            std::source_location location = std::source_location::current()) noexcept
         -> decltype(auto);
 

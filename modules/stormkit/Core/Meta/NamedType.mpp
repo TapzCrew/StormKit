@@ -32,7 +32,7 @@ export {
             constexpr ~NamedType() noexcept(std::is_nothrow_destructible_v<UnderlyingType>);
 
             template<class... Args>
-            constexpr explicit(sizeof...(Args) == 1) NamedType(Args&&...args) noexcept(
+            constexpr explicit(sizeof...(Args) == 1) NamedType(Args&&... args) noexcept(
                 std::is_nothrow_constructible_v<UnderlyingType, Args...>)
                 : m_value { std::forward<Args>(args)... } {}
 
@@ -61,7 +61,7 @@ export {
         concept IsNamedType = std::derived_from<T, NamedTypeBase>;
 
         template<class T, class... Args>
-        constexpr auto makeNamed(Args&&...args) noexcept -> T;
+        constexpr auto makeNamed(Args&&... args) noexcept -> T;
 
         struct PreIncrementable {
             constexpr auto operator++(this auto&& self) -> decltype(auto);
@@ -166,7 +166,7 @@ export {
 
         struct Callable {
             template<class... Args>
-            constexpr auto operator()(this auto&& self, Args&&...args) -> decltype(auto);
+            constexpr auto operator()(this auto&& self, Args&&... args) -> decltype(auto);
         };
 
         struct MethodCallable {
@@ -261,7 +261,7 @@ namespace stormkit::core {
     ////////////////////////////////////////
     ////////////////////////////////////////
     template<class T, class... Args>
-    constexpr auto makeNamed(Args&&...args) noexcept -> decltype(auto) {
+    constexpr auto makeNamed(Args&&... args) noexcept -> decltype(auto) {
         return T { std::forward<Args>(args)... };
     }
 
@@ -479,7 +479,7 @@ namespace stormkit::core {
     ////////////////////////////////////////
     ////////////////////////////////////////
     template<class... Args>
-    constexpr auto Callable::operator()(this auto&& self, Args&&...args) -> decltype(auto) {
+    constexpr auto Callable::operator()(this auto&& self, Args&&... args) -> decltype(auto) {
         return std::forward<decltype(self)>(self).get()(std::forward<Args>(args)...);
     }
 

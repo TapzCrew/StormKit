@@ -25,7 +25,7 @@ namespace stormkit::core {
 
     ////////////////////////////////////////
     ////////////////////////////////////////
-    auto setThreadName([[maybe_unused]] std::jthread   & thread,
+    auto setThreadName([[maybe_unused]] std::jthread&    thread,
                        [[maybe_unused]] std::string_view name) -> void {
         // auto id = thread.native_handle();
         // details::setThreadName(id, name);

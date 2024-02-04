@@ -56,13 +56,13 @@ namespace stormkit::core {
     ////////////////////////////////////////
     ////////////////////////////////////////
     inline auto read(std::istream& stream, std::span<Byte> output) noexcept -> void {
-        stream.read(std::bit_cast<char *>(std::data(output)), std::size(output));
+        stream.read(std::bit_cast<char*>(std::data(output)), std::size(output));
     }
 
     ////////////////////////////////////////
     ////////////////////////////////////////
     inline auto write(std::ostream& stream, std::span<const Byte> data) noexcept -> void {
-        stream.write(std::bit_cast<const char *>(std::data(data)), std::size(data));
+        stream.write(std::bit_cast<const char*>(std::data(data)), std::size(data));
     }
 
     ////////////////////////////////////////

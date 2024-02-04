@@ -13,8 +13,8 @@ import Components;
 
 using namespace stormkit;
 
-UpdateBoardSystem::UpdateBoardSystem(stormkit::image::Image & board,
-                                     Renderer               & renderer,
+UpdateBoardSystem::UpdateBoardSystem(stormkit::image::Image&  board,
+                                     Renderer&                renderer,
                                      entities::EntityManager& manager)
     : entities::System { manager, 0, { PositionComponent::TYPE } }, m_board { &board },
       m_renderer { &renderer }, m_last_update { Clock::now() } {
@@ -147,7 +147,7 @@ auto UpdateBoardSystem::postUpdate() -> void {
     using namespace stormkit::core::literals;
     if (m_updated) {
         m_updated          = false;
-        auto      & board  = *m_board;
+        auto&       board  = *m_board;
         const auto& extent = board.extent();
 
         for (auto i : core::range(extent.width * extent.height)) {

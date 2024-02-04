@@ -52,9 +52,9 @@ export namespace stormkit::engine {
 
         auto reset() noexcept -> void;
         auto bake() -> void;
-        auto createFrameGraph(const gpu::Device& device, BakedFrameGraph *old = nullptr)
+        auto createFrameGraph(const gpu::Device& device, BakedFrameGraph* old = nullptr)
             -> BakedFrameGraph;
-        auto allocateFrameGraph(const gpu::Device& device, BakedFrameGraph *old = nullptr)
+        auto allocateFrameGraph(const gpu::Device& device, BakedFrameGraph* old = nullptr)
             -> std::unique_ptr<BakedFrameGraph>;
 
         auto hasTask(GraphID id) const noexcept -> bool;
@@ -125,7 +125,7 @@ export namespace stormkit::engine {
         auto buildBufferPhysicalDescriptions(const GraphTask& task) noexcept
             -> std::vector<BufferInfo>;
         auto buildRenderPassPhysicalDescription(
-            const GraphTask                         & task,
+            const GraphTask&                          task,
             core::HashMap<GraphID, gpu::ImageLayout>& layouts) noexcept -> RenderPassData;
         auto allocatePhysicalResources(const gpu::Device& device) -> BakedFrameGraph::Data;
 
@@ -193,12 +193,12 @@ namespace stormkit::engine {
         auto& task = m_tasks.emplace_back(id, std::move(name), type, cull_imune);
         m_datas.emplace_back(std::vector<std::byte> { sizeof(TaskData) });
 
-        task.onSetup = [setup = std::move(setup)](core::Byte      & data,
+        task.onSetup = [setup = std::move(setup)](core::Byte&       data,
                                                   GraphTaskBuilder& builder) noexcept {
             setup(core::as<TaskData>(data), builder);
         };
         task.onExecute = [execute = std::move(
-                              execute)](const core::Byte                             & data,
+                              execute)](const core::Byte&                              data,
                                         std::optional<core::NakedRef<gpu::RenderPass>> renderpass,
                                         gpu::CommandBuffer& cmb) noexcept {
             execute(core::as<TaskData>(data), std::move(renderpass), cmb);
@@ -213,7 +213,7 @@ namespace stormkit::engine {
     /////////////////////////////////////
     template<ResourceDescriptionType Description, typename Resource>
     inline auto FrameGraphBuilder::setRetainedResource(std::string     name,
-                                                       Description  && description,
+                                                       Description&&   description,
                                                        const Resource& image)
         -> GraphResource<Description>& {
         auto& graph_resource = m_resources.emplace_back(std::move(name),
@@ -248,7 +248,7 @@ namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     template<class TaskData>
-    STORMKIT_FORCE_INLINE auto FrameGraphBuilder::getTask(this auto      & self,
+    STORMKIT_FORCE_INLINE auto FrameGraphBuilder::getTask(this auto&       self,
                                                           std::string_view name) noexcept
         -> decltype(auto) {
         return core::as<core::LikeCV<decltype(self), GraphTask>>(self.getTask(name));
@@ -264,7 +264,7 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto FrameGraphBuilder::getTask(this auto      & self,
+    STORMKIT_FORCE_INLINE auto FrameGraphBuilder::getTask(this auto&       self,
                                                           std::string_view name) noexcept
         -> decltype(auto) {
         const auto it = std::ranges::find_if(self.m_tasks, [&](const auto& t) noexcept {
@@ -310,7 +310,7 @@ namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     template<class ResourceData>
-    STORMKIT_FORCE_INLINE auto FrameGraphBuilder::getResource(this auto      & self,
+    STORMKIT_FORCE_INLINE auto FrameGraphBuilder::getResource(this auto&       self,
                                                               std::string_view name) noexcept
         -> decltype(auto) {
         return core::as<GraphResource<ResourceData>>(self.getResource(name));
@@ -326,7 +326,7 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto FrameGraphBuilder::getResource(this auto      & self,
+    STORMKIT_FORCE_INLINE auto FrameGraphBuilder::getResource(this auto&       self,
                                                               std::string_view name) noexcept
         -> decltype(auto) {
         const auto visitor = [name](auto&& value) noexcept { return value.name() == name; };

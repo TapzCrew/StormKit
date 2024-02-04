@@ -50,10 +50,10 @@ export namespace stormkit::wsi::linux::x11 {
     class WindowImpl: public ::stormkit::wsi::common::WindowImplBase {
       public:
         struct Handles {
-            xcb_connection_t  *connection;
+            xcb_connection_t*  connection;
             xcb_window_t       window;
-            xcb_key_symbols_t *key_symbols;
-            xkb_state         *state;
+            xcb_key_symbols_t* key_symbols;
+            xkb_state*         state;
         };
 
         WindowImpl();
@@ -100,14 +100,14 @@ export namespace stormkit::wsi::linux::x11 {
 
         auto setVirtualKeyboardVisible(bool visible) noexcept -> void;
 
-        auto        setMousePosition(const core::math::Vector2I       &position) noexcept -> void;
+        auto        setMousePosition(const core::math::Vector2I& position) noexcept -> void;
         static auto setMousePositionOnDesktop(const core::math::Vector2U& position) noexcept
             -> void;
 
         [[nodiscard]] static auto getMonitorSettings() -> std::vector<Monitor>;
 
       private:
-        auto processEvents(xcb_generic_event_t *xevent) -> void;
+        auto processEvents(xcb_generic_event_t* xevent) -> void;
         auto updateKeymap() -> void;
 
         auto handleKeyEvent(xcb_keycode_t keycode, bool up) noexcept -> void;
@@ -242,8 +242,8 @@ namespace stormkit::wsi::linux::x11 {
         constexpr auto XINPUT_MASK_MODIFIERS = core::UInt32 { XCB_INPUT_MODIFIER_MASK_ANY };
     } // namespace
 
-    auto isExtEvent(xcb_generic_event_t *event, int opcode) noexcept -> bool {
-        return reinterpret_cast<xcb_ge_generic_event_t *>(event)->extension == opcode;
+    auto isExtEvent(xcb_generic_event_t* event, int opcode) noexcept -> bool {
+        return reinterpret_cast<xcb_ge_generic_event_t*>(event)->extension == opcode;
     }
 
     /////////////////////////////////////
@@ -580,7 +580,7 @@ namespace stormkit::wsi::linux::x11 {
                        1,
                        m_window,
                        XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT | XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY,
-                       reinterpret_cast<const char *>(&ev));
+                       reinterpret_cast<const char*>(&ev));
 
         m_fullscreen = enabled;
 
@@ -770,23 +770,23 @@ namespace stormkit::wsi::linux::x11 {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto WindowImpl::processEvents(xcb_generic_event_t *event) -> void {
-        auto      *xevent        = event;
+    auto WindowImpl::processEvents(xcb_generic_event_t* event) -> void {
+        auto*      xevent        = event;
         const auto response_type = xevent->response_type & ~0x80;
 
         switch (response_type) {
             case XCB_KEY_PRESS: {
-                auto kevent = reinterpret_cast<xcb_key_press_event_t *>(xevent);
+                auto kevent = reinterpret_cast<xcb_key_press_event_t*>(xevent);
                 handleKeyEvent(kevent->detail, true);
                 break;
             }
             case XCB_KEY_RELEASE: {
-                auto kevent = reinterpret_cast<xcb_key_release_event_t *>(xevent);
+                auto kevent = reinterpret_cast<xcb_key_release_event_t*>(xevent);
                 handleKeyEvent(kevent->detail, false);
                 break;
             }
             case XCB_MOTION_NOTIFY: {
-                auto mouse_event = reinterpret_cast<xcb_motion_notify_event_t *>(xevent);
+                auto mouse_event = reinterpret_cast<xcb_motion_notify_event_t*>(xevent);
 
                 const auto x = core::as<core::UInt32>(mouse_event->event_x);
                 const auto y = core::as<core::UInt32>(mouse_event->event_y);
@@ -813,7 +813,7 @@ namespace stormkit::wsi::linux::x11 {
                 break;
             }
             case XCB_BUTTON_PRESS: {
-                auto button_event = reinterpret_cast<xcb_button_press_event_t *>(xevent);
+                auto button_event = reinterpret_cast<xcb_button_press_event_t*>(xevent);
 
                 auto button = button_event->detail;
                 WindowImplBase::mouseDownEvent(x11MouseButtonToStormMouseButton(button),
@@ -822,7 +822,7 @@ namespace stormkit::wsi::linux::x11 {
                 break;
             }
             case XCB_BUTTON_RELEASE: {
-                auto button_event = reinterpret_cast<xcb_button_press_event_t *>(xevent);
+                auto button_event = reinterpret_cast<xcb_button_press_event_t*>(xevent);
 
                 auto button = button_event->detail;
                 WindowImplBase::mouseUpEvent(x11MouseButtonToStormMouseButton(button),
@@ -831,7 +831,7 @@ namespace stormkit::wsi::linux::x11 {
                 break;
             }
             case XCB_CONFIGURE_NOTIFY: {
-                auto configure_event = reinterpret_cast<xcb_configure_notify_event_t *>(xevent);
+                auto configure_event = reinterpret_cast<xcb_configure_notify_event_t*>(xevent);
 
                 if ((configure_event->width != m_extent.width) ||
                     (configure_event->height != m_extent.height)) {
@@ -857,13 +857,13 @@ namespace stormkit::wsi::linux::x11 {
                          WM_DELETE_WINDOW,
                          close_atom.error().message);
 
-                if (reinterpret_cast<xcb_client_message_event_t *>(xevent)->data.data32[0] ==
+                if (reinterpret_cast<xcb_client_message_event_t*>(xevent)->data.data32[0] ==
                     *close_atom)
                     WindowImplBase::closeEvent();
                 break;
             }
             case XCB_MAPPING_NOTIFY: {
-                auto mapping_notify_event = reinterpret_cast<xcb_mapping_notify_event_t *>(xevent);
+                auto mapping_notify_event = reinterpret_cast<xcb_mapping_notify_event_t*>(xevent);
 
                 if (mapping_notify_event->request != XCB_MAPPING_POINTER) {
                     xcb_refresh_keyboard_mapping(m_key_symbols.get(), mapping_notify_event);
@@ -873,24 +873,24 @@ namespace stormkit::wsi::linux::x11 {
             }
             case XCB_GE_GENERIC: {
                 if (isExtEvent(xevent, m_xi_opcode)) {
-                    auto xievent = reinterpret_cast<xcb_ge_generic_event_t *>(xevent);
+                    auto xievent = reinterpret_cast<xcb_ge_generic_event_t*>(xevent);
                     switch (xievent->event_type) {
                         case XCB_INPUT_KEY_PRESS: [[fallthrough]];
                         case XCB_INPUT_RAW_KEY_PRESS: {
-                            auto xievent = reinterpret_cast<xcb_input_key_press_event_t *>(xevent);
+                            auto xievent = reinterpret_cast<xcb_input_key_press_event_t*>(xevent);
                             handleKeyEvent(xievent->detail, true);
                             break;
                         }
                         case XCB_INPUT_KEY_RELEASE: [[fallthrough]];
                         case XCB_INPUT_RAW_KEY_RELEASE: {
-                            auto xievent = reinterpret_cast<xcb_input_key_press_event_t *>(xevent);
+                            auto xievent = reinterpret_cast<xcb_input_key_press_event_t*>(xevent);
                             handleKeyEvent(xievent->detail, false);
                             break;
                         }
                         case XCB_INPUT_BUTTON_PRESS: [[fallthrough]];
                         case XCB_INPUT_RAW_BUTTON_PRESS: {
                             auto button_event =
-                                reinterpret_cast<xcb_input_button_press_event_t *>(xevent);
+                                reinterpret_cast<xcb_input_button_press_event_t*>(xevent);
 
                             auto button = button_event->detail;
                             WindowImplBase::mouseDownEvent(x11MouseButtonToStormMouseButton(button),
@@ -901,7 +901,7 @@ namespace stormkit::wsi::linux::x11 {
                         case XCB_INPUT_BUTTON_RELEASE: [[fallthrough]];
                         case XCB_INPUT_RAW_BUTTON_RELEASE: {
                             auto button_event =
-                                reinterpret_cast<xcb_input_button_release_event_t *>(xevent);
+                                reinterpret_cast<xcb_input_button_release_event_t*>(xevent);
 
                             auto button = button_event->detail;
                             WindowImplBase::mouseDownEvent(x11MouseButtonToStormMouseButton(button),
@@ -962,7 +962,7 @@ namespace stormkit::wsi::linux::x11 {
         symbol         = xkb_state_key_get_one_sym(m_xkb_state.get(), keycode);
         xkb_state_key_get_utf8(m_xkb_state.get(),
                                keycode,
-                               reinterpret_cast<char *>(&character),
+                               reinterpret_cast<char*>(&character),
                                sizeof(char));
 
         auto key = common::xkbKeyToStormkitKey(symbol);

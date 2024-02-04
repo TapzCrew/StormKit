@@ -15,7 +15,7 @@
         Pimpl<T, Defer>::~Pimpl() = default;                                   \
         template<class T, bool Defer>                                          \
         template<IsNot<T> First, class... Args>                                \
-        Pimpl<T, Defer>::Pimpl(First&& first, Args&&...args) {                 \
+        Pimpl<T, Defer>::Pimpl(First&& first, Args&&... args) {                \
             init(std::forward<First>(first), std::forward<Args>(args)...);     \
         }                                                                      \
         template<class T, bool Defer>                                          \
@@ -24,15 +24,15 @@
         auto Pimpl<T, Defer>::operator=(Pimpl&&) noexcept -> Pimpl& = default; \
         template<class T, bool Defer>                                          \
         template<class... Args>                                                \
-        auto Pimpl<T, Defer>::init(Args&&...args) -> void {                    \
+        auto Pimpl<T, Defer>::init(Args&&... args) -> void {                   \
             m_data = std::make_unique<T>(std::forward<Args>(args)...);         \
         }                                                                      \
         template<class T, bool Defer>                                          \
-        auto Pimpl<T, Defer>::operator->() noexcept -> T * {                   \
+        auto Pimpl<T, Defer>::operator->() noexcept -> T* {                    \
             return &get();                                                     \
         }                                                                      \
         template<class T, bool Defer>                                          \
-        auto Pimpl<T, Defer>::operator->() const noexcept -> const T * {       \
+        auto Pimpl<T, Defer>::operator->() const noexcept -> const T* {        \
             return &get();                                                     \
         }                                                                      \
         template<class T, bool Defer>                                          \

@@ -40,8 +40,8 @@ export namespace stormkit::gpu {
         };
 
         Device(const PhysicalDevice& physical_device,
-               const Instance      & instance,
-               const Info          & info,
+               const Instance&       instance,
+               const Info&           info,
                Tag);
         ~Device();
 
@@ -52,11 +52,11 @@ export namespace stormkit::gpu {
         auto operator=(Device&&) noexcept -> Device&;
 
         [[nodiscard]] static auto create(const PhysicalDevice& physical_device,
-                                         const Instance      & instance,
+                                         const Instance&       instance,
                                          const Info& info = { true, false }) noexcept -> Device;
         [[nodiscard]] static auto allocate(const PhysicalDevice& physical_device,
-                                           const Instance      & instance,
-                                           const Info          & info = { true, false }) noexcept
+                                           const Instance&       instance,
+                                           const Info&           info = { true, false }) noexcept
             -> std::unique_ptr<Device>;
 
         auto waitIdle() const noexcept -> void;
@@ -66,7 +66,7 @@ export namespace stormkit::gpu {
                                          const std::chrono::milliseconds& timeout =
                                              std::chrono::milliseconds::max()) const noexcept
             -> Expected<Result>;
-        [[nodiscard]] auto waitForFence(const Fence                    & fence,
+        [[nodiscard]] auto waitForFence(const Fence&                     fence,
                                         const std::chrono::milliseconds& timeout =
                                             std::chrono::milliseconds::max()) const noexcept
             -> Expected<Result>;
@@ -137,7 +137,7 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE auto
-        Device::waitForFence(const Fence                    & fence,
+        Device::waitForFence(const Fence&                     fence,
                              const std::chrono::milliseconds& timeout) const noexcept
         -> Expected<Result> {
         return waitForFences(core::makeNakedRefArray(fence), true, timeout);
