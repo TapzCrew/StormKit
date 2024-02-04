@@ -6,6 +6,8 @@ module;
 
 #include <stormkit/Core/PlatformMacro.hpp>
 
+#include <version>
+
 export module stormkit.Core:Utils.Assert;
 
 import std;
@@ -33,44 +35,38 @@ export namespace stormkit::core {
                                        std::string_view            message,
                                        const std::source_location& location) noexcept;
 
-    constexpr auto
-        assert(bool                        cond,
-               std::string_view            message,
-               bool                        show_callstack = true,
-               const std::source_location& location = std::source_location::current()) noexcept
-        -> void;
+    constexpr auto assert(
+        bool                        cond,
+        std::string_view            message,
+        bool                        show_callstack = true,
+        const std::source_location& location = std::source_location::current()) noexcept -> void;
 
-    constexpr auto
-        assert(bool                        cond,
-               bool                        show_callstack = true,
-               const std::source_location& location = std::source_location::current()) noexcept
-        -> void;
+    constexpr auto assert(
+        bool                        cond,
+        bool                        show_callstack = true,
+        const std::source_location& location = std::source_location::current()) noexcept -> void;
 
-    constexpr auto
-        expects(bool                        cond,
-                std::string_view            message,
-                bool                        show_callstack = true,
-                const std::source_location& location = std::source_location::current()) noexcept
-        -> void;
+    constexpr auto expects(
+        bool                        cond,
+        std::string_view            message,
+        bool                        show_callstack = true,
+        const std::source_location& location = std::source_location::current()) noexcept -> void;
 
-    constexpr auto
-        expects(bool                        cond,
-                bool                        show_callstack = true,
-                const std::source_location& location = std::source_location::current()) noexcept
-        -> void;
+    constexpr auto expects(
+        bool                        cond,
+        bool                        show_callstack = true,
+        const std::source_location& location = std::source_location::current()) noexcept -> void;
 
-    constexpr auto
-        ensures(bool                        cond,
-                std::string_view            message,
-                bool                        show_callstack = true,
-                const std::source_location& location = std::source_location::current()) noexcept
-        -> void;
+    constexpr auto ensures(
+        bool                        cond,
+        std::string_view            message,
+        bool                        show_callstack = true,
+        const std::source_location& location = std::source_location::current()) noexcept -> void;
 
-    constexpr auto
-        ensures(bool                        cond,
-                bool                        show_callstack = true,
-                const std::source_location& location = std::source_location::current()) noexcept
-        -> void;
+    constexpr auto ensures(
+        bool                        cond,
+        bool                        show_callstack = true,
+        const std::source_location& location = std::source_location::current()) noexcept -> void;
 } // namespace stormkit::core
 
 ////////////////////////////////////////////////////////////////////
@@ -144,11 +140,11 @@ namespace stormkit::core {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE constexpr auto assert(bool                        cond,
-                                                std::string_view            message,
-                                                bool                        show_callstack,
-                                                const std::source_location& location) noexcept
-        -> void {
+    STORMKIT_FORCE_INLINE constexpr auto
+        assert(bool                        cond,
+               std::string_view            message,
+               bool                        show_callstack,
+               const std::source_location& location) noexcept -> void {
 #ifdef STORMKIT_COMPILER_MSVC
         if constexpr (std::is_constant_evaluated()) {
 #else
@@ -163,18 +159,19 @@ namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE constexpr auto
-        assert(bool cond, bool show_callstack, const std::source_location& location) noexcept
-        -> void {
+        assert(bool                        cond,
+               bool                        show_callstack,
+               const std::source_location& location) noexcept -> void {
         assert(cond, "Condition check failed", show_callstack, location);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE constexpr auto expects(bool                        cond,
-                                                 std::string_view            message,
-                                                 bool                        show_callstack,
-                                                 const std::source_location& location) noexcept
-        -> void {
+    STORMKIT_FORCE_INLINE constexpr auto
+        expects(bool                        cond,
+                std::string_view            message,
+                bool                        show_callstack,
+                const std::source_location& location) noexcept -> void {
 #ifdef STORMKIT_COMPILER_MSVC
         if constexpr (std::is_constant_evaluated()) {
 #else
@@ -189,18 +186,19 @@ namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE constexpr auto
-        expects(bool cond, bool show_callstack, const std::source_location& location) noexcept
-        -> void {
+        expects(bool                        cond,
+                bool                        show_callstack,
+                const std::source_location& location) noexcept -> void {
         expects(cond, "Condition check failed", show_callstack, location);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE constexpr auto ensures(bool                        cond,
-                                                 std::string_view            message,
-                                                 bool                        show_callstack,
-                                                 const std::source_location& location) noexcept
-        -> void {
+    STORMKIT_FORCE_INLINE constexpr auto
+        ensures(bool                        cond,
+                std::string_view            message,
+                bool                        show_callstack,
+                const std::source_location& location) noexcept -> void {
 #ifdef STORMKIT_COMPILER_MSVC
         if constexpr (std::is_constant_evaluated()) {
 #else
@@ -215,8 +213,9 @@ namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE constexpr auto
-        ensures(bool cond, bool show_callstack, const std::source_location& location) noexcept
-        -> void {
+        ensures(bool                        cond,
+                bool                        show_callstack,
+                const std::source_location& location) noexcept -> void {
         ensures(cond, "Condition check failed", show_callstack, location);
     }
 } // namespace stormkit::core
