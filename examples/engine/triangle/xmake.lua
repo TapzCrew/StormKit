@@ -1,4 +1,4 @@
-add_requires("nzsl", { configs = { toolchain = "", runtimes = "", fs_watcher = false } })
+add_requires("nzsl", { configs = { runtimes = "", fs_watcher = false } })
 
 target("triangle")
 do

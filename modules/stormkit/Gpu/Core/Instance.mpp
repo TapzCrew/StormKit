@@ -141,6 +141,31 @@ export {
             friend class Instance;
         };
 
+        class STORMKIT_API Swapchain {
+            struct Tag {};
+
+          public:
+            static constexpr auto DEBUG_TYPE = DebugObjectType::Swapchain;
+
+          //   Swapchain(const Device& device, bool signaled, Tag);
+          //   ~Swapchain();
+          //
+          //   Swapchain(const Swapchain&)                    = delete;
+          //   auto operator=(const Swapchain&) -> Swapchain& = delete;
+          //
+          //   Swapchain(Swapchain&&) noexcept;
+          //   auto operator=(Swapchain&&) noexcept -> Swapchain&;
+          //
+          //   // [[nodiscard]] static auto create(const Device& device,
+          //   //                                  bool signaled = false) noexcept -> Expected<Swapchain>;
+          //   // [[nodiscard]] static auto allocate(const Device& device, bool signaled = false) noexcept
+          //   //     -> Expected<std::unique_ptr<Swapchain>>;
+          //   //
+          //   [[nodiscard]] auto vkHandle() const noexcept -> const vk::raii::SwapchainKHR&;
+          //
+          // private:
+          //   core::DeferInit<vk::raii::SwapchainKHR> m_vk_swapchain;
+        };
     } // namespace stormkit::gpu
 
     namespace std {

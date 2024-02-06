@@ -119,7 +119,8 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE Device::~Device() {
-        waitIdle();
+        if(m_vk_device.initialized()) [[likely]]
+            waitIdle();
     }
 
     /////////////////////////////////////

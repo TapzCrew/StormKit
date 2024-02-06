@@ -19,6 +19,8 @@ import App;
 auto main(std::span<const std::string_view> args) -> int {
     using namespace stormkit;
 
+    stormkit::core::printStacktrace();
+
     wsi::parseArgs(args);
     // core::setupSignalHandler();
 

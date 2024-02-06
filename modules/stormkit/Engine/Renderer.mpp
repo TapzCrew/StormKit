@@ -45,12 +45,15 @@ export {
                 -> gpu::Expected<void>;
             auto doInitInstance(std::string_view) noexcept -> gpu::Expected<void>;
             auto doInitDevice() noexcept -> gpu::Expected<void>;
+            auto doInitRenderSurface(std::optional<core::NakedRef<const wsi::Window>>) noexcept
+                -> gpu::Expected<void>;
 
             auto threadLoop(std::stop_token) noexcept -> void;
 
-            bool                           m_validation_layers_enabled = false;
-            core::DeferInit<gpu::Instance> m_instance;
-            core::DeferInit<gpu::Device>   m_device;
+            bool                            m_validation_layers_enabled = false;
+            core::DeferInit<gpu::Instance>  m_instance;
+            core::DeferInit<gpu::Device>    m_device;
+            core::DeferInit<gpu::Swapchain> m_swapchain;
 
             std::jthread m_render_thread;
         };
