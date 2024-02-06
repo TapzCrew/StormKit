@@ -1,6 +1,6 @@
 modules = {
   core = {
-    public_packages = { "glm", "frozen", "unordered_dense", "magic_enum" },
+    public_packages = { "glm", "frozen", "unordered_dense", "magic_enum", "tl_function_ref" },
     modulename = "Core",
     has_headers = true,
     custom = function()
@@ -145,10 +145,10 @@ modules = {
     },
     custom = function()
       if is_plat("linux") then
-        add_defines("VK_USE_PLATFORM_XCB_KHR")
-        add_defines("VK_USE_PLATFORM_WAYLAND_KHR")
+        add_defines("VK_USE_PLATFORM_XCB_KHR", {public = true})
+        add_defines("VK_USE_PLATFORM_WAYLAND_KHR", {public = true})
       elseif is_plat("windows") then
-        add_defines("VK_USE_PLATFORM_WIN32_KHR")
+        add_defines("VK_USE_PLATFORM_WIN32_KHR", {public = true})
       end
     end,
   },
