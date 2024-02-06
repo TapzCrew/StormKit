@@ -13,6 +13,7 @@ export module stormkit.Gpu:Core.Instance;
 import std;
 
 import stormkit.Core;
+import stormkit.Wsi;
 
 import stormkit.Gpu.Vulkan;
 
@@ -141,30 +142,39 @@ export {
             friend class Instance;
         };
 
-        class STORMKIT_API Swapchain {
+        class STORMKIT_API Surface: public InstanceObject {
             struct Tag {};
 
           public:
-            static constexpr auto DEBUG_TYPE = DebugObjectType::Swapchain;
+            static constexpr auto DEBUG_TYPE = DebugObjectType::Surface;
 
-          //   Swapchain(const Device& device, bool signaled, Tag);
-          //   ~Swapchain();
-          //
-          //   Swapchain(const Swapchain&)                    = delete;
-          //   auto operator=(const Swapchain&) -> Swapchain& = delete;
-          //
-          //   Swapchain(Swapchain&&) noexcept;
-          //   auto operator=(Swapchain&&) noexcept -> Swapchain&;
-          //
-          //   // [[nodiscard]] static auto create(const Device& device,
-          //   //                                  bool signaled = false) noexcept -> Expected<Swapchain>;
-          //   // [[nodiscard]] static auto allocate(const Device& device, bool signaled = false) noexcept
-          //   //     -> Expected<std::unique_ptr<Swapchain>>;
-          //   //
-          //   [[nodiscard]] auto vkHandle() const noexcept -> const vk::raii::SwapchainKHR&;
-          //
-          // private:
-          //   core::DeferInit<vk::raii::SwapchainKHR> m_vk_swapchain;
+            Surface(const Instance& instance, const wsi::Window& window, Tag);
+            // Surface(const Instance& instance, Tag);
+            ~Surface();
+
+            Surface(const Surface&)                    = delete;
+            auto operator=(const Surface&) -> Surface& = delete;
+
+            Surface(Surface&&) noexcept;
+            auto operator=(Surface&&) noexcept -> Surface&;
+
+            // [[nodiscard]] static auto createOffscreen(const Instance& instance) noexcept ->
+            // Expected<Surface>;
+            // [[nodiscard]] static auto
+            //     allocateOffscreen(const Instance& instance) noexcept ->
+            //     Expected<std::unique_ptr<Surface>>;
+
+            [[nodiscard]] static auto
+                                      createFromWindow(const Instance& instance,
+                                                       const wsi::Window&    window) noexcept -> Expected<Surface>;
+            [[nodiscard]] static auto allocateFromWindow(const Instance& instance,
+                                                         const wsi::Window&    window) noexcept
+                -> Expected<std::unique_ptr<Surface>>;
+
+            [[nodiscard]] auto vkHandle() const noexcept -> const vk::raii::SurfaceKHR&;
+
+          private:
+            core::DeferInit<vk::raii::SurfaceKHR> m_vk_surface;
         };
     } // namespace stormkit::gpu
 
@@ -210,7 +220,8 @@ namespace stormkit::gpu {
         doInitInstance()
             .and_then(std::bind_front(&Instance::doInitDebugReportCallback, this))
             .and_then(std::bind_front(&Instance::doRetrievePhysicalDevices, this))
-            .transform_error(core::throwError());
+            .transform_error(
+                core::monadic::map(core::monadic::narrow<Result>(), core::throwError()));
     }
 
     /////////////////////////////////////
@@ -339,4 +350,54 @@ namespace stormkit::gpu {
         PhysicalDevice::vkHandle() const noexcept -> const vk::raii::PhysicalDevice& {
         return m_vk_physical_device;
     }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE Surface::~Surface() = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE Surface::Surface(Surface&& other) noexcept = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Surface::operator=(Surface&& other) noexcept -> Surface& = default;
+
+    // /////////////////////////////////////
+    // /////////////////////////////////////
+    // STORMKIT_FORCE_INLINE auto
+    //     Surface::createOffscreen(const Instance& instance) noexcept -> Expected<Surface> try {
+    //     return Surface { instance, Tag {} };
+    // } catch (const Result& result) { return std::unexpected(result); }
+    //
+    // /////////////////////////////////////
+    // /////////////////////////////////////
+    // STORMKIT_FORCE_INLINE auto Surface::allocateOffscreen(const Instance& instance) noexcept
+    //     -> Expected<std::unique_ptr<Surface>> try {
+    //     return std::make_unique<Surface>(instance, Tag {});
+    // } catch (const Result& result) { return std::unexpected(result); }
+    //
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto
+        Surface::createFromWindow(const Instance&    instance,
+                                  const wsi::Window& window) noexcept -> Expected<Surface> try {
+        return Surface { instance, window, Tag {} };
+    } catch (const Result& result) { return std::unexpected(result); }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Surface::allocateFromWindow(const Instance&    instance,
+                                                           const wsi::Window& window) noexcept
+        -> Expected<std::unique_ptr<Surface>> try {
+        return std::make_unique<Surface>(instance, window, Tag {});
+    } catch (const Result& result) { return std::unexpected(result); }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Surface::vkHandle() const noexcept -> const vk::raii::SurfaceKHR& {
+        return m_vk_surface.get();
+    }
+
 } // namespace stormkit::gpu
