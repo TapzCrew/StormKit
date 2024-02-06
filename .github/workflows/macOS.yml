@@ -64,7 +64,7 @@ jobs:
       - name: Download and Uncompress LLVM
         if: ${{ steps.cache_llvm.outputs.cache-hit != 'true' }}
         run: |
-          wget 'https://github.com/Arthapz/llvm-patched/raw/main/macOS/llvm-x64.7z'
+          wget 'https://github.com/Arthapz/llvm-patched/raw/main/macOS/llvm-x64.zip'
           7z x llvm-x64.7z
           rm llvm-x64.7z
 
