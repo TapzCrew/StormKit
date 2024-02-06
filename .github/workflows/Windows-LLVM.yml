@@ -49,10 +49,11 @@ jobs:
 
       - name: Cache LLVM
         id: cache_llvm
-        uses: actions/cache@v3.2.2
+        uses: actions/cache@v4
         with:
           path: ${{ runner.workspace }}/StormKit/llvm/
           key: ${{ matrix.os }}-llvm
+          save-always: true
           restore-keys: |
             ${{ matrix.os }}-llvm
 
@@ -75,15 +76,12 @@ jobs:
       - name: Update xmake to patched xmake
         run: xmake update -s https://github.com/Arthapz/xmake.git#modules
 
-      # - name: Update xmake repository
-      #   run: xmake repo --update
-      #
       - name: Retrieve dependencies hash
         id: dep_hash
         run: echo "hash=$(xmake l utils.ci.packageskey)" >> $env:GITHUB_OUTPUT
 
       - name: Retrieve cached xmake dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ env.XMAKE_GLOBALDIR }}/.xmake/packages
           key: ${{ matrix.os }}-LLVM-${{ matrix.mode }}-${{ steps.dep_hash.outputs.hash }}-${{ steps.cache_key.outputs.key }}
@@ -91,7 +89,7 @@ jobs:
       - name: Configure & Build
         id: build_llvm
         run: |
-          xmake f -vD --yes -a ${{ matrix.arch }}  -m ${{ (matrix.mode == 'release' || matrix.mode == 'debug') && matrix.mode || 'releasedbg' }} -k ${{ matrix.kind }} --enable_examples=y --toolchain=llvm --sdk="${{ runner.workspace }}/StormKit/llvm/" --runtimes="c++_shared"
+          xmake f -vD --yes -a ${{ matrix.arch }}  -m ${{ (matrix.mode == 'release' || matrix.mode == 'debug') && matrix.mode || 'releasedbg' }} -k ${{ matrix.kind }} --examples=y --tests=y --toolchain=llvm --sdk="${{ runner.workspace }}/StormKit/llvm/" --runtimes="c++_shared"
           xmake b -vD
 
       - name: Tests
