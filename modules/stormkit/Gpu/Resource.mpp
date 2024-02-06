@@ -7,3 +7,4 @@ export module stormkit.Gpu:Resource;
 export import :Resource.Buffer;
 export import :Resource.Image;
 export import :Resource.Shader;
+export import :Resource.Swapchain;
