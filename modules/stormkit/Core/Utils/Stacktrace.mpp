@@ -31,9 +31,9 @@ export namespace stormkit::core {
 namespace stormkit::core {
 #if not defined(STD_STACKTRACE_SUPPORTED)
     namespace {
-        using BacktraceState = backtrace_state*;
-        auto __bt_state      = BacktraceState { nullptr };
-        auto __counter       = 0;
+        using BacktraceState         = backtrace_state*;
+        auto              __bt_state = BacktraceState { nullptr };
+        thread_local auto __counter  = 0;
 
         extern "C" auto bt_callback(void*,
                                     std::uintptr_t,
@@ -86,7 +86,7 @@ namespace stormkit::core {
                                             BACKTRACE_SUPPORTS_THREADS,
                                             bt_error_callback,
                                             &status);
-        if (status) std::println("libbacktrace initialized for {}", filename);
+  if (__bt_state and status) std::println("libbacktrace initialized for {} {}", std::bit_cast<std::intptr_t>(__bt_state), filename);
         else
             std::println(stderr, "failed to initialize libbacktrace");
 
