@@ -87,7 +87,7 @@ jobs:
           actions-cache-folder: .xmake-cache-${{ steps.cache_key.outputs.key }}
 
       - name: Update xmake to patched xmake
-        run: xmake update -s github:Arthapz/xmake#modules
+        run: xmake update -s --integrate github:Arthapz/xmake#modules
 
       - name: Set xmake env
         run: echo "XMAKE_GLOBALDIR=${{ runner.workspace }}/xmake-global"  | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
