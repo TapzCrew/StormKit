@@ -55,7 +55,7 @@ jobs:
         id: cache_llvm
         uses: actions/cache@v4
         with:
-          path: ${{ runner.workspace }}/StormKit/llvm
+          path: ${{ runner.workspace }}/StormKit/llvm-minified
           key: ${{ matrix.os }}-llvm
           save-always: true
           restore-keys: |
@@ -93,7 +93,7 @@ jobs:
       - name: Configure & Build
         id: build
         run: |
-          xmake f -vD --yes -m ${{ (matrix.mode == 'release' || matrix.mode == 'debug') && matrix.mode || 'releasedbg' }} -k ${{ matrix.kind }} --sanitizers=${{ matrix.mode == 'asan' && 'y' || 'n' }} --examples=y --tests=y --toolchain=llvm --sdk="${{ runner.workspace }}/StormKit/llvm/" --runtimes="c++_shared"
+          xmake f -vD --yes -m ${{ (matrix.mode == 'release' || matrix.mode == 'debug') && matrix.mode || 'releasedbg' }} -k ${{ matrix.kind }} --sanitizers=${{ matrix.mode == 'asan' && 'y' || 'n' }} --examples=y --tests=y --toolchain=llvm --sdk="${{ runner.workspace }}/StormKit/llvm-minified/" --runtimes="c++_shared"
           xmake b -vD
 
       - name: Tests
