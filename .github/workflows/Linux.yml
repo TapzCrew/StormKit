@@ -13,6 +13,18 @@ on:
       - 'LICENSE'
       - 'README.md'
 
+  push:
+    branches: [develop]
+    paths-ignore:
+      - '.github/workflows/Windows-MSVC.yml'
+      - '.github/workflows/Linux.yml'
+      - '.github/workflows/macOS.yml'
+      - '.github/workflows/iOS.yml'
+      - '.github/workflows/Android.yml'
+      - '.gitignore'
+      - 'LICENSE'
+      - 'README.md'
+
 jobs:
   build:
     name: ${{ matrix.os }}-x64 ( ${{ matrix.kind }}-${{ matrix.mode }} )
