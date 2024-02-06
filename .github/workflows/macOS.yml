@@ -64,9 +64,9 @@ jobs:
       - name: Download and Uncompress LLVM
         if: ${{ steps.cache_llvm.outputs.cache-hit != 'true' }}
         run: |
-          wget 'https://github.com/Arthapz/llvm-patched/raw/main/macOS/llvm-x64.zip'
-          7z x llvm-x64.zip
-          rm llvm-x64.zip
+          wget 'https://github.com/Arthapz/llvm-patched/raw/main/macOS/llvm.7z.001'
+          7z x llvm.7z.001
+          rm llvm.7z.001
 
       - name: Set xmake env
         run: echo "XMAKE_GLOBALDIR=${{ runner.workspace }}/xmake-global" >> $GITHUB_ENV
