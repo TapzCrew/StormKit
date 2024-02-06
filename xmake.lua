@@ -199,7 +199,11 @@ if not is_plat("windows") or not is_plat("mingw") then
 end
 
 ---------------------------- global options ----------------------------
-option("examples", { default = false, category = "root menu/others" })
+option("examples_engine", { default = false, category = "root menu/others", deps = {"examples"}, after_check = function(option) if option:dep("examples"):enabled() then option:enable(true) end end })
+option("examples_wsi", { default = false, category = "root menu/others", deps = {"examples"}, after_check = function(option) if option:dep("examples"):enabled() then option:enable(true) end end })
+option("examples_log", { default = false, category = "root menu/others", deps = {"examples"}, after_check = function(option) if option:dep("examples"):enabled() then option:enable(true) end end })
+option("examples_entities", { default = false, category = "root menu/others", deps = {"examples"}, after_check = function(option) if option:dep("examples"):enabled() then end end }) --option:enable(true) end end })
+option("examples", { default = false, category = "root menu/others",  })
 option("applications", { default = false, category = "root menu/others" })
 option("tests", { default = false, category = "root menu/others" })
 
@@ -464,15 +468,15 @@ for name, module in pairs(modules) do
   end
 end
 
-if has_config("examples") then
-  for name, _ in pairs(modules) do
-    local example_dir = path.join("examples", name)
-    if os.exists(example_dir) and has_config("" .. name) then
-      includes(path.join(example_dir, "**", "xmake.lua"))
-    end
+for name, _ in pairs(modules) do
+  if get_config("examples_" .. name) then
+      local example_dir = path.join("examples", name)
+      if os.exists(example_dir) and has_config("" .. name) then
+        includes(path.join(example_dir, "**", "xmake.lua"))
+      end
   end
 end
 
-if has_config("tests") then
+if get_config("tests") then
   includes("tests/xmake.lua")
 end
