@@ -8,7 +8,7 @@ modules = {
         add_packages("wil")
       end
 
-      if get_config("toolchain") and (get_config("toolchain") == "clang" or get_config("toolchain") == "llvm") then
+      if not is_plat("windows") and get_config("toolchain") and (get_config("toolchain") == "clang" or get_config("toolchain") == "llvm") then
         add_packages("libbacktrace", {public = true})
       end
 
@@ -317,7 +317,7 @@ end
 -- add_defines("FROZEN_DONT_INCLUDE_STL", "ANKERL_UNORDERED_DENSE_USE_STD_IMPORT")
 add_requireconfs("*", { configs = { modules = true } })
 
-if get_config("toolchain") and (get_config("toolchain") == "clang" or get_config("toolchain") == "llvm") then
+if not is_plat("windows") and get_config("toolchain") and (get_config("toolchain") == "clang" or get_config("toolchain") == "llvm") then
   add_requires("libbacktrace")
 end
 
