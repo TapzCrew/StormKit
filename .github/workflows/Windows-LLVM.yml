@@ -89,6 +89,9 @@ jobs:
       - name: Update xmake to patched xmake
         run: xmake update -s https://github.com/Arthapz/xmake.git#modules
 
+      - name: Update xmake repository
+        run: xmake repo --update -vD
+
       - name: Retrieve dependencies hash
         id: dep_hash
         run: echo "hash=$(xmake l utils.ci.packageskey)" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
