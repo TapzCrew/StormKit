@@ -6,6 +6,10 @@ module;
 
 #include <stormkit/Core/PlatformMacro.hpp>
 
+#ifndef STORMKIT_ASSERT
+#define STORMKIT_ASSERT 1
+#endif
+
 export module stormkit.Core:Utils.Assert;
 
 import std;
