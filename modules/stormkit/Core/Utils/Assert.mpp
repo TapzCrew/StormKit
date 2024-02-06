@@ -6,13 +6,12 @@ module;
 
 #include <stormkit/Core/PlatformMacro.hpp>
 
-#include <version>
-
 export module stormkit.Core:Utils.Assert;
 
 import std;
 
 import :Utils.Descriptors;
+import :Utils.Stacktrace;
 
 export namespace stormkit::core {
     enum class AssertType {
@@ -109,15 +108,7 @@ namespace stormkit::core {
                              location.function_name(),
                              message);
 
-                if (show_callstack) {
-                    std::println(stderr, "================= CALLSTACK =================");
-#if defined(__cpp_lib_stacktrace) and __cpp_lib_stacktrace >= 202011L
-                    auto st = std::stacktrace::current();
-                    std::println(stderr, "{}", std::to_string(st));
-#else
-                    std::println(stderr, "No <stacktrace> support !");
-#endif
-                }
+                if (show_callstack) printStacktrace();
 
                 std::terminate();
             }

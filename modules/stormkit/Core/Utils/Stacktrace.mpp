@@ -1,0 +1,100 @@
+module;
+
+#include <stormkit/Core/PlatformMacro.hpp>
+
+#include <cstdio>
+#include <version>
+
+#if defined(__cpp_lib_stacktrace) and __cpp_lib_stacktrace >= 202011L
+    #define STD_STACKTRACE_SUPPORTED
+#else
+    #include <backtrace-supported.h>
+    #include <backtrace.h>
+    #include <cxxabi.h>
+#endif
+
+export module stormkit.Core:Utils.Stacktrace;
+
+import std;
+
+export namespace stormkit::core {
+    auto printStacktrace();
+#if not defined(STD_STACKTRACE_SUPPORTED)
+    auto backtraceInit(const char* filename) noexcept -> bool;
+#endif
+} // namespace stormkit::core
+
+////////////////////////////////////////////////////////////////////
+///                      IMPLEMENTATION                          ///
+////////////////////////////////////////////////////////////////////
+
+namespace stormkit::core {
+#if not defined(STD_STACKTRACE_SUPPORTED)
+    namespace {
+        using BacktraceState = backtrace_state*;
+        auto __bt_state      = BacktraceState { nullptr };
+        auto __counter       = 0;
+
+        extern "C" auto bt_callback(void*,
+                                    std::uintptr_t,
+                                    const char* filename,
+                                    int         line,
+                                    const char* function) noexcept -> int {
+            // auto status    = 0;
+            // auto func_name = "";
+            // if (function) func_name = function;
+            //
+            // const auto demangled = abi::__cxa_demangle(func_name, nullptr, nullptr, &status);
+            //
+            // if (status != 0) func_name = demangled;
+            //
+            // auto file_name = "";
+            // if (filename) file_name = filename;
+            //
+            // std::println(stderr, "{}# {} at {}:{}", __counter++, func_name, file_name, line);
+            return 0;
+        }
+
+        extern "C" auto
+            bt_error_callback(void* status, const char* message, int error) noexcept -> void {
+            if (status) *std::bit_cast<bool*>(status) = false;
+
+            std::println(stderr, "Failed to print stacktrace, reason: {} code: {}", message, error);
+        }
+    } // namespace
+#endif
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto printStacktrace() {
+        std::println(stderr, "================= CALLSTACK =================");
+#if defined(STD_STACKTRACE_SUPPORTED)
+        const auto st = std::stacktrace::current();
+        std::println(stderr, "{}", std::to_string(st));
+#else
+        backtrace_full(__bt_state, 0, bt_callback, bt_error_callback, nullptr);
+#endif
+    }
+
+#if not defined(STD_STACKTRACE_SUPPORTED)
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto backtraceInit(const char* filename) noexcept -> bool {
+    #ifdef BACKTRACE_SUPPORTED
+        auto status = true;
+
+        __bt_state = backtrace_create_state(filename,
+                                            BACKTRACE_SUPPORTS_THREADS,
+                                            bt_error_callback,
+                                            &status);
+        if (status) std::println("libbacktrace initialized for {}", filename);
+        else
+            std::println(stderr, "failed to initialize libbacktrace");
+
+        return status;
+    #else
+        std::println("libbacktrace not supported");
+        return false;
+    #endif
+    }
+#endif
+} // namespace stormkit::core

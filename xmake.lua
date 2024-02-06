@@ -8,6 +8,10 @@ modules = {
         add_packages("wil")
       end
 
+      if get_config("toolchain") and (get_config("toolchain") == "clang" or get_config("toolchain") == "llvm") then
+        add_packages("libbacktrace", {public = true})
+      end
+
       set_configdir("$(buildir)/.gens/modules/stormkit/Core")
       add_filegroups("generated", { rootdir = "$(buildir)/.gens/modules" })
 
@@ -57,8 +61,8 @@ modules = {
     has_headers = true,
     deps = { "stormkit-core" },
     custom = function()
-        add_cxflags("-Wno-main")
-        set_strip("debug")
+      add_cxflags("-Wno-main")
+      set_strip("debug")
     end
   },
   wsi = {
@@ -171,8 +175,14 @@ set_version("0.1.0", { build = "%Y%m%d%H%M" })
 includes("xmake/**.lua")
 
 ---------------------------- global rules ----------------------------
-add_rules("plugin.vsxmake.autoupdate")
-add_rules("plugin.compile_commands.autoupdate", { outputdir = "build", lsp = "clangd" })
+if get_config("vsxmake") then
+    add_rules("plugin.vsxmake.autoupdate")
+end
+
+if get_config("compile_commands") then
+    add_rules("plugin.compile_commands.autoupdate", { outputdir = "build", lsp = "clangd" })
+end
+
 add_rules(
   "mode.debug",
   "mode.release",
@@ -189,28 +199,30 @@ if not is_plat("windows") or not is_plat("mingw") then
 end
 
 ---------------------------- global options ----------------------------
-option("enable_examples", { default = false, category = "root menu/others" })
-option("enable_applications", { default = false, category = "root menu/others" })
-option("enable_tests", { default = false, category = "root menu/others" })
+option("examples", { default = false, category = "root menu/others" })
+option("applications", { default = false, category = "root menu/others" })
+option("tests", { default = false, category = "root menu/others" })
 
 option("sanitizers", { default = false, category = "root menu/build" })
 option("mold", { default = false, category = "root menu/build" })
 
 ---------------------------- module options ----------------------------
-option("enable_log", { default = true, category = "root menu/modules" })
-option("enable_entities", { default = true, category = "root menu/modules" })
-option("enable_image", { default = true, category = "root menu/modules" })
-option("enable_main", { default = true, category = "root menu/modules" })
-option("enable_wsi", { default = true, category = "root menu/modules" })
+option("log", { default = true, category = "root menu/modules" })
+option("entities", { default = true, category = "root menu/modules" })
+option("image", { default = true, category = "root menu/modules" })
+option("main", { default = true, category = "root menu/modules" })
+option("wsi", { default = true, category = "root menu/modules" })
 option(
-  "enable_gpu",
-  { default = true, category = "root menu/modules", deps = { "enable_log", "enable_image", "enable_wsi" } }
+  "gpu",
+  { default = true, category = "root menu/modules", deps = { "log", "image", "wsi" } }
 )
-option("enable_engine", {
+option("engine", {
   default = true,
   category = "root menu/modules",
-  deps = { "enable_log", "enable-entities", "enable_image", "enable_wsi", "enable_gpu" },
+  deps = { "log", "entities", "image", "wsi", "gpu" },
 })
+option("compile_commands", { default = false, category = "root menu/support"})
+option("vsxmake", { default = false, category = "root menu/support"})
 
 ---------------------------- global config ----------------------------
 set_allowedmodes(allowedmodes)
@@ -295,14 +307,19 @@ if get_config("sanitizers") then
   set_policy("build.sanitizer.undefined", true)
 end
 
-if has_config("enable_gpu") then
+if has_config("gpu") then
   add_requireconfs("vulkan-headers", { override = true, system = false })
   add_requireconfs("vulkan-memory-allocator", { override = true, version = "master", system = false })
-  add_requireconfs("vulkan-memory-allocator-hpp", { override = true, version = "master", system = false, configs = { use_vulkanheaders = true }})
+  add_requireconfs("vulkan-memory-allocator-hpp",
+    { override = true, version = "master", system = false, configs = { use_vulkanheaders = true } })
 end
 
 -- add_defines("FROZEN_DONT_INCLUDE_STL", "ANKERL_UNORDERED_DENSE_USE_STD_IMPORT")
 add_requireconfs("*", { configs = { modules = true } })
+
+if get_config("toolchain") and (get_config("toolchain") == "clang" or get_config("toolchain") == "llvm") then
+  add_requires("libbacktrace")
+end
 
 ---------------------------- targets ----------------------------
 for name, module in pairs(modules) do
@@ -310,7 +327,7 @@ for name, module in pairs(modules) do
 
   local modulename = module.modulename
 
-  if name == "core" or name == "main" or get_config("enable_" .. name) then
+  if name == "core" or name == "main" or get_config("" .. name) then
     target("stormkit-" .. name, function()
       set_group("libraries")
 
@@ -441,21 +458,21 @@ for name, module in pairs(modules) do
         add_frameworks(module.frameworks, { public = is_kind("static") })
       end
       if is_mode("release") then
-          -- set_policy("build.optimization.lto", true)
+        -- set_policy("build.optimization.lto", true)
       end
     end)
   end
 end
 
-if has_config("enable_examples") then
+if has_config("examples") then
   for name, _ in pairs(modules) do
     local example_dir = path.join("examples", name)
-    if os.exists(example_dir) and has_config("enable_" .. name) then
+    if os.exists(example_dir) and has_config("" .. name) then
       includes(path.join(example_dir, "**", "xmake.lua"))
     end
   end
 end
 
-if has_config("enable_tests") then
+if has_config("tests") then
   includes("tests/xmake.lua")
 end
