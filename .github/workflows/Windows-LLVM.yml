@@ -73,9 +73,11 @@ jobs:
       - name: Download and Uncompress LLVM
         if: ${{ steps.cache_llvm.outputs.cache-hit != 'true' }}
         run: |
-          C:/msys64/usr/bin/wget 'https://github.com/Arthapz/llvm-patched/raw/main/windows/llvm-x64.7z'
-          7z x llvm-x64.7z
-          rm llvm-x64.7z
+          C:/msys64/usr/bin/wget 'https://github.com/Arthapz/llvm-prebuilt/raw/main/Windows/llvm.7z.001'
+          C:/msys64/usr/bin/wget 'https://github.com/Arthapz/llvm-prebuilt/raw/main/Windows/llvm.7z.002'
+          7z x llvm.7z.001
+          rm llvm.7z.001
+          rm llvm.7z.002
 
       - name: Set xmake env
         run: echo "XMAKE_GLOBALDIR=${{ runner.workspace }}/xmake-global"  | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
