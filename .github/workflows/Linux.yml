@@ -76,7 +76,7 @@ jobs:
       - name: Configure & Build
         id: build
         run: |
-          xmake f -v --yes -m ${{ (matrix.mode == 'release' || matrix.mode == 'debug') && matrix.mode || 'releasedbg' }} -k ${{ matrix.kind }} --sanitizers=${{ matrix.mode == 'asan' && 'y' || 'n' }} --examples=y --tests=y --toolchain=llvm --mold=y --runtimes="c++_shared"
+          xmake f -v --yes -m ${{ (matrix.mode == 'release' || matrix.mode == 'debug') && matrix.mode || 'releasedbg' }} -k ${{ matrix.kind }} --sanitizers=${{ matrix.mode == 'asan' && 'y' || 'n' }} --examples=y --tests=y --toolchain=llvm --mold=y --runtimes="c++_shared" --sdk="/opt/llvm-git/usr"
           xmake b -v
 
       - name: Tests
