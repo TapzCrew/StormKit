@@ -90,7 +90,7 @@ jobs:
         run: xmake update -s --integrate github:Arthapz/xmake#modules
 
       - name: Update xmake repository
-        run: xmake repo --update -vD
+        run: xmake repo --update -v
 
       - name: Retrieve dependencies hash
         id: dep_hash
@@ -105,17 +105,17 @@ jobs:
       - name: Configure & Build
         id: build_llvm
         run: |
-          xmake f -vD --yes -a ${{ matrix.arch }}  -m ${{ (matrix.mode == 'release' || matrix.mode == 'debug') && matrix.mode || 'releasedbg' }} -k ${{ matrix.kind }} --examples=y --tests=y --toolchain=llvm --sdk="${{ runner.workspace }}/StormKit/llvm/" --runtimes="c++_shared"
-          xmake b -vD
+          xmake f -v --yes -a ${{ matrix.arch }}  -m ${{ (matrix.mode == 'release' || matrix.mode == 'debug') && matrix.mode || 'releasedbg' }} -k ${{ matrix.kind }} --examples=y --tests=y --toolchain=llvm --sdk="${{ runner.workspace }}/StormKit/llvm/" --runtimes="c++_shared"
+          xmake b -v
 
       - name: Tests
         run: |
           cp "${{ runner.workspace }}/StormKit/llvm/lib/c++.dll" "${{ runner.workspace }}/StormKit/build/windows/${{ matrix.arch }}/${{ (matrix.mode == 'release' || matrix.mode == 'debug') && matrix.mode || 'releasedbg' }}/"
-          xmake test -vD
+          xmake test -v
 
       - name: Installation
         run: |
-          xmake install -vD --installdir="${{ runner.workspace }}/output"
+          xmake install -v --installdir="${{ runner.workspace }}/output"
           cp "${{ runner.workspace }}/StormKit/llvm/lib/c++.dll" "${{ runner.workspace }}/output/bin/"
           rmdir /s /q "StormKit"
 

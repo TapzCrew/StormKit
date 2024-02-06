@@ -81,7 +81,7 @@ jobs:
         run: xmake update -s https://github.com/Arthapz/xmake.git#modules
 
       - name: Update xmake repository
-        run: xmake repo --update -vD
+        run: xmake repo --update -v
 
       - name: Retrieve dependencies hash
         id: dep_hash
@@ -96,14 +96,14 @@ jobs:
       - name: Configure & Build
         id: build
         run: |
-          xmake f -vD --yes -m ${{ (matrix.mode == 'release' || matrix.mode == 'debug') && matrix.mode || 'releasedbg' }} -k ${{ matrix.kind }} --sanitizers=${{ matrix.mode == 'asan' && 'y' || 'n' }} --examples=y --tests=y --toolchain=llvm --sdk="${{ runner.workspace }}/StormKit/llvm-minified/" --runtimes="c++_shared"
-          xmake b -vD
+          xmake f -v --yes -m ${{ (matrix.mode == 'release' || matrix.mode == 'debug') && matrix.mode || 'releasedbg' }} -k ${{ matrix.kind }} --sanitizers=${{ matrix.mode == 'asan' && 'y' || 'n' }} --examples=y --tests=y --toolchain=llvm --sdk="${{ runner.workspace }}/StormKit/llvm-minified/" --runtimes="c++_shared"
+          xmake b -v
 
       - name: Tests
-        run: DYLD_LIBRARY_PATH="${{ runner.workspace }}/StormKit/llvm/lib" xmake test -vD
+        run: DYLD_LIBRARY_PATH="${{ runner.workspace }}/StormKit/llvm/lib" xmake test -v
 
       - name: Installation
-        run: xmake install -vD --installdir="${{ runner.workspace }}/output"
+        run: xmake install -v --installdir="${{ runner.workspace }}/output"
 
       - name: Upload artifacts
         id: upload
