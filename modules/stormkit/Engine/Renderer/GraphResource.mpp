@@ -108,8 +108,8 @@ namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     template<ResourceDescriptionType D>
-    STORMKIT_FORCE_INLINE auto
-        GraphResource<D>::operator=(GraphResource&& other) noexcept -> GraphResource& = default;
+    STORMKIT_FORCE_INLINE auto GraphResource<D>::operator=(GraphResource&& other) noexcept
+        -> GraphResource& = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
@@ -142,16 +142,16 @@ namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     template<ResourceDescriptionType D>
-    STORMKIT_FORCE_INLINE auto
-        GraphResource<D>::writers() const noexcept -> const std::vector<GraphID>& {
+    STORMKIT_FORCE_INLINE auto GraphResource<D>::writers() const noexcept
+        -> const std::vector<GraphID>& {
         return m_writers;
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<ResourceDescriptionType D>
-    STORMKIT_FORCE_INLINE auto
-        GraphResource<D>::readers() const noexcept -> const std::vector<GraphID>& {
+    STORMKIT_FORCE_INLINE auto GraphResource<D>::readers() const noexcept
+        -> const std::vector<GraphID>& {
         return m_readers;
     }
 
@@ -165,8 +165,8 @@ namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     template<ResourceDescriptionType D>
-    STORMKIT_FORCE_INLINE auto
-        GraphResource<D>::description() const noexcept -> const Description& {
+    STORMKIT_FORCE_INLINE auto GraphResource<D>::description() const noexcept
+        -> const Description& {
         return m_description;
     }
 } // namespace stormkit::engine

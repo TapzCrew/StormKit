@@ -53,11 +53,12 @@ export namespace stormkit::gpu {
 
         [[nodiscard]] static auto create(const PhysicalDevice& physical_device,
                                          const Instance&       instance,
-                                         const Info& info = { true, false }) noexcept -> Device;
-        [[nodiscard]] static auto
-            allocate(const PhysicalDevice& physical_device,
-                     const Instance&       instance,
-                     const Info& info = { true, false }) noexcept -> std::unique_ptr<Device>;
+                                         const Info&           info = { true,
+                                                                        false }) noexcept -> Expected<Device>;
+        [[nodiscard]] static auto allocate(const PhysicalDevice& physical_device,
+                                           const Instance&       instance,
+                                           const Info&           info = { true, false }) noexcept
+            -> Expected<std::unique_ptr<Device>>;
 
         auto waitIdle() const noexcept -> void;
 
@@ -118,7 +119,8 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE Device::~Device() {
-        waitIdle();
+        if(m_vk_device.initialized()) [[likely]]
+            waitIdle();
     }
 
     /////////////////////////////////////
@@ -128,6 +130,23 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE auto Device::operator=(Device&& other) noexcept -> Device& = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Device::create(const PhysicalDevice& physical_device,
+                                              const Instance&       instance,
+                                              const Info& info) noexcept -> Expected<Device> try {
+        return Device { physical_device, instance, info, Tag {} };
+    } catch (Result result) { return std::unexpected(result); }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto
+        Device::allocate(const PhysicalDevice& physical_device,
+                         const Instance&       instance,
+                         const Info& info) noexcept -> Expected<std::unique_ptr<Device>> try {
+        return std::make_unique<Device>(physical_device, instance, info, Tag {});
+    } catch (Result result) { return std::unexpected(result); }
 
     /////////////////////////////////////
     /////////////////////////////////////

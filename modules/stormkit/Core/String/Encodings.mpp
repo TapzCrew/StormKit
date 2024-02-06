@@ -13,7 +13,6 @@ export module stormkit.Core:String.Encodings;
 
 import std;
 
-
 import :Utils.AsCast;
 import :Utils.Numerics;
 
@@ -45,18 +44,18 @@ namespace stormkit::core {
     inline auto asciiToUtf16(std::string_view input) -> std::u16string {
         auto output = std::u16string {};
 #if not defined(STORMKIT_COMPILER_CLANG)
-        auto state  = std::mbstate_t {};
+        auto state = std::mbstate_t {};
         output.resize(std::size(input));
 
         auto len      = 0ull;
         auto input_it = std::data(input);
-        while ((len = std::mbrtoc16(std::bit_cast<char16_t *>(std::data(output)),
+        while ((len = std::mbrtoc16(std::bit_cast<char16_t*>(std::data(output)),
                                     input_it,
                                     MB_CUR_MAX,
                                     &state)) > 0ull)
             input_it += len;
 #else
-        output = std::bit_cast<char16_t *>(std::data(input));
+        output = std::bit_cast<char16_t*>(std::data(input));
 #endif
 
         return output;
@@ -67,13 +66,13 @@ namespace stormkit::core {
     inline auto utf16ToAscii(std::u16string_view input) -> std::string {
         auto output = std::string {};
 #if not defined(STORMKIT_COMPILER_CLANG)
-        auto state  = std::mbstate_t {};
+        auto state = std::mbstate_t {};
         output.resize(std::size(input));
 
         for (const auto& c : input)
-            std::c16rtomb(std::bit_cast<char *>(std::data(output)), c, &state);
+            std::c16rtomb(std::bit_cast<char*>(std::data(output)), c, &state);
 #else
-        output = std::bit_cast<char *>(std::data(input));
+        output = std::bit_cast<char*>(std::data(input));
 #endif
 
         return output;
@@ -83,14 +82,14 @@ namespace stormkit::core {
     ////////////////////////////////////////
     inline auto asciiToWide(std::string_view input) -> std::wstring {
         [[maybe_unused]] auto state  = std::mbstate_t {};
-        auto output = std::wstring {};
+        auto                  output = std::wstring {};
         output.resize(std::size(input));
 
         [[maybe_unused]] auto len      = 0ull;
         [[maybe_unused]] auto input_it = std::data(input);
         [[maybe_unused]] auto i        = 0;
 #if defined(STORMKIT_COMPILER_MSVC)
-        while ((len = std::mbrtoc16(std::bit_cast<char16_t *>(std::data(output)) + i++,
+        while ((len = std::mbrtoc16(std::bit_cast<char16_t*>(std::data(output)) + i++,
                                     input_it,
                                     MB_CUR_MAX,
                                     &state)) > 0u)
@@ -98,7 +97,7 @@ namespace stormkit::core {
 #elif defined(STORMKIT_COMPILER_CLANG)
         output = std::bit_cast<wchar_t*>(std::data(input));
 #else
-        while ((len = std::mbrtoc8(std::bit_cast<char8_t *>(std::data(output)) + i++,
+        while ((len = std::mbrtoc8(std::bit_cast<char8_t*>(std::data(output)) + i++,
                                    input_it,
                                    MB_CUR_MAX,
                                    &state)) > 0ull)
@@ -142,7 +141,7 @@ namespace stormkit::core {
         auto len      = 0ull;
         auto input_it = std::data(input);
         auto i        = 0;
-        while ((len = std::mbrtoc8(std::bit_cast<char8_t *>(std::data(output)) + i++,
+        while ((len = std::mbrtoc8(std::bit_cast<char8_t*>(std::data(output)) + i++,
                                    input_it,
                                    MB_CUR_MAX,
                                    &state)) > 0ull)
@@ -158,7 +157,7 @@ namespace stormkit::core {
     ////////////////////////////////////////
     inline auto utf8ToAscii(std::u8string_view input) -> std::string {
         [[maybe_unused]] auto state  = std::mbstate_t {};
-        auto output = std::string {};
+        auto                  output = std::string {};
         output.resize(std::size(input));
 
 #if defined(STORMKIT_COMPILER_MSVC)

@@ -26,7 +26,7 @@ export namespace stormkit::image::details {
     [[nodiscard]] auto loadJPG(std::span<const core::Byte> data) noexcept
         -> std::expected<image::Image, image::Image::Error>;
 
-    [[nodiscard]] auto saveJPG(const image::Image& image,
+    [[nodiscard]] auto saveJPG(const image::Image&          image,
                                const std::filesystem::path& filepath) noexcept
         -> std::expected<void, image::Image::Error>;
 
@@ -44,15 +44,15 @@ namespace stormkit::image::details {
     namespace jpg {
         struct ErrorData {
             std::jmp_buf setjmp_buffer;
-            std::string msg;
+            std::string  msg;
         };
 
         /////////////////////////////////////
         /////////////////////////////////////
-        auto error_callback(jpeg_common_struct *st) noexcept -> void {
+        auto error_callback(jpeg_common_struct* st) noexcept -> void {
             core::expects(st != nullptr);
 
-            auto error_data = reinterpret_cast<ErrorData *>(st->client_data);
+            auto error_data = reinterpret_cast<ErrorData*>(st->client_data);
 
             auto message = std::string {};
             message.resize(JMSG_STR_PARM_MAX);
@@ -68,7 +68,7 @@ namespace stormkit::image::details {
     /////////////////////////////////////
     auto loadJPG(std::span<const core::Byte> data) noexcept
         -> std::expected<image::Image, image::Image::Error> {
-        auto image_memory    = std::vector<core::Byte> {};
+        auto          image_memory = std::vector<core::Byte> {};
         volatile auto format = Format {}; // NOTE volatile for error: variable ‘format’ might be
                                           // clobbered by ‘longjmp’ or ‘vfork’ [-Werror=clobbered]
         auto extent    = core::math::ExtentU {};
@@ -88,7 +88,7 @@ namespace stormkit::image::details {
         }
 
         jpeg_mem_src(&info,
-                     reinterpret_cast<const unsigned char *>(std::data(data)),
+                     reinterpret_cast<const unsigned char*>(std::data(data)),
                      std::size(data));
         jpeg_read_header(&info, TRUE);
 
@@ -103,7 +103,7 @@ namespace stormkit::image::details {
         image_memory.resize(extent.width * extent.height * extent.depth *
                             info.out_color_components);
 
-        auto row_ptr = std::array<core::Byte *, 1> { nullptr };
+        auto row_ptr = std::array<core::Byte*, 1> { nullptr };
         while (info.output_scanline < info.output_height) {
             const auto index = extent.width * info.output_components * info.output_scanline;
             row_ptr[0]       = std::data(image_memory) + index;
@@ -165,7 +165,7 @@ namespace stormkit::image::details {
                     Error { .reason = Reason::Failed_To_Save, .str_error = error_data.msg });
             }
 
-            auto data          = image_rgb.data(0, 0, 0);
+            auto        data   = image_rgb.data(0, 0, 0);
             const auto& extent = image_rgb.extent(0);
 
             jpeg_create_compress(&info);
@@ -180,7 +180,7 @@ namespace stormkit::image::details {
 
             jpeg_start_compress(&info, TRUE);
 
-            auto row_ptr = std::array<core::Byte *, 1> { nullptr };
+            auto row_ptr = std::array<core::Byte*, 1> { nullptr };
             while (info.next_scanline < info.image_height) {
                 const auto index = info.next_scanline * 3u * info.image_width;
                 row_ptr[0]       = std::data(data) + index;
@@ -208,7 +208,7 @@ namespace stormkit::image::details {
     /////////////////////////////////////
     auto saveJPG(const image::Image& image) noexcept
         -> std::expected<std::vector<core::Byte>, image::Image::Error> {
-        using uchar_ptr = unsigned char *;
+        using uchar_ptr = unsigned char*;
 
         auto output_ptr = uchar_ptr { nullptr };
 
@@ -223,12 +223,12 @@ namespace stormkit::image::details {
         info.client_data     = &error_data;
         error_mgr.error_exit = jpg::error_callback;
 
-        auto data          = image_rgb.data(0, 0, 0);
+        auto        data   = image_rgb.data(0, 0, 0);
         const auto& extent = image_rgb.extent(0);
 
         jpeg_create_compress(&info);
 
-        using ulong = unsigned long;
+        using ulong   = unsigned long;
         auto out_size = ulong { 0 };
         jpeg_mem_dest(&info, &output_ptr, &out_size);
 
@@ -241,7 +241,7 @@ namespace stormkit::image::details {
 
         jpeg_start_compress(&info, TRUE);
 
-        auto row_ptr = std::array<core::Byte *, 1> { nullptr };
+        auto row_ptr = std::array<core::Byte*, 1> { nullptr };
         while (info.next_scanline < info.image_height) {
             const auto index = info.next_scanline * 3u * info.image_width;
             row_ptr[0]       = std::data(data) + index;

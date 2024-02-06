@@ -31,7 +31,7 @@ export {
         App();
         ~App() override;
 
-        auto run(const int argc, const char **argv) -> stormkit::core::Int32 override;
+        auto run(const int argc, const char** argv) -> stormkit::core::Int32 override;
 
       private:
         auto doInitWindow() -> void;
@@ -51,7 +51,7 @@ export {
 
         stormkit::image::Image m_board;
 
-        UpdateBoardSystem *m_update_system = nullptr;
+        UpdateBoardSystem* m_update_system = nullptr;
     };
 
 #ifdef STORMKIT_BUILD_MODULES

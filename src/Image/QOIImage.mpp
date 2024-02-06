@@ -16,7 +16,7 @@ export namespace stormkit::image::details {
     [[nodiscard]] auto loadQOI(std::span<const core::Byte> data) noexcept
         -> std::expected<image::Image, image::Image::Error>;
 
-    [[nodiscard]] auto saveQOI(const image::Image         & image,
+    [[nodiscard]] auto saveQOI(const image::Image&          image,
                                const std::filesystem::path& filepath) noexcept
         -> std::expected<void, image::Image::Error>;
 
@@ -89,7 +89,7 @@ namespace stormkit::image::details {
     auto loadQOI([[maybe_unused]] std::span<const core::Byte> data) noexcept
         -> std::expected<image::Image, image::Image::Error> {
         const auto  raw_header = std::span<const core::Byte> { std::data(data), SIZE_OF_HEADER };
-        const auto *header     = std::bit_cast<const QOIHeader *>(std::data(raw_header));
+        const auto* header     = std::bit_cast<const QOIHeader*>(std::data(raw_header));
 
         const auto extent =
             core::math::ExtentU { core::byteSwap(header->width), core::byteSwap(header->height) };
@@ -99,7 +99,7 @@ namespace stormkit::image::details {
         auto pixel_cache = std::array<Pixel, PIXEL_CACHE_SIZE> {};
 
         const auto chunks =
-            std::span { std::bit_cast<const core::UInt8 *>(std::data(data)) + SIZE_OF_HEADER,
+            std::span { std::bit_cast<const core::UInt8*>(std::data(data)) + SIZE_OF_HEADER,
                         std::size(data) - SIZE_OF_HEADER };
 
         const auto output_size = extent.width * extent.height * channels;

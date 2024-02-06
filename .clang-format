@@ -70,7 +70,7 @@ NamespaceIndentation: All
 ObjCSpaceAfterProperty: true
 ObjCSpaceBeforeProtocolList: false
 PenaltyBreakAssignment: '0'
-PointerAlignment: Right
+PointerAlignment: Left
 SortIncludes: 'true'
 SortUsingDeclarations: 'true'
 SpaceAfterTemplateKeyword: 'false'

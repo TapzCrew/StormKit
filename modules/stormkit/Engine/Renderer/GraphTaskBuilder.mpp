@@ -42,7 +42,7 @@ export namespace stormkit::engine {
 
       private:
         core::NakedRef<GraphTask> m_task       = nullptr;
-        FrameGraphBuilder        *m_framegraph = nullptr;
+        FrameGraphBuilder*        m_framegraph = nullptr;
     };
 } // namespace stormkit::engine
 
@@ -53,7 +53,7 @@ export namespace stormkit::engine {
 namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE GraphTaskBuilder::GraphTaskBuilder(GraphTask        & task,
+    STORMKIT_FORCE_INLINE GraphTaskBuilder::GraphTaskBuilder(GraphTask&         task,
                                                              FrameGraphBuilder& framegraph) noexcept
         : m_task { task }, m_framegraph { &framegraph } {
     }
@@ -65,7 +65,7 @@ namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE
-        GraphTaskBuilder::GraphTaskBuilder(const GraphTaskBuilder& other) noexcept = default;
+    GraphTaskBuilder::GraphTaskBuilder(const GraphTaskBuilder& other) noexcept = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
@@ -75,7 +75,7 @@ namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE
-        GraphTaskBuilder::GraphTaskBuilder(GraphTaskBuilder&& other) noexcept = default;
+    GraphTaskBuilder::GraphTaskBuilder(GraphTaskBuilder&& other) noexcept = default;
 
     /////////////////////////////////////
     /////////////////////////////////////

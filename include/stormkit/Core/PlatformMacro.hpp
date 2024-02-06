@@ -23,10 +23,10 @@
     #define STORMKIT_IMPORT        __declspec(dllimport)
     #define STORMKIT_RESTRICT      __restrict
     #define STORMKIT_PRIVATE
-    #define STORMKIT_FORCE_INLINE __forceinline 
+    #define STORMKIT_FORCE_INLINE __forceinline
 #elif defined(_MSC_VER) and defined(__clang__)
-    #define STORMKIT_EXPORT        __declspec(dllexport)
-    #define STORMKIT_IMPORT        __declspec(dllimport)
+    #define STORMKIT_EXPORT       __declspec(dllexport)
+    #define STORMKIT_IMPORT       __declspec(dllimport)
     #define STORMKIT_PRIVATE      [[gnu::visibility("hidden")]]
     #define STORMKIT_RESTRICT     __restrict
     #define STORMKIT_FORCE_INLINE [[gnu::always_inline]] inline

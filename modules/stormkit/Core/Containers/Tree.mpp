@@ -12,7 +12,6 @@ export module stormkit.Core:Containers.Tree;
 
 import std;
 
-
 import :Utils.Numerics;
 import :Utils.Handle;
 
@@ -25,10 +24,10 @@ export namespace stormkit::core {
         static constexpr auto INVALID_INDEX = IndexType { IndexType::INVALID_HANDLE_VALUE };
 
         [[nodiscard]] auto name() const noexcept -> const std::string&;
-        auto setName(std::string name) noexcept -> void;
+        auto               setName(std::string name) noexcept -> void;
 
         [[nodiscard]] auto parent() const noexcept -> IndexType;
-        auto setParent(IndexType index) noexcept -> void;
+        auto               setParent(IndexType index) noexcept -> void;
 
         auto nextSibling() const noexcept -> IndexType;
         auto setNextSibling(IndexType index) noexcept -> void;
@@ -42,10 +41,10 @@ export namespace stormkit::core {
         auto invalidate() noexcept -> void;
 
       private:
-        IndexType m_parent        = INVALID_INDEX;
-        IndexType m_next_sibling  = INVALID_INDEX;
-        IndexType m_first_child   = INVALID_INDEX;
-        DirtyBitType m_dirty_bits = 0;
+        IndexType    m_parent       = INVALID_INDEX;
+        IndexType    m_next_sibling = INVALID_INDEX;
+        IndexType    m_first_child  = INVALID_INDEX;
+        DirtyBitType m_dirty_bits   = 0;
 
         std::string m_name;
     };
@@ -70,7 +69,7 @@ export namespace stormkit::core {
 
         auto getFreeNode() -> TreeNodeIndexType;
 
-        auto insert(TreeNodeType&& node,
+        auto insert(TreeNodeType&&    node,
                     TreeNodeIndexType parent_index,
                     TreeNodeIndexType previous_sibling) -> TreeNodeIndexType;
         auto remove(TreeNodeIndexType index) -> void;
@@ -90,21 +89,21 @@ export namespace stormkit::core {
         [[nodiscard]] auto end() const noexcept;
         [[nodiscard]] auto cend() const noexcept;
 
-        auto clearDirties() noexcept -> void;
+        auto               clearDirties() noexcept -> void;
         [[nodiscard]] auto dirties() const noexcept -> std::span<const TreeNodeIndexType>;
 
-        auto genDotFile(std::filesystem::path filepath,
+        auto genDotFile(std::filesystem::path                             filepath,
                         std::function<std::string_view(std::string_view)> colorize_node) const
             -> void;
 
-        auto genDotFile(std::filesystem::path filepath,
-                        core::UInt32 highlight,
+        auto genDotFile(std::filesystem::path                             filepath,
+                        core::UInt32                                      highlight,
                         std::function<std::string_view(std::string_view)> colorize_node) const
             -> void;
 
       private:
-        TreeNodeIndexType m_first_free_index = 0;
-        std::vector<TreeNodeType> m_tree;
+        TreeNodeIndexType              m_first_free_index = 0;
+        std::vector<TreeNodeType>      m_tree;
         std::vector<TreeNodeIndexType> m_dirties;
     };
 } // namespace stormkit::core
@@ -245,7 +244,7 @@ namespace stormkit::core {
     ////////////////////////////////////////
     ////////////////////////////////////////
     template<class TreeNodeClass>
-    auto Tree<TreeNodeClass>::insert(TreeNodeType&& node,
+    auto Tree<TreeNodeClass>::insert(TreeNodeType&&    node,
                                      TreeNodeIndexType parent_index,
                                      TreeNodeIndexType previous_sibling) -> TreeNodeIndexType {
         const auto index = getFreeNode();
@@ -306,8 +305,8 @@ namespace stormkit::core {
         auto queue      = std::deque<TreeNodeIndexType> {};
         queue.emplace_back(index);
         while (not queue.empty()) {
-            auto current_index = queue.front();
-            auto& current_node = m_tree[current_index];
+            auto  current_index = queue.front();
+            auto& current_node  = m_tree[current_index];
             queue.pop_front();
 
             auto child_index = current_node.firstChild();
@@ -433,7 +432,7 @@ namespace stormkit::core {
     ////////////////////////////////////////
     template<class TreeNodeClass>
     auto Tree<TreeNodeClass>::genDotFile(
-        std::filesystem::path filepath,
+        std::filesystem::path                             filepath,
         std::function<std::string_view(std::string_view)> colorize_node) const -> void {
         auto stream = std::fstream(filepath, std::ios::out);
 
@@ -470,8 +469,8 @@ namespace stormkit::core {
     ////////////////////////////////////////
     template<class TreeNodeClass>
     auto Tree<TreeNodeClass>::genDotFile(
-        std::filesystem::path filepath,
-        core::UInt32 highlight,
+        std::filesystem::path                             filepath,
+        core::UInt32                                      highlight,
         std::function<std::string_view(std::string_view)> colorize_node) const -> void {
         std::fstream stream(filepath.string(), std::ios::out);
 

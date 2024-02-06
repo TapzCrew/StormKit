@@ -12,7 +12,6 @@ import std;
 
 import stormkit.Core;
 
-
 import :Logger;
 import :Severity;
 
@@ -24,7 +23,7 @@ export namespace stormkit::log {
 
         ~ConsoleLogger() override;
 
-        auto write(Severity severity, const Module& module, const char *string) -> void override;
+        auto write(Severity severity, const Module& module, const char* string) -> void override;
         auto flush() noexcept -> void override;
     };
 } // namespace stormkit::log

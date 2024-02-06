@@ -12,7 +12,6 @@ export module stormkit.Core:Utils.Handle;
 
 import std;
 
-
 import :Hash;
 import :Utils.AsCast;
 import :Utils.Numerics;

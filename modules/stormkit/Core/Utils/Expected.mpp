@@ -10,7 +10,6 @@ export module stormkit.Core:Utils.Expected;
 
 import std;
 
-
 import :Meta;
 
 import :Utils.AsCast;
@@ -22,7 +21,7 @@ export namespace stormkit::core {
 
     template<IsOptionalType T>
     [[nodiscard]] constexpr auto
-        either(T                                                    && optional,
+        either(T&&                                                     optional,
                std::invocable<typename PureType<T>::value_type> auto&& true_,
                std::invocable auto&& false_) noexcept -> decltype(auto);
 
@@ -31,10 +30,10 @@ export namespace stormkit::core {
 export namespace stormkit::core::monadic {
     struct Anything {
         template<typename T>
-        operator T &(this auto& self) noexcept;
+        operator T&(this auto& self) noexcept;
 
         template<typename T>
-        operator T &&(this auto&& self) noexcept;
+        operator T&&(this auto&& self) noexcept;
     };
 
     template<typename T>
@@ -52,12 +51,12 @@ export namespace stormkit::core::monadic {
 
     [[nodiscard]] constexpr auto map(auto&& first, auto&& second) noexcept -> decltype(auto);
 
-    [[nodiscard]] constexpr auto either(std::regular_invocable<Anything> auto&&...visitors) noexcept
-        -> decltype(auto);
+    [[nodiscard]] constexpr auto
+        either(std::regular_invocable<Anything> auto&&... visitors) noexcept -> decltype(auto);
 
     template<typename T>
     [[nodiscard]] constexpr auto either(IsUnaryPredicate<T> auto&& predicate,
-                                        std::invocable<T> auto  && true_,
+                                        std::invocable<T> auto&&   true_,
                                         std::invocable<T> auto&& false_) noexcept -> decltype(auto);
 
     [[nodiscard]] constexpr auto clone() noexcept -> decltype(auto);
@@ -66,7 +65,7 @@ export namespace stormkit::core::monadic {
     [[nodiscard]] constexpr auto init() noexcept -> decltype(auto);
 
     template<typename T, typename... Args>
-    [[nodiscard]] constexpr auto init(Args&&...args) noexcept -> decltype(auto);
+    [[nodiscard]] constexpr auto init(Args&&... args) noexcept -> decltype(auto);
 } // namespace stormkit::core::monadic
 
 ////////////////////////////////////////////////////////////////////
@@ -87,7 +86,7 @@ namespace stormkit::core {
     /////////////////////////////////////
     template<IsOptionalType T>
     STORMKIT_FORCE_INLINE constexpr auto
-        either(T                                                    && optional,
+        either(T&&                                                     optional,
                std::invocable<typename PureType<T>::value_type> auto&& true_,
                std::invocable auto&& false_) noexcept -> decltype(auto) {
         if (optional != std::nullopt) return true_(*std::forward<T>(optional));
@@ -159,7 +158,7 @@ namespace stormkit::core::monadic {
         -> decltype(auto) {
         return [first  = std::forward<decltype(first)>(first),
                 second = std::forward<decltype(second)>(second)](
-                   auto&&...args) noexcept -> decltype(auto) {
+                   auto&&... args) noexcept -> decltype(auto) {
             return second(first(std::forward<decltype(args)>(args)...));
         };
     }
@@ -168,8 +167,8 @@ namespace stormkit::core::monadic {
     /////////////////////////////////////
     template<typename T>
     STORMKIT_FORCE_INLINE constexpr auto either(IsUnaryPredicate<T> auto&& predicate,
-                                                std::invocable<T> auto  && true_,
-                                                std::invocable<T> auto  && false_) noexcept
+                                                std::invocable<T> auto&&   true_,
+                                                std::invocable<T> auto&&   false_) noexcept
         -> decltype(auto) {
         [predicate = std::move(predicate), true_ = std::move(true_), false_ = std::move(false_)](
             auto&& elem) noexcept -> decltype(auto) {
@@ -181,7 +180,7 @@ namespace stormkit::core::monadic {
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE constexpr auto
-        either(std::regular_invocable<Anything> auto&&...visitors) noexcept -> decltype(auto) {
+        either(std::regular_invocable<Anything> auto&&... visitors) noexcept -> decltype(auto) {
         return [... visitors =
                     std::forward<decltype(visitors)>(visitors)](auto&& variant) mutable noexcept {
             return std::visit(core::Overloaded { std::forward<decltype(visitors)>(visitors)... },
@@ -202,7 +201,7 @@ namespace stormkit::core::monadic {
     /////////////////////////////////////
     template<typename T>
     STORMKIT_FORCE_INLINE constexpr auto init() noexcept -> decltype(auto) {
-        return []<typename... Args>(Args&&...args) noexcept(
+        return []<typename... Args>(Args&&... args) noexcept(
                    noexcept(std::is_nothrow_constructible_v<T, Args...>)) -> decltype(auto) {
             return T { std::forward<Args>(args)... };
         };
@@ -211,7 +210,7 @@ namespace stormkit::core::monadic {
     /////////////////////////////////////
     /////////////////////////////////////
     template<typename T, typename... Args>
-    STORMKIT_FORCE_INLINE constexpr auto init(Args&&...args) noexcept -> decltype(auto) {
+    STORMKIT_FORCE_INLINE constexpr auto init(Args&&... args) noexcept -> decltype(auto) {
         return [... args = std::forward<Args>(args)]() mutable noexcept(
                    noexcept(std::is_nothrow_constructible_v<T, Args...>)) -> decltype(auto) {
             return T { std::forward<Args>(args)... };

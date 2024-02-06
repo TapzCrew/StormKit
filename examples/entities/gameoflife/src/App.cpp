@@ -25,7 +25,7 @@ App::~App() {
     ilog("Cleaning");
 }
 
-auto App::run([[maybe_unused]] const int argc, [[maybe_unused]] const char **argv) -> core::Int32 {
+auto App::run([[maybe_unused]] const int argc, [[maybe_unused]] const char** argv) -> core::Int32 {
     using Clock = std::chrono::high_resolution_clock;
 
     using namespace stormkit::core::literals;
@@ -152,7 +152,7 @@ auto App::handleMouse(const stormkit::wsi::MouseButtonPushedEventData& event) ->
 }
 
 auto App::createCell(stormkit::core::UInt32 x, stormkit::core::UInt32 y) -> void {
-    auto e         = m_entities.makeEntity();
+    auto  e        = m_entities.makeEntity();
     auto& position = m_entities.addComponent<PositionComponent>(e);
 
     position.x = x;

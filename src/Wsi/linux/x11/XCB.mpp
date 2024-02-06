@@ -20,10 +20,9 @@ import stormkit.Core;
 
 import :Linux.X11.Log;
 
-
 #define STORMKIT_XCB_SCOPED(name, type)                                \
     struct name##Scoped {                                              \
-        name##Scoped(type *handle) noexcept;                           \
+        name##Scoped(type* handle) noexcept;                           \
         ~name##Scoped() noexcept;                                      \
                                                                        \
         name##Scoped(const name##Scoped&)                    = delete; \
@@ -32,16 +31,16 @@ import :Linux.X11.Log;
         name##Scoped(name##Scoped&&) noexcept;                         \
         auto operator=(name##Scoped&&) noexcept -> name##Scoped&;      \
                                                                        \
-        operator type *() const noexcept {                             \
+        operator type*() const noexcept {                              \
             return m_handle;                                           \
         }                                                              \
                                                                        \
       private:                                                         \
-        type *m_handle = nullptr;                                      \
+        type* m_handle = nullptr;                                      \
     }
 
 export namespace stormkit::wsi::linux::x11 {
-    using XCBErrorPtr = xcb_generic_error_t *;
+    using XCBErrorPtr = xcb_generic_error_t*;
 
     STORMKIT_XCB_SCOPED(XCBConnection, xcb_connection_t);
     STORMKIT_XCB_SCOPED(XCBErrorContext, xcb_errors_context_t);
@@ -59,44 +58,44 @@ export namespace stormkit::wsi::linux::x11 {
     auto getXCBError(XCBErrorPtr error) -> std::string;
 
     auto getXIDeviceInfo(xcb_input_device_id_t device_id)
-        -> std::expected<xcb_input_xi_device_info_t *, Error>;
+        -> std::expected<xcb_input_xi_device_info_t*, Error>;
 } // namespace stormkit::wsi::linux::x11
 
 #undef STORMKIT_XCB_SCOPED
 
-#define STORMKIT_XCB_SCOPED(name, type, var, global, deleter)                       \
-    name##Scoped::name##Scoped(type *handle) noexcept : m_handle { handle } {       \
-        if (m_handle != nullptr) var++;                                             \
-    }                                                                               \
-                                                                                    \
-    name##Scoped::~name##Scoped() noexcept {                                        \
-        if (m_handle != nullptr) {                                                  \
-            var--;                                                                  \
-                                                                                    \
-            if (var == 0) {                                                         \
-                deleter(m_handle);                                                  \
-                m_handle = nullptr;                                                 \
-                global   = nullptr;                                                 \
-            }                                                                       \
-        }                                                                           \
-    }                                                                               \
-                                                                                    \
-    name##Scoped::name##Scoped(name##Scoped&& other) noexcept                       \
-        : m_handle { std::exchange(other.m_handle, nullptr) } {                     \
-    }                                                                               \
-                                                                                    \
-    auto name##Scoped::operator=(name##Scoped && other) noexcept -> name##Scoped& { \
-        if (this == &other) return *this;                                           \
-                                                                                    \
-        m_handle = std::exchange(other.m_handle, nullptr);                          \
-                                                                                    \
-        return *this;                                                               \
+#define STORMKIT_XCB_SCOPED(name, type, var, global, deleter)                      \
+    name##Scoped::name##Scoped(type* handle) noexcept : m_handle { handle } {      \
+        if (m_handle != nullptr) var++;                                            \
+    }                                                                              \
+                                                                                   \
+    name##Scoped::~name##Scoped() noexcept {                                       \
+        if (m_handle != nullptr) {                                                 \
+            var--;                                                                 \
+                                                                                   \
+            if (var == 0) {                                                        \
+                deleter(m_handle);                                                 \
+                m_handle = nullptr;                                                \
+                global   = nullptr;                                                \
+            }                                                                      \
+        }                                                                          \
+    }                                                                              \
+                                                                                   \
+    name##Scoped::name##Scoped(name##Scoped&& other) noexcept                      \
+        : m_handle { std::exchange(other.m_handle, nullptr) } {                    \
+    }                                                                              \
+                                                                                   \
+    auto name##Scoped::operator=(name##Scoped&& other) noexcept -> name##Scoped& { \
+        if (this == &other) return *this;                                          \
+                                                                                   \
+        m_handle = std::exchange(other.m_handle, nullptr);                         \
+                                                                                   \
+        return *this;                                                              \
     }
 
 namespace stormkit::wsi::linux::x11 {
-    using XCBConnectionPtr   = xcb_connection_t *;
-    using XCBErrorContextPtr = xcb_errors_context_t *;
-    using XCBErrorPtr        = xcb_generic_error_t *;
+    using XCBConnectionPtr   = xcb_connection_t*;
+    using XCBErrorContextPtr = xcb_errors_context_t*;
+    using XCBErrorPtr        = xcb_generic_error_t*;
     STORMKIT_RAII_CAPSULE(XCBGenericError, xcb_generic_error_t, std::free)
 
     namespace {
@@ -125,7 +124,7 @@ namespace stormkit::wsi::linux::x11 {
     inline auto getXCBConnection() noexcept -> XCBConnectionScoped {
         if (!xcb_connection) [[unlikely]] {
             xcb_connection = xcb_connect(nullptr, nullptr);
-            dlog("New xcb connection {}", std::bit_cast<void *>(xcb_connection));
+            dlog("New xcb connection {}", std::bit_cast<void*>(xcb_connection));
         }
 
         core::ensures(xcb_connection);
@@ -179,7 +178,7 @@ namespace stormkit::wsi::linux::x11 {
     inline auto getXCBErrorContext() noexcept -> XCBErrorContextScoped {
         if (!xcb_error_context) [[unlikely]] {
             xcb_errors_context_new(getXCBConnection(), &xcb_error_context);
-            dlog("New xcb error context {}", std::bit_cast<void *>(xcb_error_context));
+            dlog("New xcb error context {}", std::bit_cast<void*>(xcb_error_context));
         }
 
         core::ensures(xcb_error_context);
@@ -199,9 +198,9 @@ namespace stormkit::wsi::linux::x11 {
         const auto minor =
             xcb_errors_get_name_for_minor_code(ctx, error->major_code, error->minor_code);
 
-        using CStr            = const char *;
-        const auto *extension = CStr { nullptr };
-        const auto str_error  = xcb_errors_get_name_for_error(ctx, error->major_code, &extension);
+        using CStr            = const char*;
+        const auto* extension = CStr { nullptr };
+        const auto  str_error = xcb_errors_get_name_for_error(ctx, error->major_code, &extension);
 
         return std::format("{} extension: {} major: {} minor: {}\n",
                            str_error,
@@ -213,7 +212,7 @@ namespace stormkit::wsi::linux::x11 {
     /////////////////////////////////////
     /////////////////////////////////////
     inline auto getXIDeviceInfo(xcb_input_device_id_t device_id)
-        -> std::expected<xcb_input_xi_device_info_t *, Error> {
+        -> std::expected<xcb_input_xi_device_info_t*, Error> {
         STORMKIT_RAII_CAPSULE(Reply, xcb_input_xi_query_device_reply_t, std::free)
 
         auto connection = getXCBConnection();

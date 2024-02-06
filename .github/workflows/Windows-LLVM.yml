@@ -13,6 +13,19 @@ on:
       - 'LICENSE'
       - 'README.md'
 
+  push:
+    branches: [develop]
+    paths-ignore:
+      - '.github/workflows/Windows-MSVC.yml'
+      - '.github/workflows/Linux.yml'
+      - '.github/workflows/macOS.yml'
+      - '.github/workflows/iOS.yml'
+      - '.github/workflows/Android.yml'
+      - '.gitignore'
+      - 'LICENSE'
+      - 'README.md'
+
+
 jobs:
   build:
     name: ${{ matrix.os }}-LLVM-${{ matrix.arch }} ( ${{ matrix.kind }}-${{ matrix.mode }} )
@@ -49,22 +62,25 @@ jobs:
 
       - name: Cache LLVM
         id: cache_llvm
-        uses: actions/cache@v3.2.2
+        uses: actions/cache@v4
         with:
           path: ${{ runner.workspace }}/StormKit/llvm/
           key: ${{ matrix.os }}-llvm
+          save-always: true
           restore-keys: |
             ${{ matrix.os }}-llvm
 
       - name: Download and Uncompress LLVM
         if: ${{ steps.cache_llvm.outputs.cache-hit != 'true' }}
         run: |
-          C:/msys64/usr/bin/wget 'https://github.com/Arthapz/llvm-patched/raw/main/windows/llvm-x64.7z'
-          7z x llvm-x64.7z
-          rm llvm-x64.7z
+          C:/msys64/usr/bin/wget 'https://github.com/Arthapz/llvm-prebuilt/raw/main/Windows/llvm.7z.001'
+          C:/msys64/usr/bin/wget 'https://github.com/Arthapz/llvm-prebuilt/raw/main/Windows/llvm.7z.002'
+          7z x llvm.7z.001
+          rm llvm.7z.001
+          rm llvm.7z.002
 
       - name: Set xmake env
-        run: echo "XMAKE_GLOBALDIR=${{ runner.workspace }}/xmake-global" >> $env:GITHUB_ENV
+        run: echo "XMAKE_GLOBALDIR=${{ runner.workspace }}/xmake-global"  | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Install xmake
         uses: xmake-io/github-action-setup-xmake@v1
@@ -73,17 +89,17 @@ jobs:
           actions-cache-folder: .xmake-cache-${{ steps.cache_key.outputs.key }}
 
       - name: Update xmake to patched xmake
-        run: xmake update -s https://github.com/Arthapz/xmake.git#modules
+        run: xmake update -s --integrate github:Arthapz/xmake#modules
 
-      # - name: Update xmake repository
-      #   run: xmake repo --update
-      #
+      - name: Update xmake repository
+        run: xmake repo --update -v
+
       - name: Retrieve dependencies hash
         id: dep_hash
-        run: echo "hash=$(xmake l utils.ci.packageskey)" >> $env:GITHUB_OUTPUT
+        run: echo "hash=$(xmake l utils.ci.packageskey)" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
 
       - name: Retrieve cached xmake dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ env.XMAKE_GLOBALDIR }}/.xmake/packages
           key: ${{ matrix.os }}-LLVM-${{ matrix.mode }}-${{ steps.dep_hash.outputs.hash }}-${{ steps.cache_key.outputs.key }}
@@ -91,17 +107,17 @@ jobs:
       - name: Configure & Build
         id: build_llvm
         run: |
-          xmake f -vD --yes -a ${{ matrix.arch }}  -m ${{ (matrix.mode == 'release' || matrix.mode == 'debug') && matrix.mode || 'releasedbg' }} -k ${{ matrix.kind }} --enable_examples=y --toolchain=llvm --sdk="${{ runner.workspace }}/StormKit/llvm/" --runtimes="c++_shared"
-          xmake b -vD
+          xmake f -v --yes -a ${{ matrix.arch }}  -m ${{ (matrix.mode == 'release' || matrix.mode == 'debug') && matrix.mode || 'releasedbg' }} -k ${{ matrix.kind }} --examples=y --tests=y --toolchain=llvm --sdk="${{ runner.workspace }}/StormKit/llvm/" --runtimes="c++_shared"
+          xmake b -v
 
       - name: Tests
         run: |
           cp "${{ runner.workspace }}/StormKit/llvm/lib/c++.dll" "${{ runner.workspace }}/StormKit/build/windows/${{ matrix.arch }}/${{ (matrix.mode == 'release' || matrix.mode == 'debug') && matrix.mode || 'releasedbg' }}/"
-          xmake test -vD
+          xmake test -v
 
       - name: Installation
         run: |
-          xmake install -vD --installdir="${{ runner.workspace }}/output"
+          xmake install -v --installdir="${{ runner.workspace }}/output"
           cp "${{ runner.workspace }}/StormKit/llvm/lib/c++.dll" "${{ runner.workspace }}/output/bin/"
           rmdir /s /q "StormKit"
 

@@ -21,4 +21,3 @@ export namespace VMA_HPP_NAMESPACE {
     } // namespace raii
 } // namespace VMA_HPP_NAMESPACE
 #endif
-

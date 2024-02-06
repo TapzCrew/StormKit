@@ -57,8 +57,8 @@ export namespace stormkit::gpu {
         Sampler(Sampler&&) noexcept;
         auto operator=(Sampler&&) noexcept -> Sampler&;
 
-        [[nodiscard]] static auto create(const Device&   device,
-                                         const Settings& settings) noexcept -> Expected<Sampler>;
+        [[nodiscard]] static auto create(const Device& device, const Settings& settings) noexcept
+            -> Expected<Sampler>;
         [[nodiscard]] static auto allocate(const Device& device, const Settings& settings) noexcept
             -> Expected<std::unique_ptr<Sampler>>;
 
@@ -100,11 +100,12 @@ export namespace stormkit::gpu {
         ImageView(ImageView&&) noexcept;
         auto operator=(ImageView&&) noexcept -> ImageView&;
 
-        [[nodiscard]] static auto create(
-            const Device&                device,
-            const Image&                 image,
-            ImageViewType                type              = ImageViewType::T2D,
-            const ImageSubresourceRange& subresource_range = {}) noexcept -> Expected<ImageView>;
+        [[nodiscard]] static auto
+            create(const Device&                device,
+                   const Image&                 image,
+                   ImageViewType                type              = ImageViewType::T2D,
+                   const ImageSubresourceRange& subresource_range = {}) noexcept
+            -> Expected<ImageView>;
         [[nodiscard]] static auto
             allocate(const Device&                device,
                      const Image&                 image,
@@ -153,11 +154,11 @@ export namespace stormkit::gpu {
         Image(Image&&) noexcept;
         auto operator=(Image&&) noexcept -> Image&;
 
-        [[nodiscard]] static auto create(const Device&     device,
-                                         const CreateInfo& info) noexcept -> Expected<Image>;
-        [[nodiscard]] static auto
-            allocate(const Device&     device,
-                     const CreateInfo& create_info) noexcept -> Expected<std::unique_ptr<Image>>;
+        [[nodiscard]] static auto create(const Device& device, const CreateInfo& info) noexcept
+            -> Expected<Image>;
+        [[nodiscard]] static auto allocate(const Device&     device,
+                                           const CreateInfo& create_info) noexcept
+            -> Expected<std::unique_ptr<Image>>;
 
         [[nodiscard]] auto extent() const noexcept -> const core::math::ExtentU&;
         [[nodiscard]] auto format() const noexcept -> PixelFormat;
@@ -253,9 +254,9 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto
-        Sampler::create(const Device&   device,
-                        const Settings& settings) noexcept -> Expected<Sampler> try {
+    STORMKIT_FORCE_INLINE auto Sampler::create(const Device&   device,
+                                               const Settings& settings) noexcept
+        -> Expected<Sampler> try {
         return Sampler { device, settings, Tag {} };
     } catch (const Result& result) { return std::unexpected(result); }
 
@@ -329,16 +330,17 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto
-        ImageView::operator=(ImageView&& other) noexcept -> ImageView& = default;
+    STORMKIT_FORCE_INLINE auto ImageView::operator=(ImageView&& other) noexcept
+        -> ImageView& = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto ImageView::create(
-        const Device&                device,
-        const Image&                 image,
-        ImageViewType                type,
-        const ImageSubresourceRange& subresource_range) noexcept -> Expected<ImageView> try {
+    STORMKIT_FORCE_INLINE auto
+        ImageView::create(const Device&                device,
+                          const Image&                 image,
+                          ImageViewType                type,
+                          const ImageSubresourceRange& subresource_range) noexcept
+        -> Expected<ImageView> try {
         return ImageView { device, image, type, subresource_range, Tag {} };
     } catch (const Result& result) { return std::unexpected(result); }
 
@@ -361,8 +363,8 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto
-        ImageView::subresourceRange() const noexcept -> const ImageSubresourceRange& {
+    STORMKIT_FORCE_INLINE auto ImageView::subresourceRange() const noexcept
+        -> const ImageSubresourceRange& {
         return m_subresource_range;
     }
 
@@ -446,9 +448,9 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto
-        Image::create(const Device&     device,
-                      const CreateInfo& create_info) noexcept -> Expected<Image> try {
+    STORMKIT_FORCE_INLINE auto Image::create(const Device&     device,
+                                             const CreateInfo& create_info) noexcept
+        -> Expected<Image> try {
         return Image { device, create_info, Tag {} };
     } catch (const Result& result) { return std::unexpected(result); }
 

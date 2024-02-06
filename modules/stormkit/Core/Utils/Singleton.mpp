@@ -11,7 +11,7 @@ export namespace stormkit::core {
     class Singleton {
       public:
         template<class... Args>
-        static auto instance(Args&&...args) noexcept(std::is_nothrow_constructible_v<T>) -> T&;
+        static auto instance(Args&&... args) noexcept(std::is_nothrow_constructible_v<T>) -> T&;
 
         Singleton(Singleton&&)      = delete;
         Singleton(const Singleton&) = delete;
@@ -39,8 +39,8 @@ namespace stormkit::core {
     /////////////////////////////////////
     template<class T>
     template<class... Args>
-    auto Singleton<T>::instance(Args&&...args) noexcept(std::is_nothrow_constructible_v<T>) -> T& {
-        auto lambdas = [](Args&&...args) mutable {
+    auto Singleton<T>::instance(Args&&... args) noexcept(std::is_nothrow_constructible_v<T>) -> T& {
+        auto lambdas = [](Args&&... args) mutable {
             m_instance = std::make_unique<T>(std::forward<Args>(args)...);
         };
 

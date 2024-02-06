@@ -17,7 +17,7 @@ export namespace stormkit::core {
         using UnderlyingType  = T;
         using underlying_type = UnderlyingType;
 
-        using PointerType  = UnderlyingType *;
+        using PointerType  = UnderlyingType*;
         using pointer_type = PointerType;
 
         using ReferenceType  = UnderlyingType&;
@@ -37,7 +37,7 @@ export namespace stormkit::core {
         [[nodiscard]] constexpr auto operator->(this auto&& self) noexcept -> decltype(auto);
         [[nodiscard]] constexpr auto operator*(this auto&& self) noexcept -> decltype(auto);
 
-        [[nodiscard]] constexpr operator T &(this auto&& self) noexcept;
+        [[nodiscard]] constexpr operator T&(this auto&& self) noexcept;
 
       private:
         PointerType m_value;
@@ -54,11 +54,11 @@ export namespace stormkit::core {
 
     template<typename... Args>
         requires((IsLValueReference<Args> or IsPointer<Args>) && ...)
-    constexpr auto makeNakedRefArray(Args&&...args);
+    constexpr auto makeNakedRefArray(Args&&... args);
 
     template<typename... Args>
         requires((IsLValueReference<Args> or IsPointer<Args>) && ...)
-    constexpr auto makeNakedRefVector(Args&&...args);
+    constexpr auto makeNakedRefVector(Args&&... args);
 } // namespace stormkit::core
 
 ////////////////////////////////////////////////////////////////////
@@ -128,7 +128,7 @@ namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
     template<typename T>
-    constexpr NakedRef<T>::operator T &(this auto&& self) noexcept {
+    constexpr NakedRef<T>::operator T&(this auto&& self) noexcept {
         return std::forward<decltype(self)>(self).get();
     }
 
@@ -150,7 +150,7 @@ namespace stormkit::core {
     /////////////////////////////////////
     template<typename... Args>
         requires((IsLValueReference<Args> or IsPointer<Args>) && ...)
-    constexpr auto makeNakedRefArray(Args&&...args) {
+    constexpr auto makeNakedRefArray(Args&&... args) {
         return std::array { (makeNakedRef(std::forward<Args>(args)), ...) };
     }
 
@@ -158,7 +158,7 @@ namespace stormkit::core {
     /////////////////////////////////////
     template<typename... Args>
         requires((IsLValueReference<Args> or IsPointer<Args>) && ...)
-    constexpr auto makeNakedRefVector(Args&&...args) {
+    constexpr auto makeNakedRefVector(Args&&... args) {
         return std::vector { (makeNakedRef(std::forward<Args>(args)), ...) };
     }
 } // namespace stormkit::core

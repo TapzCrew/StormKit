@@ -36,7 +36,7 @@ namespace stormkit::core::predicates {
     ////////////////////////////////////////
     ////////////////////////////////////////
     constexpr auto wrap(std::invocable auto&& func) noexcept {
-        return [func = std::forward<decltype(func)>(func)](auto&&...args) {
+        return [func = std::forward<decltype(func)>(func)](auto&&... args) {
             return func(std::forward<decltype(args)>(args)...);
         };
     }

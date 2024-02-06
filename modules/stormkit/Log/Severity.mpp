@@ -5,6 +5,7 @@
 module;
 
 #include <stormkit/Core/FlagsMacro.hpp>
+#include <stormkit/Core/PlatformMacro.hpp>
 
 export module stormkit.Log:Severity;
 
@@ -13,7 +14,6 @@ import std;
 import frozen;
 
 import stormkit.Core;
-
 
 export {
     namespace stormkit::log {
@@ -51,23 +51,24 @@ export {
 ////////////////////////////////////////////////////////////////////
 
 namespace stormkit::log {
-    namespace details {
-        constexpr auto SEVERITY_TO_STRING = [] {
-            using namespace std::literals;
+    namespace details { namespace {
+            constexpr auto SEVERITY_TO_STRING = [] {
+                using namespace std::literals;
 
-            return frozen::make_unordered_map<Severity, std::string_view>({
-                { Severity::Info, "Info"sv },
-                { Severity::Warning, "Warning"sv },
-                { Severity::Error, "Error"sv },
-                { Severity::Fatal, "Fatal"sv },
-                { Severity::Debug, "Debug"sv },
-            });
-        }();
-    } // namespace details
+                return frozen::make_unordered_map<Severity, std::string_view>({
+                    { Severity::Info, "Info"sv },
+                    { Severity::Warning, "Warning"sv },
+                    { Severity::Error, "Error"sv },
+                    { Severity::Fatal, "Fatal"sv },
+                    { Severity::Debug, "Debug"sv },
+                });
+            }();
+    }} // namespace details
 
     ////////////////////////////////////////
     ////////////////////////////////////////
-    constexpr auto toStringView(Severity severity) noexcept -> std::string_view {
+    STORMKIT_FORCE_INLINE constexpr auto toStringView(Severity severity) noexcept
+        -> std::string_view {
         const auto it = details::SEVERITY_TO_STRING.find(severity);
         core::expects(it != std::ranges::cend(details::SEVERITY_TO_STRING));
 
@@ -76,7 +77,7 @@ namespace stormkit::log {
 
     ////////////////////////////////////////
     ////////////////////////////////////////
-    constexpr auto toString(Severity severity) -> std::string {
+    STORMKIT_FORCE_INLINE constexpr auto toString(Severity severity) -> std::string {
         return std::string { toStringView(severity) };
     }
 } // namespace stormkit::log

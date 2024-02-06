@@ -13,6 +13,18 @@ on:
       - 'LICENSE'
       - 'README.md'
 
+  push:
+    branches: [develop]
+    paths-ignore:
+      - '.github/workflows/Windows-MSVC.yml'
+      - '.github/workflows/Linux.yml'
+      - '.github/workflows/macOS.yml'
+      - '.github/workflows/iOS.yml'
+      - '.github/workflows/Android.yml'
+      - '.gitignore'
+      - 'LICENSE'
+      - 'README.md'
+
 jobs:
   build:
     name: ${{ matrix.os }}-x64 ( ${{ matrix.kind }}-${{ matrix.mode }} )
@@ -41,12 +53,20 @@ jobs:
 
       - name: Cache LLVM
         id: cache_llvm
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
-          path: ${{ runner.workspace }}/StormKit/llvm
+          path: ${{ runner.workspace }}/StormKit/llvm-minified
           key: ${{ matrix.os }}-llvm
+          save-always: true
           restore-keys: |
             ${{ matrix.os }}-llvm
+
+      - name: Download and Uncompress LLVM
+        if: ${{ steps.cache_llvm.outputs.cache-hit != 'true' }}
+        run: |
+          wget 'https://github.com/Arthapz/llvm-prebuilt/raw/main/macOS/llvm.7z.001'
+          7z x llvm.7z.001
+          rm llvm.7z.001
 
       - name: Set xmake env
         run: echo "XMAKE_GLOBALDIR=${{ runner.workspace }}/xmake-global" >> $GITHUB_ENV
@@ -57,37 +77,33 @@ jobs:
           xmake-version: branch@dev
           actions-cache-folder: .xmake-cache-${{ steps.cache_key.outputs.key }}
 
+      - name: Update xmake to patched xmake
+        run: xmake update -s https://github.com/Arthapz/xmake.git#modules
+
       - name: Update xmake repository
-        run: xmake repo -vD --update
+        run: xmake repo --update -v
 
       - name: Retrieve dependencies hash
         id: dep_hash
         run: echo "hash=$(xmake l utils.ci.packageskey)" >> $GITHUB_OUTPUT
 
       - name: Retrieve cached xmake dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ env.XMAKE_GLOBALDIR }}/.xmake/packages
           key: macOS-${{ matrix.mode }}-${{ steps.dep_hash.outputs.hash }}-${{ steps.cache_key.outputs.key }}
 
-      - name: Download and Uncompress LLVM
-        if: ${{ steps.cache_llvm.outputs.cache-hit != 'true' }}
-        run: |
-          wget 'http://86.221.35.29:1337/llvm-macos.7z'
-          7z x llvm-macos.7z
-          rm llvm-macos.7z
-
       - name: Configure & Build
         id: build
         run: |
-          xmake f -vD --yes -m ${{ (matrix.mode == 'release' || matrix.mode == 'debug') && matrix.mode || 'releasedbg' }} -k ${{ matrix.kind }} --sanitizers=${{ matrix.mode == 'asan' && 'y' || 'n' }} --enable_examples=y --enable_tests=y --enable_gpu=n --libc++=y --toolchain=llvm --sdk="${{ runner.workspace }}/StormKit/llvm/" --ldflags="-L${{ runner.workspace }}/StormKit/llvm/lib" --shflags="-L${{ runner.workspace }}/StormKit/llvm/lib"
-          xmake b -vD
+          xmake f -v --yes -m ${{ (matrix.mode == 'release' || matrix.mode == 'debug') && matrix.mode || 'releasedbg' }} -k ${{ matrix.kind }} --sanitizers=${{ matrix.mode == 'asan' && 'y' || 'n' }} --examples=y --tests=y --toolchain=llvm --sdk="${{ runner.workspace }}/StormKit/llvm-minified/" --runtimes="c++_shared"
+          xmake b -v
 
       - name: Tests
-        run: DYLD_LIBRARY_PATH="${{ runner.workspace }}/StormKit/llvm/lib" xmake test -vD
+        run: DYLD_LIBRARY_PATH="${{ runner.workspace }}/StormKit/llvm/lib" xmake test -v
 
       - name: Installation
-        run: xmake install -vD --installdir="${{ runner.workspace }}/output"
+        run: xmake install -v --installdir="${{ runner.workspace }}/output"
 
       - name: Upload artifacts
         id: upload

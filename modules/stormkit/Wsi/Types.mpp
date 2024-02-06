@@ -14,7 +14,6 @@ import frozen;
 
 import stormkit.Core;
 
-
 export {
     namespace stormkit::wsi {
         enum class WM {
@@ -28,7 +27,7 @@ export {
             Switch,
         };
 
-        using NativeHandle = void *;
+        using NativeHandle = void*;
 
         enum class Key : core::UInt8 {
             A = 0,
@@ -161,7 +160,7 @@ export {
 
             std::vector<core::math::ExtentU> extents;
 
-            void *handle = nullptr;
+            void* handle = nullptr;
 
             [[nodiscard]] constexpr auto operator<=>(const Monitor& other) const noexcept
                 -> std::strong_ordering;
@@ -284,7 +283,7 @@ export {
         [[nodiscard]] constexpr auto toString(Key value) -> std::string;
         [[nodiscard]] constexpr auto toStringView(Key value) noexcept -> std::string_view;
         //
-        [[nodiscard]] auto           toString(const Monitor          &flags) -> std::string;
+        [[nodiscard]] auto           toString(const Monitor& flags) -> std::string;
         [[nodiscard]] constexpr auto toString(Monitor::Flags flags) -> std::string;
         [[nodiscard]] constexpr auto toStringView(Monitor::Flags flags) noexcept
             -> std::string_view;

@@ -12,7 +12,6 @@ import std;
 
 import stormkit.Core;
 
-
 import :Types;
 
 namespace stormkit::wsi {
@@ -57,12 +56,12 @@ export namespace stormkit::wsi {
         [[nodiscard]] auto mouseLocked() const noexcept -> bool;
         [[nodiscard]] auto fullscreen() const noexcept -> bool;
 
-        auto setKeyRepeatEnabled(bool enabled) noexcept -> void;
+        auto               setKeyRepeatEnabled(bool enabled) noexcept -> void;
         [[nodiscard]] auto keyRepeatEnabled() const noexcept -> bool;
 
         auto setVirtualKeyboardVisible(bool visible) noexcept -> void;
 
-        auto setMousePosition(const core::math::Vector2I& position) noexcept -> void;
+        auto        setMousePosition(const core::math::Vector2I& position) noexcept -> void;
         static auto setMousePositionOnDesktop(const core::math::Vector2U& position) noexcept
             -> void;
 

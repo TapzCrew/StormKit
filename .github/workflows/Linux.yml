@@ -13,6 +13,18 @@ on:
       - 'LICENSE'
       - 'README.md'
 
+  push:
+    branches: [develop]
+    paths-ignore:
+      - '.github/workflows/Windows-MSVC.yml'
+      - '.github/workflows/Linux.yml'
+      - '.github/workflows/macOS.yml'
+      - '.github/workflows/iOS.yml'
+      - '.github/workflows/Android.yml'
+      - '.gitignore'
+      - 'LICENSE'
+      - 'README.md'
+
 jobs:
   build:
     name: ${{ matrix.os }}-x64 ( ${{ matrix.kind }}-${{ matrix.mode }} )
@@ -48,15 +60,15 @@ jobs:
           xmake-version: branch@dev
           actions-cache-folder: .xmake-cache-${{ steps.cache_key.outputs.key }}
 
-      - name: Update xmake repository
-        run: xmake repo -vD --update
+      - name: Update xmake to patched xmake
+        run: xmake update -s https://github.com/Arthapz/xmake.git#modules
 
       - name: Retrieve dependencies hash
         id: dep_hash
         run: echo "hash=$(xmake l utils.ci.packageskey)" >> $GITHUB_OUTPUT
 
       - name: Retrieve cached xmake dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ env.XMAKE_GLOBALDIR }}/.xmake/packages
           key: ${{ matrix.os }}-${{ matrix.mode }}-${{ steps.dep_hash.outputs.hash }}-${{ steps.cache_key.outputs.key }}
@@ -64,14 +76,14 @@ jobs:
       - name: Configure & Build
         id: build
         run: |
-          xmake f -vD --yes -m ${{ (matrix.mode == 'release' || matrix.mode == 'debug') && matrix.mode || 'releasedbg' }} -k ${{ matrix.kind }} --sanitizers=${{ matrix.mode == 'asan' && 'y' || 'n' }} --enable_examples=y --enable_tests=y --enable_gpu=n --libc++=y --toolchain=llvm --mold=y --sdk=/opt/llvm-git/usr --ldflags="-L/opt/llvm-git/usr/lib" --shflags="-L/opt/llvm-git/usr/lib"
-          xmake b -vD
+          xmake f -v --yes -m ${{ (matrix.mode == 'release' || matrix.mode == 'debug') && matrix.mode || 'releasedbg' }} -k ${{ matrix.kind }} --sanitizers=${{ matrix.mode == 'asan' && 'y' || 'n' }} --examples=y --tests=y --toolchain=llvm --mold=y --runtimes="c++_shared" --sdk="/opt/llvm-git/usr"
+          xmake b -v
 
       - name: Tests
-        run: LD_LIBRARY_PATH="/opt/llvm-git/usr/lib" xmake test -vD
+        run: LD_LIBRARY_PATH="/opt/llvm-git/usr/lib" xmake test -v
 
       - name: Installation
-        run: xmake install -vD --installdir="${{ runner.workspace }}/output"
+        run: xmake install -v --installdir="${{ runner.workspace }}/output"
 
       - name: Upload artifacts
         id: upload

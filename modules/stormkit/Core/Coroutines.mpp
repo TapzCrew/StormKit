@@ -29,8 +29,8 @@ namespace std {
         ~__manual_lifetime() {}
 
         template<class... _Args>
-        _T& construct(_Args&&...__args) noexcept(std::is_nothrow_constructible_v<_T, _Args...>) {
-            return *::new (static_cast<void *>(std::addressof(__value_))) _T((_Args&&)__args...);
+        _T& construct(_Args&&... __args) noexcept(std::is_nothrow_constructible_v<_T, _Args...>) {
+            return *::new (static_cast<void*>(std::addressof(__value_))) _T((_Args&&)__args...);
         }
 
         void destruct() noexcept(std::is_nothrow_destructible_v<_T>) { __value_.~_T(); }
@@ -66,7 +66,7 @@ namespace std {
         _T& get() const noexcept { return *__value_; }
 
       private:
-        _T *__value_;
+        _T* __value_;
     };
 
     template<class _T>
@@ -86,7 +86,7 @@ namespace std {
         _T&& get() const noexcept { return static_cast<_T&&>(*__value_); }
 
       private:
-        _T *__value_;
+        _T* __value_;
     };
 
     namespace ranges {
@@ -111,7 +111,7 @@ namespace std {
 
           private:
             [[no_unique_address]] _Allocator __alloc; // \expos
-            _Rng&& __range;                           // \expos
+            _Rng&&                           __range; // \expos
         };
 
         template<class _Rng>
@@ -141,28 +141,28 @@ namespace std {
             return __offset_of_allocator(__frameSize) + sizeof(_Alloc);
         }
 
-        static _Alloc& __get_allocator(void *__frame, std::size_t __frameSize) noexcept {
-            return *reinterpret_cast<_Alloc *>(static_cast<char *>(__frame) +
-                                               __offset_of_allocator(__frameSize));
+        static _Alloc& __get_allocator(void* __frame, std::size_t __frameSize) noexcept {
+            return *reinterpret_cast<_Alloc*>(static_cast<char*>(__frame) +
+                                              __offset_of_allocator(__frameSize));
         }
 
       public:
         template<class... _Args>
-        static void *
+        static void*
             operator new(std::size_t __frameSize, std::allocator_arg_t, _Alloc __alloc, _Args&...) {
-            void *__frame = __alloc.allocate(__padded_frame_size(__frameSize));
+            void* __frame = __alloc.allocate(__padded_frame_size(__frameSize));
 
             // Store allocator at end of the coroutine frame.
             // Assuming the allocator's move constructor is non-throwing (a requirement for
             // allocators)
-            ::new (static_cast<void *>(std::addressof(__get_allocator(__frame, __frameSize))))
+            ::new (static_cast<void*>(std::addressof(__get_allocator(__frame, __frameSize))))
                 _Alloc(std::move(__alloc));
 
             return __frame;
         }
 
         template<class _This, typename... _Args>
-        static void *operator new(std::size_t __frameSize,
+        static void* operator new(std::size_t __frameSize,
                                   _This&,
                                   std::allocator_arg_t,
                                   _Alloc __alloc,
@@ -172,11 +172,11 @@ namespace std {
                                                       std::move(__alloc));
         }
 
-        static void operator delete(void *__ptr, std::size_t __frameSize) noexcept {
+        static void operator delete(void* __ptr, std::size_t __frameSize) noexcept {
             _Alloc& __alloc = __get_allocator(__ptr, __frameSize);
-            _Alloc __localAlloc(std::move(__alloc));
+            _Alloc  __localAlloc(std::move(__alloc));
             __alloc.~Alloc();
-            __localAlloc.deallocate(static_cast<std::byte *>(__ptr),
+            __localAlloc.deallocate(static_cast<std::byte*>(__ptr),
                                     __padded_frame_size(__frameSize));
         }
     };
@@ -185,14 +185,14 @@ namespace std {
         requires(!__allocator_needs_to_be_stored<_Alloc>)
     class __promise_base_alloc<_Alloc> {
       public:
-        static void *operator new(std::size_t __size) {
+        static void* operator new(std::size_t __size) {
             _Alloc __alloc;
             return __alloc.allocate(__size);
         }
 
-        static void operator delete(void *__ptr, std::size_t __size) noexcept {
+        static void operator delete(void* __ptr, std::size_t __size) noexcept {
             _Alloc __alloc;
-            __alloc.deallocate(static_cast<std::byte *>(__ptr), __size);
+            __alloc.deallocate(static_cast<std::byte*>(__ptr), __size);
         }
     };
 
@@ -201,15 +201,15 @@ namespace std {
         template<class _Ref2, typename _Value, typename _Alloc>
         friend class generator;
 
-        __generator_promise_base *__root_;
-        std::coroutine_handle<> __parentOrLeaf_;
+        __generator_promise_base* __root_;
+        std::coroutine_handle<>   __parentOrLeaf_;
         // Note: Using manual_lifetime here to avoid extra calls to exception_ptr
         // constructor/destructor in cases where it is not needed (i.e. where this
         // generator coroutine is not used as a nested coroutine).
         // This member is lazily constructed by the __yield_sequence_awaiter::await_suspend()
         // method if this generator is used as a nested generator.
         __manual_lifetime<std::exception_ptr> __exception_;
-        __manual_lifetime<_Ref> __value_;
+        __manual_lifetime<_Ref>               __value_;
 
         explicit __generator_promise_base(std::coroutine_handle<> thisCoro) noexcept
             : __root_(this), __parentOrLeaf_(thisCoro) {}
@@ -241,8 +241,8 @@ namespace std {
 
             template<class _Promise>
             std::coroutine_handle<> await_suspend(std::coroutine_handle<_Promise> __h) noexcept {
-                _Promise& __promise              = __h.promise();
-                __generator_promise_base& __root = *__promise.__root_;
+                _Promise&                 __promise = __h.promise();
+                __generator_promise_base& __root    = *__promise.__root_;
                 if (&__root != &__promise) {
                     auto __parent          = __promise.__parentOrLeaf_;
                     __root.__parentOrLeaf_ = __parent;
@@ -510,11 +510,11 @@ namespace std {
       public: // to get around access restrictions for __yield_sequence_awaitable
         std::coroutine_handle<> __get_coro() noexcept { return __coro_; }
 
-        promise_type *__get_promise() noexcept { return std::addressof(__coro_.promise()); }
+        promise_type* __get_promise() noexcept { return std::addressof(__coro_.promise()); }
 
       private:
         __coroutine_handle __coro_;
-        bool __started_ = false;
+        bool               __started_ = false;
     };
 
     // Specialisation for type-erased allocator implementation.
@@ -592,10 +592,10 @@ namespace std {
           private:
             friend generator;
 
-            explicit iterator(__promise_base *__promise, std::coroutine_handle<> __coro) noexcept
+            explicit iterator(__promise_base* __promise, std::coroutine_handle<> __coro) noexcept
                 : __promise_(__promise), __coro_(__coro) {}
 
-            __promise_base *__promise_;
+            __promise_base*         __promise_;
             std::coroutine_handle<> __coro_;
         };
 
@@ -620,12 +620,12 @@ namespace std {
       public: // to get around access restrictions for __yield_sequence_awaitable
         std::coroutine_handle<> __get_coro() noexcept { return __coro_; }
 
-        __promise_base *__get_promise() noexcept { return __promise_; }
+        __promise_base* __get_promise() noexcept { return __promise_; }
 
       private:
-        __promise_base *__promise_;
+        __promise_base*         __promise_;
         std::coroutine_handle<> __coro_;
-        bool __started_ = false;
+        bool                    __started_ = false;
     };
 
 } // namespace std

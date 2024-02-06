@@ -14,7 +14,7 @@ export namespace stormkit::image::details {
     [[nodiscard]] auto loadHDR(std::span<const core::Byte> data) noexcept
         -> std::expected<image::Image, image::Image::Error>;
 
-    [[nodiscard]] auto saveHDR(const image::Image& image,
+    [[nodiscard]] auto saveHDR(const image::Image&          image,
                                const std::filesystem::path& filepath) noexcept
         -> std::expected<void, image::Image::Error>;
 

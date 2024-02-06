@@ -7,8 +7,8 @@
 
 #import <UIKit/UIInputViewController.h>
 
-@interface ViewController : UIViewController
-@property(nonatomic) BOOL hideStatusBar;
+@interface ViewController: UIViewController
+@property (nonatomic) BOOL hideStatusBar;
 @end
 
 #endif

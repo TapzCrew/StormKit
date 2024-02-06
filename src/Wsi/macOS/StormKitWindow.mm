@@ -14,10 +14,10 @@
 using namespace stormkit::wsi::macos;
 
 namespace {
-  auto fromStdString(const std::string &str) noexcept -> NSString * {
-      return [NSString stringWithCString:str.c_str() encoding:[NSString defaultCStringEncoding]];
-  }
-}
+    auto fromStdString(const std::string &str) noexcept -> NSString * {
+        return [NSString stringWithCString:str.c_str() encoding:[NSString defaultCStringEncoding]];
+    }
+} // namespace
 
 @implementation StormKitWindowController {
     macOSWindow *requester;
@@ -28,10 +28,10 @@ namespace {
 /////////////////////////////////////
 /////////////////////////////////////
 - (id)initWithWidth:(std::uint32_t)width
-             withHeight:(std::uint32_t)height
-             withStyle:(int)style
-             withTitle:(std::string)title
-         withRequester:(macOSWindow *)_requester {
+         withHeight:(std::uint32_t)height
+          withStyle:(int)style
+          withTitle:(std::string)title
+      withRequester:(macOSWindow *)_requester {
     self = [super init];
 
     if (self) {
@@ -40,27 +40,25 @@ namespace {
 
         auto window_style = NSUInteger();
 
-        if ((style & 0b1) == 0b1)
-           window_style |= NSWindowStyleMaskTitled;
+        if ((style & 0b1) == 0b1) window_style |= NSWindowStyleMaskTitled;
 
-        if ((style & 0b10) == 0b10)
-            window_style |= NSWindowStyleMaskClosable;
+        if ((style & 0b10) == 0b10) window_style |= NSWindowStyleMaskClosable;
 
-        if ((style & 0b100) == 0b100)
-            window_style |= NSWindowStyleMaskMiniaturizable;
+        if ((style & 0b100) == 0b100) window_style |= NSWindowStyleMaskMiniaturizable;
 
-        if ((style & 0b1000) == 0b1000)
-            window_style |= NSWindowStyleMaskResizable;
+        if ((style & 0b1000) == 0b1000) window_style |= NSWindowStyleMaskResizable;
 
         const auto rect = NSMakeRect(0, 0, width, height);
-        window          = [[StormKitWindow alloc] initWithContentRect:rect
-                                                styleMask:window_style
-                                                  backing:NSBackingStoreBuffered
-                                                    defer:NO];
+        window          = [[StormKitWindow alloc]
+            initWithContentRect:rect
+                      styleMask:window_style
+                        backing:NSBackingStoreBuffered
+                          defer:NO];
 
         auto frame = [window convertRectToBacking:[[window contentView] frame]];
 
-        view = [[StormKitView alloc] initWithFrame:frame withRequester:_requester withWindow:window];
+        view =
+            [[StormKitView alloc] initWithFrame:frame withRequester:_requester withWindow:window];
         [view setLayer:[CAMetalLayer layer]];
         [view setWantsLayer:YES];
 
@@ -90,7 +88,7 @@ namespace {
     [self close];
 
     window = nil;
-    view = nil;
+    view   = nil;
 }
 
 /////////////////////////////////////

@@ -33,8 +33,8 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto FrameGraphBuilder::createFrameGraph(const gpu::Device& device,
-                                             BakedFrameGraph   *old) -> BakedFrameGraph {
+    auto FrameGraphBuilder::createFrameGraph(const gpu::Device& device, BakedFrameGraph* old)
+        -> BakedFrameGraph {
         auto data = allocatePhysicalResources(device);
 
         return BakedFrameGraph { *this, std::move(data), old };
@@ -42,7 +42,7 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto FrameGraphBuilder::allocateFrameGraph(const gpu::Device& device, BakedFrameGraph *old)
+    auto FrameGraphBuilder::allocateFrameGraph(const gpu::Device& device, BakedFrameGraph* old)
         -> std::unique_ptr<BakedFrameGraph> {
         auto data = allocatePhysicalResources(device);
 
@@ -54,7 +54,7 @@ namespace stormkit::engine {
     auto FrameGraphBuilder::prepareTask(GraphTask& task) noexcept -> void {
         auto task_builder = GraphTaskBuilder { task, *this };
         auto data         = m_datas[task.dataID()];
-        task.onSetup(*std::bit_cast<core::Byte *>(&data), task_builder);
+        task.onSetup(*std::bit_cast<core::Byte*>(&data), task_builder);
     }
 
     /////////////////////////////////////

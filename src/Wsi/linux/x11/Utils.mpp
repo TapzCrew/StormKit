@@ -21,7 +21,7 @@ import :Types;
 export namespace stormkit::wsi::linux::x11 {
     auto x11KeyToChar(xcb_keysym_t key) noexcept -> char;
     auto x11MouseButtonToStormMouseButton(xcb_button_t button) noexcept -> MouseButton;
-    auto defaultRootWindow(xcb_connection_t *connection, core::Int32 screen_id) noexcept
+    auto defaultRootWindow(xcb_connection_t* connection, core::Int32 screen_id) noexcept
         -> xcb_window_t;
 } // namespace stormkit::wsi::linux::x11
 
@@ -46,7 +46,7 @@ namespace stormkit::wsi::linux::x11 {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto screen_of_display(xcb_connection_t *c, int screen) noexcept -> xcb_screen_t * {
+    auto screen_of_display(xcb_connection_t* c, int screen) noexcept -> xcb_screen_t* {
         auto iter = xcb_screen_iterator_t {};
 
         for (iter = xcb_setup_roots_iterator(xcb_get_setup(c)); iter.rem;
@@ -58,7 +58,7 @@ namespace stormkit::wsi::linux::x11 {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto defaultRootWindow(xcb_connection_t *connection, int32_t screen_id) noexcept
+    auto defaultRootWindow(xcb_connection_t* connection, int32_t screen_id) noexcept
         -> xcb_window_t {
         auto screen = screen_of_display(connection, screen_id);
 

@@ -13,37 +13,37 @@
 
 #ifdef __OBJC__
 @class UIWindow;
-using UIWindowPtr = UIWindow *;
+using UIWindowPtr = UIWindow*;
 @class ViewController;
-using ViewControllerPtr = ViewController *;
+using ViewControllerPtr = ViewController*;
 @class View;
-using ViewPtr = View *;
+using ViewPtr = View*;
 #else
-using UIWindowPtr       = struct objc_class *;
-using ViewControllerPtr = struct objc_class *;
-using ViewPtr           = struct objc_class *;
+using UIWindowPtr       = struct objc_class*;
+using ViewControllerPtr = struct objc_class*;
+using ViewPtr           = struct objc_class*;
 #endif
 
 namespace storm::window {
     class STORMKIT_PRIVATE WindowImpl: public storm::window::AbstractWindow {
       public:
         WindowImpl() noexcept;
-        WindowImpl(const std::string &title,
-                   const storm::window::VideoSettings &settings,
-                   storm::window::WindowStyle style) noexcept;
+        WindowImpl(const std::string&                  title,
+                   const storm::window::VideoSettings& settings,
+                   storm::window::WindowStyle          style) noexcept;
         ~WindowImpl() override;
 
-        void create(const std::string &title,
-                    const storm::window::VideoSettings &settings,
-                    storm::window::WindowStyle style) noexcept override;
+        void create(const std::string&                  title,
+                    const storm::window::VideoSettings& settings,
+                    storm::window::WindowStyle          style) noexcept override;
         void close() noexcept override;
 
-        bool pollEvent(storm::window::Event &event, void *native_event) noexcept override;
-        bool waitEvent(storm::window::Event &event,
-                       [[maybe_unused]] void *native_event) noexcept override;
+        bool pollEvent(storm::window::Event& event, void* native_event) noexcept override;
+        bool waitEvent(storm::window::Event&  event,
+                       [[maybe_unused]] void* native_event) noexcept override;
 
-        void setTitle(const std::string &title) noexcept override;
-        void setVideoSettings(const storm::window::VideoSettings &settings) noexcept override;
+        void setTitle(const std::string& title) noexcept override;
+        void setVideoSettings(const storm::window::VideoSettings& settings) noexcept override;
 
         storm::core::Extentu size() const noexcept override;
 
@@ -53,9 +53,9 @@ namespace storm::window {
         storm::window::NativeHandle nativeHandle() const noexcept override;
 
       private:
-        UIWindowPtr m_window;
+        UIWindowPtr       m_window;
         ViewControllerPtr m_view_controller;
-        ViewPtr m_view;
+        ViewPtr           m_view;
     };
 } // namespace storm::window
 

@@ -5,8 +5,8 @@
 #ifndef STORMKIT_WINDOW_CONTROLLER_HPP
 #define STORMKIT_WINDOW_CONTROLLER_HPP
 
-#include <string>
 #include <cstdint>
+#include <string>
 
 #import <AppKit/NSWindow.h>
 
@@ -16,14 +16,14 @@ namespace stormkit::wsi::macos {
 
 @class StormKitView;
 @interface StormKitWindowController: NSResponder<NSWindowDelegate>
-- (id)initWithWidth:(std::uint32_t)width 
-             withHeight:(std::uint32_t)height
-             withStyle:(int)style
-             withTitle:(std::string)title
-         withRequester:(stormkit::wsi::macos::macOSWindow *)_requester;
+- (id)initWithWidth:(std::uint32_t)width
+         withHeight:(std::uint32_t)height
+          withStyle:(int)style
+          withTitle:(std::string)title
+      withRequester:(stormkit::wsi::macos::macOSWindow*)_requester;
 - (void)dealloc;
 
-- (void)setRequester:(stormkit::wsi::macos::macOSWindow *)requester;
+- (void)setRequester:(stormkit::wsi::macos::macOSWindow*)requester;
 
 - (void)close;
 - (BOOL)isVisible;
@@ -32,17 +32,17 @@ namespace stormkit::wsi::macos {
 - (void)hideWindow;
 
 - (void)processEvent;
-- (StormKitView *)nativeHandle;
+- (StormKitView*)nativeHandle;
 
 - (NSSize)size;
 
 - (BOOL)windowShouldClose:(id)sender;
 
 - (void)windowWillClose:(id)sender;
-- (NSSize)windowWillResize:(NSWindow *)sender toSize:(NSSize)frameSize;
+- (NSSize)windowWillResize:(NSWindow*)sender toSize:(NSSize)frameSize;
 
-- (void)windowDidMiniaturize:(NSNotification *)notification;
-- (void)windowDidDeminiaturize:(NSNotification *)notification;
+- (void)windowDidMiniaturize:(NSNotification*)notification;
+- (void)windowDidDeminiaturize:(NSNotification*)notification;
 
 - (void)setMousePosition:(NSPoint)point;
 - (void)setWindowTitle:(std::string)title;
@@ -50,10 +50,10 @@ namespace stormkit::wsi::macos {
 - (NSPoint)convertPoint:(NSPoint)point;
 @end
 
-@interface StormKitWindow : NSWindow
-	- (BOOL) acceptsFirstResponder;
-	- (BOOL) canBecomeKeyWindow;
-	- (void) performClose: (id)sender;
+@interface StormKitWindow: NSWindow
+- (BOOL)acceptsFirstResponder;
+- (BOOL)canBecomeKeyWindow;
+- (void)performClose:(id)sender;
 @end
 
 #endif

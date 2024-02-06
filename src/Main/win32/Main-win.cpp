@@ -12,13 +12,19 @@ import std;
 
 import stormkit.Core;
 
+#include <version>
+
 namespace {
     constexpr auto BUF_SIZE = 1024;
 }
 
 extern auto userMain(std::span<const std::string_view>) -> int;
 
-auto __stdcall main(int argc, char **argv) -> int {
+auto __stdcall main(int argc, char** argv) -> int {
+#if not(defined(__cpp_lib_stacktrace) and __cpp_lib_stacktrace >= 202011L)
+    stormkit::core::backtraceInit(argv[0]);
+#endif
+
     std::locale::global(std::locale { "" });
     SetConsoleOutputCP(CP_UTF8);
     SetConsoleCP(CP_UTF8);
@@ -32,7 +38,7 @@ auto __stdcall main(int argc, char **argv) -> int {
     auto args = std::vector<std::string_view> {};
     args.reserve(argc);
 
-    for (auto &&i : stormkit::core::range(argc)) args.emplace_back(argv[i]);
+    for (auto&& i : stormkit::core::range(argc)) args.emplace_back(argv[i]);
 
     return userMain(args);
 }
@@ -40,6 +46,11 @@ auto __stdcall main(int argc, char **argv) -> int {
 auto __stdcall WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) -> int {
     const auto argc = __argc;
     const auto argv = __argv;
+
+#if not(defined(__cpp_lib_stacktrace) and __cpp_lib_stacktrace >= 202011L)
+    stormkit::core::backtraceInit(argv[0]);
+#endif
+
     std::locale::global(std::locale { "" });
     SetConsoleOutputCP(CP_UTF8);
     SetConsoleCP(CP_UTF8);
@@ -53,7 +64,7 @@ auto __stdcall WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) -> int {
     auto args = std::vector<std::string_view> {};
     args.reserve(argc);
 
-    for (auto &&i : stormkit::core::range(argc)) args.emplace_back(argv[i]);
+    for (auto&& i : stormkit::core::range(argc)) args.emplace_back(argv[i]);
 
     return userMain(args);
 }

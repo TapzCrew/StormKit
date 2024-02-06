@@ -56,12 +56,12 @@ export namespace stormkit::wsi::linux {
         [[nodiscard]] auto mouseHidden() const noexcept -> bool;
         [[nodiscard]] auto fullscreen() const noexcept -> bool;
 
-        auto setKeyRepeatEnabled(bool enabled) noexcept -> void;
+        auto               setKeyRepeatEnabled(bool enabled) noexcept -> void;
         [[nodiscard]] auto keyRepeatEnabled() const noexcept -> bool;
 
         auto setVirtualKeyboardVisible(bool visible) noexcept -> void;
 
-        auto setMousePosition(const core::math::Vector2I& position) noexcept -> void;
+        auto        setMousePosition(const core::math::Vector2I& position) noexcept -> void;
         static auto setMousePositionOnDesktop(WM wm, const core::math::Vector2U& position) noexcept
             -> void;
 
@@ -102,10 +102,10 @@ namespace stormkit::wsi::linux {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline WindowImpl::WindowImpl(WM wm,
-                                  std::string title,
+    inline WindowImpl::WindowImpl(WM                         wm,
+                                  std::string                title,
                                   const core::math::ExtentU& extent,
-                                  WindowStyle style)
+                                  WindowStyle                style)
         : m_wm { wm } {
         if (m_wm == WM::X11) m_impl = x11::WindowImpl { std::move(title), extent, style };
         else if (m_wm == WM::Wayland)
@@ -122,9 +122,9 @@ namespace stormkit::wsi::linux {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto WindowImpl::create(std::string title,
+    inline auto WindowImpl::create(std::string                title,
                                    const core::math::ExtentU& extent,
-                                   WindowStyle style) -> void {
+                                   WindowStyle                style) -> void {
         switch (m_wm) {
             CASE_DO(WM::X11, x11, create(std::move(title), extent, style));
             CASE_DO(WM::Wayland, wayland, create(std::move(title), extent, style));
@@ -402,7 +402,7 @@ namespace stormkit::wsi::linux {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto WindowImpl::setMousePositionOnDesktop(WM wm,
+    inline auto WindowImpl::setMousePositionOnDesktop(WM                          wm,
                                                       const core::math::Vector2U& position) noexcept
         -> void {
         switch (wm) {

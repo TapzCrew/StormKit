@@ -97,7 +97,7 @@ namespace stormkit::gpu {
         }();
 
         const auto queues = [&] {
-            auto q = std::vector<const Queue_ *> {};
+            auto q = std::vector<const Queue_*> {};
             q.reserve(3);
 
             if (raster_queue.id) q.push_back(&raster_queue);
@@ -131,10 +131,9 @@ namespace stormkit::gpu {
         const auto device_extensions =
             m_physical_device->vkHandle().enumerateDeviceExtensionProperties();
 
-        device_logger.dlog("Device extensions -----------");
-        for (const auto& ext : device_extensions)
-            device_logger.dlog("{}", std::string_view { ext.extensionName });
-        device_logger.dlog("-------------------------------");
+        device_logger.dlog("Device extensions: {}", device_extensions | std::views::transform([](auto&& ext) {
+                                     return std::string_view { ext.extensionName };
+                                 }));
 
         const auto swapchain_available = [&] {
             for (const auto& ext : SWAPCHAIN_EXTENSIONS) {
@@ -144,8 +143,6 @@ namespace stormkit::gpu {
                     return false;
                 }
             }
-
-            device_logger.ilog("Swapchain supported !");
 
             return true;
         }();
@@ -158,8 +155,6 @@ namespace stormkit::gpu {
                     return false;
                 }
             }
-
-            device_logger.ilog("Raytracing supported !");
 
             return true;
         }();
@@ -179,11 +174,11 @@ namespace stormkit::gpu {
         const auto acceleration_feature = vk::PhysicalDeviceAccelerationStructureFeaturesKHR {};
         const auto rt_pipeline_feature =
             vk::PhysicalDeviceRayTracingPipelineFeaturesKHR {}.setPNext(
-                std::bit_cast<void *>(&acceleration_feature));
+                std::bit_cast<void*>(&acceleration_feature));
 
-        const auto next = [&]() -> void * {
+        const auto next = [&]() -> void* {
             if (raytracing_available and info.enable_raytracing)
-                return std::bit_cast<void *>(&rt_pipeline_feature);
+                return std::bit_cast<void*>(&rt_pipeline_feature);
             return nullptr;
         }();
 

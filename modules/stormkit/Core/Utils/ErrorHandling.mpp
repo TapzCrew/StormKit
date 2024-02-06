@@ -14,6 +14,7 @@ import :Meta.Concepts;
 import :Meta.Traits;
 
 import :Utils.Descriptors;
+import :Utils.Stacktrace;
 
 export namespace stormkit::core {
     template<typename T>
@@ -71,14 +72,7 @@ namespace stormkit::core {
                          location.function_name(),
                          message);
 
-            std::println(stderr, "================= CALLSTACK =================");
-
-#if defined(__cpp_lib_stacktrace) and __cpp_lib_stacktrace >= 202011L
-            auto st = std::stacktrace::current();
-            std::println(stderr, "{}", std::to_string(st));
-#else
-            std::println(stderr, "No stacktrace support");
-#endif
+            printStacktrace();
 
             std::terminate();
         };
@@ -102,14 +96,7 @@ namespace stormkit::core {
                          location.function_name(),
                          error);
 
-            std::println(stderr, "================= CALLSTACK =================");
-
-#if defined(__cpp_lib_stacktrace) and __cpp_lib_stacktrace >= 202011L
-            auto st = std::stacktrace::current();
-            std::println(stderr, "{}", std::to_string(st));
-#else
-            std::println(stderr, "No stacktrace support");
-#endif
+            printStacktrace();
 
             std::terminate();
         };
@@ -136,14 +123,7 @@ namespace stormkit::core {
                          message,
                          error);
 
-            std::println(stderr, "================= CALLSTACK =================");
-
-#if defined(__cpp_lib_stacktrace) and __cpp_lib_stacktrace >= 202011L
-            auto st = std::stacktrace::current();
-            std::println(stderr, "{}", std::to_string(st));
-#else
-            std::println(stderr, "No stacktrace support");
-#endif
+            printStacktrace();
 
             std::terminate();
         };
@@ -167,14 +147,7 @@ namespace stormkit::core {
                          location.function_name(),
                          std::forward<decltype(error)>(error));
 
-            std::println(stderr, "================= CALLSTACK =================");
-
-#if defined(__cpp_lib_stacktrace) and __cpp_lib_stacktrace >= 202011L
-            auto st = std::stacktrace::current();
-            std::println(stderr, "{}", std::to_string(st));
-#else
-            std::println(stderr, "No stacktrace support");
-#endif
+            printStacktrace();
 
             std::terminate();
         };

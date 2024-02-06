@@ -10,7 +10,6 @@ export module stormkit.Core:Parallelism.ThreadUtils;
 
 import std;
 
-
 export namespace stormkit::core {
     STORMKIT_API auto setCurrentThreadName(std::string_view name) -> void;
     STORMKIT_API auto setThreadName(std::thread& thread, std::string_view name) -> void;

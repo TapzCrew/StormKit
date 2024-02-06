@@ -12,7 +12,6 @@ export module stormkit.Wsi:Win32.WindowImpl;
 
 import std;
 
-
 import stormkit.Core;
 
 import :Types;
@@ -450,7 +449,7 @@ namespace stormkit::wsi::win32 {
                      LPARAM                  data) -> BOOL {
         if (_monitor == nullptr) return TRUE;
 
-        auto& monitors = *reinterpret_cast<std::vector<Monitor> *>(data);
+        auto& monitors = *reinterpret_cast<std::vector<Monitor>*>(data);
 
         auto monitor_info = MONITORINFOEX {};
         ZeroMemory(&monitor_info, sizeof(MONITORINFOEX));
@@ -495,13 +494,13 @@ namespace stormkit::wsi::win32 {
     auto WindowImpl::globalOnEvent(HWND handle, UINT message, WPARAM w_param, LPARAM l_param)
         -> LRESULT {
         if (message == WM_CREATE) {
-            auto lp_create_params = reinterpret_cast<CREATESTRUCT *>(l_param)->lpCreateParams;
+            auto lp_create_params = reinterpret_cast<CREATESTRUCT*>(l_param)->lpCreateParams;
 
             SetWindowLongPtrW(handle, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(lp_create_params));
         }
 
         auto window = handle
-                          ? reinterpret_cast<WindowImpl *>(GetWindowLongPtrW(handle, GWLP_USERDATA))
+                          ? reinterpret_cast<WindowImpl*>(GetWindowLongPtrW(handle, GWLP_USERDATA))
                           : nullptr;
         if (window) window->processEvents(message, w_param, l_param);
 

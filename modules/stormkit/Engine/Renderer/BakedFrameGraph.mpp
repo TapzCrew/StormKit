@@ -26,11 +26,11 @@ export namespace stormkit::engine {
                 gpu::CommandBuffer cmb;
 
                 std::vector<gpu::ClearValue> clear_values = {};
-                gpu::RenderPass        renderpass;
-                gpu::FrameBuffer       framebuffer;
+                gpu::RenderPass              renderpass;
+                gpu::FrameBuffer             framebuffer;
             };
 
-            std::vector<Task>                tasks;
+            std::vector<Task>           tasks;
             std::vector<gpu::Image>     images      = {};
             std::vector<gpu::ImageView> image_views = {};
             std::vector<gpu::Buffer>    buffers     = {};
@@ -44,9 +44,10 @@ export namespace stormkit::engine {
 
       public:
         struct Frame {};
+
         BakedFrameGraph(const FrameGraphBuilder& builder,
-                        Data                  && data,
-                        BakedFrameGraph         *old = nullptr);
+                        Data&&                   data,
+                        BakedFrameGraph*         old = nullptr);
         ~BakedFrameGraph();
 
         BakedFrameGraph(const BakedFrameGraph&)                    = delete;
@@ -60,9 +61,9 @@ export namespace stormkit::engine {
         auto setBackbuffer(gpu::ImageView& backbuffer) -> void;
 
       private:
-        const FrameGraphBuilder *m_builder = nullptr;
+        const FrameGraphBuilder* m_builder = nullptr;
 
-        gpu::ImageView *m_backbuffer = nullptr;
+        gpu::ImageView* m_backbuffer = nullptr;
 
         Data m_data;
 

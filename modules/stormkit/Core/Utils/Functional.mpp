@@ -24,11 +24,12 @@ export namespace stormkit::core {
                std::invocable auto&& false_) noexcept -> decltype(auto);
 
     template<typename T, typename U>
+        requires(not IsArithmetic<T> and not IsArithmetic<U>)
     [[nodiscard]] constexpr auto isEqual(const T& a, const U& b) noexcept -> bool;
 
     template<typename Func, typename... Args>
     // requires(std::invocable<Func, Args...>)
-    [[nodiscard]] constexpr auto toUnary(Func&& func, Args&&...args) noexcept -> decltype(auto);
+    [[nodiscard]] constexpr auto toUnary(Func&& func, Args&&... args) noexcept -> decltype(auto);
 } // namespace stormkit::core
 
 ////////////////////////////////////////////////////////////////////
@@ -60,6 +61,7 @@ namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
     template<typename T, typename U>
+        requires(not IsArithmetic<T> and not IsArithmetic<U>)
     STORMKIT_FORCE_INLINE constexpr auto isEqual(const T& a, const U& b) noexcept -> bool {
         return a == b;
     }
@@ -69,7 +71,7 @@ namespace stormkit::core {
     template<typename Func, typename... Args>
     // requires(std::invocable<Func, Args...>)
     STORMKIT_FORCE_INLINE constexpr auto toUnary(Func&& func,
-                                                 Args&&...args) noexcept -> decltype(auto) {
+                                                 Args&&... args) noexcept -> decltype(auto) {
         return [_func = std::forward<Func>(func), ... _args = std::forward<Args>(args)](
                    auto&& first) noexcept(noexcept(func(first, std::forward<Args>(args)...))) {
             return _func(std::forward<decltype(first)>(first), std::forward<Args>(_args)...);

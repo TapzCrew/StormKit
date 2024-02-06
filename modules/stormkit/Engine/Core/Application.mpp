@@ -92,15 +92,15 @@ namespace stormkit::engine {
 
     ////////////////////////////////////////
     ////////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto
-        Application::operator=(Application&&) noexcept -> Application& = default;
+    STORMKIT_FORCE_INLINE auto Application::operator=(Application&&) noexcept
+        -> Application& = default;
 
     ////////////////////////////////////////
     ////////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto
-        Application::create(std::string_view           application_name,
-                            const core::math::ExtentU& window_extent,
-                            std::string window_title) noexcept -> Expected<Application> try {
+    STORMKIT_FORCE_INLINE auto Application::create(std::string_view           application_name,
+                                                   const core::math::ExtentU& window_extent,
+                                                   std::string                window_title) noexcept
+        -> Expected<Application> try {
         return Application { application_name,
                              window_extent,
                              std::move(window_title),
@@ -133,8 +133,8 @@ namespace stormkit::engine {
 
     ////////////////////////////////////////
     ////////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto
-        Application::eventHandler(this auto& self) noexcept -> decltype(auto) {
+    STORMKIT_FORCE_INLINE auto Application::eventHandler(this auto& self) noexcept
+        -> decltype(auto) {
         return self.m_event_handler.get();
     }
 

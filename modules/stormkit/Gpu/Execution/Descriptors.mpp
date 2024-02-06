@@ -12,7 +12,6 @@ export module stormkit.Gpu:Execution.Descriptors;
 
 import std;
 
-
 import stormkit.Core;
 
 import :Core;
@@ -68,9 +67,9 @@ export {
           private:
             using Deleter = std::function<void(vk::raii::DescriptorSet&)>;
 
-            DescriptorSet(const DescriptorPool      & pool,
+            DescriptorSet(const DescriptorPool&       pool,
                           std::vector<DescriptorType> type,
-                          vk::raii::DescriptorSet  && sets,
+                          vk::raii::DescriptorSet&&   sets,
                           Deleter                     deleter);
 
             std::vector<DescriptorType> m_types;
@@ -94,10 +93,10 @@ export {
           public:
             static constexpr auto DEBUG_TYPE = DebugObjectType::Descriptor_Set_Layout;
 
-            DescriptorSetLayout(const Device                            & device,
+            DescriptorSetLayout(const Device&                             device,
                                 std::vector<DescriptorSetLayoutBinding>&& bindings,
                                 Tag);
-            DescriptorSetLayout(const Device                              & device,
+            DescriptorSetLayout(const Device&                               device,
                                 std::span<const DescriptorSetLayoutBinding> bindings,
                                 Tag);
             ~DescriptorSetLayout();
@@ -136,7 +135,7 @@ export {
                 core::UInt32   descriptor_count;
             };
 
-            DescriptorPool(const Device        & device,
+            DescriptorPool(const Device&         device,
                            std::span<const Size> sizes,
                            core::UInt32          max_sets,
                            Tag);
@@ -148,12 +147,12 @@ export {
             DescriptorPool(DescriptorPool&&) noexcept;
             auto operator=(DescriptorPool&&) noexcept -> DescriptorPool&;
 
-            [[nodiscard]] static auto create(const Device        & device,
+            [[nodiscard]] static auto create(const Device&         device,
                                              std::span<const Size> sizes,
                                              core::UInt32          max_sets) noexcept
                 -> Expected<DescriptorPool>;
 
-            [[nodiscard]] static auto allocate(const Device        & device,
+            [[nodiscard]] static auto allocate(const Device&         device,
                                                std::span<const Size> sizes,
                                                core::UInt32          max_sets) noexcept
                 -> Expected<std::unique_ptr<DescriptorPool>>;
@@ -218,9 +217,9 @@ export {
 namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE DescriptorSet::DescriptorSet(const DescriptorPool      & pool,
+    STORMKIT_FORCE_INLINE DescriptorSet::DescriptorSet(const DescriptorPool&       pool,
                                                        std::vector<DescriptorType> type,
-                                                       vk::raii::DescriptorSet  && set,
+                                                       vk::raii::DescriptorSet&&   set,
                                                        Deleter                     deleter)
         : DeviceObject { pool.device() }, DescriptorPoolObject { pool },
           m_types { std::move(type) }, m_vk_descriptor_set { std::move(set) },
@@ -303,7 +302,9 @@ namespace stormkit::gpu {
 
         const auto create_info = vk::DescriptorSetLayoutCreateInfo {}.setBindings(vk_bindings);
 
-        this->device().vkHandle().createDescriptorSetLayout(create_info)
+        this->device()
+            .vkHandle()
+            .createDescriptorSetLayout(create_info)
             .transform(core::monadic::set(m_vk_descriptor_set_layout))
             .transform_error(core::monadic::map(core::monadic::as<Result>(), core::throwError()));
     }
@@ -311,7 +312,7 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE
-    DescriptorSetLayout::DescriptorSetLayout(const Device                            & device,
+    DescriptorSetLayout::DescriptorSetLayout(const Device&                             device,
                                              std::vector<DescriptorSetLayoutBinding>&& bindings,
                                              Tag)
         : DescriptorSetLayout { device } {
@@ -321,7 +322,7 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE
-    DescriptorSetLayout::DescriptorSetLayout(const Device                              & device,
+    DescriptorSetLayout::DescriptorSetLayout(const Device&                               device,
                                              std::span<const DescriptorSetLayoutBinding> bindings,
                                              Tag)
         : DescriptorSetLayout { device } {
@@ -372,7 +373,7 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE DescriptorPool::DescriptorPool(const Device        & device,
+    STORMKIT_FORCE_INLINE DescriptorPool::DescriptorPool(const Device&         device,
                                                          std::span<const Size> sizes,
                                                          core::UInt32          max_sets,
                                                          Tag)
@@ -389,7 +390,9 @@ namespace stormkit::gpu {
                                      .setMaxSets(max_sets)
                                      .setPoolSizes(pool_sizes);
 
-        this->device().vkHandle().createDescriptorPool(create_info)
+        this->device()
+            .vkHandle()
+            .createDescriptorPool(create_info)
             .transform(core::monadic::set(m_vk_descriptor_pool))
             .transform_error(core::monadic::map(core::monadic::as<Result>(), core::throwError()));
     }
@@ -409,7 +412,7 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto DescriptorPool::create(const Device        & device,
+    STORMKIT_FORCE_INLINE auto DescriptorPool::create(const Device&         device,
                                                       std::span<const Size> extents,
                                                       core::UInt32          max_sets) noexcept
         -> Expected<DescriptorPool> try {
@@ -418,7 +421,7 @@ namespace stormkit::gpu {
 
     ////////////////////////////////////p/
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto DescriptorPool::allocate(const Device        & device,
+    STORMKIT_FORCE_INLINE auto DescriptorPool::allocate(const Device&         device,
                                                         std::span<const Size> extents,
                                                         core::UInt32          max_sets) noexcept
         -> Expected<std::unique_ptr<DescriptorPool>> try {

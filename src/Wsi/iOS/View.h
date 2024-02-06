@@ -5,11 +5,11 @@
 #ifndef VIEW_H
 #define VIEW_H
 
-#import<UIKit/UIView.h>
+#import <UIKit/UIView.h>
 
-@interface View : UIView
+@interface View: UIView
 
-- (id)initWithFrame: (CGRect)frame withScaleFactor: (CGFloat)factor;
+- (id)initWithFrame:(CGRect)frame withScaleFactor:(CGFloat)factor;
 
 @end
 

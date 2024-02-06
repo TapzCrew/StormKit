@@ -13,7 +13,6 @@ export module stormkit.Core:Utils.DynamicLoaderImpl;
 
 import std;
 
-
 import :Utils.Expected;
 import :Utils.Numerics;
 import :Utils.AsCast;
@@ -27,11 +26,11 @@ export namespace stormkit::core {
 
         /////////////////////////////////////
         /////////////////////////////////////
-        constexpr DynamicLoaderImpl() noexcept = default;
+        STORMKIT_FORCE_INLINE constexpr DynamicLoaderImpl() noexcept = default;
 
         /////////////////////////////////////
         /////////////////////////////////////
-        ~DynamicLoaderImpl() noexcept {
+        STORMKIT_FORCE_INLINE ~DynamicLoaderImpl() noexcept {
             if (m_library_handle) [[likely]]
                 m_library_handle = nullptr;
         }
@@ -46,12 +45,13 @@ export namespace stormkit::core {
 
         /////////////////////////////////////
         /////////////////////////////////////
-        DynamicLoaderImpl(DynamicLoaderImpl&& other) noexcept
+        STORMKIT_FORCE_INLINE DynamicLoaderImpl(DynamicLoaderImpl&& other) noexcept
             : m_library_handle { std::exchange(other.m_library_handle, nullptr) } {}
 
         /////////////////////////////////////
         /////////////////////////////////////
-        STORMKIT_FORCE_INLINE auto operator=(DynamicLoaderImpl&& other) noexcept -> DynamicLoaderImpl& {
+        STORMKIT_FORCE_INLINE auto operator=(DynamicLoaderImpl&& other) noexcept
+            -> DynamicLoaderImpl& {
             if (&other == this) [[unlikely]]
                 return *this;
 
@@ -74,7 +74,7 @@ export namespace stormkit::core {
 
         /////////////////////////////////////
         /////////////////////////////////////
-        STORMKIT_FORCE_INLINE auto doGetFunc(std::string_view name) const -> Expected<void *> {
+        STORMKIT_FORCE_INLINE auto doGetFunc(std::string_view name) const -> Expected<void*> {
             core::expects(m_library_handle);
             auto func = ::dlsym(m_library_handle, std::data(name));
 
@@ -86,6 +86,6 @@ export namespace stormkit::core {
         }
 
       private:
-        void *m_library_handle = nullptr;
+        void* m_library_handle = nullptr;
     };
 } // namespace stormkit::core

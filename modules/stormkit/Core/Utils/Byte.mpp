@@ -78,7 +78,7 @@ namespace stormkit::core {
                 return sizeof(ValueType);
         }();
 
-        return std::span<ByteType> { std::bit_cast<ByteType *>(ptr), size * byte_count };
+        return std::span<ByteType> { std::bit_cast<ByteType*>(ptr), size * byte_count };
     }
 
     /////////////////////////////////////

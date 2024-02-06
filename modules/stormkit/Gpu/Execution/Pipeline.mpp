@@ -36,9 +36,9 @@ export namespace stormkit::gpu {
         PipelineCache(PipelineCache&&) noexcept;
         auto operator=(PipelineCache&&) noexcept -> PipelineCache&;
 
-        [[nodiscard]] static auto
-                                  create(const Device&         device,
-                                         std::filesystem::path cache_path) noexcept -> Expected<PipelineCache>;
+        [[nodiscard]] static auto create(const Device&         device,
+                                         std::filesystem::path cache_path) noexcept
+            -> Expected<PipelineCache>;
         [[nodiscard]] static auto allocate(const Device&         device,
                                            std::filesystem::path cache_path) noexcept
             -> Expected<std::unique_ptr<PipelineCache>>;
@@ -91,9 +91,9 @@ export namespace stormkit::gpu {
         PipelineLayout(PipelineLayout&&) noexcept;
         auto operator=(PipelineLayout&&) noexcept -> PipelineLayout&;
 
-        [[nodiscard]] static auto
-                                  create(const Device&               device,
-                                         const RasterPipelineLayout& layout) noexcept -> Expected<PipelineLayout>;
+        [[nodiscard]] static auto create(const Device&               device,
+                                         const RasterPipelineLayout& layout) noexcept
+            -> Expected<PipelineLayout>;
         [[nodiscard]] static auto allocate(const Device&               device,
                                            const RasterPipelineLayout& layout) noexcept
             -> Expected<std::unique_ptr<PipelineLayout>>;
@@ -197,8 +197,8 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto
-        PipelineCache::operator=(PipelineCache&& other) noexcept -> PipelineCache& = default;
+    STORMKIT_FORCE_INLINE auto PipelineCache::operator=(PipelineCache&& other) noexcept
+        -> PipelineCache& = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
@@ -218,8 +218,8 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto
-        PipelineCache::vkHandle() const noexcept -> const vk::raii::PipelineCache& {
+    STORMKIT_FORCE_INLINE auto PipelineCache::vkHandle() const noexcept
+        -> const vk::raii::PipelineCache& {
         return m_vk_pipeline_cache;
     }
 
@@ -264,8 +264,8 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto
-        PipelineLayout::operator=(PipelineLayout&& other) noexcept -> PipelineLayout& = default;
+    STORMKIT_FORCE_INLINE auto PipelineLayout::operator=(PipelineLayout&& other) noexcept
+        -> PipelineLayout& = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
@@ -285,8 +285,8 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto
-        PipelineLayout::vkHandle() const noexcept -> const vk::raii::PipelineLayout& {
+    STORMKIT_FORCE_INLINE auto PipelineLayout::vkHandle() const noexcept
+        -> const vk::raii::PipelineLayout& {
         return m_vk_pipeline_layout;
     }
 
@@ -314,8 +314,8 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto
-        Pipeline::operator=(Pipeline&& other) noexcept -> Pipeline& = default;
+    STORMKIT_FORCE_INLINE auto Pipeline::operator=(Pipeline&& other) noexcept
+        -> Pipeline& = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
@@ -354,8 +354,8 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto
-        Pipeline::rasterState() const noexcept -> const RasterPipelineState& {
+    STORMKIT_FORCE_INLINE auto Pipeline::rasterState() const noexcept
+        -> const RasterPipelineState& {
         core::expects(core::is<RasterPipelineState>(m_state));
         return core::as<RasterPipelineState>(m_state);
     }

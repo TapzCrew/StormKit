@@ -11,25 +11,27 @@ import stormkit.Wsi;
 
 import App;
 
-#include <stormkit/Main/MainMacro.hpp>
 #include <stormkit/Core/PlatformMacro.hpp>
+#include <stormkit/Main/MainMacro.hpp>
 
 ////////////////////////////////////////
 ////////////////////////////////////////
 auto main(std::span<const std::string_view> args) -> int {
     using namespace stormkit;
 
+    stormkit::core::printStacktrace();
+
     wsi::parseArgs(args);
     // core::setupSignalHandler();
 
     auto logger = log::Logger::createLoggerInstance<log::ConsoleLogger>();
-    logger.ilog("Using StormKit {}.{}.{} (branch: {}, commit_hash: {}), built with {}",
-         core::STORMKIT_MAJOR_VERSION,
-         core::STORMKIT_MINOR_VERSION,
-         core::STORMKIT_PATCH_VERSION,
-         core::STORMKIT_GIT_BRANCH,
-         core::STORMKIT_GIT_COMMIT_HASH,
-         STORMKIT_COMPILER);
+    logger.ilog("Using StormKit {}.{}.{}\n    branch: {}\n    commit_hash: {}\n    built with {}",
+                core::STORMKIT_MAJOR_VERSION,
+                core::STORMKIT_MINOR_VERSION,
+                core::STORMKIT_PATCH_VERSION,
+                core::STORMKIT_GIT_BRANCH,
+                core::STORMKIT_GIT_COMMIT_HASH,
+                STORMKIT_COMPILER);
 
     try {
         auto app = App {};

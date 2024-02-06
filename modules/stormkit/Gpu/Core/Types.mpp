@@ -707,6 +707,44 @@ export {
                 core::narrow<core::UInt8>(vk::GeometryFlagBitsKHR::eNoDuplicateAnyHitInvocation)
         };
 
+        enum class ColorSpace : core::UInt32 {
+            SRGB_NonLinear = core::narrow<core::UInt32>(vk::ColorSpaceKHR::eSrgbNonlinear),
+            Display_P3_NonLinear =
+                core::narrow<core::UInt32>(vk::ColorSpaceKHR::eDisplayP3NonlinearEXT),
+            // COLOR_SPACE_EXTENDED_SRGB_LINEAR_EXT    = 1000104002,
+            // COLOR_SPACE_DISPLAY_P3_LINEAR_EXT       = 1000104003,
+            // COLOR_SPACE_DCI_P3_NONLINEAR_EXT        = 1000104004,
+            // COLOR_SPACE_BT709_LINEAR_EXT            = 1000104005,
+            // COLOR_SPACE_BT709_NONLINEAR_EXT         = 1000104006,
+            // COLOR_SPACE_BT2020_LINEAR_EXT           = 1000104007,
+            // COLOR_SPACE_HDR10_ST2084_EXT            = 1000104008,
+            // COLOR_SPACE_DOLBYVISION_EXT             = 1000104009,
+            // COLOR_SPACE_HDR10_HLG_EXT               = 1000104010,
+            // COLOR_SPACE_ADOBERGB_LINEAR_EXT         = 1000104011,
+            // COLOR_SPACE_ADOBERGB_NONLINEAR_EXT      = 1000104012,
+            // COLOR_SPACE_PASS_THROUGH_EXT            = 1000104013,
+            // COLOR_SPACE_EXTENDED_SRGB_NONLINEAR_EXT = 1000104014,
+            // COLOR_SPACE_DISPLAY_NATIVE_AMD          = 1000213000,
+            // COLORSPACE_SRGB_NONLINEAR_KHR           = COLOR_SPACE_SRGB_NONLINEAR_KHR,
+            // COLOR_SPACE_DCI_P3_LINEAR_EXT           = COLOR_SPACE_DISPLAY_P3_LINEAR_EXT,
+        };
+
+        enum class PresentMode : core::UInt32 {
+            Immediate    = core::narrow<core::UInt32>(vk::PresentModeKHR::eImmediate),
+            Mailbox      = core::narrow<core::UInt32>(vk::PresentModeKHR::eMailbox),
+            Fifo         = core::narrow<core::UInt32>(vk::PresentModeKHR::eFifo),
+            Fifo_Relaxed = core::narrow<core::UInt32>(vk::PresentModeKHR::eFifoRelaxed),
+            Shared_Demand_Refresh =
+                core::narrow<core::UInt32>(vk::PresentModeKHR::eSharedDemandRefresh),
+            Shared_Continuous_Refresh =
+                core::narrow<core::UInt32>(vk::PresentModeKHR::eSharedContinuousRefresh),
+        };
+
+        struct SurfaceFormat {
+            PixelFormat format;
+            ColorSpace  color_space;
+        };
+
         struct MemoryBarrier {
             AccessFlag src;
             AccessFlag dst;

@@ -12,7 +12,6 @@ import std;
 
 import stormkit.Core;
 
-
 export namespace stormkit::image {
     class STORMKIT_API Image {
       public:
@@ -105,13 +104,13 @@ export namespace stormkit::image {
         };
 
         struct ImageData {
-            core::math::ExtentU extent     = { 0u, 0u, 0u };
-            core::UInt32 channel_count     = 0u;
-            core::UInt32 bytes_per_channel = 0u;
-            core::UInt32 layers            = 1u;
-            core::UInt32 faces             = 1u;
-            core::UInt32 mip_levels        = 1u;
-            Format format                  = Format::Undefined;
+            core::math::ExtentU extent            = { 0u, 0u, 0u };
+            core::UInt32        channel_count     = 0u;
+            core::UInt32        bytes_per_channel = 0u;
+            core::UInt32        layers            = 1u;
+            core::UInt32        faces             = 1u;
+            core::UInt32        mip_levels        = 1u;
+            Format              format            = Format::Undefined;
 
             std::vector<core::Byte> data = {};
         };
@@ -130,17 +129,17 @@ export namespace stormkit::image {
         auto operator=(Image&& rhs) noexcept -> Image&;
 
         [[nodiscard]] auto loadFromFile(std::filesystem::path filepath,
-                                        Codec codec = Codec::Autodetect) noexcept
+                                        Codec                 codec = Codec::Autodetect) noexcept
             -> std::expected<void, Error>;
         [[nodiscard]] auto loadFromMemory(std::span<const core::Byte> data,
                                           Codec codec = Codec::Autodetect) noexcept
             -> std::expected<void, Error>;
         [[nodiscard]] auto saveToFile(std::filesystem::path filename,
-                                      Codec codec,
-                                      CodecArgs args = CodecArgs::Binary) const noexcept
+                                      Codec                 codec,
+                                      CodecArgs             args = CodecArgs::Binary) const noexcept
             -> std::expected<void, Error>;
 
-        [[nodiscard]] auto saveToMemory(Codec codec,
+        [[nodiscard]] auto saveToMemory(Codec     codec,
                                         CodecArgs args = CodecArgs::Binary) const noexcept
             -> std::expected<std::vector<core::Byte>, Error>;
 
@@ -156,22 +155,22 @@ export namespace stormkit::image {
         [[nodiscard]] auto rotate270() const noexcept -> Image;
 
         [[nodiscard]] auto pixel(core::RangeExtent id,
-                                 core::UInt32 layer = 0u,
-                                 core::UInt32 face  = 0u,
-                                 core::UInt32 level = 0u) noexcept -> std::span<core::Byte>;
+                                 core::UInt32      layer = 0u,
+                                 core::UInt32      face  = 0u,
+                                 core::UInt32      level = 0u) noexcept -> std::span<core::Byte>;
         [[nodiscard]] auto pixel(core::RangeExtent id,
-                                 core::UInt32 layer = 0u,
-                                 core::UInt32 face  = 0u,
-                                 core::UInt32 level = 0u) const noexcept
+                                 core::UInt32      layer = 0u,
+                                 core::UInt32      face  = 0u,
+                                 core::UInt32      level = 0u) const noexcept
             -> std::span<const core::Byte>;
         [[nodiscard]] auto pixel(core::math::Vector3U position,
-                                 core::UInt32 layer = 0u,
-                                 core::UInt32 face  = 0u,
-                                 core::UInt32 level = 0u) noexcept -> std::span<core::Byte>;
+                                 core::UInt32         layer = 0u,
+                                 core::UInt32         face  = 0u,
+                                 core::UInt32         level = 0u) noexcept -> std::span<core::Byte>;
         [[nodiscard]] auto pixel(core::math::Vector3U position,
-                                 core::UInt32 layer = 0u,
-                                 core::UInt32 face  = 0u,
-                                 core::UInt32 level = 0u) const noexcept
+                                 core::UInt32         layer = 0u,
+                                 core::UInt32         face  = 0u,
+                                 core::UInt32         level = 0u) const noexcept
             -> std::span<const core::Byte>;
 
         [[nodiscard]] auto extent(core::UInt32 level = 0u) const noexcept -> core::math::ExtentU;
@@ -243,9 +242,9 @@ namespace stormkit::image {
     /////////////////////////////////////
     /////////////////////////////////////
     inline auto Image::pixel(core::RangeExtent index,
-                             core::UInt32 layer,
-                             core::UInt32 face,
-                             core::UInt32 level) noexcept -> std::span<core::Byte> {
+                             core::UInt32      layer,
+                             core::UInt32      face,
+                             core::UInt32      level) noexcept -> std::span<core::Byte> {
         core::expects(m_data.mip_levels > level);
         core::expects(m_data.faces > face);
         core::expects(m_data.layers > layer);
@@ -262,8 +261,8 @@ namespace stormkit::image {
     /////////////////////////////////////
     /////////////////////////////////////
     inline auto Image::pixel(core::RangeExtent index,
-                             core::UInt32 layer,
-                             core::UInt32 face,
+                             core::UInt32      layer,
+                             core::UInt32      face,
                              core::UInt32 level) const noexcept -> std::span<const core::Byte> {
         core::expects(m_data.mip_levels > level);
         core::expects(m_data.faces > face);
@@ -282,9 +281,9 @@ namespace stormkit::image {
     /////////////////////////////////////
     /////////////////////////////////////
     inline auto Image::pixel(core::math::Vector3U position,
-                             core::UInt32 layer,
-                             core::UInt32 face,
-                             core::UInt32 level) noexcept -> std::span<core::Byte> {
+                             core::UInt32         layer,
+                             core::UInt32         face,
+                             core::UInt32         level) noexcept -> std::span<core::Byte> {
         const auto mip_extent = extent(level);
 
         const auto id = position.x + (position.y * mip_extent.width) +
@@ -296,8 +295,8 @@ namespace stormkit::image {
     /////////////////////////////////////
     /////////////////////////////////////
     inline auto Image::pixel(core::math::Vector3U position,
-                             core::UInt32 layer,
-                             core::UInt32 face,
+                             core::UInt32         layer,
+                             core::UInt32         face,
                              core::UInt32 level) const noexcept -> std::span<const core::Byte> {
         const auto mip_extent = extent(level);
 
@@ -364,7 +363,7 @@ namespace stormkit::image {
     inline auto Image::size(
         [[maybe_unused]] core::UInt32 layer, // TODO Use layer and face to get correct size
         [[maybe_unused]] core::UInt32 face,
-        core::UInt32 level) const noexcept -> core::RangeExtent {
+        core::UInt32                  level) const noexcept -> core::RangeExtent {
         core::expects(m_data.mip_levels > level);
         core::expects(m_data.faces > face);
         core::expects(m_data.layers > layer);
