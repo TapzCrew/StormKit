@@ -16,13 +16,42 @@ import stormkit.Gpu;
 
 export {
     namespace stormkit::engine {
+        class STORMKIT_API RenderSurface {
+            struct Tag {};
+
+          public:
+            RenderSurface(const gpu::Instance& instance,
+                          const gpu::Device&   device,
+                          const wsi::Window&   window,
+                          Tag);
+            ~RenderSurface();
+
+            RenderSurface(const RenderSurface&)                    = delete;
+            auto operator=(const RenderSurface&) -> RenderSurface& = delete;
+
+            RenderSurface(RenderSurface&&) noexcept;
+            auto operator=(RenderSurface&&) noexcept -> RenderSurface&;
+
+            static auto createFromWindow(const gpu::Instance& instance,
+                                         const gpu::Device&   device,
+                                         const wsi::Window&   window) noexcept
+                -> gpu::Expected<RenderSurface>;
+            static auto allocateFromWindow(const gpu::Instance& instance,
+                                           const gpu::Device&   device,
+                                           const wsi::Window&   window) noexcept
+                -> gpu::Expected<std::unique_ptr<RenderSurface>>;
+
+          private:
+            core::DeferInit<gpu::Surface> m_surface;
+        };
+
         class STORMKIT_API Renderer final {
-            struct PrivateTag {};
+            struct Tag {};
 
           public:
             Renderer(std::string_view                                 application_name,
                      std::optional<core::NakedRef<const wsi::Window>> window,
-                     PrivateTag);
+                     Tag);
             ~Renderer();
 
             Renderer(const Renderer&)                    = delete;
@@ -50,13 +79,14 @@ export {
 
             auto threadLoop(std::stop_token) noexcept -> void;
 
-            bool                            m_validation_layers_enabled = false;
-            core::DeferInit<gpu::Instance>  m_instance;
-            core::DeferInit<gpu::Device>    m_device;
-            core::DeferInit<gpu::Swapchain> m_swapchain;
+            bool                           m_validation_layers_enabled = false;
+            core::DeferInit<gpu::Instance> m_instance;
+            core::DeferInit<gpu::Device>   m_device;
+            core::DeferInit<RenderSurface> m_surface;
 
             std::jthread m_render_thread;
         };
+
     } // namespace stormkit::engine
 }
 
@@ -70,7 +100,7 @@ namespace stormkit::engine {
     STORMKIT_FORCE_INLINE
     Renderer::Renderer(std::string_view                                 application_name,
                        std::optional<core::NakedRef<const wsi::Window>> window,
-                       PrivateTag) {
+                       Tag) {
         doInit(application_name, std::move(window)).transform_error(core::throwError());
     }
 
@@ -92,7 +122,7 @@ namespace stormkit::engine {
         Renderer::create(std::string_view                                 application_name,
                          std::optional<core::NakedRef<const wsi::Window>> window) noexcept
         -> gpu::Expected<Renderer> try {
-        return Renderer { application_name, std::move(window), PrivateTag {} };
+        return Renderer { application_name, std::move(window), Tag {} };
     } catch (const gpu::Result& err) { return std::unexpected { err }; }
 
     /////////////////////////////////////
@@ -101,7 +131,7 @@ namespace stormkit::engine {
         Renderer::allocate(std::string_view                                 application_name,
                            std::optional<core::NakedRef<const wsi::Window>> window) noexcept
         -> gpu::Expected<std::unique_ptr<Renderer>> try {
-        return std::make_unique<Renderer>(application_name, std::move(window), PrivateTag {});
+        return std::make_unique<Renderer>(application_name, std::move(window), Tag {});
     } catch (const gpu::Result& err) { return std::unexpected { err }; }
 
     /////////////////////////////////////
@@ -110,4 +140,35 @@ namespace stormkit::engine {
         m_render_thread = std::jthread { std::bind_front(&Renderer::threadLoop, this) };
         core::setThreadName(m_render_thread, "StormKit:RenderThread");
     }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE RenderSurface::~RenderSurface() = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE RenderSurface::RenderSurface(RenderSurface&&) noexcept = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto
+        RenderSurface::operator=(RenderSurface&&) noexcept -> RenderSurface& = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto RenderSurface::createFromWindow(const gpu::Instance& instance,
+                                                               const gpu::Device&   device,
+                                                               const wsi::Window&   window) noexcept
+        -> gpu::Expected<RenderSurface> try {
+        return RenderSurface { instance, device, window, Tag {} };
+    } catch (const gpu::Result& err) { return std::unexpected { err }; }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto RenderSurface::allocateFromWindow(const gpu::Instance& instance,
+                                                                 const gpu::Device&   device,
+                                                                 const wsi::Window& window) noexcept
+        -> gpu::Expected<std::unique_ptr<RenderSurface>> try {
+        return std::make_unique<RenderSurface>(instance, device, window, Tag {});
+    } catch (const gpu::Result& err) { return std::unexpected { err }; }
 } // namespace stormkit::engine
