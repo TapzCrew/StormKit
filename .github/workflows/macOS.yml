@@ -65,8 +65,8 @@ jobs:
         if: ${{ steps.cache_llvm.outputs.cache-hit != 'true' }}
         run: |
           wget 'https://github.com/Arthapz/llvm-patched/raw/main/macOS/llvm-x64.zip'
-          7z x llvm-x64.7z
-          rm llvm-x64.7z
+          7z x llvm-x64.zip
+          rm llvm-x64.zip
 
       - name: Set xmake env
         run: echo "XMAKE_GLOBALDIR=${{ runner.workspace }}/xmake-global" >> $GITHUB_ENV
