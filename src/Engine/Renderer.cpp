@@ -20,14 +20,14 @@ namespace stormkit::engine {
 
     namespace {
         constexpr auto RAYTRACING_EXTENSIONS =
-            std::array { "gpu__ray_tracing_pipeline"sv,   "gpu__acceleration_structure"sv,
-                         "gpu__buffer_device_address"sv,  "gpu__deferred_host_operations"sv,
-                         "gpu_EXT_descriptor_indexing"sv, "gpu__spirv_1_4"sv,
-                         "gpu__shader_float_controls"sv };
+            std::array { "VK_KHR_ray_tracing_pipeline"sv,  "VK_KHR_acceleration_structure"sv,
+                         "VK_KHR_buffer_device_address"sv, "VK_KHR_deferred_host_operations"sv,
+                         "VK_EXT_descriptor_indexing"sv,   "VK_KHR_spirv_1_4"sv,
+                         "VK_KHR_shader_float_controls"sv };
 
-        constexpr auto BASE_EXTENSIONS = std::array { "gpu__maintenance3"sv };
+        constexpr auto BASE_EXTENSIONS = std::array { "VK_KHR_maintenance3"sv };
 
-        constexpr auto SWAPCHAIN_EXTENSIONS = std::array { "gpu__swapchain"sv };
+        constexpr auto SWAPCHAIN_EXTENSIONS = std::array { "VK_KHR_swapchain"sv };
 
         /////////////////////////////////////
         /////////////////////////////////////

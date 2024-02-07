@@ -46,7 +46,7 @@ namespace stormkit::gpu {
 
         inline constexpr auto WSI_SURFACE_EXTENSIONS = std::array {
 #ifdef STORMKIT_OS_WINDOWS
-            "VK_KHR_WIN32_surface"
+            "VK_KHR_win32_surface"
 #elif defined(STORMKIT_OS_LINUX)
             "VK_KHR_xcb_surface",
             "VK_KHR_wayland_surface"

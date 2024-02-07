@@ -9,7 +9,7 @@ modules = {
       end
 
       if not is_plat("windows") and get_config("toolchain") and (get_config("toolchain") == "clang" or get_config("toolchain") == "llvm") then
-        add_packages("libbacktrace", {public = true})
+        add_packages("libbacktrace", { public = true })
       end
 
       set_configdir("$(buildir)/.gens/modules/stormkit/Core")
@@ -139,16 +139,22 @@ modules = {
       "VULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1",
       "VULKAN_HPP_NO_STRUCT_CONSTRUCTORS",
       "VULKAN_HPP_NO_UNION_CONSTRUCTORS",
-      "VULKAN_HPP_STORAGE_SHARED",
       "VULKAN_HPP_NO_EXCEPTIONS",
       "VULKAN_HPP_NO_CONSTRUCTORS"
     },
     custom = function()
+      on_load(function(target)
+        if target:kind() == "shared" then
+          add_defines("defines", "VK_HPP_STORAGE_SHARED", { public = true })
+        else
+          target:add("defines", "VK_HPP_STORAGE_API", { public = true })
+        end
+      end)
       if is_plat("linux") then
-        add_defines("VK_USE_PLATFORM_XCB_KHR", {public = true})
-        add_defines("VK_USE_PLATFORM_WAYLAND_KHR", {public = true})
+        add_defines("VK_USE_PLATFORM_XCB_KHR", { public = true })
+        add_defines("VK_USE_PLATFORM_WAYLAND_KHR", { public = true })
       elseif is_plat("windows") then
-        add_defines("VK_USE_PLATFORM_WIN32_KHR", {public = true})
+        add_defines("VK_USE_PLATFORM_WIN32_KHR", { public = true })
       end
     end,
   },
@@ -176,11 +182,11 @@ includes("xmake/**.lua")
 
 ---------------------------- global rules ----------------------------
 if get_config("vsxmake") then
-    add_rules("plugin.vsxmake.autoupdate")
+  add_rules("plugin.vsxmake.autoupdate")
 end
 
 if get_config("compile_commands") then
-    add_rules("plugin.compile_commands.autoupdate", { outputdir = "build", lsp = "clangd" })
+  add_rules("plugin.compile_commands.autoupdate", { outputdir = "build", lsp = "clangd" })
 end
 
 add_rules(
@@ -199,11 +205,42 @@ if not is_plat("windows") or not is_plat("mingw") then
 end
 
 ---------------------------- global options ----------------------------
-option("examples_engine", { default = false, category = "root menu/others", deps = {"examples"}, after_check = function(option) if option:dep("examples"):enabled() then option:enable(true) end end })
-option("examples_wsi", { default = false, category = "root menu/others", deps = {"examples"}, after_check = function(option) if option:dep("examples"):enabled() then option:enable(true) end end })
-option("examples_log", { default = false, category = "root menu/others", deps = {"examples"}, after_check = function(option) if option:dep("examples"):enabled() then option:enable(true) end end })
-option("examples_entities", { default = false, category = "root menu/others", deps = {"examples"}, after_check = function(option) if option:dep("examples"):enabled() then end end }) --option:enable(true) end end })
-option("examples", { default = false, category = "root menu/others",  })
+option("examples_engine",
+  {
+    default = false,
+    category = "root menu/others",
+    deps = { "examples" },
+    after_check = function(option)
+      if option:dep("examples"):enabled() then
+        option:enable(true)
+      end
+    end
+  })
+option("examples_wsi",
+  {
+    default = false,
+    category = "root menu/others",
+    deps = { "examples" },
+    after_check = function(option)
+      if option:dep("examples"):enabled() then
+        option:enable(true)
+      end
+    end
+  })
+option("examples_log",
+  {
+    default = false,
+    category = "root menu/others",
+    deps = { "examples" },
+    after_check = function(option)
+      if option:dep("examples"):enabled() then
+        option:enable(true)
+      end
+    end
+  })
+option("examples_entities",
+  { default = false, category = "root menu/others", deps = { "examples" }, after_check = function(option) if option:dep("examples"):enabled() then end end }) --option:enable(true) end end })
+option("examples", { default = false, category = "root menu/others", })
 option("applications", { default = false, category = "root menu/others" })
 option("tests", { default = false, category = "root menu/others" })
 
@@ -225,8 +262,8 @@ option("engine", {
   category = "root menu/modules",
   deps = { "log", "entities", "image", "wsi", "gpu" },
 })
-option("compile_commands", { default = false, category = "root menu/support"})
-option("vsxmake", { default = false, category = "root menu/support"})
+option("compile_commands", { default = false, category = "root menu/support" })
+option("vsxmake", { default = false, category = "root menu/support" })
 
 ---------------------------- global config ----------------------------
 set_allowedmodes(allowedmodes)
@@ -470,10 +507,10 @@ end
 
 for name, _ in pairs(modules) do
   if get_config("examples_" .. name) then
-      local example_dir = path.join("examples", name)
-      if os.exists(example_dir) and has_config("" .. name) then
-        includes(path.join(example_dir, "**", "xmake.lua"))
-      end
+    local example_dir = path.join("examples", name)
+    if os.exists(example_dir) and has_config("" .. name) then
+      includes(path.join(example_dir, "**", "xmake.lua"))
+    end
   end
 end
 

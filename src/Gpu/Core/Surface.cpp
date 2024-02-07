@@ -9,6 +9,8 @@ module;
 #if defined(STORMKIT_OS_LINUX)
     #include <wayland-client.h>
     #include <xcb/xcb.h>
+#elif defined(STORMKIT_OS_WINDOWS)
+    #include <windows.h>
 #endif
 
 module stormkit.Gpu;
@@ -27,15 +29,12 @@ namespace stormkit::gpu {
         : InstanceObject { instance } {
 #if defined(STORMKIT_OS_WINDOWS)
         const auto create_surface = [this, &window] {
-            const auto create_info = VkWin32SurfaceCreateInfoKHR {
-                .sType     = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR,
+            const auto create_info = vk::Win32SurfaceCreateInfoKHR {
                 .flags     = {},
                 .hinstance = GetModuleHandleW(nullptr),
-                .hwnd      = reinterpret_cast<HWND>(m_window->nativeHandle())
+                .hwnd      = reinterpret_cast<HWND>(window.nativeHandle())
             };
-
-            CHECK_VK_ERROR(
-                vkCreateWin32SurfaceKHR(this->instance(), &create_info, nullptr, &m_surface));
+            return this->instance().vkHandle().createWin32SurfaceKHR(create_info, nullptr);
         };
 #elif defined(STORMKIT_OS_MACOS)
         const auto create_surface = [this, &window] {
@@ -72,9 +71,8 @@ namespace stormkit::gpu {
             return this->instance().vkHandle().createXcbSurfaceKHR(create_info, nullptr);
         };
 
-        const auto create_surface =
-            [&make_wayland_surface,
-             &make_xcb_surface] noexcept -> core::FunctionRef<VulkanExpected<vk::raii::SurfaceKHR>> {
+        const auto create_surface = [&make_wayland_surface, &make_xcb_surface] noexcept
+            -> core::FunctionRef<VulkanExpected<vk::raii::SurfaceKHR>> {
             const auto is_wayland = std::getenv("WAYLAND_DISPLAY") != nullptr;
 
             if (is_wayland) return make_wayland_surface;
