@@ -7,7 +7,8 @@ module;
 
 #if defined(__cpp_lib_stacktrace) and __cpp_lib_stacktrace >= 202011L
     #define STD_STACKTRACE_SUPPORTED
-#else
+#elif defined(STORMKIT_OS_LINUX)
+    #define BACKTRACE_SUPPORTED
     #include <backtrace-supported.h>
     #include <backtrace.h>
     #include <cxxabi.h>
@@ -19,7 +20,7 @@ import std;
 
 export namespace stormkit::core {
     auto printStacktrace();
-#if not defined(STD_STACKTRACE_SUPPORTED)
+#if defined(BACKTRACE_SUPPORTED)
     auto backtraceInit(const char* filename) noexcept -> bool;
 #endif
 } // namespace stormkit::core
@@ -29,7 +30,7 @@ export namespace stormkit::core {
 ////////////////////////////////////////////////////////////////////
 
 namespace stormkit::core {
-#if not defined(STD_STACKTRACE_SUPPORTED)
+#if defined(BACKTRACE_SUPPORTED)
     namespace {
         using BacktraceState         = backtrace_state*;
         auto              __bt_state = BacktraceState { nullptr };
@@ -70,12 +71,12 @@ namespace stormkit::core {
 #if defined(STD_STACKTRACE_SUPPORTED)
         const auto st = std::stacktrace::current();
         std::println(stderr, "{}", std::to_string(st));
-#else
+#elif defined(BACKTRACE_SUPPORTED)
         backtrace_full(__bt_state, 0, bt_callback, bt_error_callback, nullptr);
 #endif
     }
 
-#if not defined(STD_STACKTRACE_SUPPORTED)
+#if defined(BACKTRACE_SUPPORTED)
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE auto backtraceInit(const char* filename) noexcept -> bool {
@@ -86,7 +87,10 @@ namespace stormkit::core {
                                             BACKTRACE_SUPPORTS_THREADS,
                                             bt_error_callback,
                                             &status);
-  if (__bt_state and status) std::println("libbacktrace initialized for {} {}", std::bit_cast<std::intptr_t>(__bt_state), filename);
+        if (__bt_state and status)
+            std::println("libbacktrace initialized for {} {}",
+                         std::bit_cast<std::intptr_t>(__bt_state),
+                         filename);
         else
             std::println(stderr, "failed to initialize libbacktrace");
 

@@ -21,10 +21,6 @@ namespace {
 extern auto userMain(std::span<const std::string_view>) -> int;
 
 auto __stdcall main(int argc, char** argv) -> int {
-#if not(defined(__cpp_lib_stacktrace) and __cpp_lib_stacktrace >= 202011L)
-    stormkit::core::backtraceInit(argv[0]);
-#endif
-
     std::locale::global(std::locale { "" });
     SetConsoleOutputCP(CP_UTF8);
     SetConsoleCP(CP_UTF8);
@@ -46,10 +42,6 @@ auto __stdcall main(int argc, char** argv) -> int {
 auto __stdcall WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) -> int {
     const auto argc = __argc;
     const auto argv = __argv;
-
-#if not(defined(__cpp_lib_stacktrace) and __cpp_lib_stacktrace >= 202011L)
-    stormkit::core::backtraceInit(argv[0]);
-#endif
 
     std::locale::global(std::locale { "" });
     SetConsoleOutputCP(CP_UTF8);
