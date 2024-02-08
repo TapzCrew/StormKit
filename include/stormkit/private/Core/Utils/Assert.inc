@@ -76,7 +76,7 @@ namespace stormkit::core {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto assertBase(bool                        cond,
+    STORMKIT_INLINE auto assertBase(bool                        cond,
                            AssertType                  type,
                            std::string_view            message,
                            bool                        show_callstack,

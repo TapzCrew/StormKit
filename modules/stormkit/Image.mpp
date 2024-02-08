@@ -241,10 +241,10 @@ export namespace stormkit::image {
 namespace stormkit::image {
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto Image::pixel(core::RangeExtent index,
-                             core::UInt32      layer,
-                             core::UInt32      face,
-                             core::UInt32      level) noexcept -> std::span<core::Byte> {
+    STORMKIT_INLINE auto Image::pixel(core::RangeExtent index,
+                                      core::UInt32      layer,
+                                      core::UInt32      face,
+                                      core::UInt32      level) noexcept -> std::span<core::Byte> {
         core::expects(m_data.mip_levels > level);
         core::expects(m_data.faces > face);
         core::expects(m_data.layers > layer);
@@ -260,10 +260,11 @@ namespace stormkit::image {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto Image::pixel(core::RangeExtent index,
-                             core::UInt32      layer,
-                             core::UInt32      face,
-                             core::UInt32 level) const noexcept -> std::span<const core::Byte> {
+    STORMKIT_INLINE auto Image::pixel(core::RangeExtent index,
+                                      core::UInt32      layer,
+                                      core::UInt32      face,
+                                      core::UInt32      level) const noexcept
+        -> std::span<const core::Byte> {
         core::expects(m_data.mip_levels > level);
         core::expects(m_data.faces > face);
         core::expects(m_data.layers > layer);
@@ -280,10 +281,10 @@ namespace stormkit::image {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto Image::pixel(core::math::Vector3U position,
-                             core::UInt32         layer,
-                             core::UInt32         face,
-                             core::UInt32         level) noexcept -> std::span<core::Byte> {
+    STORMKIT_INLINE auto Image::pixel(core::math::Vector3U position,
+                                      core::UInt32         layer,
+                                      core::UInt32         face,
+                                      core::UInt32 level) noexcept -> std::span<core::Byte> {
         const auto mip_extent = extent(level);
 
         const auto id = position.x + (position.y * mip_extent.width) +
@@ -294,10 +295,11 @@ namespace stormkit::image {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto Image::pixel(core::math::Vector3U position,
-                             core::UInt32         layer,
-                             core::UInt32         face,
-                             core::UInt32 level) const noexcept -> std::span<const core::Byte> {
+    STORMKIT_INLINE auto Image::pixel(core::math::Vector3U position,
+                                      core::UInt32         layer,
+                                      core::UInt32         face,
+                                      core::UInt32         level) const noexcept
+        -> std::span<const core::Byte> {
         const auto mip_extent = extent(level);
 
         const auto id = position.x + (position.y * mip_extent.width) +
@@ -308,7 +310,7 @@ namespace stormkit::image {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto Image::extent(core::UInt32 level) const noexcept -> core::math::ExtentU {
+    STORMKIT_INLINE auto Image::extent(core::UInt32 level) const noexcept -> core::math::ExtentU {
         core::expects(m_data.mip_levels > level);
 
         return { std::max(1u, m_data.extent.width >> level),
@@ -318,49 +320,49 @@ namespace stormkit::image {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto Image::channelCount() const noexcept -> core::UInt32 {
+    STORMKIT_INLINE auto Image::channelCount() const noexcept -> core::UInt32 {
         return m_data.channel_count;
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto Image::bytesPerChannel() const noexcept -> core::UInt32 {
+    STORMKIT_INLINE auto Image::bytesPerChannel() const noexcept -> core::UInt32 {
         return m_data.bytes_per_channel;
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto Image::layers() const noexcept -> core::UInt32 {
+    STORMKIT_INLINE auto Image::layers() const noexcept -> core::UInt32 {
         return m_data.layers;
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto Image::faces() const noexcept -> core::UInt32 {
+    STORMKIT_INLINE auto Image::faces() const noexcept -> core::UInt32 {
         return m_data.faces;
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto Image::mipLevels() const noexcept -> core::UInt32 {
+    STORMKIT_INLINE auto Image::mipLevels() const noexcept -> core::UInt32 {
         return m_data.mip_levels;
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto Image::format() const noexcept -> Format {
+    STORMKIT_INLINE auto Image::format() const noexcept -> Format {
         return m_data.format;
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto Image::size() const noexcept -> core::RangeExtent {
+    STORMKIT_INLINE auto Image::size() const noexcept -> core::RangeExtent {
         return std::size(m_data.data);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto Image::size(
+    STORMKIT_INLINE auto Image::size(
         [[maybe_unused]] core::UInt32 layer, // TODO Use layer and face to get correct size
         [[maybe_unused]] core::UInt32 face,
         core::UInt32                  level) const noexcept -> core::RangeExtent {
@@ -376,7 +378,7 @@ namespace stormkit::image {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto Image::size(core::UInt32 layer, core::UInt32 face) const noexcept
+    STORMKIT_INLINE auto Image::size(core::UInt32 layer, core::UInt32 face) const noexcept
         -> core::RangeExtent {
         auto _size = core::RangeExtent { 0u };
         for (auto i : core::range(m_data.mip_levels)) _size += size(layer, face, i);
@@ -386,7 +388,7 @@ namespace stormkit::image {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto Image::size(core::UInt32 layer) const noexcept -> core::RangeExtent {
+    STORMKIT_INLINE auto Image::size(core::UInt32 layer) const noexcept -> core::RangeExtent {
         auto _size = core::RangeExtent { 0u };
         for (auto i : core::range(m_data.faces)) _size += size(layer, i);
 
@@ -395,14 +397,15 @@ namespace stormkit::image {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto Image::data() noexcept -> std::span<core::Byte> {
+    STORMKIT_INLINE auto Image::data() noexcept -> std::span<core::Byte> {
         return m_data.data;
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto Image::data(core::UInt32 layer, core::UInt32 face, core::UInt32 level) noexcept
-        -> std::span<core::Byte> {
+    STORMKIT_INLINE auto Image::data(core::UInt32 layer,
+                                     core::UInt32 face,
+                                     core::UInt32 level) noexcept -> std::span<core::Byte> {
         const auto mip_size = size(layer, face, level);
 
         auto offset = core::RangeExtent { 0 };
@@ -418,15 +421,15 @@ namespace stormkit::image {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto Image::data() const noexcept -> std::span<const core::Byte> {
+    STORMKIT_INLINE auto Image::data() const noexcept -> std::span<const core::Byte> {
         return m_data.data;
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto Image::data(core::UInt32 layer,
-                            core::UInt32 face,
-                            core::UInt32 level) const noexcept -> std::span<const core::Byte> {
+    STORMKIT_INLINE auto
+        Image::data(core::UInt32 layer, core::UInt32 face, core::UInt32 level) const noexcept
+        -> std::span<const core::Byte> {
         const auto mip_size = size(layer, face, level);
 
         auto offset = core::RangeExtent { 0 };
@@ -442,13 +445,14 @@ namespace stormkit::image {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto Image::begin() noexcept {
+    STORMKIT_INLINE auto Image::begin() noexcept {
         return std::begin(m_data.data);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto Image::begin(core::UInt32 layer, core::UInt32 face, core::UInt32 level) noexcept {
+    STORMKIT_INLINE auto
+        Image::begin(core::UInt32 layer, core::UInt32 face, core::UInt32 level) noexcept {
         core::expects(m_data.mip_levels > level);
         core::expects(m_data.faces > face);
         core::expects(m_data.layers > layer);
@@ -458,26 +462,26 @@ namespace stormkit::image {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto Image::begin() const noexcept {
+    STORMKIT_INLINE auto Image::begin() const noexcept {
         return std::begin(m_data.data);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto
+    STORMKIT_INLINE auto
         Image::begin(core::UInt32 layer, core::UInt32 face, core::UInt32 level) const noexcept {
         return std::begin(data(layer, face, level));
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto Image::cbegin() const noexcept {
+    STORMKIT_INLINE auto Image::cbegin() const noexcept {
         return std::cbegin(m_data.data);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto
+    STORMKIT_INLINE auto
         Image::cbegin(core::UInt32 layer, core::UInt32 face, core::UInt32 level) const noexcept {
         core::expects(m_data.mip_levels > level);
         core::expects(m_data.faces > face);
@@ -488,13 +492,14 @@ namespace stormkit::image {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto Image::end() noexcept {
+    STORMKIT_INLINE auto Image::end() noexcept {
         return std::end(m_data.data);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto Image::end(core::UInt32 layer, core::UInt32 face, core::UInt32 level) noexcept {
+    STORMKIT_INLINE auto
+        Image::end(core::UInt32 layer, core::UInt32 face, core::UInt32 level) noexcept {
         core::expects(m_data.mip_levels > level);
         core::expects(m_data.faces > face);
         core::expects(m_data.layers > layer);
@@ -504,13 +509,13 @@ namespace stormkit::image {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto Image::end() const noexcept {
+    STORMKIT_INLINE auto Image::end() const noexcept {
         return std::end(m_data.data);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto
+    STORMKIT_INLINE auto
         Image::end(core::UInt32 layer, core::UInt32 face, core::UInt32 level) const noexcept {
         core::expects(m_data.mip_levels > level);
         core::expects(m_data.faces > face);
@@ -521,13 +526,13 @@ namespace stormkit::image {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto Image::cend() const noexcept {
+    STORMKIT_INLINE auto Image::cend() const noexcept {
         return std::cend(m_data.data);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto
+    STORMKIT_INLINE auto
         Image::cend(core::UInt32 layer, core::UInt32 face, core::UInt32 level) const noexcept {
         core::expects(m_data.mip_levels > level);
         core::expects(m_data.faces > face);
@@ -538,7 +543,7 @@ namespace stormkit::image {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto Image::imageData() const noexcept -> const ImageData& {
+    STORMKIT_INLINE auto Image::imageData() const noexcept -> const ImageData& {
         return m_data;
     }
 

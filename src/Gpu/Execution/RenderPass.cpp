@@ -14,7 +14,7 @@ import :Execution;
 
 namespace stormkit::gpu {
     namespace monadic {
-        inline auto vkRef() noexcept -> decltype(auto) {
+        auto vkRef() noexcept -> decltype(auto) {
             return [](auto&& attachment_ref) noexcept -> vk::AttachmentReference {
                 return vk::AttachmentReference {}
                     .setAttachment(attachment_ref.attachment_id)
@@ -99,9 +99,8 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     // TODO finish this
-    auto
-        RenderPassDescription::isCompatible(const RenderPassDescription& description) const noexcept
-        -> bool {
+    auto RenderPassDescription::isCompatible(
+        const RenderPassDescription& description) const noexcept -> bool {
         if (std::size(subpasses) == std::size(description.subpasses)) return false;
 
         for (auto i : core::range(std::size(subpasses))) {

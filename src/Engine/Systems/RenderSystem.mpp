@@ -1,6 +1,9 @@
 // Copyright (C) 2024 Arthur LAURENT <arthur.laurent4@gmail.com>
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
+module;
+
+#include <stormkit/Core/PlatformMacro.hpp>
 
 export module stormkit.Engine:Systems.RenderSystem;
 
@@ -37,29 +40,30 @@ namespace stormkit::engine {
 namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
-    inline RenderSystem::RenderSystem(entities::EntityManager& manager)
+    STORMKIT_INLINE RenderSystem::RenderSystem(entities::EntityManager& manager)
         : System { manager, 0, {} } {
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline RenderSystem::~RenderSystem() = default;
+    STORMKIT_INLINE RenderSystem::~RenderSystem() = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline RenderSystem::RenderSystem(RenderSystem&&) noexcept = default;
+    STORMKIT_INLINE RenderSystem::RenderSystem(RenderSystem&&) noexcept = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto RenderSystem::operator=(RenderSystem&&) noexcept -> RenderSystem& = default;
+    STORMKIT_INLINE auto RenderSystem::operator=(RenderSystem&&) noexcept
+        -> RenderSystem& = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto RenderSystem::update(core::Secondf delta) -> void {
+    STORMKIT_INLINE auto RenderSystem::update(core::Secondf delta) -> void {
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto RenderSystem::onMessageReceived(const entities::Message& message) -> void {
+    STORMKIT_INLINE auto RenderSystem::onMessageReceived(const entities::Message& message) -> void {
     }
 } // namespace stormkit::engine

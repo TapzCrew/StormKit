@@ -26,7 +26,7 @@ export namespace stormkit::core {
 namespace stormkit::core {
     ////////////////////////////////////////
     ////////////////////////////////////////
-    inline auto asciiToUtf16(std::string_view input) -> std::u16string {
+    STORMKIT_INLINE auto asciiToUtf16(std::string_view input) -> std::u16string {
         auto output = std::u16string {};
 #if not defined(STORMKIT_COMPILER_CLANG)
         auto state = std::mbstate_t {};
@@ -48,7 +48,7 @@ namespace stormkit::core {
 
     ////////////////////////////////////////
     ////////////////////////////////////////
-    inline auto utf16ToAscii(std::u16string_view input) -> std::string {
+    STORMKIT_INLINE auto utf16ToAscii(std::u16string_view input) -> std::string {
         auto output = std::string {};
 #if not defined(STORMKIT_COMPILER_CLANG)
         auto state = std::mbstate_t {};
@@ -65,7 +65,7 @@ namespace stormkit::core {
 
     ////////////////////////////////////////
     ////////////////////////////////////////
-    inline auto asciiToWide(std::string_view input) -> std::wstring {
+    STORMKIT_INLINE auto asciiToWide(std::string_view input) -> std::wstring {
         [[maybe_unused]] auto state  = std::mbstate_t {};
         auto                  output = std::wstring {};
         output.resize(std::size(input));
@@ -94,7 +94,7 @@ namespace stormkit::core {
 
     ////////////////////////////////////////
     ////////////////////////////////////////
-    inline auto wideToAscii(std::wstring_view input) -> std::string {
+    STORMKIT_INLINE auto wideToAscii(std::wstring_view input) -> std::string {
         [[maybe_unused]] auto state  = std::mbstate_t {};
         [[maybe_unused]] auto output = std::string {};
         output.resize(std::size(input));
@@ -112,7 +112,7 @@ namespace stormkit::core {
 
     ////////////////////////////////////////
     ////////////////////////////////////////
-    inline auto asciiToUtf8(std::string_view input) -> std::u8string {
+    STORMKIT_INLINE auto asciiToUtf8(std::string_view input) -> std::u8string {
         [[maybe_unused]] auto state  = std::mbstate_t {};
         [[maybe_unused]] auto output = std::u8string {};
         output.resize(std::size(input) * narrow<RangeExtent>(MB_LEN_MAX));
@@ -140,7 +140,7 @@ namespace stormkit::core {
 
     ////////////////////////////////////////
     ////////////////////////////////////////
-    inline auto utf8ToAscii(std::u8string_view input) -> std::string {
+    STORMKIT_INLINE auto utf8ToAscii(std::u8string_view input) -> std::string {
         [[maybe_unused]] auto state  = std::mbstate_t {};
         auto                  output = std::string {};
         output.resize(std::size(input));

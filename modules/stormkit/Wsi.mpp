@@ -166,8 +166,8 @@ export {
 
             void* handle = nullptr;
 
-            [[nodiscard]] constexpr auto
-                operator<=>(const Monitor& other) const noexcept -> std::strong_ordering;
+            [[nodiscard]] constexpr auto operator<=>(const Monitor& other) const noexcept
+                -> std::strong_ordering;
         };
 
         enum class WindowStyle : core::UInt8 {
@@ -289,8 +289,8 @@ export {
         //
         [[nodiscard]] auto           toString(const Monitor& flags) -> std::string;
         [[nodiscard]] constexpr auto toString(Monitor::Flags flags) -> std::string;
-        [[nodiscard]] constexpr auto
-            toStringView(Monitor::Flags flags) noexcept -> std::string_view;
+        [[nodiscard]] constexpr auto toStringView(Monitor::Flags flags) noexcept
+            -> std::string_view;
 
         class STORMKIT_API Window {
           public:
@@ -335,9 +335,9 @@ export {
 
             auto setVirtualKeyboardVisible(bool visible) noexcept -> void;
 
-            auto setMousePosition(const core::math::Vector2I& position) noexcept -> void;
-            static auto
-                setMousePositionOnDesktop(const core::math::Vector2U& position) noexcept -> void;
+            auto        setMousePosition(const core::math::Vector2I& position) noexcept -> void;
+            static auto setMousePositionOnDesktop(const core::math::Vector2U& position) noexcept
+                -> void;
 
             [[nodiscard]] static auto getMonitorSettings() -> std::vector<Monitor>;
             [[nodiscard]] static auto getPrimaryMonitorSettings() -> Monitor;
@@ -383,8 +383,8 @@ export {
         struct formatter<stormkit::wsi::MouseButton, CharT>
             : formatter<basic_string_view<CharT>, CharT> {
             template<class FormatContext>
-            auto format(stormkit::wsi::MouseButton data,
-                        FormatContext&             ctx) const -> decltype(ctx.out()) {
+            auto format(stormkit::wsi::MouseButton data, FormatContext& ctx) const
+                -> decltype(ctx.out()) {
                 return formatter<basic_string_view<CharT>, CharT>::format(
                     stormkit::wsi::toStringView(data),
                     ctx);
@@ -395,8 +395,8 @@ export {
         struct formatter<stormkit::wsi::Monitor::Flags, CharT>
             : formatter<basic_string_view<CharT>, CharT> {
             template<class FormatContext>
-            auto format(stormkit::wsi::Monitor::Flags data,
-                        FormatContext&                ctx) const -> decltype(ctx.out()) {
+            auto format(stormkit::wsi::Monitor::Flags data, FormatContext& ctx) const
+                -> decltype(ctx.out()) {
                 return formatter<basic_string_view<CharT>, CharT>::format(
                     stormkit::wsi::toStringView(data),
                     ctx);
@@ -407,8 +407,8 @@ export {
         struct formatter<stormkit::wsi::Monitor, CharT>
             : public formatter<basic_string<CharT>, CharT> {
             template<class FormatContext>
-            auto format(const stormkit::wsi::Monitor& data,
-                        FormatContext&                ctx) const -> decltype(ctx.out()) {
+            auto format(const stormkit::wsi::Monitor& data, FormatContext& ctx) const
+                -> decltype(ctx.out()) {
                 return formatter<basic_string<CharT>, CharT>::format(stormkit::wsi::toString(data),
                                                                      ctx);
             }
@@ -565,8 +565,8 @@ namespace stormkit::wsi {
 
     ////////////////////////////////////////
     ////////////////////////////////////////
-    STORMKIT_FORCE_INLINE constexpr auto
-        toStringView(MouseButton value) noexcept -> std::string_view {
+    STORMKIT_FORCE_INLINE constexpr auto toStringView(MouseButton value) noexcept
+        -> std::string_view {
         const auto it = MOUSE_BUTTON_TO_STRING.find(value);
         if (it == std::ranges::cend(MOUSE_BUTTON_TO_STRING)) [[unlikely]]
             return MOUSE_BUTTON_TO_STRING.at(MouseButton::Unknow);
@@ -582,8 +582,8 @@ namespace stormkit::wsi {
 
     ////////////////////////////////////////
     ////////////////////////////////////////
-    inline constexpr auto
-        Monitor::operator<=>(const Monitor& other) const noexcept -> std::strong_ordering {
+    STORMKIT_INLINE constexpr auto Monitor::operator<=>(const Monitor& other) const noexcept
+        -> std::strong_ordering {
         if (auto ret = flags <=> other.flags; ret != 0) return ret;
 
 #ifdef STORMKIT_COMPILER_CLANG
@@ -627,7 +627,7 @@ namespace stormkit::wsi {
 
     ////////////////////////////////////////
     ////////////////////////////////////////
-    inline constexpr auto toStringView(Monitor::Flags flags) noexcept -> std::string_view {
+    STORMKIT_INLINE constexpr auto toStringView(Monitor::Flags flags) noexcept -> std::string_view {
         using namespace std::literals;
 
         switch (flags) {
@@ -641,7 +641,7 @@ namespace stormkit::wsi {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto EventHandler::update(Window& window) -> void {
+    STORMKIT_INLINE auto EventHandler::update(Window& window) -> void {
         auto event = Event {};
 
         while (window.pollEvent(event)) {
@@ -655,8 +655,8 @@ namespace stormkit::wsi {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto EventHandler::setCallback(EventType event_type,
-                                                         Callback  callback) -> void {
+    STORMKIT_FORCE_INLINE auto EventHandler::setCallback(EventType event_type, Callback callback)
+        -> void {
         m_callback[event_type].emplace_back(std::move(callback));
     }
 

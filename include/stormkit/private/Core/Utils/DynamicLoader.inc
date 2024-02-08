@@ -53,7 +53,7 @@ export namespace stormkit::core {
 namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto DynamicLoader::load(std::filesystem::path filepath) noexcept
+    STORMKIT_INLINE auto DynamicLoader::load(std::filesystem::path filepath) noexcept
         -> Expected<DynamicLoader> {
         auto loader = DynamicLoader {};
 
@@ -62,7 +62,7 @@ namespace stormkit::core {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto DynamicLoader::allocateAndLoad(std::filesystem::path filepath) noexcept
+    STORMKIT_INLINE auto DynamicLoader::allocateAndLoad(std::filesystem::path filepath) noexcept
         -> Expected<std::unique_ptr<DynamicLoader>> {
         return load(std::move(filepath)).transform([](auto&& loader) {
             return std::make_unique<DynamicLoader>(std::move(loader));
@@ -90,7 +90,7 @@ namespace stormkit::core {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto DynamicLoader::filepath() const noexcept -> const std::filesystem::path& {
+    STORMKIT_INLINE auto DynamicLoader::filepath() const noexcept -> const std::filesystem::path& {
         return m_filepath;
     }
 } // namespace stormkit::core

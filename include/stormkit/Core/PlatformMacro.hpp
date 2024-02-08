@@ -23,25 +23,33 @@
     #define STORMKIT_IMPORT        __declspec(dllimport)
     #define STORMKIT_RESTRICT      __restrict
     #define STORMKIT_PRIVATE
-    #define STORMKIT_FORCE_INLINE __forceinline
+    #define STORMKIT_FORCE_INLINE_IMPL __forceinline
 #elif defined(_MSC_VER) and defined(__clang__)
-    #define STORMKIT_EXPORT       __declspec(dllexport)
-    #define STORMKIT_IMPORT       __declspec(dllimport)
-    #define STORMKIT_PRIVATE      [[gnu::visibility("hidden")]]
-    #define STORMKIT_RESTRICT     __restrict
-    #define STORMKIT_FORCE_INLINE [[gnu::always_inline]] inline
+    #define STORMKIT_EXPORT            __declspec(dllexport)
+    #define STORMKIT_IMPORT            __declspec(dllimport)
+    #define STORMKIT_PRIVATE           [[gnu::visibility("hidden")]]
+    #define STORMKIT_RESTRICT          __restrict
+    #define STORMKIT_FORCE_INLINE_IMPL [[gnu::always_inline]] inline
 #elif defined(__MINGW32__)
     #define STORMKIT_EXPORT __declspec(dllexport)
     #define STORMKIT_IMPORT __declspec(dllimport)
     #define STORMKIT_PRIVATE
-    #define STORMKIT_RESTRICT     __restrict inline
-    #define STORMKIT_FORCE_INLINE [[gnu::always_inline]] inline
+    #define STORMKIT_RESTRICT          __restrict inline
+    #define STORMKIT_FORCE_INLINE_IMPL [[gnu::always_inline]] inline
 #else
-    #define STORMKIT_IMPORT       [[gnu::visibility("default")]]
-    #define STORMKIT_EXPORT       [[gnu::visibility("default")]]
-    #define STORMKIT_PRIVATE      [[gnu::visibility("hidden")]]
-    #define STORMKIT_RESTRICT     __restrict
-    #define STORMKIT_FORCE_INLINE [[gnu::always_inline]] inline
+    #define STORMKIT_IMPORT            [[gnu::visibility("default")]]
+    #define STORMKIT_EXPORT            [[gnu::visibility("default")]]
+    #define STORMKIT_PRIVATE           [[gnu::visibility("hidden")]]
+    #define STORMKIT_RESTRICT          __restrict
+    #define STORMKIT_FORCE_INLINE_IMPL [[gnu::always_inline]] inline
+#endif
+
+#if not defined(STORMKIT_LTO)
+    #define STORMKIT_FORCE_INLINE STORMKIT_FORCE_INLINE_IMPL
+    #define STORMKIT_INLINE       inline
+#else
+    #define STORMKIT_FORCE_INLINE
+    #define STORMKIT_INLINE
 #endif
 
 #if defined(__MINGW32__)

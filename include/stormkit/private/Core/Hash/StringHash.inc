@@ -39,40 +39,40 @@ export namespace stormkit::core {
 namespace stormkit::core {
     ////////////////////////////////////////
     ////////////////////////////////////////
-    inline auto StringHash::operator()(const std::string& value) const noexcept -> std::uint64_t {
+    STORMKIT_INLINE auto StringHash::operator()(const std::string& value) const noexcept -> std::uint64_t {
         return std::hash<std::string> {}(value);
     }
 
     ////////////////////////////////////////
     ////////////////////////////////////////
-    inline auto StringHash::operator()(std::string_view value) const noexcept -> std::uint64_t {
+    STORMKIT_INLINE auto StringHash::operator()(std::string_view value) const noexcept -> std::uint64_t {
         return std::hash<std::string_view> {}(value);
     }
 
     ////////////////////////////////////////
     ////////////////////////////////////////
-    inline auto StringEqual::operator()(const std::string& a, const std::string& b) const noexcept
+    STORMKIT_INLINE auto StringEqual::operator()(const std::string& a, const std::string& b) const noexcept
         -> bool {
         return a.compare(b) == 0;
     }
 
     ////////////////////////////////////////
     ////////////////////////////////////////
-    inline auto StringEqual::operator()(const std::string& a, std::string_view b) const noexcept
+    STORMKIT_INLINE auto StringEqual::operator()(const std::string& a, std::string_view b) const noexcept
         -> bool {
         return a.compare(b) == 0;
     }
 
     ////////////////////////////////////////
     ////////////////////////////////////////
-    inline auto StringEqual::operator()(std::string_view a, const std::string& b) const noexcept
+    STORMKIT_INLINE auto StringEqual::operator()(std::string_view a, const std::string& b) const noexcept
         -> bool {
         return a.compare(b) == 0;
     }
 
     ////////////////////////////////////////
     ////////////////////////////////////////
-    inline auto StringEqual::operator()(std::string_view a, std::string_view b) const noexcept
+    STORMKIT_INLINE auto StringEqual::operator()(std::string_view a, std::string_view b) const noexcept
         -> bool {
         return a.compare(b) == 0;
     }

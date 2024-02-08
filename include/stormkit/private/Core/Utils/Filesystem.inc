@@ -25,7 +25,7 @@ export namespace stormkit::core {
 namespace stormkit::core {
     ////////////////////////////////////////
     ////////////////////////////////////////
-    inline auto read(std::istream& stream, RangeExtent size) noexcept -> std::vector<Byte> {
+    STORMKIT_INLINE auto read(std::istream& stream, RangeExtent size) noexcept -> std::vector<Byte> {
         auto output = std::vector<Byte> {};
         output.resize(size);
 
@@ -37,7 +37,7 @@ namespace stormkit::core {
     ////////////////////////////////////////
     ////////////////////////////////////////
     template<RangeExtent size>
-    inline auto read(std::istream& stream) noexcept -> std::array<Byte, size> {
+    STORMKIT_INLINE auto read(std::istream& stream) noexcept -> std::array<Byte, size> {
         auto output = std::array<Byte, size> {};
 
         read(stream, output);
@@ -60,7 +60,7 @@ namespace stormkit::core {
 
     ////////////////////////////////////////
     ////////////////////////////////////////
-    inline auto readText(std::istream& stream, RangeExtent size) noexcept -> std::string {
+    STORMKIT_INLINE auto readText(std::istream& stream, RangeExtent size) noexcept -> std::string {
         auto output = std::string {};
         output.resize(size);
 

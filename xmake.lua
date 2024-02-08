@@ -499,7 +499,10 @@ for name, module in pairs(modules) do
         add_frameworks(module.frameworks, { public = is_kind("static") })
       end
       if is_mode("release") then
-        -- set_policy("build.optimization.lto", true)
+        set_policy("build.optimization.lto", true)
+        if get_config("kind") == "static" then
+          add_defines("STORMKIT_LTO", { public = true })
+        end
       end
     end)
   end

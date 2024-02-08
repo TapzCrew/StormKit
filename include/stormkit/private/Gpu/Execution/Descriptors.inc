@@ -226,7 +226,7 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto DescriptorSet::update(std::span<const Descriptor> descriptors) -> void {
+    STORMKIT_INLINE auto DescriptorSet::update(std::span<const Descriptor> descriptors) -> void {
         const auto [buffers, images] = [&descriptors]() -> decltype(auto) {
             auto buffers = std::vector<vk::DescriptorBufferInfo> {};
             auto images  = std::vector<vk::DescriptorImageInfo> {};

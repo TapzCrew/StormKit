@@ -40,7 +40,7 @@ export namespace stormkit::core {
 
             Task() = default;
 
-            inline Task(Type _type, std::function<void()> _work)
+            STORMKIT_INLINE Task(Type _type, std::function<void()> _work)
                 : type { _type }, work { std::move(_work) } {}
 
             Task(Task&&) noexcept                    = default;

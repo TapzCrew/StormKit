@@ -40,7 +40,7 @@ export namespace stormkit::core {
 ////////////////////////////////////////////////////////////////////
 
 namespace stormkit::core {
-    inline auto split(std::string_view string, char delim) noexcept -> std::vector<std::string> {
+    STORMKIT_INLINE auto split(std::string_view string, char delim) noexcept -> std::vector<std::string> {
         auto output = std::vector<std::string> {};
         auto first  = RangeExtent { 0u };
 
@@ -57,7 +57,7 @@ namespace stormkit::core {
         return output;
     }
 
-    inline auto toLower(std::string_view string, std::locale locale) noexcept -> std::string {
+    STORMKIT_INLINE auto toLower(std::string_view string, std::locale locale) noexcept -> std::string {
         auto& facet = std::use_facet<std::ctype<typename std::string_view::value_type>>(locale);
 
         auto result = std::string { string };
@@ -68,7 +68,7 @@ namespace stormkit::core {
 
     ////////////////////////////////////////
     ////////////////////////////////////////
-    inline auto toUpper(std::string_view string, std::locale locale) noexcept -> std::string {
+    STORMKIT_INLINE auto toUpper(std::string_view string, std::locale locale) noexcept -> std::string {
         auto& facet = std::use_facet<std::ctype<typename std::string_view::value_type>>(locale);
 
         auto result = std::string { string };
@@ -79,13 +79,13 @@ namespace stormkit::core {
 
     ////////////////////////////////////////
     ////////////////////////////////////////
-    inline auto toString(auto&& value) noexcept -> std::string {
+    STORMKIT_INLINE auto toString(auto&& value) noexcept -> std::string {
         return std::to_string(std::forward<decltype(value)>(value));
     }
 
     ////////////////////////////////////////
     ////////////////////////////////////////
-    inline auto toCZString(std::string_view value) noexcept -> const char* {
+    STORMKIT_INLINE auto toCZString(std::string_view value) noexcept -> const char* {
         return std::data(value);
     }
 } // namespace stormkit::core
