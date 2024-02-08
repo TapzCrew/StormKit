@@ -42,7 +42,10 @@ export {
                 -> gpu::Expected<std::unique_ptr<RenderSurface>>;
 
           private:
-            core::DeferInit<gpu::Surface> m_surface;
+            auto doInitSwapchain() noexcept -> gpu::Expected<gpu::Swapchain>;
+
+            core::DeferInit<gpu::Surface>   m_surface;
+            core::DeferInit<gpu::Swapchain> m_swapchain;
         };
 
         class STORMKIT_API Renderer final {
