@@ -12,7 +12,6 @@ import std;
 
 import stormkit.Core;
 
-import :ConsoleLogger;
 import :LogColorizer;
 
 using namespace std::literals;

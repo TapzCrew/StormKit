@@ -8,9 +8,6 @@ import std;
 
 import stormkit.Core;
 
-import :Logger;
-import :Severity;
-
 namespace stormkit::log {
     namespace {
 #ifdef STORMKIT_BUILD_DEBUG

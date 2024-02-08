@@ -8,8 +8,6 @@ import std;
 
 import stormkit.Core;
 
-import :FileLogger;
-
 using namespace std::literals;
 
 namespace {

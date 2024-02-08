@@ -4,7 +4,7 @@
 
 export module stormkit.Log:LogColorizer;
 
-import :Severity;
+import stormkit.Log;
 
 export namespace stormkit::log::details {
     auto colorifyBegin(Severity severity, bool to_stderr) noexcept -> void;

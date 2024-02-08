@@ -2,13 +2,351 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
+module;
+
+#include <stormkit/Core/PlatformMacro.hpp>
+#include <stormkit/Core/FlagsMacro.hpp>
+
 export module stormkit.Log;
 
-// clang-format off
+import std;
+import frozen;
 
-// clang-format on
+import stormkit.Core;
 
-export import :Logger;
-export import :ConsoleLogger;
-export import :FileLogger;
-export import :Severity;
+export {
+    namespace stormkit::log {
+        struct Module;
+        enum class Severity {
+            Info,
+            Warning,
+            Error,
+            Fatal,
+            Debug
+        };
+
+        [[nodiscard]] constexpr auto toStringView(Severity severity) noexcept -> std::string_view;
+        [[nodiscard]] constexpr auto toString(Severity severity) -> std::string;
+
+        class STORMKIT_API Logger {
+          public:
+            using LogClock = std::chrono::high_resolution_clock;
+
+            explicit Logger(LogClock::time_point start) noexcept;
+            Logger(LogClock::time_point start, Severity log_level) noexcept;
+            virtual ~Logger();
+
+            virtual auto
+                write(Severity severity, const Module& module, const char* string) -> void = 0;
+            virtual auto flush() -> void                                                   = 0;
+
+            auto setLogLevel(Severity log_level) noexcept -> void;
+
+            [[nodiscard]] auto startTime() const noexcept -> const LogClock::time_point&;
+            [[nodiscard]] auto logLevel() const noexcept -> const Severity&;
+
+            template<class T, typename... Args>
+            [[nodiscard]] static auto createLoggerInstance(Args&&... param_args) -> T;
+
+            template<class T, typename... Args>
+            [[nodiscard]] static auto
+                allocateLoggerInstance(Args&&... param_args) -> std::unique_ptr<T>;
+
+            template<class... Args>
+            static auto log(Severity         severity,
+                            const Module&    module,
+                            std::string_view format_string,
+                            Args&&... param_args) -> void;
+
+            template<class... Args>
+            static auto log(Severity         severity,
+                            std::string_view format_string,
+                            Args&&... param_args) -> void;
+
+            template<class... Args>
+            static auto dlog(Args&&... param_args) -> void;
+
+            template<class... Args>
+            static auto ilog(Args&&... param_args) -> void;
+
+            template<class... Args>
+            static auto wlog(Args&&... param_args) -> void;
+
+            template<class... Args>
+            static auto elog(Args&&... param_args) -> void;
+
+            template<class... Args>
+            static auto flog(Args&&... param_args) -> void;
+
+            [[nodiscard]] static auto hasLogger() noexcept -> bool;
+            [[nodiscard]] static auto instance() noexcept -> Logger&;
+
+          protected:
+            LogClock::time_point m_start_time;
+            Severity             m_log_level;
+        };
+
+        struct Module {
+            template<class... Args>
+            auto dlog(Args&&... args) const -> void;
+
+            template<class... Args>
+            auto ilog(Args&&... args) const -> void;
+
+            template<class... Args>
+            auto wlog(Args&&... args) const -> void;
+
+            template<class... Args>
+            auto elog(Args&&... args) const -> void;
+
+            template<class... Args>
+            auto flog(Args&&... args) const -> void;
+
+            auto flush() const -> void;
+
+            std::string_view name = "";
+        };
+
+        template<core::ConstexprString str>
+        [[nodiscard]] constexpr auto operator""_module() -> stormkit::log::Module;
+
+        class STORMKIT_API FileLogger final: public Logger {
+          public:
+            FileLogger(LogClock::time_point start, std::filesystem::path path);
+            FileLogger(LogClock::time_point start, std::filesystem::path path, Severity log_level);
+            ~FileLogger() override;
+
+            FileLogger(const FileLogger&)                    = delete;
+            auto operator=(const FileLogger&) -> FileLogger& = delete;
+
+            FileLogger(FileLogger&&);
+            auto operator=(FileLogger&&) -> FileLogger&;
+
+            auto
+                write(Severity severity, const Module& module, const char* string) -> void override;
+            auto flush() -> void override;
+
+          private:
+            core::StringHashMap<std::ofstream> m_streams;
+
+            std::filesystem::path m_base_path;
+        };
+
+        class STORMKIT_API ConsoleLogger final: public Logger {
+          public:
+            explicit ConsoleLogger(LogClock::time_point start) noexcept;
+            ConsoleLogger(LogClock::time_point start, Severity log_level) noexcept;
+
+            ~ConsoleLogger() override;
+
+            auto
+                write(Severity severity, const Module& module, const char* string) -> void override;
+            auto flush() noexcept -> void override;
+        };
+    } // namespace stormkit::log
+
+    FLAG_ENUM(stormkit::log::Severity)
+
+    namespace std {
+        template<class CharT>
+        struct formatter<stormkit::log::Severity, CharT>
+            : formatter<basic_string_view<CharT>, CharT> {
+            template<class FormatContext>
+            auto format(stormkit::log::Severity data,
+                        FormatContext&          ctx) const -> decltype(ctx.out()) {
+                return formatter<basic_string_view<CharT>, CharT>::format(
+                    stormkit::log::toStringView(data),
+                    ctx);
+            }
+        };
+    } // namespace std
+}
+
+////////////////////////////////////////////////////////////////////
+///                      IMPLEMENTATION                          ///
+////////////////////////////////////////////////////////////////////
+
+namespace stormkit::log {
+    namespace details { namespace {
+        constexpr auto SEVERITY_TO_STRING = [] {
+            using namespace std::literals;
+
+            return frozen::make_unordered_map<Severity, std::string_view>({
+                { Severity::Info, "Info"sv },
+                { Severity::Warning, "Warning"sv },
+                { Severity::Error, "Error"sv },
+                { Severity::Fatal, "Fatal"sv },
+                { Severity::Debug, "Debug"sv },
+            });
+        }();
+    }} // namespace details
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    STORMKIT_FORCE_INLINE constexpr auto
+        toStringView(Severity severity) noexcept -> std::string_view {
+        const auto it = details::SEVERITY_TO_STRING.find(severity);
+        core::expects(it != std::ranges::cend(details::SEVERITY_TO_STRING));
+
+        return it->second;
+    }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    STORMKIT_FORCE_INLINE constexpr auto toString(Severity severity) -> std::string {
+        return std::string { toStringView(severity) };
+    }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Logger::setLogLevel(Severity log_level) noexcept -> void {
+        m_log_level = log_level;
+    }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Logger::startTime() const noexcept -> const LogClock::time_point& {
+        return m_start_time;
+    }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Logger::logLevel() const noexcept -> const Severity& {
+        return m_log_level;
+    }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    template<class T, typename... Args>
+    STORMKIT_FORCE_INLINE auto Logger::createLoggerInstance(Args&&... param_args) -> T {
+        using LogClock = std::chrono::high_resolution_clock;
+        static_assert(std::is_base_of<Logger, T>::value, "T must inherit Logger");
+
+        auto time_point = LogClock::now();
+
+        return T { std::move(time_point), std::forward<Args>(param_args)... };
+    }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    template<class T, typename... Args>
+    STORMKIT_FORCE_INLINE auto
+        Logger::allocateLoggerInstance(Args&&... param_args) -> std::unique_ptr<T> {
+        using LogClock = std::chrono::high_resolution_clock;
+        static_assert(std::is_base_of<Logger, T>::value, "T must inherit Logger");
+
+        auto time_point = LogClock::now();
+
+        return std::make_unique<T>(std::move(time_point), std::forward<Args>(param_args)...);
+    }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    template<class... Args>
+    STORMKIT_FORCE_INLINE auto Logger::log(Severity         severity,
+                                           const Module&    m,
+                                           std::string_view format_string,
+                                           Args&&... param_args) -> void {
+        core::expects(hasLogger());
+
+        const auto format        = format_string;
+        auto       memory_buffer = std::string {};
+        std::vformat_to(std::back_inserter(memory_buffer),
+                        format,
+                        std::make_format_args(param_args...));
+
+        instance().write(severity, m, std::data(memory_buffer));
+    }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    template<class... Args>
+    STORMKIT_FORCE_INLINE auto Logger::log(Severity         severity,
+                                           std::string_view format_string,
+                                           Args&&... param_args) -> void {
+        log(severity, Module {}, format_string, std::forward<Args>(param_args)...);
+    }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    template<class... Args>
+    STORMKIT_FORCE_INLINE auto Logger::dlog(Args&&... param_args) -> void {
+        log(Severity::Debug, std::forward<Args>(param_args)...);
+    }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    template<class... Args>
+    STORMKIT_FORCE_INLINE auto Logger::ilog(Args&&... param_args) -> void {
+        log(Severity::Info, std::forward<Args>(param_args)...);
+    }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    template<class... Args>
+    STORMKIT_FORCE_INLINE auto Logger::wlog(Args&&... param_args) -> void {
+        log(Severity::Warning, std::forward<Args>(param_args)...);
+    }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    template<class... Args>
+    STORMKIT_FORCE_INLINE auto Logger::elog(Args&&... param_args) -> void {
+        log(Severity::Error, std::forward<Args>(param_args)...);
+    }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    template<class... Args>
+    STORMKIT_FORCE_INLINE auto Logger::flog(Args&&... param_args) -> void {
+        log(Severity::Fatal, std::forward<Args>(param_args)...);
+    }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    template<class... Args>
+    STORMKIT_FORCE_INLINE auto Module::dlog(Args&&... args) const -> void {
+        Logger::dlog(*this, std::forward<Args>(args)...);
+    }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    template<class... Args>
+    STORMKIT_FORCE_INLINE auto Module::ilog(Args&&... args) const -> void {
+        Logger::ilog(*this, std::forward<Args>(args)...);
+    }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    template<class... Args>
+    STORMKIT_FORCE_INLINE auto Module::wlog(Args&&... args) const -> void {
+        Logger::wlog(*this, std::forward<Args>(args)...);
+    }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    template<class... Args>
+    STORMKIT_FORCE_INLINE auto Module::elog(Args&&... args) const -> void {
+        Logger::elog(*this, std::forward<Args>(args)...);
+    }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    template<class... Args>
+    STORMKIT_FORCE_INLINE auto Module::flog(Args&&... args) const -> void {
+        Logger::flog(*this, std::forward<Args>(args)...);
+    }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Module::flush() const -> void {
+        Logger::instance().flush();
+    }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    template<core::ConstexprString str>
+    STORMKIT_FORCE_INLINE constexpr auto operator"" _module() -> stormkit::log::Module {
+        return Module { str.view() };
+    }
+} // namespace stormkit::log

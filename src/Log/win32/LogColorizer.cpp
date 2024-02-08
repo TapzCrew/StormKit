@@ -12,9 +12,6 @@ import std;
 
 import stormkit.Core;
 
-import :LogColorizer;
-import :Severity;
-
 namespace stormkit::log::details {
     namespace {
         [[maybe_unused]] constexpr auto KBLA = 0;
