@@ -126,7 +126,7 @@ namespace stormkit::gpu {
         auto func = std::mem_fn(std::forward<Func>(func_ref));
 
         const auto result = func(value, std::forward<Args>(args)...);
-        if (std::ranges::any_of(possible_results, core::toUnary(core::monadic::isEqual(), result)))
+        if (std::ranges::any_of(possible_results, core::toUnary(core::monadic::equal(), result)))
             return result;
 
         return std::unexpected { result };

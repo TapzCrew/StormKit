@@ -2,9 +2,31 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
+module;
+
+#include <climits>
+#include <cstdlib>
+
+#include <stormkit/Core/PlatformMacro.hpp>
+
+#include <magic_enum.hpp>
+
 export module stormkit.Core:String;
 
-export import :String.CString;
-export import :String.Encodings;
-export import :String.Format;
-export import :String.Operations;
+import std;
+
+import :Meta;
+import :Numerics;
+import :Math;
+import :Utils;
+
+export namespace stormkit::core {
+    using CZString  = const char*;
+    using ZString   = char*;
+    using CWZString = const wchar_t*;
+    using WZString  = wchar_t*;
+} // namespace stormkit::core
+
+#include <stormkit/private/Core/String/Encodings.inc>
+#include <stormkit/private/Core/String/Format.inc>
+#include <stormkit/private/Core/String/Operations.inc>

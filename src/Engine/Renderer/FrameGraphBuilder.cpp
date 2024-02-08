@@ -275,45 +275,44 @@ namespace stormkit::engine {
                             }) |
                             std::ranges::to<std::vector>();
 
-        const auto reads =
-            task.reads() | std::views::filter([this](const auto id) noexcept {
-                const auto& resource = getResource(id);
-                return core::is<GraphImage>(resource);
-            }) |
-            std::views::transform([&, this](const auto id) {
-                const auto& resource    = getResource<ImageDescription>(id);
-                const auto& description = resource.description();
+        const auto reads = task.reads() | std::views::filter([this](const auto id) noexcept {
+                               const auto& resource = getResource(id);
+                               return core::is<GraphImage>(resource);
+                           }) |
+                           std::views::transform([&, this](const auto id) {
+                               const auto& resource    = getResource<ImageDescription>(id);
+                               const auto& description = resource.description();
 
-                auto attachment_description = gpu::AttachmentDescription {
-                    .format             = description.format,
-                    .load_op            = gpu::AttachmentLoadOperation::Load,
-                    .store_op           = gpu::AttachmentStoreOperation::Dont_Care,
-                    .stencil_load_op    = gpu::AttachmentLoadOperation::Dont_Care,
-                    .stencil_store_op   = gpu::AttachmentStoreOperation::Dont_Care,
-                    .source_layout      = layouts.at(id),
-                    .destination_layout = layouts.at(id)
-                };
+                               auto attachment_description = gpu::AttachmentDescription {
+                                   .format             = description.format,
+                                   .load_op            = gpu::AttachmentLoadOperation::Load,
+                                   .store_op           = gpu::AttachmentStoreOperation::Dont_Care,
+                                   .stencil_load_op    = gpu::AttachmentLoadOperation::Dont_Care,
+                                   .stencil_store_op   = gpu::AttachmentStoreOperation::Dont_Care,
+                                   .source_layout      = layouts.at(id),
+                                   .destination_layout = layouts.at(id)
+                               };
 
-                if (std::ranges::any_of(task.writes(),
-                                        core::toUnary(core::monadic::isEqual(), id))) {
-                    to_remove.emplace_back(id);
-                    attachment_description.store_op = gpu::AttachmentStoreOperation::Store;
-                }
+                               if (std::ranges::any_of(task.writes(), core::monadic::equal(id))) {
+                                   to_remove.emplace_back(id);
+                                   attachment_description.store_op =
+                                       gpu::AttachmentStoreOperation::Store;
+                               }
 
-                if (isDepthStencilFormat(description.format)) [[unlikely]] {
-                    std::swap(attachment_description.load_op,
-                              attachment_description.stencil_load_op);
-                    std::swap(attachment_description.store_op,
-                              attachment_description.stencil_store_op);
-                    attachment_description.destination_layout =
-                        gpu::ImageLayout::Depth_Stencil_Attachment_Optimal;
-                }
+                               if (isDepthStencilFormat(description.format)) [[unlikely]] {
+                                   std::swap(attachment_description.load_op,
+                                             attachment_description.stencil_load_op);
+                                   std::swap(attachment_description.store_op,
+                                             attachment_description.stencil_store_op);
+                                   attachment_description.destination_layout =
+                                       gpu::ImageLayout::Depth_Stencil_Attachment_Optimal;
+                               }
 
-                layouts[id] = attachment_description.destination_layout;
+                               layouts[id] = attachment_description.destination_layout;
 
-                return attachment_description;
-            }) |
-            std::ranges::to<std::vector>();
+                               return attachment_description;
+                           }) |
+                           std::ranges::to<std::vector>();
 
         auto output = RenderPassData {};
         output.description.attachments =

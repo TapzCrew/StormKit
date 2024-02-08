@@ -2,7 +2,16 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
+module;
+
+#include <stormkit/Core/PlatformMacro.hpp>
+
 export module stormkit.Core:Parallelism;
 
-export import :Parallelism.ThreadPool;
-export import :Parallelism.ThreadUtils;
+import std;
+
+import :Utils;
+import :Numerics;
+
+#include <stormkit/private/Core/Parallelism/ThreadUtils.inc>
+#include <stormkit/private/Core/Parallelism/ThreadPool.inc>

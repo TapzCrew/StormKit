@@ -1,0 +1,85 @@
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+export namespace stormkit::core {
+    [[nodiscard]] auto read(std::istream& stream, RangeExtent size) noexcept -> std::vector<Byte>;
+
+    template<RangeExtent size>
+    [[nodiscard]] auto read(std::istream& stream) noexcept -> std::array<Byte, size>;
+
+    auto read(std::istream& stream, std::span<Byte> output) noexcept -> void;
+
+    auto write(std::ostream& stream, std::span<const Byte> data) noexcept -> void;
+
+    [[nodiscard]] auto readText(std::istream& stream, RangeExtent size) noexcept -> std::string;
+
+    auto readText(std::istream& stream, std::span<char> output) noexcept -> void;
+
+    auto writeText(std::ostream& stream, std::string_view data) noexcept -> void;
+} // namespace stormkit::core
+
+////////////////////////////////////////////////////////////////////
+///                      IMPLEMENTATION                          ///
+////////////////////////////////////////////////////////////////////
+
+namespace stormkit::core {
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    inline auto read(std::istream& stream, RangeExtent size) noexcept -> std::vector<Byte> {
+        auto output = std::vector<Byte> {};
+        output.resize(size);
+
+        read(stream, output);
+
+        return output;
+    }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    template<RangeExtent size>
+    inline auto read(std::istream& stream) noexcept -> std::array<Byte, size> {
+        auto output = std::array<Byte, size> {};
+
+        read(stream, output);
+
+        return output;
+    }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto read(std::istream& stream, std::span<Byte> output) noexcept -> void {
+        stream.read(std::bit_cast<char*>(std::data(output)), std::size(output));
+    }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto write(std::ostream&         stream,
+                                     std::span<const Byte> data) noexcept -> void {
+        stream.write(std::bit_cast<const char*>(std::data(data)), std::size(data));
+    }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    inline auto readText(std::istream& stream, RangeExtent size) noexcept -> std::string {
+        auto output = std::string {};
+        output.resize(size);
+
+        readText(stream, output);
+
+        return output;
+    }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto readText(std::istream&   stream,
+                                        std::span<char> output) noexcept -> void {
+        stream.read(std::data(output), std::size(output));
+    }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto writeText(std::ostream&    stream,
+                                         std::string_view data) noexcept -> void {
+        stream.write(std::data(data), std::size(data));
+    }
+} // namespace stormkit::core

@@ -2,8 +2,19 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
+module;
+
+#include <stormkit/Core/MemoryMacro.hpp>
+#include <stormkit/Core/PlatformMacro.hpp>
+
 export module stormkit.Core:Containers;
 
-export import :Containers.RingBuffer;
-export import :Containers.Tree;
-export import :Containers.Utils;
+import std;
+
+import :Utils;
+import :Numerics;
+import :Meta;
+
+#include <stormkit/private/Core/Containers/RingBuffer.inc>
+#include <stormkit/private/Core/Containers/Tree.inc>
+#include <stormkit/private/Core/Containers/Utils.inc>

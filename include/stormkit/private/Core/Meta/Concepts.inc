@@ -1,0 +1,182 @@
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+namespace stormkit::core {
+    namespace details {
+        template<class T>
+        concept IsBooleanTestable = std::convertible_to<T, bool>;
+    } // namespace details
+
+    export {
+        template<class T>
+        concept IsHashable = requires(std::remove_cvref_t<T>& a) {
+            { std::hash<std::remove_cvref_t<T>> {}(a) } -> std::convertible_to<std::size_t>;
+        };
+
+        template<class T>
+        concept IsFancyPointer = requires(T&& a) {
+            a.operator->();
+            a.operator*();
+            a.get();
+        };
+
+        template<class T, class U>
+        concept Is = std::same_as<T, U> or std::derived_from<T, U>;
+
+        template<class T, class U>
+        concept IsPure = Is<std::remove_cvref_t<T>, std::remove_cvref_t<U>>;
+
+        template<class T, class... U>
+        concept IsOneOf = (Is<T, U> or ...);
+
+        template<class T, class U>
+        concept IsNot = not Is<T, U>;
+
+        template<class T, class U>
+        concept IsNotPure = IsNot<std::remove_cvref_t<T>, std::remove_cvref_t<U>>;
+
+        template<class T>
+        concept IsByte = Is<T, std::byte>;
+
+        template<class T>
+        concept IsBytePure = IsPure<T, std::byte>;
+
+        template<class T>
+        concept IsNotByte = not IsByte<T>;
+
+        template<class T>
+        concept IsNotBytePure = not IsBytePure<T>;
+
+        template<class T>
+        concept IsStringLike = std::convertible_to<T, std::string_view>;
+
+        template<class T>
+        concept IsRawPointer = std::is_pointer_v<T>;
+
+        template<class T>
+        concept IsPointer = IsRawPointer<T> or IsFancyPointer<T>;
+
+        // clang-format off
+        template<class T>
+        concept IsNotPointer = not IsPointer<T>;
+        // clang-format on
+
+        template<class T>
+        concept IsLValueReference = std::is_lvalue_reference_v<T>;
+
+        template<class T>
+        concept IsRValueReference = std::is_rvalue_reference_v<T>;
+
+        template<class T>
+        concept IsReference = IsLValueReference<T> or IsRValueReference<T>;
+
+        // clang-format off
+        template<class T>
+        concept IsNotReference = not IsReference<T>;
+        // clang-format on
+
+        template<class T>
+        concept IsIndirection = IsLValueReference<T> or IsPointer<T>;
+
+        template<class T>
+        concept IsRawIndirection = IsLValueReference<T> or IsRawPointer<T>;
+
+        template<class T>
+        concept IsPolymorphic = std::is_polymorphic_v<T>;
+
+        template<class T>
+        concept IsNotIndirection = not IsIndirection<T>;
+
+        template<class T>
+        concept IsEnumeration = std::is_enum_v<T> and IsNotByte<T>;
+
+        template<class T>
+        concept IsEnumerationPure = IsEnumeration<std::remove_cvref_t<T>>;
+
+        template<typename T>
+        concept IsIntegral = std::integral<T>;
+
+        template<typename T>
+        concept IsIntegralPure = IsIntegral<std::remove_cvref_t<T>>;
+
+        template<typename T>
+        concept IsFloatingPoint = std::floating_point<T>;
+
+        template<typename T>
+        concept IsFloatingPointPure = IsFloatingPoint<std::remove_cvref_t<T>>;
+
+        template<class T>
+        concept IsArithmetic =
+            (IsIntegral<T> or IsFloatingPoint<T>)and not IsPointer<T> and not IsEnumeration<T>;
+
+        template<class T>
+        concept IsArithmeticPure = IsArithmetic<std::remove_cvref_t<T>>;
+
+        template<class T>
+        concept IsPreIncrementable = requires(T& a) { a.operator--(); };
+
+        template<class T>
+        concept IsBooleanTestable = details::IsBooleanTestable<T> && requires(T&& t) {
+            { not std::forward<T>(t) } -> details::IsBooleanTestable;
+        };
+
+        template<class T>
+        concept IsOptionalType = requires(T&& t) {
+            t.has_value();
+            { t == std::nullopt } -> details::IsBooleanTestable;
+            { t != std::nullopt } -> details::IsBooleanTestable;
+        };
+
+        template<class T>
+        concept IsVariantType = requires(T&& t) {
+            { std::holds_alternative<int>(t) } -> details::IsBooleanTestable;
+        };
+
+        template<class T, class... Args>
+        concept IsPredicate = std::predicate<T, Args...>;
+
+        template<class T, class U>
+        concept IsUnaryPredicate = IsPredicate<T, const U&>;
+
+        template<class T, class U>
+        concept IsBinaryPredicate = IsPredicate<T, const U&, const U&>;
+
+        template<class T, class U>
+        concept IsHashFunc = std::regular_invocable<T, U> and
+                             std::convertible_to<std::invoke_result_t<T, U>, std::uint64_t>;
+
+        // doesn't work atm
+        template<class T, class CharT>
+        concept IsFormattable =
+            true; // requires(std::formatter<T, CharT> f, T val) { f.format("{}", val); };
+
+        template<class T>
+        concept IsCharacter =
+            IsOneOf<T, char, signed char, unsigned char, wchar_t, char8_t, char16_t, char32_t>;
+
+        template<class T>
+        concept IsCharacterPure = IsCharacter<std::remove_cvref_t<T>>;
+
+        template<class T>
+        concept IsColorComponent = Is<T, float> or Is<T, std::uint8_t>;
+
+        template<class T>
+        concept IsConst = std::is_const_v<T>;
+
+        template<class T>
+        concept IsNotConst = std::is_const_v<T>;
+
+        template<class From, typename To>
+        concept IsBraceInitializableTo = requires(From&& from) { To { std::forward<From>(from) }; };
+
+        template<typename To, typename From>
+        concept IsNarrowing =
+            IsArithmetic<To> and IsArithmetic<From> and IsBraceInitializableTo<From, To>;
+
+        template<typename To, typename From>
+        concept IsNarrowingPure = IsNarrowing<std::remove_cvref_t<To>, std::remove_cvref_t<From>>;
+    } // namespace stormkit::core
+
+#ifndef STORMKIT_NO_MODULES
+}
+#endif

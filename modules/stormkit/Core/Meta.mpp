@@ -2,11 +2,18 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
+module;
+
+#include <stormkit/Core/MemoryMacro.hpp>
+
+#include <stormkit/Core/HashMacro.hpp>
+
 export module stormkit.Core:Meta;
 
-export import :Meta.Concepts;
-export import :Meta.Traits;
-export import :Meta.NamedType;
+import std;
+
+#include <stormkit/private/Core/Meta/Concepts.inc>
+#include <stormkit/private/Core/Meta/Traits.inc>
 
 export namespace stormkit::core {
     template<class... Ts>

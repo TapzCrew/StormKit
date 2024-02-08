@@ -1,0 +1,79 @@
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+export namespace stormkit::core {
+    struct StringHash {
+        using is_transparent = void;
+
+        [[nodiscard]] auto operator()(const std::string& value) const noexcept -> std::uint64_t;
+        [[nodiscard]] auto operator()(std::string_view value) const noexcept -> std::uint64_t;
+    };
+
+    struct StringEqual {
+        using is_transparent = void;
+
+        [[nodiscard]] auto operator()(const std::string& a, const std::string& b) const noexcept
+            -> bool;
+        [[nodiscard]] auto operator()(const std::string& a, std::string_view b) const noexcept
+            -> bool;
+        [[nodiscard]] auto operator()(std::string_view a, const std::string& b) const noexcept
+            -> bool;
+        [[nodiscard]] auto operator()(std::string_view a, std::string_view b) const noexcept
+            -> bool;
+    };
+
+    template<class Value, class Key = std::string>
+    using StringHashMap = std::unordered_map<std::remove_cvref_t<Key>,
+                                             std::remove_cvref_t<Value>,
+                                             StringHash,
+                                             StringEqual>;
+
+    template<class Value = std::string>
+    using StringHashSet = std::unordered_set<std::remove_cvref_t<Value>, StringHash, StringEqual>;
+} // namespace stormkit::core
+
+////////////////////////////////////////////////////////////////////
+///                      IMPLEMENTATION                          ///
+////////////////////////////////////////////////////////////////////
+
+namespace stormkit::core {
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    inline auto StringHash::operator()(const std::string& value) const noexcept -> std::uint64_t {
+        return std::hash<std::string> {}(value);
+    }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    inline auto StringHash::operator()(std::string_view value) const noexcept -> std::uint64_t {
+        return std::hash<std::string_view> {}(value);
+    }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    inline auto StringEqual::operator()(const std::string& a, const std::string& b) const noexcept
+        -> bool {
+        return a.compare(b) == 0;
+    }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    inline auto StringEqual::operator()(const std::string& a, std::string_view b) const noexcept
+        -> bool {
+        return a.compare(b) == 0;
+    }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    inline auto StringEqual::operator()(std::string_view a, const std::string& b) const noexcept
+        -> bool {
+        return a.compare(b) == 0;
+    }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    inline auto StringEqual::operator()(std::string_view a, std::string_view b) const noexcept
+        -> bool {
+        return a.compare(b) == 0;
+    }
+} // namespace stormkit::core

@@ -6,7 +6,7 @@ module stormkit.Core;
 
 import std;
 
-import :Parallelism.ThreadUtils;
+import :Parallelism;
 
 namespace stormkit::core {
     ////////////////////////////////////////

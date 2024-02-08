@@ -1,0 +1,50 @@
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+export namespace stormkit::core {
+    auto seed(Int seed) noexcept -> void;
+
+    template<std::floating_point T>
+    [[nodiscard]] auto rand(T min, T max) noexcept -> T;
+
+    template<std::integral T>
+    [[nodiscard]] auto rand(T min, T max) noexcept -> T;
+} // namespace stormkit::core
+
+////////////////////////////////////////////////////////////////////
+///                      IMPLEMENTATION                          ///
+////////////////////////////////////////////////////////////////////
+
+namespace stormkit::core {
+    namespace {
+        std::default_random_engine generator {};
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto randomGenerator() noexcept -> std::default_random_engine& {
+        return generator;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto seed(Int seed) noexcept -> void {
+        randomGenerator().seed(seed);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<std::floating_point T>
+    STORMKIT_FORCE_INLINE auto rand(T min, T max) noexcept -> T {
+        std::uniform_real_distribution<T> dis(min, max);
+        return dis(randomGenerator());
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<std::integral T>
+    STORMKIT_FORCE_INLINE auto rand(T min, T max) noexcept -> T {
+        std::uniform_int_distribution<T> dis(min, max);
+        return dis(randomGenerator());
+    }
+} // namespace stormkit::core

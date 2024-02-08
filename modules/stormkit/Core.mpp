@@ -4,15 +4,14 @@
 
 export module stormkit.Core;
 
-// clang-format off
-
-// clang-format on
-
+export import :Color;
 export import :Configuration;
 export import :Containers;
 export import :Coroutines;
 export import :Hash;
 export import :Meta;
+export import :Math;
+export import :Numerics;
 export import :Parallelism;
 export import :String;
 export import :Utils;
