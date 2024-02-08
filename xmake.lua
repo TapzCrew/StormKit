@@ -145,7 +145,7 @@ modules = {
     custom = function()
       on_load(function(target)
         if target:kind() == "shared" then
-          add_defines("defines", "VK_HPP_STORAGE_SHARED", { public = true })
+          target:add("defines", "VK_HPP_STORAGE_SHARED", { public = true })
         else
           target:add("defines", "VK_HPP_STORAGE_API", { public = true })
         end
