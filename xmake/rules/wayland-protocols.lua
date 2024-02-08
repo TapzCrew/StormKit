@@ -20,7 +20,7 @@ do
 
 	on_load(function(target)
 		if target:rule("c++.build") then
-			local rule = target:rule("c++.build"):clone()
+			local rule = target:rule("c++.build.modules"):clone()
 			rule:add("deps", "wayland.protocols", { order = true })
 			target:rule_add(rule)
 		end

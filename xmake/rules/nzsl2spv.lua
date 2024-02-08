@@ -6,8 +6,8 @@ do
 	-- for c++ module dependency discovery
 	on_load(function(target)
 		if target:rule("c++.build.modules") then
-			local rule = target:rule("c++.build"):clone()
-			rule:add("deps", "wayland.protocols", { order = true })
+			local rule = target:rule("c++.build.modules"):clone()
+			rule:add("deps", "compile.shaders", { order = true })
 			target:rule_add(rule)
 		end
 	end)
