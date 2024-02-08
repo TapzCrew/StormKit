@@ -44,9 +44,9 @@ do
 				local privatefile = path.join(outputdir, path.basename(protocol) .. ".c")
 
 				-- for c++ module dependency discovery
-				if not os.exists(clientfile) then
-					os.touch(clientfile)
-				end
+				-- if not os.exists(clientfile) then
+				-- 	os.touch(clientfile)
+				-- end
 
 				target:add("files", privatefile, { always_added = true })
 			end
