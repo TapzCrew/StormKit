@@ -8,11 +8,10 @@ import std;
 
 import stormkit.Core;
 import stormkit.Image;
-
-import :Core;
 import stormkit.Gpu.Vulkan;
 
-import :Resource.Image;
+import :Core;
+import :Resource;
 
 // #include <gli/load.hpp>
 

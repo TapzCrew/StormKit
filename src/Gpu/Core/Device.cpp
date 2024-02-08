@@ -6,19 +6,18 @@ module;
 
 #include <vulkan/vulkan_hpp_macros.hpp>
 
+#include <stormkit/Gpu/Core/VulkanMacro.hpp>
+#include <stormkit/Log/LogMacro.hpp>
+
 module stormkit.Gpu;
 
 import std;
 
 import stormkit.Core;
 import stormkit.Log;
-
-#include <stormkit/Gpu/Core/VulkanMacro.hpp>
-#include <stormkit/Log/LogMacro.hpp>
-
-import :Core.Device;
-import :Core.Sync;
 import stormkit.Gpu.Vulkan;
+
+import :Core;
 
 using namespace std::literals;
 
@@ -131,9 +130,10 @@ namespace stormkit::gpu {
         const auto device_extensions =
             m_physical_device->vkHandle().enumerateDeviceExtensionProperties();
 
-        device_logger.dlog("Device extensions: {}", device_extensions | std::views::transform([](auto&& ext) {
-                                     return std::string_view { ext.extensionName };
-                                 }));
+        device_logger.dlog("Device extensions: {}",
+                           device_extensions | std::views::transform([](auto&& ext) {
+                               return std::string_view { ext.extensionName };
+                           }));
 
         const auto swapchain_available = [&] {
             for (const auto& ext : SWAPCHAIN_EXTENSIONS) {

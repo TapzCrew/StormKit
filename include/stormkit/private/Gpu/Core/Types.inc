@@ -1,0 +1,1478 @@
+export {
+    namespace stormkit::gpu {
+        inline constexpr auto QUEUE_FAMILY_IGNORED = core::UInt32 { vk::QueueFamilyIgnored };
+
+        enum class PhysicalDeviceType : core::UInt8 {
+            Discrete_GPU   = core::narrow<core::UInt8>(vk::PhysicalDeviceType::eDiscreteGpu),
+            Virtual_GPU    = core::narrow<core::UInt8>(vk::PhysicalDeviceType::eVirtualGpu),
+            Integrated_GPU = core::narrow<core::UInt8>(vk::PhysicalDeviceType::eIntegratedGpu),
+            CPU            = core::narrow<core::UInt8>(vk::PhysicalDeviceType::eCpu),
+            Other          = core::narrow<core::UInt8>(vk::PhysicalDeviceType::eOther),
+        };
+
+        enum class QueueFlag : core::UInt8 {
+            None           = 0,
+            Graphics       = core::narrow<core::UInt8>(vk::QueueFlagBits::eGraphics),
+            Compute        = core::narrow<core::UInt8>(vk::QueueFlagBits::eCompute),
+            Transfert      = core::narrow<core::UInt8>(vk::QueueFlagBits::eTransfer),
+            Sparse_Binding = core::narrow<core::UInt8>(vk::QueueFlagBits::eSparseBinding),
+        };
+
+        enum class ShaderStageFlag : core::UInt8 {
+            None     = 0,
+            Vertex   = core::narrow<core::UInt8>(vk::ShaderStageFlagBits::eVertex),
+            Fragment = core::narrow<core::UInt8>(vk::ShaderStageFlagBits::eFragment),
+            Geometry = core::narrow<core::UInt8>(vk::ShaderStageFlagBits::eGeometry),
+            Compute  = core::narrow<core::UInt8>(vk::ShaderStageFlagBits::eCompute),
+        };
+
+        enum class PrimitiveTopology : core::UInt8 {
+            Point_List     = core::narrow<core::UInt8>(vk::PrimitiveTopology::ePointList),
+            Line_List      = core::narrow<core::UInt8>(vk::PrimitiveTopology::eLineList),
+            Line_Strip     = core::narrow<core::UInt8>(vk::PrimitiveTopology::eLineStrip),
+            Triangle_List  = core::narrow<core::UInt8>(vk::PrimitiveTopology::eTriangleList),
+            Triangle_Strip = core::narrow<core::UInt8>(vk::PrimitiveTopology::eTriangleStrip),
+            Triangle_Fan   = core::narrow<core::UInt8>(vk::PrimitiveTopology::eTriangleFan),
+        };
+
+        enum class PolygonMode : core::UInt8 {
+            Fill  = core::narrow<core::UInt8>(vk::PolygonMode::eFill),
+            Line  = core::narrow<core::UInt8>(vk::PolygonMode::eLine),
+            Point = core::narrow<core::UInt8>(vk::PolygonMode::ePoint),
+        };
+
+        enum class CullModeFlag : core::UInt8 {
+            None       = core::narrow<core::UInt8>(vk::CullModeFlagBits::eNone),
+            Front      = core::narrow<core::UInt8>(vk::CullModeFlagBits::eFront),
+            Back       = core::narrow<core::UInt8>(vk::CullModeFlagBits::eBack),
+            Front_Back = Front | Back,
+        };
+
+        enum class FrontFace : core::UInt8 {
+            Clockwise         = core::narrow<core::UInt8>(vk::FrontFace::eClockwise),
+            Counter_Clockwise = core::narrow<core::UInt8>(vk::FrontFace::eCounterClockwise),
+        };
+
+        enum class SampleCountFlag : core::UInt8 {
+            None = 0,
+            C1   = core::narrow<core::UInt8>(vk::SampleCountFlagBits::e1),
+            C2   = core::narrow<core::UInt8>(vk::SampleCountFlagBits::e2),
+            C4   = core::narrow<core::UInt8>(vk::SampleCountFlagBits::e4),
+            C8   = core::narrow<core::UInt8>(vk::SampleCountFlagBits::e8),
+            C16  = core::narrow<core::UInt8>(vk::SampleCountFlagBits::e16),
+            C32  = core::narrow<core::UInt8>(vk::SampleCountFlagBits::e32),
+            C64  = core::narrow<core::UInt8>(vk::SampleCountFlagBits::e64),
+        };
+
+        enum class ColorComponentFlag : core::UInt8 {
+            None = 0,
+            R    = core::narrow<core::UInt8>(vk::ColorComponentFlagBits::eR),
+            G    = core::narrow<core::UInt8>(vk::ColorComponentFlagBits::eG),
+            B    = core::narrow<core::UInt8>(vk::ColorComponentFlagBits::eB),
+            A    = core::narrow<core::UInt8>(vk::ColorComponentFlagBits::eA),
+            RG   = R | G,
+            RGB  = RG | B,
+            RGBA = RGB | A,
+        };
+
+        enum class BlendFactor : core::UInt8 {
+            One                 = core::narrow<core::UInt8>(vk::BlendFactor::eOne),
+            Zero                = core::narrow<core::UInt8>(vk::BlendFactor::eZero),
+            Src_Color           = core::narrow<core::UInt8>(vk::BlendFactor::eSrcColor),
+            One_Minus_Src_Color = core::narrow<core::UInt8>(vk::BlendFactor::eOneMinusSrcColor),
+            Dst_Color           = core::narrow<core::UInt8>(vk::BlendFactor::eDstColor),
+            One_Minus_Dst_Color = core::narrow<core::UInt8>(vk::BlendFactor::eOneMinusDstColor),
+            Src_Alpha           = core::narrow<core::UInt8>(vk::BlendFactor::eSrcAlpha),
+            One_Minus_Src_Alpha = core::narrow<core::UInt8>(vk::BlendFactor::eOneMinusSrcAlpha),
+            Dst_Alpha           = core::narrow<core::UInt8>(vk::BlendFactor::eDstAlpha),
+            One_Minus_Dst_Alpha = core::narrow<core::UInt8>(vk::BlendFactor::eOneMinusDstAlpha),
+            Constant_Color      = core::narrow<core::UInt8>(vk::BlendFactor::eConstantColor),
+            One_Minus_Constant_Color =
+                core::narrow<core::UInt8>(vk::BlendFactor::eOneMinusConstantColor),
+            Constant_Alpha = core::narrow<core::UInt8>(vk::BlendFactor::eConstantAlpha),
+            One_Minus_Constant_Alpha =
+                core::narrow<core::UInt8>(vk::BlendFactor::eOneMinusConstantAlpha),
+            Src_Alpha_Saturate   = core::narrow<core::UInt8>(vk::BlendFactor::eSrcAlphaSaturate),
+            Src1_Color           = core::narrow<core::UInt8>(vk::BlendFactor::eSrc1Color),
+            One_Minus_Src1_Color = core::narrow<core::UInt8>(vk::BlendFactor::eOneMinusSrc1Color),
+            Src1_Alpha           = core::narrow<core::UInt8>(vk::BlendFactor::eSrc1Alpha),
+            One_Minus_Src1_Alpha = core::narrow<core::UInt8>(vk::BlendFactor::eOneMinusSrc1Alpha),
+        };
+
+        enum class BlendOperation : core::UInt8 {
+            Add               = core::narrow<core::UInt8>(vk::BlendOp::eAdd),
+            Substract         = core::narrow<core::UInt8>(vk::BlendOp::eSubtract),
+            Reverse_Substract = core::narrow<core::UInt8>(vk::BlendOp::eReverseSubtract),
+            Min               = core::narrow<core::UInt8>(vk::BlendOp::eMin),
+            Max               = core::narrow<core::UInt8>(vk::BlendOp::eMax),
+        };
+
+        enum class LogicOperation : core::UInt8 {
+            Clear         = core::narrow<core::UInt8>(vk::LogicOp::eClear),
+            And           = core::narrow<core::UInt8>(vk::LogicOp::eAnd),
+            And_Reverse   = core::narrow<core::UInt8>(vk::LogicOp::eAndReverse),
+            Copy          = core::narrow<core::UInt8>(vk::LogicOp::eCopy),
+            And_Inverted  = core::narrow<core::UInt8>(vk::LogicOp::eAndInverted),
+            No_Operation  = core::narrow<core::UInt8>(vk::LogicOp::eNoOp),
+            Xor           = core::narrow<core::UInt8>(vk::LogicOp::eXor),
+            Or            = core::narrow<core::UInt8>(vk::LogicOp::eOr),
+            Nor           = core::narrow<core::UInt8>(vk::LogicOp::eNor),
+            Equivalent    = core::narrow<core::UInt8>(vk::LogicOp::eEquivalent),
+            Invert        = core::narrow<core::UInt8>(vk::LogicOp::eInvert),
+            Or_Reverse    = core::narrow<core::UInt8>(vk::LogicOp::eOrReverse),
+            Copy_Inverted = core::narrow<core::UInt8>(vk::LogicOp::eCopyInverted),
+            Or_Inverted   = core::narrow<core::UInt8>(vk::LogicOp::eOrInverted),
+            Nand          = core::narrow<core::UInt8>(vk::LogicOp::eNand),
+            Set           = core::narrow<core::UInt8>(vk::LogicOp::eSet),
+        };
+
+        enum class PixelFormat : core::UInt8 {
+            R8_SNorm    = core::narrow<core::UInt8>(vk::Format::eR8Snorm),
+            RG8_SNorm   = core::narrow<core::UInt8>(vk::Format::eR8G8Snorm),
+            RGB8_SNorm  = core::narrow<core::UInt8>(vk::Format::eR8G8B8Snorm),
+            RGBA8_SNorm = core::narrow<core::UInt8>(vk::Format::eR8G8B8A8Snorm),
+
+            R8_UNorm    = core::narrow<core::UInt8>(vk::Format::eR8Unorm),
+            RG8_UNorm   = core::narrow<core::UInt8>(vk::Format::eR8G8Unorm),
+            RGB8_UNorm  = core::narrow<core::UInt8>(vk::Format::eR8G8B8Unorm),
+            RGBA8_UNorm = core::narrow<core::UInt8>(vk::Format::eR8G8B8A8Unorm),
+
+            R16_SNorm    = core::narrow<core::UInt8>(vk::Format::eR16Snorm),
+            RG16_SNorm   = core::narrow<core::UInt8>(vk::Format::eR16G16Snorm),
+            RGB16_SNorm  = core::narrow<core::UInt8>(vk::Format::eR16G16B16Snorm),
+            RGBA16_SNorm = core::narrow<core::UInt8>(vk::Format::eR16G16B16A16Snorm),
+
+            R16_UNorm    = core::narrow<core::UInt8>(vk::Format::eR16Unorm),
+            RG16_UNorm   = core::narrow<core::UInt8>(vk::Format::eR16G16Unorm),
+            RGB16_UNorm  = core::narrow<core::UInt8>(vk::Format::eR16G16B16Unorm),
+            RGBA16_UNorm = core::narrow<core::UInt8>(vk::Format::eR16G16B16A16Unorm),
+
+            A2_RGB10_UNorm = core::narrow<core::UInt8>(vk::Format::eA2R10G10B10UnormPack32),
+
+            RGBA4_UNorm_Pack16 = core::narrow<core::UInt8>(vk::Format::eR4G4B4A4UnormPack16),
+
+            A1_RGB5_UNorm_Pack16 = core::narrow<core::UInt8>(vk::Format::eA1R5G5B5UnormPack16),
+
+            R5_G6_B5_UNorm_Pack16 = core::narrow<core::UInt8>(vk::Format::eR5G6B5UnormPack16),
+
+            BGR8_UNorm  = core::narrow<core::UInt8>(vk::Format::eB8G8R8Unorm),
+            BGRA8_UNorm = core::narrow<core::UInt8>(vk::Format::eB8G8R8A8Unorm),
+
+            R8I    = core::narrow<core::UInt8>(vk::Format::eR8Sint),
+            RG8I   = core::narrow<core::UInt8>(vk::Format::eR8G8Sint),
+            RGB8I  = core::narrow<core::UInt8>(vk::Format::eR8G8B8Sint),
+            RGBA8I = core::narrow<core::UInt8>(vk::Format::eR8G8B8A8Sint),
+
+            R8U    = core::narrow<core::UInt8>(vk::Format::eR8Uint),
+            RG8U   = core::narrow<core::UInt8>(vk::Format::eR8G8Uint),
+            RGB8U  = core::narrow<core::UInt8>(vk::Format::eR8G8B8Uint),
+            RGBA8U = core::narrow<core::UInt8>(vk::Format::eR8G8B8A8Uint),
+
+            R16I    = core::narrow<core::UInt8>(vk::Format::eR16Sint),
+            RG16I   = core::narrow<core::UInt8>(vk::Format::eR16G16Sint),
+            RGB16I  = core::narrow<core::UInt8>(vk::Format::eR16G16B16Sint),
+            RGBA16I = core::narrow<core::UInt8>(vk::Format::eR16G16B16A16Sint),
+
+            R16U    = core::narrow<core::UInt8>(vk::Format::eR16Uint),
+            RG16U   = core::narrow<core::UInt8>(vk::Format::eR16G16Uint),
+            RGB16U  = core::narrow<core::UInt8>(vk::Format::eR16G16B16Uint),
+            RGBA16U = core::narrow<core::UInt8>(vk::Format::eR16G16B16A16Uint),
+
+            R32I    = core::narrow<core::UInt8>(vk::Format::eR32Sint),
+            RG32I   = core::narrow<core::UInt8>(vk::Format::eR32G32Sint),
+            RGB32I  = core::narrow<core::UInt8>(vk::Format::eR32G32B32Sint),
+            RGBA32I = core::narrow<core::UInt8>(vk::Format::eR32G32B32A32Sint),
+
+            R32U    = core::narrow<core::UInt8>(vk::Format::eR32Uint),
+            RG32U   = core::narrow<core::UInt8>(vk::Format::eR32G32Uint),
+            RGB32U  = core::narrow<core::UInt8>(vk::Format::eR32G32B32Uint),
+            RGBA32U = core::narrow<core::UInt8>(vk::Format::eR32G32B32A32Uint),
+
+            A2_RGB10U_Pack32 = core::narrow<core::UInt8>(vk::Format::eA2R10G10B10UintPack32),
+
+            R16F    = core::narrow<core::UInt8>(vk::Format::eR16Sfloat),
+            RG16F   = core::narrow<core::UInt8>(vk::Format::eR16G16Sfloat),
+            RGB16F  = core::narrow<core::UInt8>(vk::Format::eR16G16B16Sfloat),
+            RGBA16F = core::narrow<core::UInt8>(vk::Format::eR16G16B16A16Sfloat),
+
+            R32F    = core::narrow<core::UInt8>(vk::Format::eR32Sfloat),
+            RG32F   = core::narrow<core::UInt8>(vk::Format::eR32G32Sfloat),
+            RGB32F  = core::narrow<core::UInt8>(vk::Format::eR32G32B32Sfloat),
+            RGBA32F = core::narrow<core::UInt8>(vk::Format::eR32G32B32A32Sfloat),
+
+            BG11_R10F_Pack32 = core::narrow<core::UInt8>(vk::Format::eB10G11R11UfloatPack32),
+
+            sRGB8  = core::narrow<core::UInt8>(vk::Format::eR8G8B8Srgb),
+            sRGBA8 = core::narrow<core::UInt8>(vk::Format::eR8G8B8A8Srgb),
+            sBGR8  = core::narrow<core::UInt8>(vk::Format::eB8G8R8Srgb),
+            sBGRA8 = core::narrow<core::UInt8>(vk::Format::eB8G8R8A8Srgb),
+
+            Depth16  = core::narrow<core::UInt8>(vk::Format::eD16Unorm),
+            Depth24  = core::narrow<core::UInt8>(vk::Format::eX8D24UnormPack32),
+            Depth32F = core::narrow<core::UInt8>(vk::Format::eD32Sfloat),
+
+            Depth16_Stencil8  = core::narrow<core::UInt8>(vk::Format::eD16UnormS8Uint),
+            Depth24_Stencil8  = core::narrow<core::UInt8>(vk::Format::eD24UnormS8Uint),
+            Depth32F_Stencil8 = core::narrow<core::UInt8>(vk::Format::eD32SfloatS8Uint),
+
+            Undefined = core::narrow<core::UInt8>(vk::Format::eUndefined),
+        };
+
+        enum class AttachmentLoadOperation : core::UInt8 {
+            Clear     = core::narrow<core::UInt8>(vk::AttachmentLoadOp::eClear),
+            Load      = core::narrow<core::UInt8>(vk::AttachmentLoadOp::eLoad),
+            Dont_Care = core::narrow<core::UInt8>(vk::AttachmentLoadOp::eDontCare),
+        };
+
+        enum class AttachmentStoreOperation : core::UInt8 {
+            Store     = core::narrow<core::UInt8>(vk::AttachmentStoreOp::eStore),
+            Dont_Care = core::narrow<core::UInt8>(vk::AttachmentStoreOp::eDontCare),
+        };
+
+        enum class PipelineBindPoint : core::UInt8 {
+            Graphics = core::narrow<core::UInt8>(vk::PipelineBindPoint::eGraphics),
+            Compute  = core::narrow<core::UInt8>(vk::PipelineBindPoint::eCompute),
+        };
+
+        enum class ImageLayout : core::UInt32 {
+            General = core::narrow<core::UInt32>(vk::ImageLayout::eGeneral),
+            Color_Attachment_Optimal =
+                core::narrow<core::UInt32>(vk::ImageLayout::eColorAttachmentOptimal),
+            Depth_Stencil_Attachment_Optimal =
+                core::narrow<core::UInt32>(vk::ImageLayout::eDepthStencilAttachmentOptimal),
+            Depth_Stencil_Read_Only_Optimal =
+                core::narrow<core::UInt32>(vk::ImageLayout::eDepthStencilReadOnlyOptimal),
+            Shader_Read_Only_Optimal =
+                core::narrow<core::UInt32>(vk::ImageLayout::eShaderReadOnlyOptimal),
+            Transfer_Src_Optimal = core::narrow<core::UInt32>(vk::ImageLayout::eTransferSrcOptimal),
+            Transfer_Dst_Optimal = core::narrow<core::UInt32>(vk::ImageLayout::eTransferDstOptimal),
+            Preinitialized       = core::narrow<core::UInt32>(vk::ImageLayout::ePreinitialized),
+            Depth_Read_Only_Stencil_Attachment_Optimal =
+                core::narrow<core::UInt32>(vk::ImageLayout::eDepthReadOnlyStencilAttachmentOptimal),
+            Depth_Attachment_Stencil_Read_Only_Optimal =
+                core::narrow<core::UInt32>(vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal),
+            Present_Src    = core::narrow<core::UInt32>(vk::ImageLayout::ePresentSrcKHR),
+            Shared_Present = core::narrow<core::UInt32>(vk::ImageLayout::eSharedPresentKHR),
+            Undefined      = core::narrow<core::UInt32>(vk::ImageLayout::eUndefined),
+        };
+
+        enum class ImageAspectMaskFlag : core::UInt8 {
+            None    = 0,
+            Color   = core::narrow<core::UInt8>(vk::ImageAspectFlagBits::eColor),
+            Depth   = core::narrow<core::UInt8>(vk::ImageAspectFlagBits::eDepth),
+            Stencil = core::narrow<core::UInt8>(vk::ImageAspectFlagBits::eStencil),
+        };
+
+        enum class VertexInputRate : core::UInt8 {
+            Vertex   = core::narrow<core::UInt8>(vk::VertexInputRate::eVertex),
+            Instance = core::narrow<core::UInt8>(vk::VertexInputRate::eInstance),
+        };
+
+        enum class ImageCreateFlag : core::UInt16 {
+            None           = 0,
+            Sparse_Binding = core::narrow<core::UInt16>(vk::ImageCreateFlagBits::eSparseBinding),
+            Sparse_Residency =
+                core::narrow<core::UInt16>(vk::ImageCreateFlagBits::eSparseResidency),
+            Sparse_Aliased  = core::narrow<core::UInt16>(vk::ImageCreateFlagBits::eSparseAliased),
+            Mutable_Format  = core::narrow<core::UInt16>(vk::ImageCreateFlagBits::eMutableFormat),
+            Cube_Compatible = core::narrow<core::UInt16>(vk::ImageCreateFlagBits::eCubeCompatible),
+            Alias           = core::narrow<core::UInt16>(vk::ImageCreateFlagBits::eAlias),
+            Split_Instance_Bind_Regions =
+                core::narrow<core::UInt16>(vk::ImageCreateFlagBits::eSplitInstanceBindRegions),
+            Array_2D_Compatible =
+                core::narrow<core::UInt16>(vk::ImageCreateFlagBits::e2DArrayCompatible),
+            Block_Texel_View_Compatible =
+                core::narrow<core::UInt16>(vk::ImageCreateFlagBits::eBlockTexelViewCompatible),
+            Extended_Usage = core::narrow<core::UInt16>(vk::ImageCreateFlagBits::eExtendedUsage),
+            Protected      = core::narrow<core::UInt16>(vk::ImageCreateFlagBits::eProtected),
+            Disjoint       = core::narrow<core::UInt16>(vk::ImageCreateFlagBits::eDisjoint),
+        };
+
+        enum class Format : core::UInt8 {
+            Byte  = core::narrow<core::UInt8>(vk::Format::eR8Sint),
+            Byte2 = core::narrow<core::UInt8>(vk::Format::eR8G8Sint),
+            Byte3 = core::narrow<core::UInt8>(vk::Format::eR8G8B8Sint),
+            Byte4 = core::narrow<core::UInt8>(vk::Format::eR8G8B8A8Sint),
+
+            Byte_Norm  = core::narrow<core::UInt8>(vk::Format::eR8Snorm),
+            Byte2_Norm = core::narrow<core::UInt8>(vk::Format::eR8G8Snorm),
+            Byte3_Norm = core::narrow<core::UInt8>(vk::Format::eR8G8B8Snorm),
+            Byte4_Norm = core::narrow<core::UInt8>(vk::Format::eR8G8B8A8Snorm),
+
+            Byte_Scaled  = core::narrow<core::UInt8>(vk::Format::eR8Sscaled),
+            Byte2_Scaled = core::narrow<core::UInt8>(vk::Format::eR8G8Sscaled),
+            Byte3_Scaled = core::narrow<core::UInt8>(vk::Format::eR8G8B8Sscaled),
+            Byte4_Scaled = core::narrow<core::UInt8>(vk::Format::eR8G8B8A8Sscaled),
+
+            UByte  = core::narrow<core::UInt8>(vk::Format::eR8Uint),
+            UByte2 = core::narrow<core::UInt8>(vk::Format::eR8G8Uint),
+            UByte3 = core::narrow<core::UInt8>(vk::Format::eR8G8B8Uint),
+            UByte4 = core::narrow<core::UInt8>(vk::Format::eR8G8B8A8Uint),
+
+            UByte_Norm  = core::narrow<core::UInt8>(vk::Format::eR8Unorm),
+            UByte2_Norm = core::narrow<core::UInt8>(vk::Format::eR8G8Unorm),
+            UByte3_Norm = core::narrow<core::UInt8>(vk::Format::eR8G8B8Unorm),
+            UByte4_Norm = core::narrow<core::UInt8>(vk::Format::eR8G8B8A8Unorm),
+
+            UByte_Ucaled  = core::narrow<core::UInt8>(vk::Format::eR8Uscaled),
+            UByte2_Ucaled = core::narrow<core::UInt8>(vk::Format::eR8G8Uscaled),
+            UByte3_Ucaled = core::narrow<core::UInt8>(vk::Format::eR8G8B8Uscaled),
+            UByte4_Ucaled = core::narrow<core::UInt8>(vk::Format::eR8G8B8A8Uscaled),
+
+            Short  = core::narrow<core::UInt8>(vk::Format::eR16Sint),
+            Short2 = core::narrow<core::UInt8>(vk::Format::eR16G16Sint),
+            Short3 = core::narrow<core::UInt8>(vk::Format::eR16G16B16Sint),
+            Short4 = core::narrow<core::UInt8>(vk::Format::eR16G16B16A16Sint),
+
+            Short_Norm  = core::narrow<core::UInt8>(vk::Format::eR16Sfloat),
+            Short2_Norm = core::narrow<core::UInt8>(vk::Format::eR16G16Sfloat),
+            Short3_Norm = core::narrow<core::UInt8>(vk::Format::eR16G16B16Sfloat),
+            Short4_Norm = core::narrow<core::UInt8>(vk::Format::eR16G16B16A16Sfloat),
+
+            Short_Scaled  = core::narrow<core::UInt8>(vk::Format::eR16Sscaled),
+            Short2_Scaled = core::narrow<core::UInt8>(vk::Format::eR16G16Sscaled),
+            Short3_Scaled = core::narrow<core::UInt8>(vk::Format::eR16G16B16Sscaled),
+            Short4_Scaled = core::narrow<core::UInt8>(vk::Format::eR16G16B16A16Sscaled),
+
+            UShort  = core::narrow<core::UInt8>(vk::Format::eR16Uint),
+            UShort2 = core::narrow<core::UInt8>(vk::Format::eR16G16Uint),
+            UShort3 = core::narrow<core::UInt8>(vk::Format::eR16G16B16Uint),
+            UShort4 = core::narrow<core::UInt8>(vk::Format::eR16G16B16A16Uint),
+
+            UShort_Norm  = core::narrow<core::UInt8>(vk::Format::eR16Unorm),
+            UShort2_Norm = core::narrow<core::UInt8>(vk::Format::eR16G16Unorm),
+            UShort3_Norm = core::narrow<core::UInt8>(vk::Format::eR16G16B16Unorm),
+            UShort4_Norm = core::narrow<core::UInt8>(vk::Format::eR16G16B16A16Unorm),
+
+            UShort_Ucaled  = core::narrow<core::UInt8>(vk::Format::eR16Uscaled),
+            UShort2_Ucaled = core::narrow<core::UInt8>(vk::Format::eR16G16Uscaled),
+            UShort3_Ucaled = core::narrow<core::UInt8>(vk::Format::eR16G16B16Uscaled),
+            UShort4_Ucaled = core::narrow<core::UInt8>(vk::Format::eR16G16B16A16Uscaled),
+
+            Int  = core::narrow<core::UInt8>(vk::Format::eR32Sint),
+            Int2 = core::narrow<core::UInt8>(vk::Format::eR32G32Sint),
+            Int3 = core::narrow<core::UInt8>(vk::Format::eR32G32B32Sint),
+            Int4 = core::narrow<core::UInt8>(vk::Format::eR32G32B32A32Sint),
+
+            UInt  = core::narrow<core::UInt8>(vk::Format::eR32Uint),
+            UInt2 = core::narrow<core::UInt8>(vk::Format::eR32G32Uint),
+            UInt3 = core::narrow<core::UInt8>(vk::Format::eR32G32B32Uint),
+            UInt4 = core::narrow<core::UInt8>(vk::Format::eR32G32B32A32Uint),
+
+            Long  = core::narrow<core::UInt8>(vk::Format::eR64Sint),
+            Long2 = core::narrow<core::UInt8>(vk::Format::eR64G64Sint),
+            Long3 = core::narrow<core::UInt8>(vk::Format::eR64G64B64Sint),
+            Long4 = core::narrow<core::UInt8>(vk::Format::eR64G64B64A64Sint),
+
+            ULong  = core::narrow<core::UInt8>(vk::Format::eR64Uint),
+            ULong2 = core::narrow<core::UInt8>(vk::Format::eR64G64Uint),
+            ULong3 = core::narrow<core::UInt8>(vk::Format::eR64G64B64Uint),
+            ULong4 = core::narrow<core::UInt8>(vk::Format::eR64G64B64A64Uint),
+
+            Float  = core::narrow<core::UInt8>(vk::Format::eR32Sfloat),
+            Float2 = core::narrow<core::UInt8>(vk::Format::eR32G32Sfloat),
+            Float3 = core::narrow<core::UInt8>(vk::Format::eR32G32B32Sfloat),
+            Float4 = core::narrow<core::UInt8>(vk::Format::eR32G32B32A32Sfloat),
+
+            Double  = core::narrow<core::UInt8>(vk::Format::eR64Sfloat),
+            Double2 = core::narrow<core::UInt8>(vk::Format::eR64G64Sfloat),
+            Double3 = core::narrow<core::UInt8>(vk::Format::eR64G64B64Sfloat),
+            Double4 = core::narrow<core::UInt8>(vk::Format::eR64G64B64A64Sfloat),
+
+            Undefined = core::narrow<core::UInt8>(vk::Format::eUndefined),
+        };
+
+        enum class BufferUsageFlag : core::UInt16 {
+            Vertex        = core::narrow<core::UInt16>(vk::BufferUsageFlagBits::eVertexBuffer),
+            Index         = core::narrow<core::UInt16>(vk::BufferUsageFlagBits::eIndexBuffer),
+            Transfert_Src = core::narrow<core::UInt16>(vk::BufferUsageFlagBits::eTransferSrc),
+            Transfert_Dst = core::narrow<core::UInt16>(vk::BufferUsageFlagBits::eTransferDst),
+            Uniform       = core::narrow<core::UInt16>(vk::BufferUsageFlagBits::eUniformBuffer),
+            Storage       = core::narrow<core::UInt16>(vk::BufferUsageFlagBits::eStorageBuffer),
+            Uniform_Texel =
+                core::narrow<core::UInt16>(vk::BufferUsageFlagBits::eUniformTexelBuffer),
+            Storage_Texel =
+                core::narrow<core::UInt16>(vk::BufferUsageFlagBits::eStorageTexelBuffer),
+            Indirect = core::narrow<core::UInt16>(vk::BufferUsageFlagBits::eIndirectBuffer),
+        };
+
+        enum class ImageUsageFlag : core::UInt16 {
+            Transfert_Src    = core::narrow<core::UInt16>(vk::ImageUsageFlagBits::eTransferSrc),
+            Transfert_Dst    = core::narrow<core::UInt16>(vk::ImageUsageFlagBits::eTransferDst),
+            Sampled          = core::narrow<core::UInt16>(vk::ImageUsageFlagBits::eSampled),
+            Storage          = core::narrow<core::UInt16>(vk::ImageUsageFlagBits::eStorage),
+            Color_Attachment = core::narrow<core::UInt16>(vk::ImageUsageFlagBits::eColorAttachment),
+            Depth_Stencil_Attachment =
+                core::narrow<core::UInt16>(vk::ImageUsageFlagBits::eDepthStencilAttachment),
+            Transient_Attachment =
+                core::narrow<core::UInt16>(vk::ImageUsageFlagBits::eTransientAttachment),
+            Input_Attachment = core::narrow<core::UInt16>(vk::ImageUsageFlagBits::eInputAttachment),
+        };
+
+        enum class MemoryPropertyFlag : core::UInt8 {
+            Device_Local  = core::narrow<core::UInt8>(vk::MemoryPropertyFlagBits::eDeviceLocal),
+            Host_Visible  = core::narrow<core::UInt8>(vk::MemoryPropertyFlagBits::eHostVisible),
+            Host_Coherent = core::narrow<core::UInt8>(vk::MemoryPropertyFlagBits::eHostCoherent),
+            Host_Cached   = core::narrow<core::UInt8>(vk::MemoryPropertyFlagBits::eHostCached),
+        };
+
+        enum class CommandBufferLevel : core::UInt8 {
+            Primary   = core::narrow<core::UInt8>(vk::CommandBufferLevel::ePrimary),
+            Secondary = core::narrow<core::UInt8>(vk::CommandBufferLevel::eSecondary),
+        };
+
+        enum class DescriptorType : core::UInt8 {
+            Sampler = core::narrow<core::UInt8>(vk::DescriptorType::eSampler),
+            Combined_Image_Sampler =
+                core::narrow<core::UInt8>(vk::DescriptorType::eCombinedImageSampler),
+            Sampled_Image = core::narrow<core::UInt8>(vk::DescriptorType::eSampledImage),
+            Storage_Image = core::narrow<core::UInt8>(vk::DescriptorType::eStorageImage),
+            Uniform_Texel_Buffer =
+                core::narrow<core::UInt8>(vk::DescriptorType::eUniformTexelBuffer),
+            Storage_Texel_Buffer =
+                core::narrow<core::UInt8>(vk::DescriptorType::eStorageTexelBuffer),
+            Uniform_Buffer = core::narrow<core::UInt8>(vk::DescriptorType::eUniformBuffer),
+            Storage_Buffer = core::narrow<core::UInt8>(vk::DescriptorType::eStorageBuffer),
+            Uniform_Buffer_Dynamic =
+                core::narrow<core::UInt8>(vk::DescriptorType::eUniformBufferDynamic),
+            Storage_Buffer_Dynamic =
+                core::narrow<core::UInt8>(vk::DescriptorType::eStorageBufferDynamic),
+            Input_Attachment = core::narrow<core::UInt8>(vk::DescriptorType::eInputAttachment),
+        };
+
+        enum class CompareOperation : core::UInt8 {
+            Never            = core::narrow<core::UInt8>(vk::CompareOp::eNever),
+            Less             = core::narrow<core::UInt8>(vk::CompareOp::eLess),
+            Equal            = core::narrow<core::UInt8>(vk::CompareOp::eEqual),
+            Less_Or_Equal    = core::narrow<core::UInt8>(vk::CompareOp::eLessOrEqual),
+            Greater          = core::narrow<core::UInt8>(vk::CompareOp::eGreater),
+            Not_Equal        = core::narrow<core::UInt8>(vk::CompareOp::eNotEqual),
+            Greater_Or_Equal = core::narrow<core::UInt8>(vk::CompareOp::eGreaterOrEqual),
+            Always           = core::narrow<core::UInt8>(vk::CompareOp::eAlways),
+        };
+
+        enum class Filter : core::UInt32 {
+            Nearest   = core::narrow<core::UInt32>(vk::Filter::eNearest),
+            Linear    = core::narrow<core::UInt32>(vk::Filter::eLinear),
+            Cubic_Img = core::narrow<core::UInt32>(vk::Filter::eCubicIMG),
+        };
+
+        enum class SamplerAddressMode : core::UInt8 {
+            Repeat          = core::narrow<core::UInt8>(vk::SamplerAddressMode::eRepeat),
+            Mirrored_Repeat = core::narrow<core::UInt8>(vk::SamplerAddressMode::eMirroredRepeat),
+            Clamp_To_Edge   = core::narrow<core::UInt8>(vk::SamplerAddressMode::eClampToEdge),
+            Clamp_To_Border = core::narrow<core::UInt8>(vk::SamplerAddressMode::eClampToBorder),
+            Mirror_Clamp_To_Edge =
+                core::narrow<core::UInt8>(vk::SamplerAddressMode::eMirrorClampToEdge),
+        };
+
+        enum class BorderColor : core::UInt8 {
+            Float_Transparent_Black =
+                core::narrow<core::UInt8>(vk::BorderColor::eFloatTransparentBlack),
+            Int_Transparent_Black =
+                core::narrow<core::UInt8>(vk::BorderColor::eIntTransparentBlack),
+            Float_Opaque_Black = core::narrow<core::UInt8>(vk::BorderColor::eFloatOpaqueBlack),
+            Int_Opaque_Black   = core::narrow<core::UInt8>(vk::BorderColor::eIntOpaqueBlack),
+            Float_Opaque_White = core::narrow<core::UInt8>(vk::BorderColor::eFloatOpaqueWhite),
+            Int_opaque_White   = core::narrow<core::UInt8>(vk::BorderColor::eIntOpaqueWhite),
+        };
+
+        enum class SamplerMipmapMode : core::UInt8 {
+            Nearest = core::narrow<core::UInt8>(vk::SamplerMipmapMode::eNearest),
+            Linear  = core::narrow<core::UInt8>(vk::SamplerMipmapMode::eLinear),
+        };
+
+        enum class Result : core::Int32 {
+            Success                  = core::narrow<core::Int32>(vk::Result::eSuccess),
+            Not_Ready                = core::narrow<core::Int32>(vk::Result::eNotReady),
+            Timeout                  = core::narrow<core::Int32>(vk::Result::eTimeout),
+            Event_Set                = core::narrow<core::Int32>(vk::Result::eEventSet),
+            Event_Reset              = core::narrow<core::Int32>(vk::Result::eEventReset),
+            Incomplete               = core::narrow<core::Int32>(vk::Result::eIncomplete),
+            Error_Out_Of_host_Memory = core::narrow<core::Int32>(vk::Result::eErrorOutOfHostMemory),
+            Error_Out_Of_Device_Memory =
+                core::narrow<core::Int32>(vk::Result::eErrorOutOfDeviceMemory),
+            Error_Initialization_Failed =
+                core::narrow<core::Int32>(vk::Result::eErrorInitializationFailed),
+            Error_Device_Lost       = core::narrow<core::Int32>(vk::Result::eErrorDeviceLost),
+            Error_Memory_Map_Failed = core::narrow<core::Int32>(vk::Result::eErrorMemoryMapFailed),
+            Error_Layer_Not_Present = core::narrow<core::Int32>(vk::Result::eErrorLayerNotPresent),
+            Error_EXTension_Not_Present =
+                core::narrow<core::Int32>(vk::Result::eErrorExtensionNotPresent),
+            Error_Feature_Not_Present =
+                core::narrow<core::Int32>(vk::Result::eErrorFeatureNotPresent),
+            Error_Incompatible_Driver =
+                core::narrow<core::Int32>(vk::Result::eErrorIncompatibleDriver),
+            Error_Too_Many_Objects = core::narrow<core::Int32>(vk::Result::eErrorTooManyObjects),
+            Error_Format_Not_Supported =
+                core::narrow<core::Int32>(vk::Result::eErrorFormatNotSupported),
+            Error_Fragmented_Pool    = core::narrow<core::Int32>(vk::Result::eErrorFragmentedPool),
+            Error_Unknown            = core::narrow<core::Int32>(vk::Result::eErrorUnknown),
+            Error_Out_Of_Pool_Memory = core::narrow<core::Int32>(vk::Result::eErrorOutOfPoolMemory),
+            Error_Invalid_EXTernal_Handle =
+                core::narrow<core::Int32>(vk::Result::eErrorInvalidExternalHandle),
+            Error_Fragmentation = core::narrow<core::Int32>(vk::Result::eErrorFragmentation),
+            Error_Invalid_Opaque_Capture_Address =
+                core::narrow<core::Int32>(vk::Result::eErrorInvalidOpaqueCaptureAddress),
+            Error_Surface_Lost = core::narrow<core::Int32>(vk::Result::eErrorSurfaceLostKHR),
+            Error_Native_Window_In_Use =
+                core::narrow<core::Int32>(vk::Result::eErrorNativeWindowInUseKHR),
+            Suboptimal        = core::narrow<core::Int32>(vk::Result::eSuboptimalKHR),
+            Error_Out_Of_Data = core::narrow<core::Int32>(vk::Result::eErrorOutOfDateKHR),
+            Error_Incompatible_Display =
+                core::narrow<core::Int32>(vk::Result::eErrorIncompatibleDisplayKHR),
+            Error_Validation_Failed =
+                core::narrow<core::Int32>(vk::Result::eErrorValidationFailedEXT),
+            Error_Not_Permitted = core::narrow<core::Int32>(vk::Result::eErrorNotPermittedEXT),
+#if defined(VK_USE_PLATFORM_WIN32_KHR)
+            Error_Fullscreen_Exclusive_Mode_Lost =
+                core::narrow<core::Int32>(vk::Result::eErrorFullScreenExclusiveModeLostEXT),
+#endif
+            Thread_Idle        = core::narrow<core::Int32>(vk::Result::eThreadIdleKHR),
+            Thread_Done        = core::narrow<core::Int32>(vk::Result::eThreadDoneKHR),
+            Operation_Deferred = core::narrow<core::Int32>(vk::Result::eOperationDeferredKHR),
+            Operation_Not_Deferred =
+                core::narrow<core::Int32>(vk::Result::eOperationNotDeferredKHR),
+            Pipeline_Compile_Required =
+                core::narrow<core::Int32>(vk::Result::ePipelineCompileRequired),
+        };
+
+        enum class ImageType : core::UInt8 {
+            T1D = core::narrow<core::UInt8>(vk::ImageType::e1D),
+            T2D = core::narrow<core::UInt8>(vk::ImageType::e2D),
+            T3D = core::narrow<core::UInt8>(vk::ImageType::e3D),
+        };
+
+        enum class ImageViewType : core::UInt8 {
+            T1D        = core::narrow<core::UInt8>(vk::ImageViewType::e1D),
+            T2D        = core::narrow<core::UInt8>(vk::ImageViewType::e2D),
+            T3D        = core::narrow<core::UInt8>(vk::ImageViewType::e3D),
+            Cube       = core::narrow<core::UInt8>(vk::ImageViewType::eCube),
+            T1D_Array  = core::narrow<core::UInt8>(vk::ImageViewType::e1DArray),
+            T2D_Array  = core::narrow<core::UInt8>(vk::ImageViewType::e2DArray),
+            Cube_Array = core::narrow<core::UInt8>(vk::ImageViewType::eCubeArray),
+        };
+
+        enum class DebugObjectType : core::UInt32 {
+            Unknown         = core::narrow<core::UInt32>(vk::ObjectType::eUnknown),
+            Instance        = core::narrow<core::UInt32>(vk::ObjectType::eInstance),
+            Physical_Device = core::narrow<core::UInt32>(vk::ObjectType::ePhysicalDevice),
+            Device          = core::narrow<core::UInt32>(vk::ObjectType::eDevice),
+            Queue           = core::narrow<core::UInt32>(vk::ObjectType::eQueue),
+            Semaphore       = core::narrow<core::UInt32>(vk::ObjectType::eSemaphore),
+            Command_Buffer  = core::narrow<core::UInt32>(vk::ObjectType::eCommandBuffer),
+            Fence           = core::narrow<core::UInt32>(vk::ObjectType::eFence),
+            Device_Memory   = core::narrow<core::UInt32>(vk::ObjectType::eDeviceMemory),
+            Buffer          = core::narrow<core::UInt32>(vk::ObjectType::eBuffer),
+            Image           = core::narrow<core::UInt32>(vk::ObjectType::eImage),
+            Event           = core::narrow<core::UInt32>(vk::ObjectType::eEvent),
+            Query_Pool      = core::narrow<core::UInt32>(vk::ObjectType::eQueryPool),
+            Buffer_View     = core::narrow<core::UInt32>(vk::ObjectType::eBufferView),
+            Image_View      = core::narrow<core::UInt32>(vk::ObjectType::eImageView),
+            Shader_Module   = core::narrow<core::UInt32>(vk::ObjectType::eShaderModule),
+            Pipeline_Cache  = core::narrow<core::UInt32>(vk::ObjectType::ePipelineCache),
+            Pipeline_Layout = core::narrow<core::UInt32>(vk::ObjectType::ePipelineLayout),
+            Render_Pass     = core::narrow<core::UInt32>(vk::ObjectType::eRenderPass),
+            Pipeline        = core::narrow<core::UInt32>(vk::ObjectType::ePipeline),
+            PipelineLayout  = core::narrow<core::UInt32>(vk::ObjectType::ePipelineLayout),
+            Descriptor_Set_Layout =
+                core::narrow<core::UInt32>(vk::ObjectType::eDescriptorSetLayout),
+            Sampler         = core::narrow<core::UInt32>(vk::ObjectType::eSampler),
+            Descriptor_Pool = core::narrow<core::UInt32>(vk::ObjectType::eDescriptorPool),
+            Descriptor_Set  = core::narrow<core::UInt32>(vk::ObjectType::eDescriptorSet),
+            FrameBuffer     = core::narrow<core::UInt32>(vk::ObjectType::eFramebuffer),
+            Command_Pool    = core::narrow<core::UInt32>(vk::ObjectType::eCommandPool),
+            Surface         = core::narrow<core::UInt32>(vk::ObjectType::eSurfaceKHR),
+            Swapchain       = core::narrow<core::UInt32>(vk::ObjectType::eSwapchainKHR),
+            Debug_Report_Callback =
+                core::narrow<core::UInt32>(vk::ObjectType::eDebugReportCallbackEXT),
+            Display_KHR = core::narrow<core::UInt32>(vk::ObjectType::eDisplayKHR),
+        };
+
+        enum class AccessFlag : core::UInt32 {
+            None = core::narrow<core::UInt32>(vk::AccessFlagBits::eNoneKHR),
+            Indirect_Command_Read =
+                core::narrow<core::UInt32>(vk::AccessFlagBits::eIndirectCommandRead),
+            Vertex_Attribute_Read =
+                core::narrow<core::UInt32>(vk::AccessFlagBits::eVertexAttributeRead),
+            Uniform_Read = core::narrow<core::UInt32>(vk::AccessFlagBits::eUniformRead),
+            Input_Attachment_Read =
+                core::narrow<core::UInt32>(vk::AccessFlagBits::eInputAttachmentRead),
+            Shader_Read  = core::narrow<core::UInt32>(vk::AccessFlagBits::eShaderRead),
+            Shader_Write = core::narrow<core::UInt32>(vk::AccessFlagBits::eShaderWrite),
+            Color_Attachment_Read =
+                core::narrow<core::UInt32>(vk::AccessFlagBits::eColorAttachmentRead),
+            Color_Attachment_Write =
+                core::narrow<core::UInt32>(vk::AccessFlagBits::eColorAttachmentWrite),
+            Depth_Stencil_Attachment_Read =
+                core::narrow<core::UInt32>(vk::AccessFlagBits::eDepthStencilAttachmentRead),
+            Depth_Stencil_Attachment_Write =
+                core::narrow<core::UInt32>(vk::AccessFlagBits::eDepthStencilAttachmentWrite),
+            Transfer_Read  = core::narrow<core::UInt32>(vk::AccessFlagBits::eTransferRead),
+            Transfer_Write = core::narrow<core::UInt32>(vk::AccessFlagBits::eTransferWrite),
+            Host_Read      = core::narrow<core::UInt32>(vk::AccessFlagBits::eHostRead),
+            Host_Write     = core::narrow<core::UInt32>(vk::AccessFlagBits::eHostWrite),
+            Memory_Read    = core::narrow<core::UInt32>(vk::AccessFlagBits::eMemoryRead),
+            Memory_Write   = core::narrow<core::UInt32>(vk::AccessFlagBits::eMemoryWrite),
+        };
+
+        enum class PipelineStageFlag : core::UInt32 {
+            None          = core::narrow<core::UInt32>(vk::PipelineStageFlagBits::eNoneKHR),
+            Top_Of_Pipe   = core::narrow<core::UInt32>(vk::PipelineStageFlagBits::eTopOfPipe),
+            Draw_Indirect = core::narrow<core::UInt32>(vk::PipelineStageFlagBits::eDrawIndirect),
+            Vertex_Input  = core::narrow<core::UInt32>(vk::PipelineStageFlagBits::eVertexInput),
+            Vertex_Shader = core::narrow<core::UInt32>(vk::PipelineStageFlagBits::eVertexShader),
+            Tessellation_Control_Shader =
+                core::narrow<core::UInt32>(vk::PipelineStageFlagBits::eTessellationControlShader),
+            Tessellation_Evaluation_Shader = core::narrow<core::UInt32>(
+                vk::PipelineStageFlagBits::eTessellationEvaluationShader),
+            Geometry_Shader =
+                core::narrow<core::UInt32>(vk::PipelineStageFlagBits::eGeometryShader),
+            Fragment_Shader =
+                core::narrow<core::UInt32>(vk::PipelineStageFlagBits::eFragmentShader),
+            Early_Fragment_Tests =
+                core::narrow<core::UInt32>(vk::PipelineStageFlagBits::eEarlyFragmentTests),
+            Late_Fragment_Tests =
+                core::narrow<core::UInt32>(vk::PipelineStageFlagBits::eLateFragmentTests),
+            Color_Attachment_Output =
+                core::narrow<core::UInt32>(vk::PipelineStageFlagBits::eColorAttachmentOutput),
+            Compute_Shader = core::narrow<core::UInt32>(vk::PipelineStageFlagBits::eComputeShader),
+            Transfer       = core::narrow<core::UInt32>(vk::PipelineStageFlagBits::eTransfer),
+            Bottom_Of_Pipe = core::narrow<core::UInt32>(vk::PipelineStageFlagBits::eBottomOfPipe),
+            Host           = core::narrow<core::UInt32>(vk::PipelineStageFlagBits::eHost),
+            All_Graphics   = core::narrow<core::UInt32>(vk::PipelineStageFlagBits::eAllGraphics),
+            All_Commands   = core::narrow<core::UInt32>(vk::PipelineStageFlagBits::eAllCommands),
+        };
+
+        enum class DependencyFlag : core::UInt8 {
+            None         = 0,
+            By_Region    = core::narrow<core::UInt8>(vk::DependencyFlagBits::eByRegion),
+            Device_Group = core::narrow<core::UInt8>(vk::DependencyFlagBits::eByRegion),
+            View_Local   = core::narrow<core::UInt8>(vk::DependencyFlagBits::eViewLocal),
+        };
+
+        enum class DynamicState : core::UInt8 {
+            Viewport             = core::narrow<core::UInt8>(vk::DynamicState::eViewport),
+            Scissor              = core::narrow<core::UInt8>(vk::DynamicState::eScissor),
+            Line_Width           = core::narrow<core::UInt8>(vk::DynamicState::eLineWidth),
+            Depth_Bias           = core::narrow<core::UInt8>(vk::DynamicState::eDepthBias),
+            Blend_Constants      = core::narrow<core::UInt8>(vk::DynamicState::eBlendConstants),
+            Depth_Bounds         = core::narrow<core::UInt8>(vk::DynamicState::eDepthBounds),
+            Stencil_Compare_Mask = core::narrow<core::UInt8>(vk::DynamicState::eStencilCompareMask),
+            Stencil_Write_Mask   = core::narrow<core::UInt8>(vk::DynamicState::eStencilWriteMask),
+            Stencil_Reference    = core::narrow<core::UInt8>(vk::DynamicState::eStencilReference),
+        };
+
+        enum class ImageTiling : core::UInt32 {
+            Optimal = core::narrow<core::UInt32>(vk::ImageTiling::eOptimal),
+            Linear  = core::narrow<core::UInt32>(vk::ImageTiling::eLinear),
+            DRM_Ext = core::narrow<core::UInt32>(vk::ImageTiling::eDrmFormatModifierEXT),
+        };
+
+        enum class StencilFaceFlag : core::UInt8 {
+            Front          = core::narrow<core::UInt8>(vk::StencilFaceFlagBits::eFront),
+            Back           = core::narrow<core::UInt8>(vk::StencilFaceFlagBits::eBack),
+            Front_And_Back = Front | Back
+        };
+
+        enum class GeometryType : core::UInt8 {
+            Triangles = core::narrow<core::UInt8>(vk::GeometryTypeKHR::eTriangles),
+            AABBS     = core::narrow<core::UInt8>(vk::GeometryTypeKHR::eAabbs),
+            Instances = core::narrow<core::UInt8>(vk::GeometryTypeKHR::eInstances)
+        };
+
+        enum class GeometryFlag : core::UInt8 {
+            Opaque = core::narrow<core::UInt8>(vk::GeometryFlagBitsKHR::eOpaque),
+            No_Duplicate_Any_Hit_Invocation =
+                core::narrow<core::UInt8>(vk::GeometryFlagBitsKHR::eNoDuplicateAnyHitInvocation)
+        };
+
+        enum class ColorSpace : core::UInt32 {
+            SRGB_NonLinear = core::narrow<core::UInt32>(vk::ColorSpaceKHR::eSrgbNonlinear),
+            Display_P3_NonLinear =
+                core::narrow<core::UInt32>(vk::ColorSpaceKHR::eDisplayP3NonlinearEXT),
+            // COLOR_SPACE_EXTENDED_SRGB_LINEAR_EXT    = 1000104002,
+            // COLOR_SPACE_DISPLAY_P3_LINEAR_EXT       = 1000104003,
+            // COLOR_SPACE_DCI_P3_NONLINEAR_EXT        = 1000104004,
+            // COLOR_SPACE_BT709_LINEAR_EXT            = 1000104005,
+            // COLOR_SPACE_BT709_NONLINEAR_EXT         = 1000104006,
+            // COLOR_SPACE_BT2020_LINEAR_EXT           = 1000104007,
+            // COLOR_SPACE_HDR10_ST2084_EXT            = 1000104008,
+            // COLOR_SPACE_DOLBYVISION_EXT             = 1000104009,
+            // COLOR_SPACE_HDR10_HLG_EXT               = 1000104010,
+            // COLOR_SPACE_ADOBERGB_LINEAR_EXT         = 1000104011,
+            // COLOR_SPACE_ADOBERGB_NONLINEAR_EXT      = 1000104012,
+            // COLOR_SPACE_PASS_THROUGH_EXT            = 1000104013,
+            // COLOR_SPACE_EXTENDED_SRGB_NONLINEAR_EXT = 1000104014,
+            // COLOR_SPACE_DISPLAY_NATIVE_AMD          = 1000213000,
+            // COLORSPACE_SRGB_NONLINEAR_KHR           = COLOR_SPACE_SRGB_NONLINEAR_KHR,
+            // COLOR_SPACE_DCI_P3_LINEAR_EXT           = COLOR_SPACE_DISPLAY_P3_LINEAR_EXT,
+        };
+
+        enum class PresentMode : core::UInt32 {
+            Immediate    = core::narrow<core::UInt32>(vk::PresentModeKHR::eImmediate),
+            Mailbox      = core::narrow<core::UInt32>(vk::PresentModeKHR::eMailbox),
+            Fifo         = core::narrow<core::UInt32>(vk::PresentModeKHR::eFifo),
+            Fifo_Relaxed = core::narrow<core::UInt32>(vk::PresentModeKHR::eFifoRelaxed),
+            Shared_Demand_Refresh =
+                core::narrow<core::UInt32>(vk::PresentModeKHR::eSharedDemandRefresh),
+            Shared_Continuous_Refresh =
+                core::narrow<core::UInt32>(vk::PresentModeKHR::eSharedContinuousRefresh),
+        };
+
+        struct SurfaceFormat {
+            PixelFormat format;
+            ColorSpace  color_space;
+        };
+
+        struct MemoryBarrier {
+            AccessFlag src;
+            AccessFlag dst;
+        };
+
+        struct RenderCapabilities {
+            struct {
+                bool robust_buffer_access;
+                bool full_draw_index_uint32;
+                bool image_cube_array;
+                bool independent_blend;
+                bool geometry_shader;
+                bool tessellation_shader;
+                bool sampler_rate_shading;
+                bool dual_src_blend;
+                bool logic_op;
+                bool multi_draw_indirect;
+                bool draw_indirect_first_instance;
+                bool depth_clamp;
+                bool depth_bias_clamp;
+                bool fill_Mode_non_solid;
+                bool depth_bounds;
+                bool wide_lines;
+                bool large_points;
+                bool alpha_to_one;
+                bool multi_viewport;
+                bool sampler_anisotropy;
+                bool texture_compression_etc2;
+                bool texture_compression_astc_ldr;
+                bool texture_compression_bc;
+                bool occlusion_query_precise;
+                bool pipeline_statistics_query;
+                bool vertex_pipeline_stores_and_atomics;
+                bool fragment_stores_and_atomics;
+                bool shader_tessellation_and_geometry_point_size;
+                bool shader_image_gather_extended;
+                bool shader_storage_image_extended_formats;
+                bool shader_storage_image_multisample;
+                bool shader_storage_image_read_without_format;
+                bool shader_storage_image_write_without_format;
+                bool shader_uniform_buffer_array_dynamic_indexing;
+                bool shader_sampled_image_array_dynamic_indexing;
+                bool shader_storage_buffer_array_dynamic_indexing;
+                bool shader_storage_image_array_dynamic_indexing;
+                bool shader_clip_distance;
+                bool shader_cull_distance;
+                bool shader_float_64;
+                bool shader_int_64;
+                bool shader_int_16;
+                bool shader_resource_residency;
+                bool shader_resource_min_lod;
+                bool sparse_binding;
+                bool sparse_residency_buffer;
+                bool sparse_residency_image_2D;
+                bool sparse_residency_image_3D;
+                bool sparse_residency_2_samples;
+                bool sparse_residency_4_samples;
+                bool sparse_residency_6_samples;
+                bool sparse_residency_8_samples;
+                bool sparse_residency_16_samples;
+                bool sparse_residency_aliased;
+                bool variable_multisample_rate;
+                bool inherited_queries;
+            } features;
+
+            struct {
+                core::UInt32                max_image_dimension_1D;
+                core::UInt32                max_image_dimension_2D;
+                core::UInt32                max_image_dimension_3D;
+                core::UInt32                max_image_dimension_cube;
+                core::UInt32                max_image_array_layers;
+                core::UInt32                max_texel_buffer_elements;
+                core::UInt32                max_uniform_buffer_range;
+                std::optional<core::UInt32> max_storage_buffer_range;
+                core::UInt32                max_push_constants_size;
+                std::optional<core::UInt32> max_memory_allocation_count;
+                std::optional<core::UInt32> max_sampler_allocation_count;
+                std::optional<core::UInt64> buffer_image_granularity;
+                std::optional<core::UInt64> sparse_address_space_size;
+                std::optional<core::UInt32> max_bound_descriptor_sets;
+                core::UInt32                max_per_stage_descriptor_samplers;
+                core::UInt32                max_per_stage_descriptor_uniform_buffers;
+                core::UInt32                max_per_stage_descriptor_storage_buffers;
+                core::UInt32                max_per_stage_descriptor_sampled_images;
+                core::UInt32                max_per_stage_descriptor_storage_images;
+                std::optional<core::UInt32> max_per_stage_descriptor_input_attachments;
+                std::optional<core::UInt32> max_per_stage_resources;
+                core::UInt32                max_descriptor_set_samplers;
+                core::UInt32                max_descriptor_set_uniform_buffers;
+                core::UInt32                max_descriptor_set_uniform_buffers_dynamic;
+                core::UInt32                max_descriptor_set_storage_buffers;
+                core::UInt32                max_descriptor_set_storage_buffers_dynamic;
+                core::UInt32                max_descriptor_set_sampled_images;
+                core::UInt32                max_descriptor_set_storage_images;
+                std::optional<core::UInt32> max_descriptor_set_input_attachments;
+                core::UInt32                max_vertex_input_attributes;
+                core::UInt32                max_vertex_input_bindings;
+                core::UInt32                max_vertex_input_attribute_offset;
+                std::optional<core::UInt32> max_vertex_input_binding_stride;
+                core::UInt32                max_vertex_output_components;
+                core::UInt32                max_tessellation_generation_level;
+                core::UInt32                max_tessellation_patch_size;
+                core::UInt32                max_tessellation_control_per_vertex_input_components;
+                core::UInt32                max_tessellation_control_per_vertex_output_components;
+                core::UInt32                max_tessellation_control_per_patch_output_components;
+                core::UInt32                max_tessellation_control_total_output_components;
+                core::UInt32                max_tessellation_evaluation_input_components;
+                core::UInt32                max_tessellation_evaluation_output_components;
+                core::UInt32                max_geometry_shader_invocations;
+                core::UInt32                max_geometry_input_components;
+                core::UInt32                max_geometry_output_components;
+                core::UInt32                max_geometry_output_vertices;
+                core::UInt32                max_geometry_total_output_components;
+                core::UInt32                max_fragment_input_components;
+                core::UInt32                max_fragment_output_attachments;
+                core::UInt32                max_fragment_dual_src_attachments;
+                core::UInt32                max_fragment_combined_output_resources;
+                core::UInt32                max_compute_shared_memory_size;
+                std::array<core::UInt32, 3> max_compute_work_group_count;
+                core::UInt32                max_compute_work_group_invocations;
+                std::array<core::UInt32, 3> max_compute_work_group_size;
+                std::optional<core::UInt32> sub_pixel_precision_bits;
+                std::optional<core::UInt32> sub_texel_precision_bits;
+                std::optional<core::UInt32> mipmap_precision_bits;
+                core::UInt32                max_draw_indexed_index_value;
+                std::optional<core::UInt32> max_draw_indirect_count;
+                float                       max_sampler_lod_bias;
+                float                       max_sampler_anisotropy;
+                core::UInt32                max_viewports;
+                std::array<core::UInt32, 2> max_viewport_dimensions;
+                std::array<float, 2>        viewport_bounds_range;
+                std::optional<core::UInt32> viewport_sub_pixel_bits;
+                std::optional<core::RangeExtent> min_memory_map_alignment;
+                std::optional<core::UInt64>      min_texel_buffer_offset_alignment;
+                core::UInt64                     min_uniform_buffer_offset_alignment;
+                core::UInt64                     min_storage_buffer_offset_alignment;
+                core::Int32                      min_texel_offset;
+                core::UInt32                     max_texel_offset;
+                core::Int32                      min_texel_gather_offset;
+                core::UInt32                     max_texel_gather_offset;
+                float                            min_interpolation_offset;
+                float                            max_interpolation_offset;
+                std::optional<core::UInt32>      sub_pixel_interpolation_offset_bits;
+                core::UInt32                     max_framebuffer_width;
+                core::UInt32                     max_framebuffer_height;
+                core::UInt32                     max_framebuffer_layers;
+                SampleCountFlag                  framebuffer_color_sample_counts;
+                SampleCountFlag                  framebuffer_depth_sample_counts;
+                SampleCountFlag                  framebuffer_stencil_sample_counts;
+                SampleCountFlag                  framebuffer_no_attachments_sample_counts;
+                core::UInt32                     max_color_attachments;
+                SampleCountFlag                  sampled_image_color_sample_counts;
+                SampleCountFlag                  sampled_image_integer_sample_counts;
+                SampleCountFlag                  sampled_image_depth_sample_counts;
+                SampleCountFlag                  sampled_image_stencil_sample_counts;
+                SampleCountFlag                  storage_image_sample_counts;
+                core::UInt32                     max_sample_mask_words;
+                bool                             timestamp_compute_and_engine;
+                float                            timestamp_period;
+                core::UInt32                     max_clip_distances;
+                core::UInt32                     max_cull_distances;
+                core::UInt32                     max_combined_clip_and_cull_distances;
+                core::UInt32                     discrete_queue_priorities;
+                std::array<float, 2>             point_size_range;
+                std::array<float, 2>             line_width_range;
+                float                            point_size_granularity;
+                float                            line_width_granularity;
+                bool                             strict_lines;
+                bool                             standard_sample_locations;
+                std::optional<core::UInt64>      optimal_buffer_copy_offset_alignment;
+                std::optional<core::UInt64>      optimal_buffer_copy_row_pitch_alignment;
+                core::UInt64                     non_coherent_atom_size;
+            } limits;
+        };
+
+        struct ImageSubresourceRange {
+            ImageAspectMaskFlag aspect_mask = ImageAspectMaskFlag::Color;
+
+            core::UInt32 base_mip_level   = 0u;
+            core::UInt32 level_count      = 1u;
+            core::UInt32 base_array_layer = 0u;
+            core::UInt32 layer_count      = 1u;
+        };
+
+        struct ImageSubresourceLayers {
+            ImageAspectMaskFlag aspect_mask = ImageAspectMaskFlag::Color;
+
+            core::UInt32 mip_level        = 0u;
+            core::UInt32 base_array_layer = 0u;
+            core::UInt32 layer_count      = 1u;
+        };
+
+        struct Viewport {
+            core::math::Vector2F position;
+            core::math::ExtentF  extent;
+            core::math::Vector2F depth;
+
+            constexpr operator vk::Viewport() const noexcept;
+        };
+
+        struct Scissor {
+            core::math::Vector2I offset;
+            core::math::ExtentU  extent;
+
+            constexpr operator vk::Rect2D() const noexcept;
+        };
+
+        struct ClearColor {
+            core::RGBColorF color = stormkit::core::RGBColorDef::Silver<float>;
+        };
+
+        struct ClearDepthStencil {
+            float        depth   = 1.f;
+            core::UInt32 stencil = 0;
+        };
+
+        using ClearValue = std::variant<ClearColor, ClearDepthStencil>;
+
+        struct BufferImageCopy {
+            core::UInt32 buffer_offset;
+            core::UInt32 buffer_row_length;
+            core::UInt32 buffer_image_height;
+
+            ImageSubresourceLayers subresource_layers;
+
+            core::math::Vector3I offset;
+            core::math::ExtentU  extent;
+        };
+
+        struct BlitRegion {
+            ImageSubresourceLayers src;
+            ImageSubresourceLayers dst;
+
+            std::array<core::math::ExtentI, 2> src_offset;
+            std::array<core::math::ExtentI, 2> dst_offset;
+        };
+
+        struct PushConstantRange {
+            ShaderStageFlag   stages;
+            core::UInt32      offset;
+            core::RangeExtent size;
+        };
+
+        struct PhysicalDeviceInfo {
+            core::UInt64 device_id;
+            std::string  device_name;
+            core::UInt64 vendor_id;
+            std::string  vendor_name;
+
+            core::UInt32 api_major_version;
+            core::UInt32 api_minor_version;
+            core::UInt32 api_patch_version;
+
+            core::UInt32 driver_major_version;
+            core::UInt32 driver_minor_version;
+            core::UInt32 driver_patch_version;
+
+            std::array<core::UInt8, vk::UuidSize> pipeline_cache_uuid;
+
+            PhysicalDeviceType type;
+        };
+
+        struct QueueFamily {
+            QueueFlag    flags;
+            core::UInt32 count;
+        };
+
+        using ClearValue = std::variant<ClearColor, ClearDepthStencil>;
+        using SpirvID    = core::UInt32;
+
+        template<typename T>
+        class ParentRef {
+          public:
+            explicit ParentRef(const T& parent) noexcept;
+            ~ParentRef() noexcept;
+
+            ParentRef(const ParentRef&) noexcept;
+            auto operator=(const ParentRef&) noexcept -> ParentRef&;
+
+            ParentRef(ParentRef&&) noexcept;
+            auto operator=(ParentRef&&) noexcept -> ParentRef&;
+
+            [[nodiscard]] auto parent() const noexcept -> const T&;
+
+          private:
+            core::NakedRef<const T> m_parent;
+        };
+
+        template<class T>
+        using Expected = std::expected<T, Result>;
+
+        class Instance;
+
+        class InstanceObject: public ParentRef<Instance> {
+          public:
+            using ParentRef<Instance>::ParentRef;
+
+            [[nodiscard]] auto instance() const noexcept -> const Instance&;
+        };
+
+        class Device;
+
+        class DeviceObject: public ParentRef<Device> {
+          public:
+            using ParentRef<Device>::ParentRef;
+
+            [[nodiscard]] auto device() const noexcept -> const Device&;
+        };
+
+        [[nodiscard]] constexpr auto isDepthOnlyFormat(PixelFormat format) noexcept -> bool;
+        [[nodiscard]] constexpr auto isDepthStencilFormat(PixelFormat format) noexcept -> bool;
+        [[nodiscard]] constexpr auto isDepthFormat(PixelFormat format) noexcept -> bool;
+
+        [[nodiscard]] constexpr auto getChannelCountFor(PixelFormat format) noexcept -> core::UInt8;
+        [[nodiscard]] constexpr auto
+            getArraySizeByChannelFor(PixelFormat format) noexcept -> core::UInt8;
+
+        [[nodiscard]] auto
+            computeMipLevel(const core::math::ExtentU& extent) noexcept -> core::UInt32;
+        [[nodiscard]] constexpr auto computeUniformBufferOffsetAlignement(
+            core::RangeExtent         size,
+            const RenderCapabilities& capabilities) noexcept -> core::RangeExtent;
+
+        [[nodiscard]] auto toString(const PhysicalDeviceInfo& data) noexcept;
+
+        template<typename To, typename From>
+        [[nodiscard]] constexpr auto as(From&&) noexcept -> To;
+
+        template<>
+        [[nodiscard]] constexpr auto as<vk::Viewport, const gpu::Viewport&>(
+            const gpu::Viewport& viewport) noexcept -> vk::Viewport;
+
+        template<>
+        [[nodiscard]] constexpr auto as<vk::Extent3D, const core::math::ExtentU&>(
+            const core::math::ExtentU& extent) noexcept -> vk::Extent3D;
+
+        template<>
+        [[nodiscard]] constexpr auto as<core::math::ExtentU, const vk::Extent3D&>(
+            const vk::Extent3D& extent) noexcept -> core::math::ExtentU;
+
+        template<>
+        [[nodiscard]] constexpr auto as<vk::Extent2D, const core::math::ExtentU&>(
+            const core::math::ExtentU& extent) noexcept -> vk::Extent2D;
+
+        template<>
+        [[nodiscard]] constexpr auto as<core::math::ExtentU, const vk::Extent2D&>(
+            const vk::Extent2D& extent) noexcept -> core::math::ExtentU;
+
+        template<>
+        [[nodiscard]] constexpr auto as<vk::Offset3D, const core::math::Vector3I&>(
+            const core::math::Vector3I& offset) noexcept -> vk::Offset3D;
+
+        template<>
+        [[nodiscard]] constexpr auto as<vk::Offset2D, const core::math::Vector2I&>(
+            const core::math::Vector2I& offset) noexcept -> vk::Offset2D;
+
+        template<>
+        [[nodiscard]] constexpr auto as<core::math::Vector3I, const vk::Offset3D&>(
+            const vk::Offset3D& offset) noexcept -> core::math::Vector3I;
+
+        template<>
+        [[nodiscard]] constexpr auto as<core::math::Vector2I, const vk::Offset2D&>(
+            const vk::Offset2D& offset) noexcept -> core::math::Vector2I;
+    } // namespace stormkit::gpu
+
+    FLAG_ENUM(stormkit::gpu::QueueFlag)
+    FLAG_ENUM(stormkit::gpu::ShaderStageFlag)
+    FLAG_ENUM(stormkit::gpu::SampleCountFlag)
+    FLAG_ENUM(stormkit::gpu::ColorComponentFlag)
+    FLAG_ENUM(stormkit::gpu::ImageAspectMaskFlag)
+    FLAG_ENUM(stormkit::gpu::ImageCreateFlag)
+    FLAG_ENUM(stormkit::gpu::CullModeFlag)
+    FLAG_ENUM(stormkit::gpu::BufferUsageFlag)
+    FLAG_ENUM(stormkit::gpu::ImageUsageFlag)
+    FLAG_ENUM(stormkit::gpu::MemoryPropertyFlag)
+    FLAG_ENUM(stormkit::gpu::AccessFlag)
+    FLAG_ENUM(stormkit::gpu::PipelineStageFlag)
+    FLAG_ENUM(stormkit::gpu::DependencyFlag)
+    FLAG_ENUM(stormkit::gpu::StencilFaceFlag)
+    FLAG_ENUM(stormkit::gpu::GeometryFlag)
+    HASH_FUNC(stormkit::gpu::Viewport, value.position, value.extent, value.depth)
+    HASH_FUNC(stormkit::gpu::Scissor, value.offset, value.extent)
+}
+
+////////////////////////////////////////////////////////////////////
+///                      IMPLEMENTATION                          ///
+////////////////////////////////////////////////////////////////////
+
+namespace stormkit::gpu {
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<typename T>
+    STORMKIT_FORCE_INLINE ParentRef<T>::ParentRef(const T& parent) noexcept : m_parent { &parent } {
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<typename T>
+    STORMKIT_FORCE_INLINE ParentRef<T>::~ParentRef() noexcept = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<typename T>
+    STORMKIT_FORCE_INLINE ParentRef<T>::ParentRef(const ParentRef&) noexcept = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<typename T>
+    STORMKIT_FORCE_INLINE auto
+        ParentRef<T>::operator=(const ParentRef&) noexcept -> ParentRef& = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<typename T>
+    STORMKIT_FORCE_INLINE ParentRef<T>::ParentRef(ParentRef&&) noexcept = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<typename T>
+    STORMKIT_FORCE_INLINE auto
+        ParentRef<T>::operator=(ParentRef&&) noexcept -> ParentRef& = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<typename T>
+    STORMKIT_FORCE_INLINE auto ParentRef<T>::parent() const noexcept -> const T& {
+        return m_parent.get();
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto InstanceObject::instance() const noexcept -> const Instance& {
+        return ParentRef<Instance>::parent();
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto DeviceObject::device() const noexcept -> const Device& {
+        return ParentRef<Device>::parent();
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE constexpr auto isDepthOnlyFormat(PixelFormat format) noexcept -> bool {
+        return format == PixelFormat::Depth16 or format == PixelFormat::Depth24 or
+               format == PixelFormat::Depth32F;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE constexpr auto isDepthStencilFormat(PixelFormat format) noexcept -> bool {
+        return format == PixelFormat::Depth16_Stencil8 or format == PixelFormat::Depth24_Stencil8 or
+               format == PixelFormat::Depth32F_Stencil8;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE constexpr auto isDepthFormat(PixelFormat format) noexcept -> bool {
+        return isDepthOnlyFormat(format) or isDepthStencilFormat(format);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE constexpr auto
+        getChannelCountFor(PixelFormat format) noexcept -> core::UInt8 {
+        switch (format) {
+            case PixelFormat::R8_SNorm:
+            case PixelFormat::R8_UNorm:
+            case PixelFormat::R16_SNorm:
+            case PixelFormat::R16_UNorm:
+            case PixelFormat::R8I:
+            case PixelFormat::R8U:
+            case PixelFormat::R16I:
+            case PixelFormat::R16U:
+            case PixelFormat::R32I:
+            case PixelFormat::R32U:
+            case PixelFormat::R16F:
+            case PixelFormat::R32F:
+            case PixelFormat::Depth16:
+            case PixelFormat::Depth24:
+            case PixelFormat::Depth32F: return 1;
+
+            case PixelFormat::RG8_SNorm:
+            case PixelFormat::RG8_UNorm:
+            case PixelFormat::RG16_SNorm:
+            case PixelFormat::RG16_UNorm:
+            case PixelFormat::RG8I:
+            case PixelFormat::RG8U:
+            case PixelFormat::RG16I:
+            case PixelFormat::RG16U:
+            case PixelFormat::RG32I:
+            case PixelFormat::RG32U:
+            case PixelFormat::RG16F:
+            case PixelFormat::RG32F:
+            case PixelFormat::Depth16_Stencil8:
+            case PixelFormat::Depth24_Stencil8:
+            case PixelFormat::Depth32F_Stencil8: return 2;
+
+            case PixelFormat::RGB8_SNorm:
+            case PixelFormat::RGB8_UNorm:
+            case PixelFormat::RGB16_SNorm:
+            case PixelFormat::RGB16_UNorm:
+            case PixelFormat::BGR8_UNorm:
+            case PixelFormat::RGB8I:
+            case PixelFormat::RGB8U:
+            case PixelFormat::RGB16I:
+            case PixelFormat::RGB16U:
+            case PixelFormat::RGB32I:
+            case PixelFormat::RGB32U:
+            case PixelFormat::RGB16F:
+            case PixelFormat::RGB32F:
+            case PixelFormat::sRGB8:
+            case PixelFormat::sBGR8:
+            case PixelFormat::R5_G6_B5_UNorm_Pack16:
+            case PixelFormat::BG11_R10F_Pack32: return 3;
+
+            case PixelFormat::RGBA8_SNorm:
+            case PixelFormat::RGBA8_UNorm:
+            case PixelFormat::RGBA16_SNorm:
+            case PixelFormat::RGBA16_UNorm:
+            case PixelFormat::BGRA8_UNorm:
+            case PixelFormat::RGBA8I:
+            case PixelFormat::RGBA8U:
+            case PixelFormat::RGBA16I:
+            case PixelFormat::RGBA16U:
+            case PixelFormat::RGBA32I:
+            case PixelFormat::RGBA32U:
+            case PixelFormat::RGBA16F:
+            case PixelFormat::RGBA32F:
+            case PixelFormat::sRGBA8:
+            case PixelFormat::sBGRA8: return 4;
+
+            default: break;
+        }
+
+        return 0u;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE constexpr auto
+        getArraySizeByChannelFor(PixelFormat format) noexcept -> core::UInt8 {
+        switch (format) {
+            case PixelFormat::R8_SNorm:
+            case PixelFormat::R8_UNorm:
+            case PixelFormat::RG8_SNorm:
+            case PixelFormat::RG8_UNorm:
+            case PixelFormat::R8I:
+            case PixelFormat::R8U:
+            case PixelFormat::RG8I:
+            case PixelFormat::RG8U:
+            case PixelFormat::RGB8_SNorm:
+            case PixelFormat::RGB8_UNorm:
+            case PixelFormat::BGR8_UNorm:
+            case PixelFormat::RGB8I:
+            case PixelFormat::RGB8U:
+            case PixelFormat::RGBA8_SNorm:
+            case PixelFormat::RGBA8_UNorm:
+            case PixelFormat::RGBA16_SNorm:
+            case PixelFormat::BGRA8_UNorm:
+            case PixelFormat::sRGB8:
+            case PixelFormat::sBGR8:
+            case PixelFormat::sRGBA8:
+            case PixelFormat::sBGRA8: return 1u;
+
+            case PixelFormat::R16_SNorm:
+            case PixelFormat::R16_UNorm:
+            case PixelFormat::R16I:
+            case PixelFormat::R16U:
+            case PixelFormat::RG16_SNorm:
+            case PixelFormat::RG16_UNorm:
+            case PixelFormat::RG16I:
+            case PixelFormat::RG16U:
+            case PixelFormat::RG16F:
+            case PixelFormat::RGB16I:
+            case PixelFormat::RGB16U:
+            case PixelFormat::RGB16F:
+            case PixelFormat::RGBA16I:
+            case PixelFormat::RGBA16U:
+            case PixelFormat::RGBA16F:
+            case PixelFormat::R16F: return 2u;
+
+            case PixelFormat::R32I:
+            case PixelFormat::R32U:
+            case PixelFormat::R32F:
+            case PixelFormat::RG32I:
+            case PixelFormat::RG32U:
+            case PixelFormat::RG32F:
+            case PixelFormat::RGB16_SNorm:
+            case PixelFormat::RGB32I:
+            case PixelFormat::RGB32U:
+            case PixelFormat::RGB32F:
+            case PixelFormat::RGBA8I:
+            case PixelFormat::RGBA8U:
+            case PixelFormat::RGBA32I:
+            case PixelFormat::RGBA32U:
+            case PixelFormat::RGBA32F: return 4u;
+
+            default: break;
+        }
+
+        return 0u;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE constexpr Viewport::operator vk::Viewport() const noexcept {
+        return vk::Viewport {}
+            .setX(position.x)
+            .setY(position.y)
+            .setWidth(extent.width)
+            .setHeight(extent.height)
+            .setMinDepth(depth.x)
+            .setMaxDepth(depth.y);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE constexpr Scissor::operator vk::Rect2D() const noexcept {
+        return vk::Rect2D {}
+            .setOffset(as<vk::Offset2D>(offset))
+            .setExtent(as<vk::Extent2D>(extent));
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto
+        computeMipLevel(const core::math::ExtentU& extent) noexcept -> core::UInt32 {
+        const auto as_float = core::math::ExtentF { extent };
+
+        return core::narrow<core::UInt32>(core::math::floor(
+                   core::math::log2(core::math::max(as_float.width, as_float.height)))) +
+               1;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE constexpr auto computeUniformBufferOffsetAlignement(
+        core::RangeExtent         size,
+        const RenderCapabilities& capabilities) noexcept -> core::RangeExtent {
+        const auto min_ubo_align = capabilities.limits.min_uniform_buffer_offset_alignment;
+
+        if (min_ubo_align > 0) size = (size + min_ubo_align - 1) & ~(min_ubo_align - 1);
+
+        return size;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto toString(const PhysicalDeviceInfo& data) noexcept {
+        return std::format("[PhysicalDeviceInfo:\n"
+                           "   .device_id      = {:#06x},\n"
+                           "   .device_name    = {},\n"
+                           "   .vendor_id      = {:#06x},\n"
+                           "   .vendor_name    = {},\n"
+                           "   .api_version    = {}.{}.{},\n"
+                           "   .driver_version = {}.{}.{},\n"
+                           "   .type           = {}]",
+                           data.device_id,
+                           data.device_name,
+                           data.vendor_id,
+                           data.vendor_name,
+                           data.api_major_version,
+                           data.api_minor_version,
+                           data.api_patch_version,
+                           data.driver_major_version,
+                           data.driver_minor_version,
+                           data.driver_patch_version,
+                           data.type);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<typename To, typename From>
+    STORMKIT_FORCE_INLINE constexpr auto as(From&&) noexcept -> To {
+        static_assert(true, "Not yet implemented");
+        return To {};
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<>
+    [[nodiscard]] constexpr auto as<vk::Viewport, const gpu::Viewport&>(
+        const gpu::Viewport& viewport) noexcept -> vk::Viewport {
+        return viewport.operator vk::Viewport();
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<>
+    STORMKIT_FORCE_INLINE constexpr auto as<vk::Extent3D, const core::math::ExtentU&>(
+        const core::math::ExtentU& extent) noexcept -> vk::Extent3D {
+        return vk::Extent3D { extent.width, extent.height, extent.depth };
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<>
+    STORMKIT_FORCE_INLINE constexpr auto as<core::math::ExtentU, const vk::Extent3D&>(
+        const vk::Extent3D& extent) noexcept -> core::math::ExtentU {
+        return { extent.width, extent.height, extent.depth };
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<>
+    STORMKIT_FORCE_INLINE constexpr auto as<vk::Extent2D, const core::math::ExtentU&>(
+        const core::math::ExtentU& extent) noexcept -> vk::Extent2D {
+        return vk::Extent2D { extent.width, extent.height };
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<>
+    STORMKIT_FORCE_INLINE constexpr auto as<core::math::ExtentU, const vk::Extent2D&>(
+        const vk::Extent2D& extent) noexcept -> core::math::ExtentU {
+        return { extent.width, extent.height };
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<>
+    STORMKIT_FORCE_INLINE constexpr auto as<vk::Offset3D, const core::math::Vector3I&>(
+        const core::math::Vector3I& extent) noexcept -> vk::Offset3D {
+        return vk::Offset3D { extent.x, extent.y, extent.z };
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<>
+    STORMKIT_FORCE_INLINE constexpr auto as<vk::Offset2D, const core::math::Vector2I&>(
+        const core::math::Vector2I& extent) noexcept -> vk::Offset2D {
+        return vk::Offset2D { extent.x, extent.y };
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<>
+    STORMKIT_FORCE_INLINE constexpr auto as<core::math::Vector3I, const vk::Offset3D&>(
+        const vk::Offset3D& offset) noexcept -> core::math::Vector3I {
+        return { offset.x, offset.y, offset.z };
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<>
+    STORMKIT_FORCE_INLINE constexpr auto as<core::math::Vector2I, const vk::Offset2D&>(
+        const vk::Offset2D& offset) noexcept -> core::math::Vector2I {
+        return { offset.x, offset.y };
+    }
+} // namespace stormkit::gpu

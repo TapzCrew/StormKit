@@ -7,12 +7,10 @@ module stormkit.Gpu;
 import std;
 
 import stormkit.Core;
-
-import :Execution.RenderPass;
-
 import stormkit.Gpu.Vulkan;
+
 import :Core;
-import :Execution.RenderPass;
+import :Execution;
 
 namespace stormkit::gpu {
     namespace monadic {

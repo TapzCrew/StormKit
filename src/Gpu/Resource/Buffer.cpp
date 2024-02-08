@@ -7,11 +7,10 @@ module stormkit.Gpu;
 import std;
 
 import stormkit.Core;
-
-import :Core;
 import stormkit.Gpu.Vulkan;
 
-import :Resource.Buffer;
+import :Core;
+import :Resource;
 
 namespace stormkit::gpu {
     /////////////////////////////////////

@@ -2,9 +2,1034 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
+module;
+
+#include <stormkit/Core/PlatformMacro.hpp>
+
 export module stormkit.Gpu:Resource;
 
-export import :Resource.Buffer;
-export import :Resource.Image;
-export import :Resource.Shader;
-export import :Resource.Swapchain;
+import std;
+import stormkit.Core;
+import stormkit.Gpu.Vulkan;
+
+import :Core;
+
+export namespace stormkit::gpu {
+    class STORMKIT_API Buffer: public DeviceObject {
+        struct Tag {};
+
+      public:
+        struct CreateInfo {
+            BufferUsageFlag    usages;
+            core::RangeExtent  size;
+            MemoryPropertyFlag property =
+                MemoryPropertyFlag::Host_Visible | MemoryPropertyFlag::Host_Coherent;
+        };
+
+        static constexpr auto DEBUG_TYPE = DebugObjectType::Buffer;
+
+        Buffer(const Device& device, const CreateInfo& info, bool persistently_mapping, Tag);
+        ~Buffer();
+
+        Buffer(const Buffer&) = delete;
+        auto operator=(const Buffer&) -> Buffer&;
+
+        Buffer(Buffer&&) noexcept;
+        auto operator=(Buffer&&) noexcept -> Buffer&;
+
+        [[nodiscard]] static auto
+                                  create(const Device&     device,
+                                         const CreateInfo& info,
+                                         bool              persistently_mapped = false) noexcept -> Expected<Buffer>;
+        [[nodiscard]] static auto allocate(const Device&     device,
+                                           const CreateInfo& info,
+                                           bool              persistently_mapped = false) noexcept
+            -> Expected<std::unique_ptr<Buffer>>;
+
+        [[nodiscard]] auto usages() const noexcept -> BufferUsageFlag;
+        [[nodiscard]] auto size() const noexcept -> core::RangeExtent;
+
+        [[nodiscard]] auto map(core::RangeOffset offset) noexcept -> decltype(auto);
+        [[nodiscard]] auto map(core::RangeOffset offset,
+                               core::RangeExtent size) noexcept -> decltype(auto);
+
+        template<class T>
+        [[nodiscard]] auto mapAs(core::RangeOffset offset) noexcept -> decltype(auto);
+
+        [[nodiscard]] auto data(this auto& self) noexcept -> decltype(auto);
+        [[nodiscard]] auto data(this auto& self, core::RangeExtent size) noexcept -> decltype(auto);
+
+        template<class T>
+        [[nodiscard]] auto dataAs(this auto& self) noexcept -> decltype(auto);
+
+        auto flush(core::RangeOffset offset, core::RangeExtent size) -> void;
+        auto unmap() -> void;
+
+        [[nodiscard]] auto isPersistentlyMapped() const noexcept -> bool;
+
+        auto upload(std::span<const core::Byte> data, core::RangeOffset offset = 0) -> void;
+        template<class T>
+        auto upload(const T& data, core::RangeOffset offset = 0) -> void;
+        template<class T>
+        auto upload(std::span<const T> data, core::RangeOffset offset = 0) -> void;
+
+        [[nodiscard]] auto vkHandle() const noexcept -> const vk::raii::Buffer&;
+
+      private:
+        static auto findMemoryType(core::UInt                                type_filter,
+                                   vk::MemoryPropertyFlags                   properties,
+                                   const vk::PhysicalDeviceMemoryProperties& mem_properties,
+                                   const vk::MemoryRequirements& mem_requirements) -> core::UInt;
+
+        core::DeferInit<vk::raii::Buffer> m_vk_buffer;
+        vma::raii::Allocation             m_vma_allocation;
+
+        BufferUsageFlag   m_usages = {};
+        core::RangeExtent m_size   = 0;
+
+        bool        m_is_persistently_mapped = false;
+        core::Byte* m_mapped_pointer         = nullptr;
+    };
+
+    struct BufferMemoryBarrier {
+        AccessFlag src;
+        AccessFlag dst;
+
+        core::UInt32 src_queue_family_index = QUEUE_FAMILY_IGNORED;
+        core::UInt32 dst_queue_family_index = QUEUE_FAMILY_IGNORED;
+
+        const Buffer&     buffer;
+        core::RangeExtent size;
+        core::UInt64      offset = 0;
+    };
+
+    class STORMKIT_API Sampler: public DeviceObject {
+        struct Tag {};
+
+      public:
+        struct Settings {
+            Filter mag_filter = Filter::Linear;
+            Filter min_filter = Filter::Linear;
+
+            SamplerAddressMode address_mode_u = SamplerAddressMode::Repeat;
+            SamplerAddressMode address_mode_v = SamplerAddressMode::Repeat;
+            SamplerAddressMode address_mode_w = SamplerAddressMode::Repeat;
+
+            bool  enable_anisotropy = false;
+            float max_anisotropy    = 0.f;
+
+            BorderColor border_color = BorderColor::Int_Opaque_Black;
+
+            bool unnormalized_coordinates = false;
+
+            bool             compare_enable    = false;
+            CompareOperation compare_operation = CompareOperation::Always;
+
+            SamplerMipmapMode mipmap_mode  = SamplerMipmapMode::Linear;
+            float             mip_lod_bias = 0.f;
+
+            float min_lod = 0.f;
+            float max_lod = 0.f;
+        };
+
+        static constexpr auto DEBUG_TYPE = DebugObjectType::Sampler;
+
+        Sampler(const Device& device, const Settings& settings, Tag);
+        ~Sampler();
+
+        Sampler(const Sampler&)                    = delete;
+        auto operator=(const Sampler&) -> Sampler& = delete;
+
+        Sampler(Sampler&&) noexcept;
+        auto operator=(Sampler&&) noexcept -> Sampler&;
+
+        [[nodiscard]] static auto create(const Device&   device,
+                                         const Settings& settings) noexcept -> Expected<Sampler>;
+        [[nodiscard]] static auto allocate(const Device& device, const Settings& settings) noexcept
+            -> Expected<std::unique_ptr<Sampler>>;
+
+        [[nodiscard]] auto settings() const noexcept -> const Settings&;
+
+        [[nodiscard]] auto vkHandle() const noexcept -> const vk::raii::Sampler&;
+
+      private:
+        Settings m_settings = {};
+
+        core::DeferInit<vk::raii::Sampler> m_vk_sampler;
+    };
+
+    class Image;
+
+    class ImageObject: public ParentRef<Image> {
+      public:
+        using ParentRef<Image>::ParentRef;
+
+        [[nodiscard]] auto image() const noexcept -> const Image&;
+    };
+
+    class STORMKIT_API ImageView: public DeviceObject, public ImageObject {
+        struct Tag {};
+
+      public:
+        static constexpr auto DEBUG_TYPE = DebugObjectType::Image_View;
+
+        ImageView(const Device&                device,
+                  const Image&                 image,
+                  ImageViewType                type,
+                  const ImageSubresourceRange& subresource_range,
+                  Tag);
+        ~ImageView();
+
+        ImageView(const ImageView&)                    = delete;
+        auto operator=(const ImageView&) -> ImageView& = delete;
+
+        ImageView(ImageView&&) noexcept;
+        auto operator=(ImageView&&) noexcept -> ImageView&;
+
+        [[nodiscard]] static auto create(
+            const Device&                device,
+            const Image&                 image,
+            ImageViewType                type              = ImageViewType::T2D,
+            const ImageSubresourceRange& subresource_range = {}) noexcept -> Expected<ImageView>;
+        [[nodiscard]] static auto
+            allocate(const Device&                device,
+                     const Image&                 image,
+                     ImageViewType                type              = ImageViewType::T2D,
+                     const ImageSubresourceRange& subresource_range = {}) noexcept
+            -> Expected<std::unique_ptr<ImageView>>;
+
+        [[nodiscard]] auto type() const noexcept -> ImageViewType;
+        [[nodiscard]] auto subresourceRange() const noexcept -> const ImageSubresourceRange&;
+
+        [[nodiscard]] auto vkHandle() const noexcept -> const vk::raii::ImageView&;
+
+      private:
+        ImageViewType         m_type              = {};
+        ImageSubresourceRange m_subresource_range = {};
+
+        core::DeferInit<vk::raii::ImageView> m_vk_image_view;
+    };
+
+    class STORMKIT_API Image: public DeviceObject {
+        struct Tag {};
+
+      public:
+        struct CreateInfo {
+            core::math::ExtentU extent;
+            PixelFormat         format     = PixelFormat::RGBA8_UNorm;
+            core::UInt32        layers     = 1u;
+            core::UInt32        mip_levels = 1u;
+            ImageType           type       = ImageType::T2D;
+            ImageCreateFlag     flags      = ImageCreateFlag::None;
+            SampleCountFlag     samples    = SampleCountFlag::C1;
+            ImageUsageFlag      usages = ImageUsageFlag::Sampled | ImageUsageFlag::Transfert_Dst |
+                                    ImageUsageFlag::Transfert_Src;
+            ImageTiling        tiling   = ImageTiling::Optimal;
+            MemoryPropertyFlag property = MemoryPropertyFlag::Device_Local;
+        };
+
+        static constexpr auto DEBUG_TYPE = DebugObjectType::Image;
+
+        Image(const Device& device, const CreateInfo& create_info, Tag);
+        ~Image();
+
+        Image(const Image&)                    = delete;
+        auto operator=(const Image&) -> Image& = delete;
+
+        Image(Image&&) noexcept;
+        auto operator=(Image&&) noexcept -> Image&;
+
+        [[nodiscard]] static auto create(const Device&     device,
+                                         const CreateInfo& info) noexcept -> Expected<Image>;
+        [[nodiscard]] static auto
+            allocate(const Device&     device,
+                     const CreateInfo& create_info) noexcept -> Expected<std::unique_ptr<Image>>;
+
+        [[nodiscard]] auto extent() const noexcept -> const core::math::ExtentU&;
+        [[nodiscard]] auto format() const noexcept -> PixelFormat;
+        [[nodiscard]] auto type() const noexcept -> ImageType;
+        [[nodiscard]] auto samples() const noexcept -> SampleCountFlag;
+        [[nodiscard]] auto layers() const noexcept -> core::UInt32;
+        [[nodiscard]] auto faces() const noexcept -> core::UInt32;
+        [[nodiscard]] auto mipLevels() const noexcept -> core::UInt32;
+        [[nodiscard]] auto usages() const noexcept -> ImageUsageFlag;
+
+        [[nodiscard]] auto vkHandle() const noexcept -> const vk::raii::Image&;
+
+      private:
+        Image(const Device& device, const CreateInfo& info);
+        Image(const Device&              device,
+              const core::math::ExtentU& extent,
+              PixelFormat                format,
+              vk::Image&&                image,
+              Tag);
+
+        core::math::ExtentU m_extent     = { 0, 0, 0 };
+        PixelFormat         m_format     = {};
+        core::UInt32        m_layers     = 0;
+        core::UInt32        m_faces      = 0;
+        core::UInt32        m_mip_levels = 0;
+        ImageType           m_type       = {};
+        ImageCreateFlag     m_flags      = {};
+        SampleCountFlag     m_samples    = {};
+        ImageUsageFlag      m_usages     = {};
+
+        core::DeferInit<vk::raii::Image> m_vk_image;
+        vma::raii::Allocation            m_vma_allocation;
+
+        bool m_own_image = true;
+    };
+
+    struct ImageMemoryBarrier {
+        AccessFlag src;
+        AccessFlag dst;
+
+        ImageLayout old_layout;
+        ImageLayout new_layout;
+
+        core::UInt32 src_queue_family_index = QUEUE_FAMILY_IGNORED;
+        core::UInt32 dst_queue_family_index = QUEUE_FAMILY_IGNORED;
+
+        const Image&          image;
+        ImageSubresourceRange range;
+    };
+
+    class STORMKIT_API Shader: public DeviceObject {
+        struct Tag {};
+
+      public:
+        static constexpr auto DEBUG_TYPE = DebugObjectType::Shader_Module;
+
+        Shader(const Device&                device,
+               const std::filesystem::path& filepath,
+               ShaderStageFlag              type,
+               Tag);
+        Shader(const Device& device, std::span<const core::Byte> data, ShaderStageFlag type, Tag);
+        Shader(const Device& device, std::span<const SpirvID> data, ShaderStageFlag type, Tag);
+        ~Shader();
+
+        Shader(const Shader&)                    = delete;
+        auto operator=(const Shader&) -> Shader& = delete;
+
+        Shader(Shader&&) noexcept;
+        auto operator=(Shader&&) noexcept -> Shader&;
+
+        [[nodiscard]] static auto loadFromFile(const Device&                device,
+                                               const std::filesystem::path& filepath,
+                                               ShaderStageFlag type) noexcept -> Expected<Shader>;
+        [[nodiscard]] static auto fromBytes(const Device&               device,
+                                            std::span<const core::Byte> data,
+                                            ShaderStageFlag type) noexcept -> Expected<Shader>;
+        [[nodiscard]] static auto fromSpirvIDs(const Device&            device,
+                                               std::span<const SpirvID> data,
+                                               ShaderStageFlag type) noexcept -> Expected<Shader>;
+
+        [[nodiscard]] static auto allocateAndLoadFromFile(const Device&                device,
+                                                          const std::filesystem::path& filepath,
+                                                          ShaderStageFlag type) noexcept
+            -> Expected<std::unique_ptr<Shader>>;
+        [[nodiscard]] static auto
+                                  allocateFromBytes(const Device&               device,
+                                                    std::span<const core::Byte> data,
+                                                    ShaderStageFlag type) noexcept -> Expected<std::unique_ptr<Shader>>;
+        [[nodiscard]] static auto allocateFromSpirvIDs(const Device&            device,
+                                                       std::span<const SpirvID> data,
+                                                       ShaderStageFlag          type) noexcept
+            -> Expected<std::unique_ptr<Shader>>;
+
+        [[nodiscard]] auto type() const noexcept -> ShaderStageFlag;
+        [[nodiscard]] auto source() const noexcept -> const std::vector<SpirvID>&;
+        // const DescriptorSetLayout &descriptorSetLayout() const noexcept;
+
+        [[nodiscard]] auto vkHandle() const noexcept -> const vk::raii::ShaderModule&;
+
+      private:
+        auto compile() -> void;
+        auto reflect() noexcept -> void;
+
+        ShaderStageFlag      m_type   = ShaderStageFlag::None;
+        std::vector<SpirvID> m_source = {};
+
+        core::DeferInit<vk::raii::ShaderModule> m_vk_shader_module;
+    };
+
+    class STORMKIT_API Swapchain {
+        struct Tag {};
+
+      public:
+        static constexpr auto DEBUG_TYPE = DebugObjectType::Swapchain;
+
+        //   Swapchain(const Device& device, bool signaled, Tag);
+        //   ~Swapchain();
+        //
+        //   Swapchain(const Swapchain&)                    = delete;
+        //   auto operator=(const Swapchain&) -> Swapchain& = delete;
+        //
+        //   Swapchain(Swapchain&&) noexcept;
+        //   auto operator=(Swapchain&&) noexcept -> Swapchain&;
+        //
+        //   [[nodiscard]] static auto create(const Device& device,
+        //                                    bool signaled = false) noexcept ->
+        //                                    Expected<Swapchain>;
+        //   [[nodiscard]] static auto allocate(const Device& device, bool signaled = false)
+        //   noexcept
+        //       -> Expected<std::unique_ptr<Swapchain>>;
+        //
+        //   [[nodiscard]] auto vkHandle() const noexcept -> const vk::raii::SwapchainKHR&;
+        //
+        // private:
+        //   core::DeferInit<vk::raii::SwapchainKHR> m_vk_swapchain;
+        //
+        //   core::ExtentU m_extent;
+        //   PixelFormat   m_pixel_format;
+        //   core::UInt32  m_image_count;
+        //
+        //   std::vector<Image> m_images;
+        //
+        //   std::vector<Semaphore> m_image_availables;
+        //   std::vector<Semaphore> m_render_finished;
+        //   std::vector<Semaphore> m_in_flight_fences;
+    };
+} // namespace stormkit::gpu
+
+////////////////////////////////////////////////////////////////////
+///                      IMPLEMENTATION                          ///
+////////////////////////////////////////////////////////////////////
+
+namespace stormkit::gpu {
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE Buffer::~Buffer() = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE Buffer::Buffer(Buffer&& other) noexcept = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Buffer::operator=(Buffer&& other) noexcept -> Buffer& = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto
+        Buffer::create(const Device&     device,
+                       const CreateInfo& info,
+                       bool              persistently_mapped) noexcept -> Expected<Buffer> try {
+        return Buffer { device, info, persistently_mapped, Tag {} };
+    } catch (const Result& result) { return std::unexpected(result); }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Buffer::allocate(const Device&     device,
+                                                const CreateInfo& info,
+                                                bool              persistently_mapped) noexcept
+        -> Expected<std::unique_ptr<Buffer>> try {
+        return std::make_unique<Buffer>(device, info, persistently_mapped, Tag {});
+    } catch (const Result& result) { return std::unexpected(result); }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Buffer::usages() const noexcept -> BufferUsageFlag {
+        core::expects(m_vma_allocation.operator bool());
+
+        return m_usages;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Buffer::size() const noexcept -> core::RangeExtent {
+        core::expects(m_vma_allocation.operator bool());
+
+        return m_size;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Buffer::map(core::RangeOffset offset) noexcept -> decltype(auto) {
+        core::expects(m_vma_allocation.operator bool());
+        core::expects(offset < core::as<core::RangeOffset>(m_size));
+
+        if (!m_mapped_pointer) {
+            auto _ = device().vmaAllocator().mapMemory(*m_vma_allocation,
+                                                       std::bit_cast<void**>(&m_mapped_pointer));
+            m_mapped_pointer += offset;
+        }
+
+        return m_mapped_pointer;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Buffer::map(core::RangeOffset offset,
+                                           core::RangeExtent size) noexcept -> decltype(auto) {
+        return std::span<core::Byte> { map(offset), size };
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<class T>
+    STORMKIT_FORCE_INLINE auto Buffer::mapAs(core::RangeOffset offset) noexcept -> decltype(auto) {
+        core::expects(m_vma_allocation.operator bool());
+
+        return std::bit_cast<T*>(map(offset));
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Buffer::data(this auto& self) noexcept -> decltype(auto) {
+        core::expects(self.m_vma_allocation.operator bool());
+        core::expects(self.m_mapped_pointer);
+
+        using Byte = core::LikeCV<decltype(self), core::Byte>;
+
+        return std::bit_cast<Byte*>(self.m_mapped_pointer);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Buffer::data(this auto&        self,
+                                            core::RangeExtent size) noexcept -> decltype(auto) {
+        core::expects(self.m_vma_allocation.operator bool());
+        core::expects(self.m_mapped_pointer);
+
+        using Byte = core::LikeCV<decltype(self), core::Byte>;
+
+        return std::span<Byte> { std::bit_cast<Byte*>(self.m_mapped_pointer), size };
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<class T>
+    STORMKIT_FORCE_INLINE auto Buffer::dataAs(this auto& self) noexcept -> decltype(auto) {
+        core::expects(self.m_vma_allocation.operator bool());
+
+        using Type = core::LikeCV<decltype(self), T>;
+
+        return std::bit_cast<Type*>(self.data());
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Buffer::flush(core::RangeOffset offset,
+                                             core::RangeExtent size) -> void {
+        core::expects(m_vma_allocation.operator bool());
+        core::expects(offset <= core::as<core::RangeOffset>(m_size));
+        core::expects(size <= m_size);
+
+        device().vmaAllocator().flushAllocation(*m_vma_allocation, offset, size);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Buffer::unmap() -> void {
+        core::expects(m_vma_allocation.operator bool());
+        core::expects(m_is_persistently_mapped, "Trying to unmap persistent buffer !");
+
+        device().vmaAllocator().unmapMemory(*m_vma_allocation);
+
+        m_mapped_pointer = nullptr;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Buffer::upload(std::span<const core::Byte> data,
+                                              core::RangeOffset           offset) -> void {
+        auto ptr = map(offset, std::size(data));
+
+        std::ranges::copy(data, std::begin(ptr));
+
+        unmap();
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<class T>
+    STORMKIT_FORCE_INLINE auto Buffer::upload(const T& data, core::RangeOffset offset) -> void {
+        upload(core::asByteView(data), offset);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<class T>
+    STORMKIT_FORCE_INLINE auto Buffer::upload(std::span<const T> data,
+                                              core::RangeOffset  offset) -> void {
+        upload(core::asByteView(data), offset);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Buffer::vkHandle() const noexcept -> const vk::raii::Buffer& {
+        return m_vk_buffer;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE Sampler::Sampler(const Device& device, const Settings& settings, Tag)
+        : DeviceObject { device }, m_settings { settings } {
+        this->device()
+            .vkHandle()
+            .createSampler(
+                { .magFilter    = core::narrow<vk::Filter>(m_settings.mag_filter),
+                  .minFilter    = core::narrow<vk::Filter>(m_settings.min_filter),
+                  .mipmapMode   = core::narrow<vk::SamplerMipmapMode>(m_settings.mipmap_mode),
+                  .addressModeU = core::narrow<vk::SamplerAddressMode>(m_settings.address_mode_u),
+                  .addressModeV = core::narrow<vk::SamplerAddressMode>(m_settings.address_mode_v),
+                  .addressModeW = core::narrow<vk::SamplerAddressMode>(m_settings.address_mode_w),
+                  .mipLodBias   = m_settings.mip_lod_bias,
+                  .anisotropyEnable = m_settings.enable_anisotropy,
+                  .maxAnisotropy    = m_settings.max_anisotropy,
+                  .compareEnable    = m_settings.compare_enable,
+                  .compareOp        = core::narrow<vk::CompareOp>(m_settings.compare_operation),
+                  .minLod           = m_settings.min_lod,
+                  .maxLod           = m_settings.max_lod,
+                  .borderColor      = core::narrow<vk::BorderColor>(m_settings.border_color),
+                  .unnormalizedCoordinates = m_settings.unnormalized_coordinates })
+            .transform_error(core::monadic::map(core::monadic::as<Result>(), core::throwError()));
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE Sampler::~Sampler() = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE Sampler::Sampler(Sampler&& other) noexcept = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Sampler::operator=(Sampler&& other) noexcept -> Sampler& = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto
+        Sampler::create(const Device&   device,
+                        const Settings& settings) noexcept -> Expected<Sampler> try {
+        return Sampler { device, settings, Tag {} };
+    } catch (const Result& result) { return std::unexpected(result); }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Sampler::allocate(const Device&   device,
+                                                 const Settings& settings) noexcept
+        -> Expected<std::unique_ptr<Sampler>> try {
+        return std::make_unique<Sampler>(device, settings, Tag {});
+    } catch (const Result& result) { return std::unexpected(result); }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Sampler::settings() const noexcept -> const Settings& {
+        return m_settings;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Sampler::vkHandle() const noexcept -> const vk::raii::Sampler& {
+        return m_vk_sampler;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto ImageObject::image() const noexcept -> const Image& {
+        return ParentRef<Image>::parent();
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE ImageView::ImageView(const Device&                device,
+                                               const Image&                 image,
+                                               ImageViewType                type,
+                                               const ImageSubresourceRange& subresource_range,
+                                               Tag)
+        : DeviceObject { device }, ImageObject { image }, m_type { type },
+          m_subresource_range { subresource_range } {
+        const auto vk_subresource_range =
+            vk::ImageSubresourceRange {}
+                .setAspectMask(
+                    core::narrow<vk::ImageAspectFlagBits>(m_subresource_range.aspect_mask))
+                .setBaseMipLevel(m_subresource_range.base_mip_level)
+                .setLevelCount(m_subresource_range.level_count)
+                .setBaseArrayLayer(m_subresource_range.base_array_layer)
+                .setLayerCount(m_subresource_range.layer_count);
+
+        this->device()
+            .vkHandle()
+            .createImageView({
+                .image            = *this->image().vkHandle(),
+                .viewType         = core::narrow<vk::ImageViewType>(m_type),
+                .format           = core::narrow<vk::Format>(this->image().format()),
+                .components       = { .r = vk::ComponentSwizzle::eR,
+                                      .g = vk::ComponentSwizzle::eG,
+                                      .b = vk::ComponentSwizzle::eB,
+                                      .a = vk::ComponentSwizzle::eA },
+                .subresourceRange = vk_subresource_range,
+            })
+            .transform(core::monadic::set(m_vk_image_view))
+            .transform_error(core::monadic::map(core::monadic::as<Result>(), core::throwError()));
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE ImageView::~ImageView() = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE ImageView::ImageView(ImageView&& other) noexcept = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto
+        ImageView::operator=(ImageView&& other) noexcept -> ImageView& = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto ImageView::create(
+        const Device&                device,
+        const Image&                 image,
+        ImageViewType                type,
+        const ImageSubresourceRange& subresource_range) noexcept -> Expected<ImageView> try {
+        return ImageView { device, image, type, subresource_range, Tag {} };
+    } catch (const Result& result) { return std::unexpected(result); }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto
+        ImageView::allocate(const Device&                device,
+                            const Image&                 image,
+                            ImageViewType                type,
+                            const ImageSubresourceRange& subresource_range) noexcept
+        -> Expected<std::unique_ptr<ImageView>> try {
+        return std::make_unique<ImageView>(device, image, type, subresource_range, Tag {});
+    } catch (const Result& result) { return std::unexpected(result); }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto ImageView::type() const noexcept -> ImageViewType {
+        return m_type;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto
+        ImageView::subresourceRange() const noexcept -> const ImageSubresourceRange& {
+        return m_subresource_range;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto ImageView::vkHandle() const noexcept -> const vk::raii::ImageView& {
+        return m_vk_image_view;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE Image::Image(const Device& device, const CreateInfo& info)
+        : DeviceObject { device }, m_extent { info.extent }, m_format { info.format },
+          m_layers { info.layers }, m_faces { 1 }, m_mip_levels { info.mip_levels },
+          m_type { info.type }, m_flags { info.flags }, m_samples { info.samples },
+          m_usages { info.usages } {
+        if (core::checkFlag(m_flags, gpu::ImageCreateFlag::Cube_Compatible)) m_faces = 6u;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE Image::Image(const Device& device, const CreateInfo& info, Tag)
+        : Image { device, info } {
+        const auto create_info = vk::ImageCreateInfo {}
+                                     .setFlags(core::narrow<vk::ImageCreateFlagBits>(m_flags))
+                                     .setImageType(core::narrow<vk::ImageType>(m_type))
+                                     .setFormat(core::narrow<vk::Format>(m_format))
+                                     .setExtent(as<vk::Extent3D>(m_extent))
+                                     .setMipLevels(m_mip_levels)
+                                     .setArrayLayers(m_layers * m_faces)
+                                     .setSamples(core::narrow<vk::SampleCountFlagBits>(m_samples))
+                                     .setTiling(core::narrow<vk::ImageTiling>(info.tiling))
+                                     .setUsage(core::narrow<vk::ImageUsageFlagBits>(m_usages))
+                                     .setSharingMode(vk::SharingMode::eExclusive)
+                                     .setInitialLayout(vk::ImageLayout::eUndefined);
+
+        this->device()
+            .vkHandle()
+            .createImage(create_info)
+            .transform(core::monadic::set(m_vk_image))
+            .transform([this, &info]() noexcept -> VulkanExpected<void> {
+                const auto requirements = m_vk_image->getMemoryRequirements();
+
+                const auto allocate_info = vma::AllocationCreateInfo {}.setRequiredFlags(
+                    core::narrow<vk::MemoryPropertyFlagBits>(info.property));
+
+                auto&& allocator = this->device().vmaAllocator();
+
+                auto&& [error, m_vma_allocation] =
+                    allocator.allocateMemoryUnique(requirements, allocate_info);
+                if (error != vk::Result::eSuccess)
+                    return std::unexpected { core::narrow<vk::Result>(error) };
+                return {};
+            })
+            .transform_error(core::monadic::map(core::monadic::as<Result>(), core::throwError()));
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE Image::Image(const Device&                device,
+                                       const core::math::ExtentU&   extent,
+                                       gpu::PixelFormat             format,
+                                       [[maybe_unused]] vk::Image&& image,
+                                       Tag)
+        : Image { device, CreateInfo { extent, format, 1u, 1u }, Tag {} } {
+        // m_vk_image  = std::move(image);
+        m_own_image = false;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE Image::~Image() = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE Image::Image(Image&& other) noexcept = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Image::operator=(Image&& other) noexcept -> Image& = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto
+        Image::create(const Device&     device,
+                      const CreateInfo& create_info) noexcept -> Expected<Image> try {
+        return Image { device, create_info, Tag {} };
+    } catch (const Result& result) { return std::unexpected(result); }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Image::allocate(const Device&     device,
+                                               const CreateInfo& create_info) noexcept
+        -> Expected<std::unique_ptr<Image>> try {
+        return std::make_unique<Image>(device, create_info, Tag {});
+    } catch (const Result& result) { return std::unexpected(result); }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Image::extent() const noexcept -> const core::math::ExtentU& {
+        return m_extent;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Image::format() const noexcept -> PixelFormat {
+        return m_format;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Image::type() const noexcept -> ImageType {
+        return m_type;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Image::samples() const noexcept -> SampleCountFlag {
+        return m_samples;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Image::layers() const noexcept -> core::UInt32 {
+        return m_layers;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Image::faces() const noexcept -> core::UInt32 {
+        return m_faces;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Image::mipLevels() const noexcept -> core::UInt32 {
+        return m_mip_levels;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Image::usages() const noexcept -> ImageUsageFlag {
+        return m_usages;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Image::vkHandle() const noexcept -> const vk::raii::Image& {
+        return m_vk_image;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE
+    Shader::Shader(const Device&                device,
+                   const std::filesystem::path& filepath,
+                   ShaderStageFlag              type,
+                   Tag)
+        : DeviceObject { device }, m_type { type } {
+        auto       stream = std::ifstream { filepath.string(), std::ios::binary | std::ios::ate };
+        const auto size   = stream.tellg();
+
+        m_source.resize(size);
+
+        core::read(stream, core::viewAsBytes(m_source));
+
+        compile();
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE
+    Shader::Shader(const Device&               device,
+                   std::span<const core::Byte> data,
+                   ShaderStageFlag             type,
+                   Tag)
+        : Shader { device, core::viewAs<const SpirvID>(data), type, Tag {} } {
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE
+    Shader::Shader(const Device& device, std::span<const SpirvID> data, ShaderStageFlag type, Tag)
+        : DeviceObject { device }, m_type { type } {
+        m_source.reserve(std::size(data));
+        std::ranges::copy(data, std::back_inserter(m_source));
+
+        compile();
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE Shader::~Shader() = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE Shader::Shader(Shader&& other) noexcept = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Shader::operator=(Shader&& other) noexcept -> Shader& = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto
+        Shader::loadFromFile(const Device&                device,
+                             const std::filesystem::path& filepath,
+                             ShaderStageFlag              type) noexcept -> Expected<Shader> try {
+        return Shader { device, std::move(filepath), type, Tag {} };
+    } catch (const Result& result) { return std::unexpected(result); }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto
+        Shader::fromBytes(const Device&               device,
+                          std::span<const core::Byte> data,
+                          ShaderStageFlag             type) noexcept -> Expected<Shader> try {
+        return Shader { device, data, type, Tag {} };
+    } catch (const Result& result) { return std::unexpected(result); }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto
+        Shader::fromSpirvIDs(const Device&            device,
+                             std::span<const SpirvID> data,
+                             ShaderStageFlag          type) noexcept -> Expected<Shader> try {
+        return Shader { device, data, type, Tag {} };
+    } catch (const Result& result) { return std::unexpected(result); }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Shader::allocateAndLoadFromFile(
+        const Device&                device,
+        const std::filesystem::path& filepath,
+        ShaderStageFlag              type) noexcept -> Expected<std::unique_ptr<Shader>> try {
+        return std::make_unique<Shader>(device, filepath, type, Tag {});
+    } catch (const Result& result) { return std::unexpected(result); }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Shader::allocateFromBytes(const Device&               device,
+                                                         std::span<const core::Byte> data,
+                                                         ShaderStageFlag             type) noexcept
+        -> Expected<std::unique_ptr<Shader>> try {
+        return std::make_unique<Shader>(device, data, type, Tag {});
+    } catch (const Result& result) { return std::unexpected(result); }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Shader::allocateFromSpirvIDs(const Device&            device,
+                                                            std::span<const SpirvID> data,
+                                                            ShaderStageFlag          type) noexcept
+        -> Expected<std::unique_ptr<Shader>> try {
+        return std::make_unique<Shader>(device, data, type, Tag {});
+    } catch (const Result& result) { return std::unexpected(result); }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Shader::compile() -> void {
+        const auto create_info = vk::ShaderModuleCreateInfo {}.setCode(m_source);
+
+        this->device()
+            .vkHandle()
+            .createShaderModule(create_info)
+            .transform(core::monadic::set(m_vk_shader_module))
+            .transform_error(core::monadic::map(core::monadic::as<Result>(), core::throwError()));
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Shader::type() const noexcept -> ShaderStageFlag {
+        return m_type;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Shader::source() const noexcept -> const std::vector<SpirvID>& {
+        return m_source;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Shader::vkHandle() const noexcept -> const vk::raii::ShaderModule& {
+        return m_vk_shader_module;
+    }
+
+    // /////////////////////////////////////
+    // /////////////////////////////////////
+    // STORMKIT_FORCE_INLINE Swapchain::~Swapchain() = default;
+    //
+    // /////////////////////////////////////
+    // /////////////////////////////////////
+    // STORMKIT_FORCE_INLINE Swapchain::Swapchain(Swapchain&& other) noexcept = default;
+    //
+    // /////////////////////////////////////
+    // /////////////////////////////////////
+    // STORMKIT_FORCE_INLINE auto
+    //     Swapchain::operator=(Swapchain&& other) noexcept -> Swapchain& = default;
+    //
+    // /////////////////////////////////////
+    // /////////////////////////////////////
+    // STORMKIT_FORCE_INLINE auto
+    //     Swapchain::create(std::string app_name,
+    //                      bool        enable_validation) noexcept -> Expected<Swapchain> try {
+    //     return Swapchain { std::move(app_name), enable_validation, Tag {} };
+    // } catch (Result result) { return std::unexpected(result); }
+    //
+    // /////////////////////////////////////
+    // /////////////////////////////////////
+    // STORMKIT_FORCE_INLINE auto Swapchain::allocate(std::string app_name,
+    //                                               bool        enable_validation) noexcept
+    //     -> Expected<std::unique_ptr<Swapchain>> try {
+    //     return std::make_unique<Swapchain>(std::move(app_name), enable_validation, Tag {});
+    // } catch (Result result) { return std::unexpected(result); }
+    //
+    // /////////////////////////////////////
+    // /////////////////////////////////////
+    // STORMKIT_FORCE_INLINE auto Swapchain::vkHandle() const noexcept -> const
+    // vk::raii::SwapchainKHR& {
+    //     return m_vk_swapchain;
+    // }
+} // namespace stormkit::gpu
