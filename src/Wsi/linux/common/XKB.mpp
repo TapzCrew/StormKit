@@ -16,8 +16,7 @@ import std;
 
 import stormkit.Core;
 import stormkit.Log;
-
-import :Types;
+import stormkit.Wsi;
 
 #define STORMKIT_XKB_SCOPED(name, type)                                \
     struct name##Scoped {                                              \

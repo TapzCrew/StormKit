@@ -9,8 +9,7 @@ module;
 export module stormkit.Wsi:Win32.Utils;
 
 import stormkit.Core;
-
-import :Types;
+import stormkit.Wsi;
 
 export namespace stormkit::wsi::win32 {
     auto win32KeyToStormKitKey(WPARAM key, LPARAM flags) noexcept -> Key;

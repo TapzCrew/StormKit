@@ -15,8 +15,7 @@ module;
 export module stormkit.Wsi:Linux.X11.Utils;
 
 import stormkit.Core;
-
-import :Types;
+import stormkit.Wsi;
 
 export namespace stormkit::wsi::linux::x11 {
     auto x11KeyToChar(xcb_keysym_t key) noexcept -> char;
