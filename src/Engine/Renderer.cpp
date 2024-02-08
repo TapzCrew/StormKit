@@ -12,6 +12,7 @@ import stormkit.Wsi;
 import stormkit.Gpu;
 
 import :Renderer;
+import :Renderer.FrameGraph;
 
 using namespace std::literals;
 

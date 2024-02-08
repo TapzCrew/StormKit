@@ -6,7 +6,7 @@ module stormkit.Engine;
 
 import std;
 
-import :Core.Application;
+import :Core;
 
 import stormkit.Core;
 import stormkit.Wsi;

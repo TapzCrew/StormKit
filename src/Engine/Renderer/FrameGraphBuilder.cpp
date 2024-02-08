@@ -9,12 +9,7 @@ import std;
 import stormkit.Core;
 import stormkit.Gpu;
 
-import :Renderer.FrameGraphBuilder;
-import :Renderer.BakedFrameGraph;
-import :Renderer.GraphTask;
-import :Renderer.GraphID;
-import :Renderer.GraphResource;
-import :Renderer.GraphTaskBuilder;
+import :Renderer.FrameGraph;
 
 namespace stormkit::engine {
     /////////////////////////////////////
@@ -33,8 +28,8 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto FrameGraphBuilder::createFrameGraph(const gpu::Device& device, BakedFrameGraph* old)
-        -> BakedFrameGraph {
+    auto FrameGraphBuilder::createFrameGraph(const gpu::Device& device,
+                                             BakedFrameGraph*   old) -> BakedFrameGraph {
         auto data = allocatePhysicalResources(device);
 
         return BakedFrameGraph { *this, std::move(data), old };

@@ -9,8 +9,7 @@ import std;
 import stormkit.Core;
 import stormkit.Gpu;
 
-import :Renderer.FrameGraphBuilder;
-import :Renderer.BakedFrameGraph;
+import :Renderer.FrameGraph;
 
 namespace stormkit::engine {
     /////////////////////////////////////

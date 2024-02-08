@@ -1,0 +1,820 @@
+module;
+
+#include <stormkit/Core/PlatformMacro.hpp>
+
+export module stormkit.Engine:Renderer.FrameGraph;
+
+import std;
+
+import stormkit.Core;
+import stormkit.Gpu;
+
+export namespace stormkit::engine {
+    using GraphID                    = core::UInt64;
+    inline constexpr auto INVALID_ID = std::numeric_limits<GraphID>::max();
+
+    struct BufferDescription {
+        core::RangeExtent size;
+    };
+
+    struct ImageDescription {
+        core::math::ExtentU extent;
+        gpu::ImageType      type;
+        gpu::PixelFormat    format;
+
+        core::UInt32 layers = 1u;
+
+        std::optional<gpu::ClearValue> clear_value;
+    };
+
+    template<class T>
+    concept ResourceDescriptionType =
+        core::Is<T, BufferDescription> || core::Is<T, ImageDescription>;
+
+    template<ResourceDescriptionType D>
+    class STORMKIT_API GraphResource {
+      public:
+        using Description = D;
+
+        GraphResource(std::string name, Description&& description, GraphID creator);
+        virtual ~GraphResource();
+
+        GraphResource(const GraphResource&)                    = delete;
+        auto operator=(const GraphResource&) -> GraphResource& = delete;
+
+        GraphResource(GraphResource&&) noexcept;
+        auto operator=(GraphResource&&) noexcept -> GraphResource&;
+
+        [[nodiscard]] auto id() const noexcept -> GraphID;
+        [[nodiscard]] auto name() const noexcept -> const std::string&;
+        [[nodiscard]] auto transient() const noexcept -> bool;
+        [[nodiscard]] auto creator() const noexcept -> GraphID;
+        [[nodiscard]] auto writers() const noexcept -> const std::vector<GraphID>&;
+        [[nodiscard]] auto readers() const noexcept -> const std::vector<GraphID>&;
+        [[nodiscard]] auto refCount() const noexcept -> core::RangeExtent;
+        [[nodiscard]] auto description() const noexcept -> const Description&;
+
+      private:
+        std::string m_name;
+        Description m_description;
+        GraphID     m_id;
+
+        GraphID m_creator;
+
+        std::vector<GraphID> m_writers;
+        std::vector<GraphID> m_readers;
+
+        core::RangeExtent m_ref_count;
+
+        friend class GraphTaskBuilder;  // TODO rework this
+        friend class FrameGraphBuilder; // TODO rework this
+    };
+
+    using GraphBuffer = GraphResource<BufferDescription>;
+    using GraphImage  = GraphResource<ImageDescription>;
+
+    class GraphTaskBuilder;
+
+    class STORMKIT_API GraphTask {
+      public:
+        enum class Type {
+            Graphics,
+            Compute
+        };
+
+        GraphTask(core::RangeOffset data_id,
+                  std::string       name,
+                  Type              type       = Type::Graphics,
+                  bool              cull_imune = false);
+        virtual ~GraphTask();
+
+        GraphTask(const GraphTask&)                    = delete;
+        auto operator=(const GraphTask&) -> GraphTask& = delete;
+
+        GraphTask(GraphTask&&) noexcept;
+        auto operator=(GraphTask&&) noexcept -> GraphTask&;
+
+        [[nodiscard]] auto id() const noexcept -> GraphID;
+        [[nodiscard]] auto dataID() const noexcept -> core::RangeOffset;
+        [[nodiscard]] auto name() const noexcept -> const std::string&;
+        [[nodiscard]] auto type() const noexcept -> Type;
+        [[nodiscard]] auto cullImune() const noexcept -> bool;
+        [[nodiscard]] auto refCount() const noexcept -> core::RangeExtent;
+
+        [[nodiscard]] auto creates() const noexcept -> const std::vector<GraphID>&;
+        [[nodiscard]] auto writes() const noexcept -> const std::vector<GraphID>&;
+        [[nodiscard]] auto reads() const noexcept -> const std::vector<GraphID>&;
+
+        auto setCullImune(bool imune) noexcept -> void;
+
+        std::function<void(std::byte&, GraphTaskBuilder&)> onSetup;
+        std::function<void(const std::byte&,
+                           std::optional<core::NakedRef<gpu::RenderPass>> renderpass,
+                           gpu::CommandBuffer&                            cmb)>
+            onExecute;
+
+      private:
+        GraphID           m_id;
+        core::RangeOffset m_data_id;
+        std::string       m_name;
+        Type              m_type;
+        bool              m_cull_imune;
+        core::RangeExtent m_ref_count = 0;
+
+        std::vector<GraphID> m_creates;
+        std::vector<GraphID> m_writes;
+        std::vector<GraphID> m_reads;
+
+        friend class GraphTaskBuilder;  // TODO rework this
+        friend class FrameGraphBuilder; // TODO rework this
+    };
+
+    class FrameGraphBuilder;
+
+    class STORMKIT_API BakedFrameGraph {
+        struct Data {
+            struct Task {
+                GraphID id;
+
+                gpu::CommandBuffer cmb;
+
+                std::vector<gpu::ClearValue> clear_values = {};
+                gpu::RenderPass              renderpass;
+                gpu::FrameBuffer             framebuffer;
+            };
+
+            std::vector<Task>           tasks;
+            std::vector<gpu::Image>     images      = {};
+            std::vector<gpu::ImageView> image_views = {};
+            std::vector<gpu::Buffer>    buffers     = {};
+
+            core::DeferInit<gpu::CommandPool>   raster_command_pool;
+            core::DeferInit<gpu::CommandBuffer> main_cmb;
+            core::DeferInit<gpu::CommandBuffer> blit_cmb;
+
+            core::DeferInit<gpu::Semaphore> semaphore;
+        };
+
+      public:
+        struct Frame {};
+
+        BakedFrameGraph(const FrameGraphBuilder& builder,
+                        Data&&                   data,
+                        BakedFrameGraph*         old = nullptr);
+        ~BakedFrameGraph();
+
+        BakedFrameGraph(const BakedFrameGraph&)                    = delete;
+        auto operator=(const BakedFrameGraph&) -> BakedFrameGraph& = delete;
+
+        BakedFrameGraph(BakedFrameGraph&&) noexcept;
+        auto operator=(BakedFrameGraph&&) noexcept -> BakedFrameGraph&;
+
+        auto execute(Frame& frame) -> void;
+
+        auto setBackbuffer(gpu::ImageView& backbuffer) -> void;
+
+      private:
+        const FrameGraphBuilder* m_builder = nullptr;
+
+        gpu::ImageView* m_backbuffer = nullptr;
+
+        Data m_data;
+
+        friend class FrameGraphBuilder;
+    };
+
+    class STORMKIT_API FrameGraphBuilder {
+      public:
+        template<typename T>
+        using SetupCallback = std::function<void(T&, GraphTaskBuilder&)>;
+        template<typename T>
+        using ExecuteCallback = std::function<void(const T&,
+                                                   std::optional<core::NakedRef<gpu::RenderPass>>&,
+                                                   gpu::CommandBuffer& cmb)>;
+
+        FrameGraphBuilder() noexcept;
+        ~FrameGraphBuilder();
+
+        FrameGraphBuilder(const FrameGraphBuilder&)                    = delete;
+        auto operator=(const FrameGraphBuilder&) -> FrameGraphBuilder& = delete;
+
+        FrameGraphBuilder(FrameGraphBuilder&&) noexcept;
+        auto operator=(FrameGraphBuilder&&) noexcept -> FrameGraphBuilder&;
+
+        template<class TaskData>
+        auto addTask(std::string               name,
+                     SetupCallback<TaskData>   setup,
+                     ExecuteCallback<TaskData> execute,
+                     GraphTask::Type           type       = GraphTask::Type::Graphics,
+                     bool                      cull_imune = false) noexcept -> GraphTask&;
+
+        template<ResourceDescriptionType Description, typename Resource>
+        auto setRetainedResource(std::string     name,
+                                 Description&&   description,
+                                 const Resource& image) -> GraphResource<Description>&;
+
+        auto setFinalResource(GraphID final) noexcept -> void;
+
+        auto reset() noexcept -> void;
+        auto bake() -> void;
+        auto createFrameGraph(const gpu::Device& device,
+                              BakedFrameGraph*   old = nullptr) -> BakedFrameGraph;
+        auto allocateFrameGraph(const gpu::Device& device,
+                                BakedFrameGraph* old = nullptr) -> std::unique_ptr<BakedFrameGraph>;
+
+        auto hasTask(GraphID id) const noexcept -> bool;
+        auto hasTask(std::string_view name) const noexcept -> bool;
+
+        template<class TaskData>
+        auto getTask(this auto& self, std::string_view name) noexcept -> decltype(auto);
+
+        template<class TaskData>
+        auto getTask(this auto& self, GraphID id) noexcept -> decltype(auto);
+
+        auto getTask(this auto& self, std::string_view name) noexcept -> decltype(auto);
+        auto getTask(this auto& self, GraphID id) noexcept -> decltype(auto);
+
+        auto hasResource(GraphID id) const noexcept -> bool;
+        auto hasResource(std::string_view name) const noexcept -> bool;
+
+        template<class Description>
+        auto getResource(this auto& self, std::string_view name) noexcept -> decltype(auto);
+
+        template<class Description>
+        auto getResource(this auto& self, GraphID id) noexcept -> decltype(auto);
+
+        auto getResource(this auto& self, std::string_view name) noexcept -> decltype(auto);
+        auto getResource(this auto& self, GraphID id) noexcept -> decltype(auto);
+
+      private:
+        struct BufferInfo {
+            GraphID                 id;
+            gpu::Buffer::CreateInfo create_info;
+            std::string_view        name;
+        };
+
+        struct ImageInfo {
+            GraphID                id;
+            gpu::Image::CreateInfo create_info;
+            gpu::ClearValue        clear_value;
+            std::string_view       name;
+        };
+
+        struct RenderPassData {
+            gpu::RenderPassDescription                  description;
+            std::vector<std::vector<gpu::Subpass::Ref>> color_attachment_refs;
+            std::vector<std::vector<gpu::Subpass::Ref>> depth_attachment_refs;
+            std::vector<std::vector<gpu::Subpass::Ref>> resolve_attachment_refs;
+        };
+
+        struct Pass {
+            GraphID id = INVALID_ID;
+
+            RenderPassData   renderpass;
+            std::string_view name;
+
+            std::vector<BufferInfo> buffers;
+            std::vector<ImageInfo>  images;
+        };
+
+        using GraphResourceVariant = std::variant<GraphBuffer, GraphImage>;
+        using ResourceVariant =
+            std::variant<core::NakedRef<const gpu::Image>, core::NakedRef<const gpu::Buffer>>;
+
+        auto prepareTask(GraphTask& task) noexcept -> void;
+
+        auto cullUnreferencedResources() noexcept -> void;
+        auto buildPhysicalDescriptions() noexcept -> void;
+        auto buildImagePhysicalDescriptions(const GraphTask& task) noexcept
+            -> std::vector<ImageInfo>;
+        auto buildBufferPhysicalDescriptions(const GraphTask& task) noexcept
+            -> std::vector<BufferInfo>;
+        auto buildRenderPassPhysicalDescription(
+            const GraphTask&                          task,
+            core::HashMap<GraphID, gpu::ImageLayout>& layouts) noexcept -> RenderPassData;
+        auto allocatePhysicalResources(const gpu::Device& device) -> BakedFrameGraph::Data;
+
+        std::future<void>               m_bake_future;
+        std::list<GraphTask>            m_tasks;
+        std::list<GraphResourceVariant> m_resources;
+        GraphID                         m_final_resource = INVALID_ID;
+
+        std::vector<std::vector<std::byte>> m_datas;
+
+        core::HashMap<GraphID, ResourceVariant> m_retained_resources;
+
+        std::vector<Pass> m_preprocessed_framegraph;
+
+        core::ThreadPool m_thread_pool;
+
+        friend class GraphTaskBuilder;
+    };
+
+    class STORMKIT_API GraphTaskBuilder {
+      public:
+        GraphTaskBuilder(GraphTask& task, FrameGraphBuilder& framegraph) noexcept;
+        ~GraphTaskBuilder() noexcept;
+
+        GraphTaskBuilder(const GraphTaskBuilder&) noexcept;
+        auto operator=(const GraphTaskBuilder&) noexcept -> GraphTaskBuilder&;
+
+        GraphTaskBuilder(GraphTaskBuilder&&) noexcept;
+        auto operator=(GraphTaskBuilder&&) noexcept -> GraphTaskBuilder&;
+
+        template<ResourceDescriptionType Description>
+        auto create(std::string name, Description&& description) -> GraphResource<Description>&;
+
+        template<ResourceDescriptionType Description>
+        auto read(GraphResource<Description>& resource) -> GraphResource<Description>&;
+
+        template<ResourceDescriptionType Description>
+        auto write(GraphResource<Description>& resource) -> GraphResource<Description>&;
+
+        template<ResourceDescriptionType Description>
+        auto readwrite(GraphResource<Description>& resource) -> GraphResource<Description>&;
+
+      private:
+        core::NakedRef<GraphTask> m_task       = nullptr;
+        FrameGraphBuilder*        m_framegraph = nullptr;
+    };
+
+} // namespace stormkit::engine
+
+////////////////////////////////////////////////////////////////////
+///                      IMPLEMENTATION                          ///
+////////////////////////////////////////////////////////////////////
+
+namespace stormkit::engine {
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<ResourceDescriptionType D>
+    STORMKIT_FORCE_INLINE GraphResource<D>::GraphResource(std::string   name,
+                                                          Description&& description,
+                                                          GraphID       creator)
+        : m_creator { creator }, m_name { std::move(name) },
+          m_description { std::forward<Description>(description) } {
+        static GraphID s_next_id = 0;
+
+        m_id = s_next_id++;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<ResourceDescriptionType D>
+    STORMKIT_FORCE_INLINE GraphResource<D>::~GraphResource() = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<ResourceDescriptionType D>
+    STORMKIT_FORCE_INLINE GraphResource<D>::GraphResource(GraphResource&& other) noexcept = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<ResourceDescriptionType D>
+    STORMKIT_FORCE_INLINE auto
+        GraphResource<D>::operator=(GraphResource&& other) noexcept -> GraphResource& = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<ResourceDescriptionType D>
+    STORMKIT_FORCE_INLINE auto GraphResource<D>::id() const noexcept -> GraphID {
+        return m_id;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<ResourceDescriptionType D>
+    STORMKIT_FORCE_INLINE auto GraphResource<D>::name() const noexcept -> const std::string& {
+        return m_name;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<ResourceDescriptionType D>
+    STORMKIT_FORCE_INLINE auto GraphResource<D>::transient() const noexcept -> bool {
+        return m_creator != INVALID_ID;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<ResourceDescriptionType D>
+    STORMKIT_FORCE_INLINE auto GraphResource<D>::creator() const noexcept -> GraphID {
+        return m_creator;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<ResourceDescriptionType D>
+    STORMKIT_FORCE_INLINE auto
+        GraphResource<D>::writers() const noexcept -> const std::vector<GraphID>& {
+        return m_writers;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<ResourceDescriptionType D>
+    STORMKIT_FORCE_INLINE auto
+        GraphResource<D>::readers() const noexcept -> const std::vector<GraphID>& {
+        return m_readers;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<ResourceDescriptionType D>
+    STORMKIT_FORCE_INLINE auto GraphResource<D>::refCount() const noexcept -> core::RangeExtent {
+        return m_ref_count;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<ResourceDescriptionType D>
+    STORMKIT_FORCE_INLINE auto
+        GraphResource<D>::description() const noexcept -> const Description& {
+        return m_description;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE GraphTask::GraphTask(core::RangeOffset data_id,
+                                               std::string       name,
+                                               Type              type,
+                                               bool              cull_imune)
+        : m_data_id { data_id }, m_name { std::move(name) }, m_type { type },
+          m_cull_imune { cull_imune } {
+        static GraphID s_next_id = 0;
+
+        m_id = s_next_id++;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE GraphTask::~GraphTask() = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE GraphTask::GraphTask(GraphTask&& other) noexcept = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto
+        GraphTask::operator=(GraphTask&& other) noexcept -> GraphTask& = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto GraphTask::id() const noexcept -> GraphID {
+        return m_id;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto GraphTask::dataID() const noexcept -> core::RangeOffset {
+        return m_data_id;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto GraphTask::name() const noexcept -> const std::string& {
+        return m_name;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto GraphTask::type() const noexcept -> Type {
+        return m_type;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto GraphTask::cullImune() const noexcept -> bool {
+        return m_cull_imune;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto GraphTask::refCount() const noexcept -> core::RangeExtent {
+        return m_ref_count;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto GraphTask::creates() const noexcept -> const std::vector<GraphID>& {
+        return m_creates;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto GraphTask::writes() const noexcept -> const std::vector<GraphID>& {
+        return m_writes;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto GraphTask::reads() const noexcept -> const std::vector<GraphID>& {
+        return m_reads;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto GraphTask::setCullImune(bool imune) noexcept -> void {
+        m_cull_imune = imune;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE BakedFrameGraph::~BakedFrameGraph() = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE
+    BakedFrameGraph::BakedFrameGraph(BakedFrameGraph&& other) noexcept = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto
+        BakedFrameGraph::operator=(BakedFrameGraph&& other) noexcept -> BakedFrameGraph& = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE FrameGraphBuilder::FrameGraphBuilder() noexcept {
+        m_thread_pool.setName("StormKit:FrameGraph:Worker");
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE FrameGraphBuilder::~FrameGraphBuilder() = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE
+    FrameGraphBuilder::FrameGraphBuilder(FrameGraphBuilder&& other) noexcept = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto FrameGraphBuilder::operator=(FrameGraphBuilder&& other) noexcept
+        -> FrameGraphBuilder& = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto FrameGraphBuilder::reset() noexcept -> void {
+        m_resources.clear();
+        m_tasks.clear();
+        m_datas.clear();
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<class TaskData>
+    inline auto FrameGraphBuilder::addTask(std::string               name,
+                                           SetupCallback<TaskData>   setup,
+                                           ExecuteCallback<TaskData> execute,
+                                           GraphTask::Type           type,
+                                           bool cull_imune) noexcept -> GraphTask& {
+        core::expects(!hasTask(name), std::format("Task {} already registered !", name));
+
+        auto  id   = std::size(m_datas);
+        auto& task = m_tasks.emplace_back(id, std::move(name), type, cull_imune);
+        m_datas.emplace_back(std::vector<std::byte> { sizeof(TaskData) });
+
+        task.onSetup = [setup = std::move(setup)](core::Byte&       data,
+                                                  GraphTaskBuilder& builder) noexcept {
+            setup(core::as<TaskData>(data), builder);
+        };
+        task.onExecute = [execute = std::move(
+                              execute)](const core::Byte&                              data,
+                                        std::optional<core::NakedRef<gpu::RenderPass>> renderpass,
+                                        gpu::CommandBuffer& cmb) noexcept {
+            execute(core::as<TaskData>(data), std::move(renderpass), cmb);
+        };
+
+        prepareTask(task);
+
+        return task;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<ResourceDescriptionType Description, typename Resource>
+    inline auto FrameGraphBuilder::setRetainedResource(std::string     name,
+                                                       Description&&   description,
+                                                       const Resource& image)
+        -> GraphResource<Description>& {
+        auto& graph_resource = m_resources.emplace_back(std::move(name),
+                                                        INVALID_ID,
+                                                        std::forward<Description>(description));
+
+        m_retained_resources.emplace(graph_resource->id(), ResourceVariant { &image });
+
+        return core::as<GraphResource<Description>>(*graph_resource);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto FrameGraphBuilder::setFinalResource(GraphID id) noexcept -> void {
+        m_final_resource = id;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto FrameGraphBuilder::hasTask(GraphID id) const noexcept -> bool {
+        return std::ranges::any_of(m_tasks, [&](const auto& t) noexcept { return t.id() == id; });
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto
+        FrameGraphBuilder::hasTask(std::string_view name) const noexcept -> bool {
+        return std::ranges::any_of(m_tasks,
+                                   [&](const auto& t) noexcept { return t.name() == name; });
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<class TaskData>
+    STORMKIT_FORCE_INLINE auto
+        FrameGraphBuilder::getTask(this auto&       self,
+                                   std::string_view name) noexcept -> decltype(auto) {
+        return core::as<core::LikeCV<decltype(self), GraphTask>>(self.getTask(name));
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<class TaskData>
+    STORMKIT_FORCE_INLINE auto FrameGraphBuilder::getTask(this auto& self,
+                                                          GraphID id) noexcept -> decltype(auto) {
+        return core::as<core::LikeCV<decltype(self), GraphTask>>(self.getTask(id));
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto
+        FrameGraphBuilder::getTask(this auto&       self,
+                                   std::string_view name) noexcept -> decltype(auto) {
+        const auto it = std::ranges::find_if(self.m_tasks, [&](const auto& t) noexcept {
+            return t.name() == name;
+        });
+
+        core::ensures(it != std::ranges::cend(self.m_tasks),
+                      std::format("task with name {} not found", name));
+
+        return *it;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto FrameGraphBuilder::getTask(this auto& self,
+                                                          GraphID id) noexcept -> decltype(auto) {
+        auto it = std::ranges::find_if(self.m_tasks,
+                                       [&](const auto& t) noexcept { return t.id() == id; });
+
+        core::ensures(it != std::ranges::end(self.m_tasks),
+                      std::format("task with id {} not found", id));
+
+        return *it;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto FrameGraphBuilder::hasResource(GraphID id) const noexcept -> bool {
+        return std::ranges::any_of(m_resources, [&](const auto& t) noexcept {
+            return std::visit([&](auto&& t) { return t.id() == id; }, t);
+        });
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto
+        FrameGraphBuilder::hasResource(std::string_view name) const noexcept -> bool {
+        return std::ranges::any_of(m_resources, [&](const auto& t) noexcept {
+            return std::visit([&](auto&& t) { return t.name() == name; }, t);
+        });
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<class ResourceData>
+    STORMKIT_FORCE_INLINE auto
+        FrameGraphBuilder::getResource(this auto&       self,
+                                       std::string_view name) noexcept -> decltype(auto) {
+        return core::as<GraphResource<ResourceData>>(self.getResource(name));
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<class ResourceData>
+    STORMKIT_FORCE_INLINE auto
+        FrameGraphBuilder::getResource(this auto& self, GraphID id) noexcept -> decltype(auto) {
+        return core::as<GraphResource<ResourceData>>(self.getResource(id));
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto
+        FrameGraphBuilder::getResource(this auto&       self,
+                                       std::string_view name) noexcept -> decltype(auto) {
+        const auto visitor = [name](auto&& value) noexcept { return value.name() == name; };
+
+        auto it = std::ranges::find_if(self.m_resources, [&](auto&& value) noexcept {
+            return std::visit(visitor, value);
+        });
+
+        core::ensures(it != std::ranges::end(self.m_resources),
+                      std::format("resource with name {} not found", name));
+
+        return *it;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto
+        FrameGraphBuilder::getResource(this auto& self, GraphID id) noexcept -> decltype(auto) {
+        const auto visitor = [id](auto&& value) noexcept { return value.id() == id; };
+
+        auto it = std::ranges::find_if(self.m_resources, [&](auto&& value) noexcept {
+            return std::visit(visitor, value);
+        });
+
+        core::ensures(it != std::ranges::end(self.m_resources),
+                      std::format("resource with id {} not found", id));
+
+        return *it;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE GraphTaskBuilder::GraphTaskBuilder(GraphTask&         task,
+                                                             FrameGraphBuilder& framegraph) noexcept
+        : m_task { task }, m_framegraph { &framegraph } {
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE GraphTaskBuilder::~GraphTaskBuilder() noexcept = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE
+    GraphTaskBuilder::GraphTaskBuilder(const GraphTaskBuilder& other) noexcept = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto GraphTaskBuilder::operator=(const GraphTaskBuilder& other) noexcept
+        -> GraphTaskBuilder& = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE
+    GraphTaskBuilder::GraphTaskBuilder(GraphTaskBuilder&& other) noexcept = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto GraphTaskBuilder::operator=(GraphTaskBuilder&& other) noexcept
+        -> GraphTaskBuilder& = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<ResourceDescriptionType Description>
+    STORMKIT_FORCE_INLINE auto GraphTaskBuilder::create(std::string name, Description&& description)
+        -> GraphResource<Description>& {
+        const auto& resource =
+            m_framegraph->m_resources.emplace(std::move(name),
+                                              m_task->id(),
+                                              std::forward<Description>(description));
+
+        m_task->m_creates.emplace_back(resource->id());
+
+        return core::as<GraphResource<Description>>(*resource);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<ResourceDescriptionType Description>
+    STORMKIT_FORCE_INLINE auto GraphTaskBuilder::read(GraphResource<Description>& resource)
+        -> GraphResource<Description>& {
+        resource.m_readers.emplace_back(m_task->id());
+        m_task->m_reads.emplace_back(resource.id());
+
+        return resource;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<ResourceDescriptionType Description>
+    STORMKIT_FORCE_INLINE auto GraphTaskBuilder::write(GraphResource<Description>& resource)
+        -> GraphResource<Description>& {
+        resource.m_writers.emplace_back(m_task->id());
+        m_task->m_writes.emplace_back(resource.id());
+
+        return resource;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<ResourceDescriptionType Description>
+    STORMKIT_FORCE_INLINE auto GraphTaskBuilder::readwrite(GraphResource<Description>& resource)
+        -> GraphResource<Description>& {
+        [[maybe_unused]] const auto _1 = read(resource);
+        [[maybe_unused]] const auto _2 = write(resource);
+
+        return resource;
+    }
+} // namespace stormkit::engine
