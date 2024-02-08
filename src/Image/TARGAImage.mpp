@@ -8,7 +8,7 @@ import std;
 
 import stormkit.Core;
 
-import :Image;
+import stormkit.Image;
 
 export namespace stormkit::image::details {
     [[nodiscard]] auto loadTGA(std::span<const core::Byte> data) noexcept

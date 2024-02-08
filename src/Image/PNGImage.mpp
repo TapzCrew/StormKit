@@ -14,8 +14,7 @@ export module stormkit.Image:PNGImage;
 import std;
 
 import stormkit.Core;
-
-import :Image;
+import stormkit.Image;
 
 export namespace stormkit::image::details {
     [[nodiscard]] auto loadPNG(std::span<const core::Byte> data) noexcept
