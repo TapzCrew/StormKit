@@ -4,8 +4,6 @@
 
 module;
 
-#include <stormkit/Core/PlatformMacro.hpp>
-#include <stormkit/Log/LogMacro.hpp>
 #include <vulkan/vulkan_hpp_macros.hpp>
 
 module stormkit.Gpu;
@@ -14,9 +12,11 @@ import std;
 
 import stormkit.Core;
 import stormkit.Log;
-import stormkit.Gpu.Vulkan;
 
-import :Core;
+#include <stormkit/Core/PlatformMacro.hpp>
+#include <stormkit/Log/LogMacro.hpp>
+
+import stormkit.Gpu.Vulkan;
 
 namespace stormkit::gpu {
     LOGGER("stormkit.Gpu")

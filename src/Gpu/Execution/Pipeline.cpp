@@ -7,10 +7,12 @@ module stormkit.Gpu;
 import std;
 
 import stormkit.Core;
-import stormkit.Gpu.Vulkan;
 
+import stormkit.Gpu.Vulkan;
 import :Core;
-import :Execution;
+import :Execution.Pipeline;
+import :Execution.RenderPass;
+import :Execution.RasterPipelineState;
 
 namespace stormkit::gpu {
     /////////////////////////////////////

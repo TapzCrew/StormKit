@@ -1,6 +1,23 @@
-// Copyright (C) 2024 Arthur LAURENT <arthur.laurent4@gmail.com>
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
+
+module;
+
+#include <stormkit/Core/HashMacro.hpp>
+
+#include <stormkit/Core/PlatformMacro.hpp>
+
+export module stormkit.Gpu:Execution.RenderPass;
+
+import std;
+
+import stormkit.Core;
+
+import :Core;
+import :Resource;
+import stormkit.Gpu.Vulkan;
+
 export {
     namespace stormkit::gpu {
         class RenderPass;
@@ -42,8 +59,8 @@ export {
                 -> Expected<std::unique_ptr<FrameBuffer>>;
 
             [[nodiscard]] auto extent() const noexcept -> const core::math::ExtentU&;
-            [[nodiscard]] auto
-                attachments() const noexcept -> const std::vector<core::NakedRef<const ImageView>>&;
+            [[nodiscard]] auto attachments() const noexcept
+                -> const std::vector<core::NakedRef<const ImageView>>&;
 
             [[nodiscard]] auto vkHandle() const noexcept -> const vk::raii::Framebuffer&;
 
@@ -109,25 +126,25 @@ export {
             RenderPass(RenderPass&&) noexcept;
             auto operator=(RenderPass&&) noexcept -> RenderPass&;
 
-            [[nodiscard]] static auto
-                                      create(const Device&                device,
-                                             const RenderPassDescription& description) noexcept -> Expected<RenderPass>;
+            [[nodiscard]] static auto create(const Device&                device,
+                                             const RenderPassDescription& description) noexcept
+                -> Expected<RenderPass>;
             [[nodiscard]] static auto allocate(const Device&                device,
                                                const RenderPassDescription& description) noexcept
                 -> Expected<std::unique_ptr<RenderPass>>;
 
-            [[nodiscard]] auto
-                createFrameBuffer(const core::math::ExtentU&                   size,
-                                  std::vector<core::NakedRef<const ImageView>> attachments)
-                    const noexcept -> Expected<FrameBuffer>;
-            [[nodiscard]] auto
-                allocateFrameBuffer(const core::math::ExtentU&                   size,
-                                    std::vector<core::NakedRef<const ImageView>> attachments)
-                    const noexcept -> Expected<std::unique_ptr<FrameBuffer>>;
+            [[nodiscard]] auto createFrameBuffer(
+                const core::math::ExtentU&                   size,
+                std::vector<core::NakedRef<const ImageView>> attachments) const noexcept
+                -> Expected<FrameBuffer>;
+            [[nodiscard]] auto allocateFrameBuffer(
+                const core::math::ExtentU&                   size,
+                std::vector<core::NakedRef<const ImageView>> attachments) const noexcept
+                -> Expected<std::unique_ptr<FrameBuffer>>;
 
             [[nodiscard]] auto isCompatible(const RenderPass& render_pass) const noexcept -> bool;
-            [[nodiscard]] auto
-                isCompatible(const RenderPassDescription& description) const noexcept -> bool;
+            [[nodiscard]] auto isCompatible(const RenderPassDescription& description) const noexcept
+                -> bool;
 
             [[nodiscard]] auto description() const noexcept -> const RenderPassDescription&;
 
@@ -140,7 +157,6 @@ export {
 
             core::DeferInit<vk::raii::RenderPass> m_vk_render_pass;
         };
-
     } // namespace stormkit::gpu
 
     HASH_FUNC(stormkit::gpu::AttachmentDescription,
@@ -209,8 +225,8 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto
-        FrameBuffer::operator=(FrameBuffer&& other) noexcept -> FrameBuffer& = default;
+    STORMKIT_FORCE_INLINE auto FrameBuffer::operator=(FrameBuffer&& other) noexcept
+        -> FrameBuffer& = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
@@ -247,8 +263,8 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto
-        FrameBuffer::vkHandle() const noexcept -> const vk::raii::Framebuffer& {
+    STORMKIT_FORCE_INLINE auto FrameBuffer::vkHandle() const noexcept
+        -> const vk::raii::Framebuffer& {
         return m_vk_framebuffer;
     }
 
@@ -271,8 +287,8 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto
-        RenderPass::operator=(RenderPass&& other) noexcept -> RenderPass& = default;
+    STORMKIT_FORCE_INLINE auto RenderPass::operator=(RenderPass&& other) noexcept
+        -> RenderPass& = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
@@ -293,19 +309,19 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto
-        RenderPass::createFrameBuffer(const core::math::ExtentU&                   extent,
-                                      std::vector<core::NakedRef<const ImageView>> attachments)
-            const noexcept -> Expected<FrameBuffer> {
+    STORMKIT_FORCE_INLINE auto RenderPass::createFrameBuffer(
+        const core::math::ExtentU&                   extent,
+        std::vector<core::NakedRef<const ImageView>> attachments) const noexcept
+        -> Expected<FrameBuffer> {
         return FrameBuffer::create(*this, extent, std::move(attachments));
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto
-        RenderPass::allocateFrameBuffer(const core::math::ExtentU&                   extent,
-                                        std::vector<core::NakedRef<const ImageView>> attachments)
-            const noexcept -> Expected<std::unique_ptr<FrameBuffer>> {
+    STORMKIT_FORCE_INLINE auto RenderPass::allocateFrameBuffer(
+        const core::math::ExtentU&                   extent,
+        std::vector<core::NakedRef<const ImageView>> attachments) const noexcept
+        -> Expected<std::unique_ptr<FrameBuffer>> {
         return FrameBuffer::allocate(*this, extent, std::move(attachments));
     }
 
@@ -321,15 +337,15 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto
-        RenderPass::description() const noexcept -> const RenderPassDescription& {
+    STORMKIT_FORCE_INLINE auto RenderPass::description() const noexcept
+        -> const RenderPassDescription& {
         return m_description;
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto
-        RenderPass::vkHandle() const noexcept -> const vk::raii::RenderPass& {
+    STORMKIT_FORCE_INLINE auto RenderPass::vkHandle() const noexcept
+        -> const vk::raii::RenderPass& {
         return m_vk_render_pass;
     }
 } // namespace stormkit::gpu

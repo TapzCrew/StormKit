@@ -7,9 +7,8 @@ module stormkit.Gpu;
 import std;
 
 import stormkit.Core;
-import stormkit.Gpu.Vulkan;
 
-import :Core;
+import stormkit.Gpu.Vulkan;
 
 namespace stormkit::gpu {
     static auto vendorNameByID(core::UInt64 ID) -> std::string_view {
@@ -190,30 +189,30 @@ namespace stormkit::gpu {
         m_capabilities.limits.max_framebuffer_height = properties.limits.maxFramebufferHeight;
         m_capabilities.limits.max_framebuffer_layers = properties.limits.maxFramebufferLayers;
         m_capabilities.limits.framebuffer_color_sample_counts =
-            core::narrow<SampleCountFlag>(properties.limits.framebufferColorSampleCounts
-                                              .operator vk::SampleCountFlags::MaskType());
+            core::narrow<SampleCountFlag>(properties.limits.framebufferColorSampleCounts.
+                                          operator vk::SampleCountFlags::MaskType());
         m_capabilities.limits.framebuffer_depth_sample_counts =
-            core::narrow<SampleCountFlag>(properties.limits.framebufferDepthSampleCounts
-                                              .operator vk::SampleCountFlags::MaskType());
+            core::narrow<SampleCountFlag>(properties.limits.framebufferDepthSampleCounts.
+                                          operator vk::SampleCountFlags::MaskType());
         m_capabilities.limits.framebuffer_stencil_sample_counts =
-            core::narrow<SampleCountFlag>(properties.limits.framebufferStencilSampleCounts
-                                              .operator vk::SampleCountFlags::MaskType());
+            core::narrow<SampleCountFlag>(properties.limits.framebufferStencilSampleCounts.
+                                          operator vk::SampleCountFlags::MaskType());
         m_capabilities.limits.framebuffer_no_attachments_sample_counts =
-            core::narrow<SampleCountFlag>(properties.limits.framebufferNoAttachmentsSampleCounts
-                                              .operator vk::SampleCountFlags::MaskType());
+            core::narrow<SampleCountFlag>(properties.limits.framebufferNoAttachmentsSampleCounts.
+                                          operator vk::SampleCountFlags::MaskType());
         m_capabilities.limits.max_color_attachments = properties.limits.maxColorAttachments;
         m_capabilities.limits.sampled_image_color_sample_counts =
-            core::narrow<SampleCountFlag>(properties.limits.sampledImageColorSampleCounts
-                                              .operator vk::SampleCountFlags::MaskType());
+            core::narrow<SampleCountFlag>(properties.limits.sampledImageColorSampleCounts.
+                                          operator vk::SampleCountFlags::MaskType());
         m_capabilities.limits.sampled_image_integer_sample_counts =
-            core::narrow<SampleCountFlag>(properties.limits.sampledImageIntegerSampleCounts
-                                              .operator vk::SampleCountFlags::MaskType());
+            core::narrow<SampleCountFlag>(properties.limits.sampledImageIntegerSampleCounts.
+                                          operator vk::SampleCountFlags::MaskType());
         m_capabilities.limits.sampled_image_depth_sample_counts =
-            core::narrow<SampleCountFlag>(properties.limits.sampledImageDepthSampleCounts
-                                              .operator vk::SampleCountFlags::MaskType());
+            core::narrow<SampleCountFlag>(properties.limits.sampledImageDepthSampleCounts.
+                                          operator vk::SampleCountFlags::MaskType());
         m_capabilities.limits.sampled_image_stencil_sample_counts =
-            core::narrow<SampleCountFlag>(properties.limits.sampledImageStencilSampleCounts
-                                              .operator vk::SampleCountFlags::MaskType());
+            core::narrow<SampleCountFlag>(properties.limits.sampledImageStencilSampleCounts.
+                                          operator vk::SampleCountFlags::MaskType());
         m_capabilities.limits.storage_image_sample_counts = core::narrow<SampleCountFlag>(
             properties.limits.storageImageSampleCounts.operator vk::SampleCountFlags::MaskType());
         m_capabilities.limits.max_sample_mask_words = properties.limits.maxSampleMaskWords;

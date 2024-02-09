@@ -2,23 +2,10 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-module;
-
-#include <stormkit/Core/HashMacro.hpp>
-#include <stormkit/Core/PlatformMacro.hpp>
-
 export module stormkit.Gpu:Execution;
 
-import std;
-import frozen;
-
-import stormkit.Core;
-import stormkit.Gpu.Vulkan;
-
-import :Core;
-import :Resource;
-
-#include <stormkit/private/Gpu/Execution/Descriptors.inc>
-#include <stormkit/private/Gpu/Execution/RenderPass.inc>
-#include <stormkit/private/Gpu/Execution/Pipeline.inc>
-#include <stormkit/private/Gpu/Execution/CommandBuffer.inc>
+export import :Execution.CommandBuffer;
+export import :Execution.Descriptors;
+export import :Execution.Pipeline;
+export import :Execution.RasterPipelineState;
+export import :Execution.RenderPass;

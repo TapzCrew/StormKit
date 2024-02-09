@@ -19,9 +19,8 @@ import std;
 
 import stormkit.Core;
 import stormkit.Wsi;
-import stormkit.Gpu.Vulkan;
 
-import :Core;
+import stormkit.Gpu.Vulkan;
 
 namespace stormkit::gpu {
     /////////////////////////////////////
@@ -30,11 +29,11 @@ namespace stormkit::gpu {
         : InstanceObject { instance } {
 #if defined(STORMKIT_OS_WINDOWS)
         const auto create_surface = [this, &window] {
-            const auto create_info =
-                vk::Win32SurfaceCreateInfoKHR { .flags     = {},
-                                                .hinstance = GetModuleHandleW(nullptr),
-                                                .hwnd =
-                                                    reinterpret_cast<HWND>(window.nativeHandle()) };
+            const auto create_info = vk::Win32SurfaceCreateInfoKHR {
+                .flags     = {},
+                .hinstance = GetModuleHandleW(nullptr),
+                .hwnd      = reinterpret_cast<HWND>(window.nativeHandle())
+            };
             return this->instance().vkHandle().createWin32SurfaceKHR(create_info, nullptr);
         };
 #elif defined(STORMKIT_OS_MACOS)

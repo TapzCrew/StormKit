@@ -2,20 +2,18 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-module;
-
-#include <stormkit/Log/LogMacro.hpp>
-
 module stormkit.Gpu;
 
 import std;
 
 import stormkit.Core;
 import stormkit.Log;
-import stormkit.Gpu.Vulkan;
 
+#include <stormkit/Log/LogMacro.hpp>
+
+import stormkit.Gpu.Vulkan;
 import :Core;
-import :Execution;
+import :Execution.Pipeline;
 
 namespace stormkit::gpu {
     LOGGER("stormkit.Gpu")

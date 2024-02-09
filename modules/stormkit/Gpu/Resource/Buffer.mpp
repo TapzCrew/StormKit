@@ -1,0 +1,277 @@
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+module;
+
+#include <stormkit/Core/PlatformMacro.hpp>
+
+export module stormkit.Gpu:Resource.Buffer;
+
+import std;
+
+import stormkit.Core;
+
+import :Core;
+import stormkit.Gpu.Vulkan;
+
+export namespace stormkit::gpu {
+    class STORMKIT_API Buffer: public DeviceObject {
+        struct Tag {};
+
+      public:
+        struct CreateInfo {
+            BufferUsageFlag    usages;
+            core::RangeExtent  size;
+            MemoryPropertyFlag property =
+                MemoryPropertyFlag::Host_Visible | MemoryPropertyFlag::Host_Coherent;
+        };
+
+        static constexpr auto DEBUG_TYPE = DebugObjectType::Buffer;
+
+        Buffer(const Device& device, const CreateInfo& info, bool persistently_mapping, Tag);
+        ~Buffer();
+
+        Buffer(const Buffer&) = delete;
+        auto operator=(const Buffer&) -> Buffer&;
+
+        Buffer(Buffer&&) noexcept;
+        auto operator=(Buffer&&) noexcept -> Buffer&;
+
+        [[nodiscard]] static auto create(const Device&     device,
+                                         const CreateInfo& info,
+                                         bool              persistently_mapped = false) noexcept
+            -> Expected<Buffer>;
+        [[nodiscard]] static auto allocate(const Device&     device,
+                                           const CreateInfo& info,
+                                           bool              persistently_mapped = false) noexcept
+            -> Expected<std::unique_ptr<Buffer>>;
+
+        [[nodiscard]] auto usages() const noexcept -> BufferUsageFlag;
+        [[nodiscard]] auto size() const noexcept -> core::RangeExtent;
+
+        [[nodiscard]] auto map(core::RangeOffset offset) noexcept -> decltype(auto);
+        [[nodiscard]] auto map(core::RangeOffset offset, core::RangeExtent size) noexcept
+            -> decltype(auto);
+
+        template<class T>
+        [[nodiscard]] auto mapAs(core::RangeOffset offset) noexcept -> decltype(auto);
+
+        [[nodiscard]] auto data(this auto& self) noexcept -> decltype(auto);
+        [[nodiscard]] auto data(this auto& self, core::RangeExtent size) noexcept -> decltype(auto);
+
+        template<class T>
+        [[nodiscard]] auto dataAs(this auto& self) noexcept -> decltype(auto);
+
+        auto flush(core::RangeOffset offset, core::RangeExtent size) -> void;
+        auto unmap() -> void;
+
+        [[nodiscard]] auto isPersistentlyMapped() const noexcept -> bool;
+
+        auto upload(std::span<const core::Byte> data, core::RangeOffset offset = 0) -> void;
+        template<class T>
+        auto upload(const T& data, core::RangeOffset offset = 0) -> void;
+        template<class T>
+        auto upload(std::span<const T> data, core::RangeOffset offset = 0) -> void;
+
+        [[nodiscard]] auto vkHandle() const noexcept -> const vk::raii::Buffer&;
+
+      private:
+        static auto findMemoryType(core::UInt                                type_filter,
+                                   vk::MemoryPropertyFlags                   properties,
+                                   const vk::PhysicalDeviceMemoryProperties& mem_properties,
+                                   const vk::MemoryRequirements& mem_requirements) -> core::UInt;
+
+        core::DeferInit<vk::raii::Buffer> m_vk_buffer;
+        vma::raii::Allocation             m_vma_allocation;
+
+        BufferUsageFlag   m_usages = {};
+        core::RangeExtent m_size   = 0;
+
+        bool        m_is_persistently_mapped = false;
+        core::Byte* m_mapped_pointer         = nullptr;
+    };
+
+    struct BufferMemoryBarrier {
+        AccessFlag src;
+        AccessFlag dst;
+
+        core::UInt32 src_queue_family_index = QUEUE_FAMILY_IGNORED;
+        core::UInt32 dst_queue_family_index = QUEUE_FAMILY_IGNORED;
+
+        const Buffer&     buffer;
+        core::RangeExtent size;
+        core::UInt64      offset = 0;
+    };
+} // namespace stormkit::gpu
+
+////////////////////////////////////////////////////////////////////
+///                      IMPLEMENTATION                          ///
+////////////////////////////////////////////////////////////////////
+
+namespace stormkit::gpu {
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE Buffer::~Buffer() = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE Buffer::Buffer(Buffer&& other) noexcept = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Buffer::operator=(Buffer&& other) noexcept -> Buffer& = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Buffer::create(const Device&     device,
+                                              const CreateInfo& info,
+                                              bool              persistently_mapped) noexcept
+        -> Expected<Buffer> try {
+        return Buffer { device, info, persistently_mapped, Tag {} };
+    } catch (const Result& result) { return std::unexpected(result); }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Buffer::allocate(const Device&     device,
+                                                const CreateInfo& info,
+                                                bool              persistently_mapped) noexcept
+        -> Expected<std::unique_ptr<Buffer>> try {
+        return std::make_unique<Buffer>(device, info, persistently_mapped, Tag {});
+    } catch (const Result& result) { return std::unexpected(result); }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Buffer::usages() const noexcept -> BufferUsageFlag {
+        core::expects(m_vma_allocation.operator bool());
+
+        return m_usages;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Buffer::size() const noexcept -> core::RangeExtent {
+        core::expects(m_vma_allocation.operator bool());
+
+        return m_size;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Buffer::map(core::RangeOffset offset) noexcept -> decltype(auto) {
+        core::expects(m_vma_allocation.operator bool());
+        core::expects(offset < core::as<core::RangeOffset>(m_size));
+
+        if (!m_mapped_pointer) {
+            auto _ = device().vmaAllocator().mapMemory(*m_vma_allocation,
+                                                       std::bit_cast<void**>(&m_mapped_pointer));
+            m_mapped_pointer += offset;
+        }
+
+        return m_mapped_pointer;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Buffer::map(core::RangeOffset offset,
+                                           core::RangeExtent size) noexcept -> decltype(auto) {
+        return std::span<core::Byte> { map(offset), size };
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<class T>
+    STORMKIT_FORCE_INLINE auto Buffer::mapAs(core::RangeOffset offset) noexcept -> decltype(auto) {
+        core::expects(m_vma_allocation.operator bool());
+
+        return std::bit_cast<T*>(map(offset));
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Buffer::data(this auto& self) noexcept -> decltype(auto) {
+        core::expects(self.m_vma_allocation.operator bool());
+        core::expects(self.m_mapped_pointer);
+
+        using Byte = core::LikeCV<decltype(self), core::Byte>;
+
+        return std::bit_cast<Byte*>(self.m_mapped_pointer);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Buffer::data(this auto& self, core::RangeExtent size) noexcept
+        -> decltype(auto) {
+        core::expects(self.m_vma_allocation.operator bool());
+        core::expects(self.m_mapped_pointer);
+
+        using Byte = core::LikeCV<decltype(self), core::Byte>;
+
+        return std::span<Byte> { std::bit_cast<Byte*>(self.m_mapped_pointer), size };
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<class T>
+    STORMKIT_FORCE_INLINE auto Buffer::dataAs(this auto& self) noexcept -> decltype(auto) {
+        core::expects(self.m_vma_allocation.operator bool());
+
+        using Type = core::LikeCV<decltype(self), T>;
+
+        return std::bit_cast<Type*>(self.data());
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Buffer::flush(core::RangeOffset offset, core::RangeExtent size)
+        -> void {
+        core::expects(m_vma_allocation.operator bool());
+        core::expects(offset <= core::as<core::RangeOffset>(m_size));
+        core::expects(size <= m_size);
+
+        device().vmaAllocator().flushAllocation(*m_vma_allocation, offset, size);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Buffer::unmap() -> void {
+        core::expects(m_vma_allocation.operator bool());
+        core::expects(m_is_persistently_mapped, "Trying to unmap persistent buffer !");
+
+        device().vmaAllocator().unmapMemory(*m_vma_allocation);
+
+        m_mapped_pointer = nullptr;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Buffer::upload(std::span<const core::Byte> data,
+                                              core::RangeOffset           offset) -> void {
+        auto ptr = map(offset, std::size(data));
+
+        std::ranges::copy(data, std::begin(ptr));
+
+        unmap();
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<class T>
+    STORMKIT_FORCE_INLINE auto Buffer::upload(const T& data, core::RangeOffset offset) -> void {
+        upload(core::asByteView(data), offset);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<class T>
+    STORMKIT_FORCE_INLINE auto Buffer::upload(std::span<const T> data, core::RangeOffset offset)
+        -> void {
+        upload(core::asByteView(data), offset);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Buffer::vkHandle() const noexcept -> const vk::raii::Buffer& {
+        return m_vk_buffer;
+    }
+} // namespace stormkit::gpu

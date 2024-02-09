@@ -1,6 +1,25 @@
-// Copyright (C) 2024 Arthur LAURENT <arthur.laurent4@gmail.com>
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
+
+module;
+
+#include <stormkit/Gpu/Core/VulkanMacro.hpp>
+
+#include <stormkit/Core/PlatformMacro.hpp>
+
+export module stormkit.Gpu:Core.Instance;
+
+import std;
+
+import stormkit.Core;
+import stormkit.Wsi;
+
+import stormkit.Gpu.Vulkan;
+
+import :Core.Types;
+import :Core.Device;
+
 export {
     namespace stormkit::gpu {
         class PhysicalDevice;
@@ -146,10 +165,10 @@ export {
             //     Expected<std::unique_ptr<Surface>>;
 
             [[nodiscard]] static auto
-                                      createFromWindow(const Instance&    instance,
-                                                       const wsi::Window& window) noexcept -> Expected<Surface>;
-            [[nodiscard]] static auto allocateFromWindow(const Instance&    instance,
-                                                         const wsi::Window& window) noexcept
+                                      createFromWindow(const Instance& instance,
+                                                       const wsi::Window&    window) noexcept -> Expected<Surface>;
+            [[nodiscard]] static auto allocateFromWindow(const Instance& instance,
+                                                         const wsi::Window&    window) noexcept
                 -> Expected<std::unique_ptr<Surface>>;
 
             [[nodiscard]] auto vkHandle() const noexcept -> const vk::raii::SurfaceKHR&;
@@ -157,7 +176,6 @@ export {
           private:
             core::DeferInit<vk::raii::SurfaceKHR> m_vk_surface;
         };
-
     } // namespace stormkit::gpu
 
     namespace std {
@@ -254,7 +272,7 @@ namespace stormkit::gpu {
     // STORMKIT_FORCE_INLINE auto Instance::createWindowSurface(const wsi::Window& window,
     // Surface::Buffering buffering) const
     // -> WindowSurface {
-    // return WindowSurface { window, instance(), buffering };jpense que chaque partition jvais
+    // return WindowSurface { window, instance(), buffering };
     // }
 
     // /////////////////////////////////////
@@ -381,4 +399,5 @@ namespace stormkit::gpu {
     STORMKIT_FORCE_INLINE auto Surface::vkHandle() const noexcept -> const vk::raii::SurfaceKHR& {
         return m_vk_surface.get();
     }
+
 } // namespace stormkit::gpu

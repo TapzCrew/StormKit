@@ -1,0 +1,96 @@
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+module;
+
+#include <stormkit/Core/PlatformMacro.hpp>
+
+export module stormkit.Gpu:Resource.Swapchain;
+
+import std;
+
+import stormkit.Core;
+
+import stormkit.Gpu.Vulkan;
+
+import :Core;
+
+export namespace stormkit::gpu {
+    class STORMKIT_API Swapchain {
+        struct Tag {};
+
+      public:
+        static constexpr auto DEBUG_TYPE = DebugObjectType::Swapchain;
+
+      //   Swapchain(const Device& device, bool signaled, Tag);
+      //   ~Swapchain();
+      //
+      //   Swapchain(const Swapchain&)                    = delete;
+      //   auto operator=(const Swapchain&) -> Swapchain& = delete;
+      //
+      //   Swapchain(Swapchain&&) noexcept;
+      //   auto operator=(Swapchain&&) noexcept -> Swapchain&;
+      //
+      //   [[nodiscard]] static auto create(const Device& device,
+      //                                    bool signaled = false) noexcept -> Expected<Swapchain>;
+      //   [[nodiscard]] static auto allocate(const Device& device, bool signaled = false) noexcept
+      //       -> Expected<std::unique_ptr<Swapchain>>;
+      //
+      //   [[nodiscard]] auto vkHandle() const noexcept -> const vk::raii::SwapchainKHR&;
+      //
+      // private:
+      //   core::DeferInit<vk::raii::SwapchainKHR> m_vk_swapchain;
+      //
+      //   core::ExtentU m_extent;
+      //   PixelFormat   m_pixel_format;
+      //   core::UInt32  m_image_count;
+      //
+      //   std::vector<Image> m_images;
+      //
+      //   std::vector<Semaphore> m_image_availables;
+      //   std::vector<Semaphore> m_render_finished;
+      //   std::vector<Semaphore> m_in_flight_fences;
+    };
+} // namespace stormkit::gpu
+
+////////////////////////////////////////////////////////////////////
+///                      IMPLEMENTATION                          ///
+////////////////////////////////////////////////////////////////////
+
+namespace stormkit::gpu {
+    // /////////////////////////////////////
+    // /////////////////////////////////////
+    // STORMKIT_FORCE_INLINE Swapchain::~Swapchain() = default;
+    //
+    // /////////////////////////////////////
+    // /////////////////////////////////////
+    // STORMKIT_FORCE_INLINE Swapchain::Swapchain(Swapchain&& other) noexcept = default;
+    //
+    // /////////////////////////////////////
+    // /////////////////////////////////////
+    // STORMKIT_FORCE_INLINE auto
+    //     Swapchain::operator=(Swapchain&& other) noexcept -> Swapchain& = default;
+    //
+    // /////////////////////////////////////
+    // /////////////////////////////////////
+    // STORMKIT_FORCE_INLINE auto
+    //     Swapchain::create(std::string app_name,
+    //                      bool        enable_validation) noexcept -> Expected<Swapchain> try {
+    //     return Swapchain { std::move(app_name), enable_validation, Tag {} };
+    // } catch (Result result) { return std::unexpected(result); }
+    //
+    // /////////////////////////////////////
+    // /////////////////////////////////////
+    // STORMKIT_FORCE_INLINE auto Swapchain::allocate(std::string app_name,
+    //                                               bool        enable_validation) noexcept
+    //     -> Expected<std::unique_ptr<Swapchain>> try {
+    //     return std::make_unique<Swapchain>(std::move(app_name), enable_validation, Tag {});
+    // } catch (Result result) { return std::unexpected(result); }
+    //
+    // /////////////////////////////////////
+    // /////////////////////////////////////
+    // STORMKIT_FORCE_INLINE auto Swapchain::vkHandle() const noexcept -> const vk::raii::SwapchainKHR& {
+    //     return m_vk_swapchain;
+    // }
+} // namespace stormkit::gpu

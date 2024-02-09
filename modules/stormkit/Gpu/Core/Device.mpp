@@ -1,7 +1,24 @@
-// Copyright (C) 2024 Arthur LAURENT <arthur.laurent4@gmail.com>
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
+
+module;
+
+#include <stormkit/Core/PlatformMacro.hpp>
+
+export module stormkit.Gpu:Core.Device;
+
+import std;
+
+import stormkit.Core;
+
+import stormkit.Gpu.Vulkan;
+
+import :Core.Types;
+
 export namespace stormkit::gpu {
+    class PhysicalDevice;
+    class Instance;
     class Fence;
     class Semaphore;
 
@@ -92,7 +109,6 @@ export namespace stormkit::gpu {
         vma::raii::Allocator m_vma_allocator;
         vma::VulkanFunctions m_vma_function_table;
     };
-
 } // namespace stormkit::gpu
 
 ////////////////////////////////////////////////////////////////////
@@ -103,7 +119,7 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE Device::~Device() {
-        if (m_vk_device.initialized()) [[likely]]
+        if(m_vk_device.initialized()) [[likely]]
             waitIdle();
     }
 
@@ -237,5 +253,4 @@ namespace stormkit::gpu {
 
         m_vk_device->setDebugUtilsObjectNameEXT(info);
     }
-
 } // namespace stormkit::gpu
