@@ -6,8 +6,6 @@ module stormkit.Core;
 
 import std;
 
-import :Parallelism;
-
 namespace stormkit::core {
     namespace details {
         ////////////////////////////////////////

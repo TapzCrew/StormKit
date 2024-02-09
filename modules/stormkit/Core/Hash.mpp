@@ -8,11 +8,6 @@ module;
 
 export module stormkit.Core:Hash;
 
-import std;
-import ankerl.unordered_dense;
-
-import :Meta;
-
-#include <stormkit/private/Core/Hash/Base.inc>
-#include <stormkit/private/Core/Hash/HashMap.inc>
-#include <stormkit/private/Core/Hash/StringHash.inc>
+export import :Hash.Base;
+export import :Hash.HashMap;
+export import :Hash.StringHash;

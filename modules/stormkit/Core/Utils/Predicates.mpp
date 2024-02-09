@@ -1,0 +1,49 @@
+// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+export module stormkit.Core:Utils.Predicates;
+
+import std;
+
+export namespace stormkit::core::predicates {
+    constexpr auto equal(auto&& value) noexcept;
+    constexpr auto appendTo(std::ranges::range auto& range) noexcept;
+    constexpr auto wrap(std::invocable auto&& func) noexcept;
+    constexpr auto asByte() noexcept;
+} // namespace stormkit::core::predicates
+
+////////////////////////////////////////////////////////////////////
+///                      IMPLEMENTATION                          ///
+////////////////////////////////////////////////////////////////////
+
+namespace stormkit::core::predicates {
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    constexpr auto equal(auto&& value) noexcept {
+        return
+            [value = std::forward<decltype(value)>(value)](auto&& other) { return value == other; };
+    }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    constexpr auto appendTo(std::ranges::range auto& range) noexcept {
+        return [&range](auto&& val) {
+            range.emplace(std::ranges::cend(range), std::forward<decltype(val)>(val));
+        };
+    }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    constexpr auto wrap(std::invocable auto&& func) noexcept {
+        return [func = std::forward<decltype(func)>(func)](auto&&... args) {
+            return func(std::forward<decltype(args)>(args)...);
+        };
+    }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    constexpr auto asByte() noexcept {
+        return [](auto&& val) { return static_cast<std::byte>(val); };
+    }
+} // namespace stormkit::core::predicates

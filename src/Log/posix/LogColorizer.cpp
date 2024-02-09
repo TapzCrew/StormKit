@@ -2,10 +2,6 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-module;
-
-#include <cstdio>
-
 module stormkit.Log;
 
 import std;
@@ -32,7 +28,7 @@ namespace stormkit::log::details {
     /////////////////////////////////////
     /////////////////////////////////////
     auto colorifyBegin(Severity severity, bool to_stderr) noexcept -> void {
-        auto output = (to_stderr) ? stderr : stdout;
+        auto output = (to_stderr) ? core::getSTDErr() : core::getSTDOut();
         switch (severity) {
             case Severity::Info: std::print(output, "{}{}{}", KBLCK, KINV, KGRN); break;
             case Severity::Warning: std::print(output, "{}{}{}", KBLCK, KINV, KMAG); break;
@@ -46,7 +42,7 @@ namespace stormkit::log::details {
     /////////////////////////////////////
     /////////////////////////////////////
     auto colorifyEnd(bool to_stderr) noexcept -> void {
-        auto output = (to_stderr) ? stderr : stdout;
+        auto output = (to_stderr) ? core::getSTDErr() : core::getSTDOut();
         std::print(output, KNRM);
     }
 } // namespace stormkit::log::details

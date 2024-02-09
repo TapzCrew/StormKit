@@ -2,61 +2,30 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-module;
-
-#include <cstdio>
-#include <version>
-
-#include <tl/function_ref.hpp>
-
-#include <stormkit/Core/HashMacro.hpp>
-#include <stormkit/Core/MemoryMacro.hpp>
-#include <stormkit/Core/PlatformMacro.hpp>
-
-#if defined(__cpp_lib_stacktrace) and __cpp_lib_stacktrace >= 202011L
-    #define STD_STACKTRACE_SUPPORTED
-#elif defined(STORMKIT_OS_LINUX)
-    #define BACKTRACE_SUPPORTED
-    #include <backtrace-supported.h>
-    #include <backtrace.h>
-    #include <cxxabi.h>
-#endif
-
-#ifndef STORMKIT_ASSERT
-    #define STORMKIT_ASSERT 1
-#endif
-
-#undef assert
-
 export module stormkit.Core:Utils;
 
-import std;
-
-import :Meta;
-import :Coroutines;
-import :Hash;
-import :Numerics;
-import :Math;
-
-// clang-format off
-#include <stormkit/private/Core/Utils/Stacktrace.inc>
-#include <stormkit/private/Core/Utils/Assert.inc>
-#include <stormkit/private/Core/Utils/AsCast.inc>
-#include <stormkit/private/Core/Utils/Flags.inc>
-#include <stormkit/private/Core/Utils/Byte.inc>
-#include <stormkit/private/Core/Utils/App.inc>
-#include <stormkit/private/Core/Utils/NamedType.inc>
-#include <stormkit/private/Core/Utils/DeferInit.inc>
-#include <stormkit/private/Core/Utils/Pimpl.inc>
-#include <stormkit/private/Core/Utils/DynamicLoader.inc>
-#include <stormkit/private/Core/Utils/ErrorHandling.inc>
-#include <stormkit/private/Core/Utils/Filesystem.inc>
-#include <stormkit/private/Core/Utils/Functional.inc>
-#include <stormkit/private/Core/Utils/FunctionRef.inc>
-#include <stormkit/private/Core/Utils/Handle.inc>
-#include <stormkit/private/Core/Utils/Monadic.inc>
-#include <stormkit/private/Core/Utils/NakedRef.inc>
-#include <stormkit/private/Core/Utils/Random.inc>
-#include <stormkit/private/Core/Utils/Singleton.inc>
-#include <stormkit/private/Core/Utils/Algorithms.inc>
-// clang-format on
+export import :Utils.Algorithms;
+export import :Utils.App;
+export import :Utils.AsCast;
+export import :Utils.Assert;
+export import :Utils.Byte;
+export import :Utils.Color;
+export import :Utils.Descriptors;
+export import :Utils.DeferInit;
+export import :Utils.DynamicLoader;
+export import :Utils.Expected;
+export import :Utils.ErrorHandling;
+export import :Utils.Filesystem;
+export import :Utils.Functional;
+export import :Utils.FunctionRef;
+export import :Utils.Flags;
+export import :Utils.Handle;
+export import :Utils.Math;
+export import :Utils.Monadic;
+export import :Utils.NakedRef;
+export import :Utils.Numerics;
+export import :Utils.Pimpl;
+export import :Utils.Predicates;
+export import :Utils.Random;
+export import :Utils.Singleton;
+export import :Utils.Stacktrace;

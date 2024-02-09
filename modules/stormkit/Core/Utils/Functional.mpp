@@ -1,0 +1,80 @@
+// Copyright (C) 2024 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+module;
+
+#include <stormkit/Core/PlatformMacro.hpp>
+
+export module stormkit.Core:Utils.Functional;
+
+import std;
+
+import :Meta;
+
+export namespace stormkit::core {
+    [[nodiscard]] constexpr auto either(bool                  condition,
+                                        std::invocable auto&& true_,
+                                        std::invocable auto&& false_) noexcept -> decltype(auto);
+
+    template<IsOptionalType T>
+    [[nodiscard]] constexpr auto
+        either(T&&                                                     optional,
+               std::invocable<typename PureType<T>::value_type> auto&& true_,
+               std::invocable auto&& false_) noexcept -> decltype(auto);
+
+    template<typename T, typename U>
+        requires(not IsArithmetic<T> and not IsArithmetic<U>)
+    [[nodiscard]] constexpr auto isEqual(const T& a, const U& b) noexcept -> bool;
+
+    template<typename Func, typename... Args>
+    // requires(std::invocable<Func, Args...>)
+    [[nodiscard]] constexpr auto toUnary(Func&& func, Args&&... args) noexcept -> decltype(auto);
+} // namespace stormkit::core
+
+////////////////////////////////////////////////////////////////////
+///                      IMPLEMENTATION                          ///
+////////////////////////////////////////////////////////////////////
+
+namespace stormkit::core {
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE constexpr auto
+        either(bool                  condition,
+               std::invocable auto&& true_,
+               std::invocable auto&& false_) noexcept -> decltype(auto) {
+        if (condition) return true_();
+        return false_();
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<IsOptionalType T>
+    STORMKIT_FORCE_INLINE constexpr auto
+        either(T&&                                                     optional,
+               std::invocable<typename PureType<T>::value_type> auto&& true_,
+               std::invocable auto&& false_) noexcept -> decltype(auto) {
+        if (optional != std::nullopt) return true_(*std::forward<T>(optional));
+        return false_();
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<typename T, typename U>
+        requires(not IsArithmetic<T> and not IsArithmetic<U>)
+    STORMKIT_FORCE_INLINE constexpr auto isEqual(const T& a, const U& b) noexcept -> bool {
+        return a == b;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<typename Func, typename... Args>
+    // requires(std::invocable<Func, Args...>)
+    STORMKIT_FORCE_INLINE constexpr auto toUnary(Func&& func,
+                                                 Args&&... args) noexcept -> decltype(auto) {
+        return [_func = std::forward<Func>(func), ... _args = std::forward<Args>(args)](
+                   auto&& first) noexcept(noexcept(func(first, std::forward<Args>(args)...))) {
+            return _func(std::forward<decltype(first)>(first), std::forward<Args>(_args)...);
+        };
+    }
+} // namespace stormkit::core

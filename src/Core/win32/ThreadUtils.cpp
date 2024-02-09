@@ -7,9 +7,7 @@ module stormkit.Core;
 
 import std;
 
-import :Parallelism;
-
-static constexpr auto MS_VC_EXCEPTION = DWORD { 0x406D1388 };
+inline constexpr auto MS_VC_EXCEPTION = DWORD { 0x406D1388 };
 
 #pragma pack(push, 8)
 

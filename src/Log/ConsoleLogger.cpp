@@ -46,7 +46,7 @@ namespace stormkit::log {
         }();
 
         const auto to_stderr = severity == Severity::Error or severity == Severity::Fatal;
-        auto       output    = (to_stderr) ? stderr : stdout;
+        auto       output    = (to_stderr) ? core::getSTDErr() : core::getSTDOut();
 
         // not yet
         /*

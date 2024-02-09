@@ -139,7 +139,7 @@ export {
             KeyCount,
             Unknow = std::numeric_limits<core::Int8>::max(),
         };
-        inline constexpr auto KEY_COUNT = core::as<core::Underlying>(Key::KeyCount);
+        STORMKIT_FORCE_INLINE constexpr auto KEY_COUNT = core::as<core::Underlying>(Key::KeyCount);
 
         enum class MouseButton : core::UInt8 {
             Left,
@@ -150,7 +150,7 @@ export {
             ButtonCount,
             Unknow = std::numeric_limits<core::Int8>::max(),
         };
-        inline constexpr auto MOUSE_BUTTON_COUNT =
+        STORMKIT_FORCE_INLINE constexpr auto MOUSE_BUTTON_COUNT =
             core::as<core::Underlying>(MouseButton::ButtonCount);
 
         struct Monitor {
