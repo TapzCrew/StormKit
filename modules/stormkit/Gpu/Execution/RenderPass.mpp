@@ -5,7 +5,6 @@
 module;
 
 #include <stormkit/Core/HashMacro.hpp>
-
 #include <stormkit/Core/PlatformMacro.hpp>
 
 export module stormkit.Gpu:Execution.RenderPass;
@@ -13,10 +12,10 @@ export module stormkit.Gpu:Execution.RenderPass;
 import std;
 
 import stormkit.Core;
+import stormkit.Gpu.Vulkan;
 
 import :Core;
 import :Resource;
-import stormkit.Gpu.Vulkan;
 
 export {
     namespace stormkit::gpu {

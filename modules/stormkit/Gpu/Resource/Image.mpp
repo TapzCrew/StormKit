@@ -12,9 +12,9 @@ import std;
 
 import stormkit.Core;
 import stormkit.Image;
+import stormkit.Gpu.Vulkan;
 
 import :Core;
-import stormkit.Gpu.Vulkan;
 
 export namespace stormkit::gpu {
     class STORMKIT_API Sampler: public DeviceObject {

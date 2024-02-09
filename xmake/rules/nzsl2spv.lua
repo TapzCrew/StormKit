@@ -5,8 +5,8 @@ do
 
 	-- for c++ module dependency discovery
 	on_load(function(target)
-		if target:rule("c++.build.modules") then
-			local rule = target:rule("c++.build.modules"):clone()
+		if target:rule("c++.build.modules.builder") then
+			local rule = target:rule("c++.build.modules.builder"):clone()
 			rule:add("deps", "compile.shaders", { order = true })
 			target:rule_add(rule)
 		end

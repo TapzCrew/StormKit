@@ -13,7 +13,6 @@ export module stormkit.Core:Utils.DynamicLoaderImpl;
 
 import std;
 
-import :Utils.Expected;
 import :Utils.Numerics;
 import :Utils.AsCast;
 import :Utils.DynamicLoader;

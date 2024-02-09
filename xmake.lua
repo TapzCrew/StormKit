@@ -246,6 +246,7 @@ option("tests", { default = false, category = "root menu/others" })
 
 option("sanitizers", { default = false, category = "root menu/build" })
 option("mold", { default = false, category = "root menu/build" })
+option("lto", { default = false, category = "root menu/build" })
 
 ---------------------------- module options ----------------------------
 option("log", { default = true, category = "root menu/modules" })
@@ -498,7 +499,7 @@ for name, module in pairs(modules) do
       if module.frameworks then
         add_frameworks(module.frameworks, { public = is_kind("static") })
       end
-      if is_mode("release") then
+      if get_config("lto") then
         set_policy("build.optimization.lto", true)
         if get_config("kind") == "static" then
           add_defines("STORMKIT_LTO", { public = true })

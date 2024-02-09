@@ -11,11 +11,10 @@ export module stormkit.Gpu:Execution.RasterPipelineState;
 import std;
 
 import stormkit.Core;
+import stormkit.Gpu.Vulkan;
 
 import :Core;
-import stormkit.Gpu.Vulkan;
 import :Resource;
-
 import :Execution.Descriptors;
 
 export namespace stormkit::gpu {

@@ -5,7 +5,6 @@
 module;
 
 #include <stormkit/Core/HashMacro.hpp>
-
 #include <stormkit/Core/PlatformMacro.hpp>
 
 export module stormkit.Gpu:Execution.Descriptors;
@@ -13,10 +12,10 @@ export module stormkit.Gpu:Execution.Descriptors;
 import std;
 
 import stormkit.Core;
+import stormkit.Gpu.Vulkan;
 
 import :Core;
 import :Resource;
-import stormkit.Gpu.Vulkan;
 
 export {
     namespace stormkit::gpu {
@@ -108,8 +107,8 @@ export {
             auto operator=(DescriptorSetLayout&&) noexcept -> DescriptorSetLayout&;
 
             [[nodiscard]] auto hash() const noexcept -> core::Hash64;
-            [[nodiscard]] auto bindings() const noexcept
-                -> const std::vector<DescriptorSetLayoutBinding>&;
+            [[nodiscard]] auto
+                bindings() const noexcept -> const std::vector<DescriptorSetLayoutBinding>&;
 
             [[nodiscard]] auto vkHandle() const noexcept -> const vk::raii::DescriptorSetLayout&;
 
@@ -147,10 +146,10 @@ export {
             DescriptorPool(DescriptorPool&&) noexcept;
             auto operator=(DescriptorPool&&) noexcept -> DescriptorPool&;
 
-            [[nodiscard]] static auto create(const Device&         device,
-                                             std::span<const Size> sizes,
-                                             core::UInt32          max_sets) noexcept
-                -> Expected<DescriptorPool>;
+            [[nodiscard]] static auto
+                create(const Device&         device,
+                       std::span<const Size> sizes,
+                       core::UInt32          max_sets) noexcept -> Expected<DescriptorPool>;
 
             [[nodiscard]] static auto allocate(const Device&         device,
                                                std::span<const Size> sizes,
@@ -171,9 +170,8 @@ export {
 
     template<>
     struct STORMKIT_API std::hash<stormkit::gpu::DescriptorSetLayout> {
-        [[nodiscard]] auto
-            operator()(const stormkit::gpu::DescriptorSetLayout& value) const noexcept
-            -> stormkit::core::Hash64 {
+        [[nodiscard]] auto operator()(const stormkit::gpu::DescriptorSetLayout& value)
+            const noexcept -> stormkit::core::Hash64 {
             return value.hash();
         }
     };
@@ -239,8 +237,8 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto DescriptorSet::operator=(DescriptorSet&&) noexcept
-        -> DescriptorSet& = default;
+    STORMKIT_FORCE_INLINE auto
+        DescriptorSet::operator=(DescriptorSet&&) noexcept -> DescriptorSet& = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
@@ -274,15 +272,15 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto DescriptorSet::types() const noexcept
-        -> const std::vector<DescriptorType>& {
+    STORMKIT_FORCE_INLINE auto
+        DescriptorSet::types() const noexcept -> const std::vector<DescriptorType>& {
         return m_types;
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto DescriptorSet::vkHandle() const noexcept
-        -> const vk::raii::DescriptorSet& {
+    STORMKIT_FORCE_INLINE auto
+        DescriptorSet::vkHandle() const noexcept -> const vk::raii::DescriptorSet& {
         return m_vk_descriptor_set;
     }
 
@@ -359,8 +357,8 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto DescriptorSetLayout::vkHandle() const noexcept
-        -> const vk::raii::DescriptorSetLayout& {
+    STORMKIT_FORCE_INLINE auto
+        DescriptorSetLayout::vkHandle() const noexcept -> const vk::raii::DescriptorSetLayout& {
         return m_vk_descriptor_set_layout.get();
     }
 
@@ -407,15 +405,15 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto DescriptorPool::operator=(DescriptorPool&& other) noexcept
-        -> DescriptorPool& = default;
+    STORMKIT_FORCE_INLINE auto
+        DescriptorPool::operator=(DescriptorPool&& other) noexcept -> DescriptorPool& = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto DescriptorPool::create(const Device&         device,
-                                                      std::span<const Size> extents,
-                                                      core::UInt32          max_sets) noexcept
-        -> Expected<DescriptorPool> try {
+    STORMKIT_FORCE_INLINE auto
+        DescriptorPool::create(const Device&         device,
+                               std::span<const Size> extents,
+                               core::UInt32 max_sets) noexcept -> Expected<DescriptorPool> try {
         return DescriptorPool { device, extents, max_sets, Tag {} };
     } catch (const Result& result) { return std::unexpected(result); }
 
@@ -430,8 +428,8 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto DescriptorPool::vkHandle() const noexcept
-        -> const vk::raii::DescriptorPool& {
+    STORMKIT_FORCE_INLINE auto
+        DescriptorPool::vkHandle() const noexcept -> const vk::raii::DescriptorPool& {
         return m_vk_descriptor_pool;
     }
 } // namespace stormkit::gpu

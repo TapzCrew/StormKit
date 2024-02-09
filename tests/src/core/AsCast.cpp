@@ -162,8 +162,8 @@ namespace {
                                     expects((as<unsigned int>(14) == 14u));
                                     expects((as<unsigned int>(-1) != 1));
 
-                                    expects((isEqual(as<float>(19), 19.f)));
-                                    expects((isEqual(as<float>(-5), -5.)));
+                                    expects((equal(as<float>(19), 19.f)));
+                                    expects((equal(as<float>(-5), -5.)));
                                 } },
                           } };
 }

@@ -5,7 +5,6 @@
 module;
 
 #include <stormkit/Core/MemoryMacro.hpp>
-
 #include <stormkit/Core/PlatformMacro.hpp>
 
 export module stormkit.Core:Containers.Tree;

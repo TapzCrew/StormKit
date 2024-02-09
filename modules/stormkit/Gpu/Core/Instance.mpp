@@ -4,9 +4,9 @@
 
 module;
 
-#include <stormkit/Gpu/Core/VulkanMacro.hpp>
-
 #include <stormkit/Core/PlatformMacro.hpp>
+
+#include <stormkit/Gpu/Core/VulkanMacro.hpp>
 
 export module stormkit.Gpu:Core.Instance;
 
@@ -14,7 +14,6 @@ import std;
 
 import stormkit.Core;
 import stormkit.Wsi;
-
 import stormkit.Gpu.Vulkan;
 
 import :Core.Types;

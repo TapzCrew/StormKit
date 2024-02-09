@@ -11,10 +11,9 @@ export module stormkit.Gpu:Execution.Pipeline;
 import std;
 
 import stormkit.Core;
-
-import :Core;
 import stormkit.Gpu.Vulkan;
 
+import :Core;
 import :Execution.RasterPipelineState;
 import :Execution.RenderPass;
 

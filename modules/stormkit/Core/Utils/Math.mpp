@@ -458,8 +458,8 @@ namespace stormkit::core {
         /////////////////////////////////////
         template<IsArithmetic T>
         constexpr auto Extent<T>::operator==(const Extent<T>& other) const noexcept -> bool {
-            return isEqual<T>(width, other.width) and isEqual<T>(height, other.height) and
-                   isEqual<T>(depth, other.depth);
+            return equal<T>(width, other.width) and equal<T>(height, other.height) and
+                   equal<T>(depth, other.depth);
         }
 
         /////////////////////////////////////

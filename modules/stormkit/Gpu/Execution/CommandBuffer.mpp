@@ -5,7 +5,6 @@
 module;
 
 #include <stormkit/Core/HashMacro.hpp>
-
 #include <stormkit/Core/PlatformMacro.hpp>
 
 export module stormkit.Gpu:Execution.CommandBuffer;
@@ -15,11 +14,10 @@ import std;
 import frozen;
 
 import stormkit.Core;
-
 import stormkit.Gpu.Vulkan;
+
 import :Core;
 import :Resource;
-
 import :Execution.Descriptors;
 import :Execution.RenderPass;
 import :Execution.Pipeline;
@@ -34,8 +32,8 @@ export namespace stormkit::gpu {
         Queue(const Device& device, const Device::QueueEntry& entry, Tag);
         ~Queue();
 
-        Queue(const Queue&)                   = delete;
-        auto operator=(const Queue&) noexcept = delete;
+        Queue(const Queue&)          = delete;
+        auto operator=(const Queue&) = delete;
 
         Queue(Queue&&) noexcept;
         auto operator=(Queue&&) noexcept -> Queue&;
@@ -256,8 +254,8 @@ export namespace stormkit::gpu {
         CommandPool(const Device& device, const Queue& queue, Tag);
         ~CommandPool();
 
-        CommandPool(const CommandPool&)             = delete;
-        auto operator=(const CommandPool&) noexcept = delete;
+        CommandPool(const CommandPool&)    = delete;
+        auto operator=(const CommandPool&) = delete;
 
         CommandPool(CommandPool&&) noexcept;
         auto operator=(CommandPool&&) noexcept -> CommandPool&;
@@ -362,6 +360,14 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
+    STORMKIT_FORCE_INLINE Queue::Queue(Queue&&) noexcept = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Queue::operator=(Queue&&) noexcept -> Queue& = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
     STORMKIT_FORCE_INLINE auto
         Queue::create(const Device&             device,
                       const Device::QueueEntry& entry) noexcept -> Expected<Queue> try {
@@ -423,12 +429,16 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto QueueObject::queue() const noexcept -> const Queue& { return }
+    STORMKIT_FORCE_INLINE auto QueueObject::queue() const noexcept -> const Queue& {
+        return ParentRef<Queue>::parent();
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE
-        auto CommandPoolObject::commandPool() const noexcept -> const Queue& { return }
+    auto CommandPoolObject::commandPool() const noexcept -> const CommandPool& {
+        return ParentRef<CommandPool>::parent();
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
@@ -1206,6 +1216,25 @@ namespace stormkit::gpu {
         CommandBuffer::vkHandle() const noexcept -> const vk::raii::CommandBuffer& {
         return m_vk_command_buffer;
     }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE CommandPool::CommandPool(const Device& device, const Queue& queue, Tag)
+        : DeviceObject { device }, QueueObject { queue } {
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE CommandPool::~CommandPool() = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE CommandPool::CommandPool(CommandPool&&) noexcept = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto
+        CommandPool::operator=(CommandPool&&) noexcept -> CommandPool& = default;
 
     /////////////////////////////////////
     /////////////////////////////////////

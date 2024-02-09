@@ -11,7 +11,6 @@ export module stormkit.Gpu:Resource.Swapchain;
 import std;
 
 import stormkit.Core;
-
 import stormkit.Gpu.Vulkan;
 
 import :Core;
