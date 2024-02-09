@@ -363,6 +363,13 @@ if not is_plat("windows") and get_config("toolchain") and (get_config("toolchain
   add_requires("libbacktrace")
 end
 
+if get_config("lto") then
+  set_policy("build.optimization.lto", true)
+  if get_config("kind") == "static" then
+    add_defines("STORMKIT_LTO")
+  end
+end
+
 ---------------------------- targets ----------------------------
 for name, module in pairs(modules) do
   add_requires(table.join(module.packages or {}, module.public_packages or {}))
@@ -498,12 +505,6 @@ for name, module in pairs(modules) do
 
       if module.frameworks then
         add_frameworks(module.frameworks, { public = is_kind("static") })
-      end
-      if get_config("lto") then
-        set_policy("build.optimization.lto", true)
-        if get_config("kind") == "static" then
-          add_defines("STORMKIT_LTO", { public = true })
-        end
       end
     end)
   end
