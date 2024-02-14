@@ -17,7 +17,7 @@ do
 
 		-- add outputdir to include path
 		local outputdir = target:extraconf("rules", "compile.shaders", "outputdir")
-			or path.join(target:autogendir(), "rules", "compile.shaders")
+			                or path.join(target:autogendir(), "rules", "compile.shaders")
 		if not os.isdir(outputdir) then
 			os.mkdir(outputdir)
 		end
@@ -45,7 +45,7 @@ do
 		import("core.project.project")
 
 		local outputdir = target:extraconf("rules", "compile.shaders", "outputdir")
-			or path.join(target:autogendir(), "rules", "compile.shaders")
+		                 	or path.join(target:autogendir(), "rules", "compile.shaders")
 		local fileconfig = target:fileconfig(shaderfile)
 		if fileconfig and fileconfig.prefixdir then
 			outputdir = path.join(outputdir, fileconfig.prefixdir)
@@ -83,8 +83,7 @@ do
 
 		table.insert(argv, shaderfile)
 
-		local outputfile = path.join(path.directory(shaderfile), path.basename(shaderfile) .. ".nzslb.h")
-
+		local outputfile = path.join(outputdir, path.basename(shaderfile) .. ".nzslb.h")
 		batchcmds:vrunv(nzslc.program, argv, { curdir = ".", envs = envs })
 
 		-- add deps
