@@ -7,7 +7,7 @@ module;
 #include <stormkit/Core/PlatformMacro.hpp>
 
 #ifndef STORMKIT_ASSERT
-#define STORMKIT_ASSERT 1
+    #define STORMKIT_ASSERT 1
 #endif
 
 export module stormkit.Core:Utils.Assert;
@@ -77,6 +77,10 @@ export namespace stormkit::core {
 ////////////////////////////////////////////////////////////////////
 
 namespace stormkit::core {
+    namespace {
+        std::mutex mutex;
+    }
+
     /////////////////////////////////////
     /////////////////////////////////////
     constexpr auto toString(AssertType t) noexcept -> std::string_view {
@@ -93,12 +97,13 @@ namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_INLINE auto assertBase(bool                        cond,
-                           AssertType                  type,
-                           std::string_view            message,
-                           bool                        show_callstack,
-                           const std::source_location& location) noexcept {
+                                    AssertType                  type,
+                                    std::string_view            message,
+                                    bool                        show_callstack,
+                                    const std::source_location& location) noexcept {
         if constexpr (STORMKIT_ASSERT == 1) {
             if (not cond) [[unlikely]] {
+                auto lock = std::unique_lock { mutex };
                 auto stderr = getSTDErr();
                 std::println(stderr,
                              "[{}] failed in \n"
