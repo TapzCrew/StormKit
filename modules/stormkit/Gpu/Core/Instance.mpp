@@ -41,11 +41,11 @@ export {
             [[nodiscard]] static auto
                 create(std::string app_name = "",
                        bool        verbose  = (core::STORMKIT_BUILD_TYPE ==
-                                       "Debug")) noexcept -> Expected<Instance>;
+                                       "DEBUG")) noexcept -> Expected<Instance>;
             [[nodiscard]] static auto
                 allocate(std::string app_name = "",
                          bool        verbose  = (core::STORMKIT_BUILD_TYPE ==
-                                         "Debug")) noexcept -> Expected<std::unique_ptr<Instance>>;
+                                         "DEBUG")) noexcept -> Expected<std::unique_ptr<Instance>>;
 
             [[nodiscard]] auto
                 physicalDevices() const noexcept -> const std::vector<PhysicalDevice>&;
