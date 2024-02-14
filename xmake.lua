@@ -10,6 +10,8 @@ modules = {
 
       if not is_plat("windows") and get_config("toolchain") and (get_config("toolchain") == "clang" or get_config("toolchain") == "llvm") then
         add_packages("libbacktrace", { public = true })
+      elseif is_plat("windows") then
+        add_syslinks("dbghelp")
       end
 
       set_configdir("$(buildir)/.gens/modules/stormkit/Core")
@@ -178,7 +180,8 @@ set_project("StormKit")
 
 set_version("0.1.0", { build = "%Y%m%d%H%M" })
 
-includes("xmake/**.lua")
+includes("xmake/rules/*.lua")
+includes("xmake/*.lua")
 
 ---------------------------- global rules ----------------------------
 if get_config("vsxmake") then
