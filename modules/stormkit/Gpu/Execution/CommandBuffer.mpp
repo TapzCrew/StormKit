@@ -904,7 +904,7 @@ namespace stormkit::gpu {
             std::ranges::to<std::vector>();
 
         m_vk_command_buffer.copyBufferToImage(toVkHandle()(src),
-                                              toVkHandle()(dst),
+                                              dst.vkHandle(),
                                               vk::ImageLayout::eTransferDstOptimal,
                                               vk_copy_regions);
     }
@@ -943,7 +943,7 @@ namespace stormkit::gpu {
             }) |
             std::ranges::to<std::vector>();
 
-        m_vk_command_buffer.copyImageToBuffer(toVkHandle()(src),
+        m_vk_command_buffer.copyImageToBuffer(src.vkHandle(),
                                               vk::ImageLayout::eTransferDstOptimal,
                                               toVkHandle()(dst),
                                               vk_copy_regions);
@@ -980,9 +980,9 @@ namespace stormkit::gpu {
                                          .dstSubresource = vk_dst_subresource_layers,
                                          .extent         = as<vk::Extent3D>(extent) } };
 
-        m_vk_command_buffer.copyImage(toVkHandle()(src),
+        m_vk_command_buffer.copyImage(src.vkHandle(),
                                       core::narrow<vk::ImageLayout>(src_layout),
-                                      toVkHandle()(dst),
+                                      dst.vkHandle(),
                                       core::narrow<vk::ImageLayout>(dst_layout),
                                       vk_regions);
     }
@@ -1019,9 +1019,9 @@ namespace stormkit::gpu {
                                             .dstSubresource = vk_dst_subresource_layers,
                                             .extent         = vk_extent } };
 
-        m_vk_command_buffer.resolveImage(toVkHandle()(src),
+        m_vk_command_buffer.resolveImage(src.vkHandle(),
                                          core::narrow<vk::ImageLayout>(src_layout),
-                                         toVkHandle()(dst),
+                                         dst.vkHandle(),
                                          core::narrow<vk::ImageLayout>(dst_layout),
                                          vk_regions);
     }
@@ -1063,9 +1063,9 @@ namespace stormkit::gpu {
             }) |
             std::ranges::to<std::vector>();
 
-        m_vk_command_buffer.blitImage(toVkHandle()(src),
+        m_vk_command_buffer.blitImage(src.vkHandle(),
                                       core::narrow<vk::ImageLayout>(src_layout),
-                                      toVkHandle()(dst),
+                                      dst.vkHandle(),
                                       core::narrow<vk::ImageLayout>(dst_layout),
                                       vk_regions,
                                       core::narrow<vk::Filter>(filter));
@@ -1104,7 +1104,7 @@ namespace stormkit::gpu {
                                                   .newLayout           = vk_dst_layout,
                                                   .srcQueueFamilyIndex = vk::QueueFamilyIgnored,
                                                   .dstQueueFamilyIndex = vk::QueueFamilyIgnored,
-                                                  .image               = toVkHandle()(image),
+                                                  .image               = image.vkHandle(),
                                                   .subresourceRange    = vk_subresource_range } };
 
         m_vk_command_buffer.pipelineBarrier(src_stage, dst_stage, {}, {}, {}, barriers);
@@ -1161,7 +1161,7 @@ namespace stormkit::gpu {
                     .newLayout           = core::narrow<vk::ImageLayout>(barrier.new_layout),
                     .srcQueueFamilyIndex = barrier.src_queue_family_index,
                     .dstQueueFamilyIndex = barrier.dst_queue_family_index,
-                    .image               = toVkHandle()(barrier.image),
+                    .image               = barrier.image.vkHandle(),
                     .subresourceRange    = vk_subresource_range
                 };
             }) |
