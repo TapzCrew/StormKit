@@ -58,7 +58,7 @@ namespace stormkit::gpu {
         struct Queue_ {
             std::optional<core::UInt32> id    = std::nullopt;
             core::UInt32                count = 0u;
-            core::Byte                  padding[3];
+            core::Byte                  _[3];
             QueueFlag                   flags = QueueFlag {};
         };
 
@@ -131,9 +131,10 @@ namespace stormkit::gpu {
         const auto device_extensions =
             m_physical_device->vkHandle().enumerateDeviceExtensionProperties();
 
-        device_logger.dlog("Device extensions: {}", device_extensions | std::views::transform([](auto&& ext) {
-                                     return std::string_view { ext.extensionName };
-                                 }));
+        device_logger.dlog("Device extensions: {}",
+                           device_extensions | std::views::transform([](auto&& ext) {
+                               return std::string_view { ext.extensionName };
+                           }));
 
         const auto swapchain_available = [&] {
             for (const auto& ext : SWAPCHAIN_EXTENSIONS) {
@@ -211,6 +212,11 @@ namespace stormkit::gpu {
                 return {};
             })
             .transform_error(core::monadic::map(core::monadic::as<Result>(), core::throwError()));
+
+        if (raster_queue.id)
+            m_raster_queue = QueueEntry { .id    = *raster_queue.id,
+                                          .count = raster_queue.count,
+                                          .flags = raster_queue.flags };
 
         setObjectName(*this,
                       std::format("StormKit:Device ({})", m_physical_device->info().device_name));
