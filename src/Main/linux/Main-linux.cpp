@@ -10,9 +10,7 @@ import stormkit.Core;
 extern auto userMain(std::span<const std::string_view>) -> int;
 
 auto main(int argc, char** argv) -> int {
-#if not(defined(__cpp_lib_stacktrace) and __cpp_lib_stacktrace >= 202011L)
     stormkit::core::backtraceInit(argv[0]);
-#endif
 
     auto args = std::vector<std::string_view> {};
 
