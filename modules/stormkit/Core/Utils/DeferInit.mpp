@@ -165,7 +165,7 @@ namespace stormkit::core {
     template<typename T>
     [[nodiscard]] STORMKIT_FORCE_INLINE constexpr auto
         DeferInit<T>::get(this auto&& self) noexcept -> decltype(auto) {
-        core::expects(self.m_initialized);
+        core::expects(self.m_initialized, "Underlying object is not initialized");
 
         using U = LikeCVType<decltype(self), T>;
 
@@ -177,7 +177,7 @@ namespace stormkit::core {
     template<typename T>
     STORMKIT_FORCE_INLINE constexpr auto
         DeferInit<T>::operator->(this auto&& self) noexcept -> decltype(auto) {
-        core::expects(self.m_initialized);
+        core::expects(self.m_initialized, "Underlying object is not initialized");
 
         using U = LikeCVType<decltype(self), T>;
 
