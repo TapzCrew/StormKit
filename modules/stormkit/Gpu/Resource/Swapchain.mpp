@@ -14,42 +14,52 @@ import stormkit.Core;
 import stormkit.Gpu.Vulkan;
 
 import :Core;
+import :Resource.Image;
 
 export namespace stormkit::gpu {
-    class STORMKIT_API Swapchain {
+    class STORMKIT_API Swapchain: public DeviceObject {
         struct Tag {};
 
       public:
         static constexpr auto DEBUG_TYPE = DebugObjectType::Swapchain;
 
-      //   Swapchain(const Device& device, bool signaled, Tag);
-      //   ~Swapchain();
-      //
-      //   Swapchain(const Swapchain&)                    = delete;
-      //   auto operator=(const Swapchain&) -> Swapchain& = delete;
-      //
-      //   Swapchain(Swapchain&&) noexcept;
-      //   auto operator=(Swapchain&&) noexcept -> Swapchain&;
-      //
-      //   [[nodiscard]] static auto create(const Device& device,
-      //                                    bool signaled = false) noexcept -> Expected<Swapchain>;
-      //   [[nodiscard]] static auto allocate(const Device& device, bool signaled = false) noexcept
-      //       -> Expected<std::unique_ptr<Swapchain>>;
-      //
-      //   [[nodiscard]] auto vkHandle() const noexcept -> const vk::raii::SwapchainKHR&;
-      //
-      // private:
-      //   core::DeferInit<vk::raii::SwapchainKHR> m_vk_swapchain;
-      //
-      //   core::ExtentU m_extent;
-      //   PixelFormat   m_pixel_format;
-      //   core::UInt32  m_image_count;
-      //
-      //   std::vector<Image> m_images;
-      //
-      //   std::vector<Semaphore> m_image_availables;
-      //   std::vector<Semaphore> m_render_finished;
-      //   std::vector<Semaphore> m_in_flight_fences;
+        Swapchain(Tag,
+                  const Device&                         device,
+                  const Surface&                        surface,
+                  const core::math::ExtentU&            extent,
+                  std::optional<vk::raii::SwapchainKHR> old_swapchain = std::nullopt);
+        ~Swapchain();
+
+        Swapchain(const Swapchain&)                    = delete;
+        auto operator=(const Swapchain&) -> Swapchain& = delete;
+
+        Swapchain(Swapchain&&) noexcept;
+        auto operator=(Swapchain&&) noexcept -> Swapchain&;
+
+        [[nodiscard]] static auto create(const Device&                         device,
+                                         const Surface&                        surface,
+                                         const core::math::ExtentU&            extent,
+                                         std::optional<vk::raii::SwapchainKHR> old_swapchain =
+                                             std::nullopt) noexcept -> Expected<Swapchain>;
+        [[nodiscard]] static auto
+            allocate(const Device&                         device,
+                     const Surface&                        surface,
+                     const core::math::ExtentU&            extent,
+                     std::optional<vk::raii::SwapchainKHR> old_swapchain = std::nullopt) noexcept
+            -> Expected<std::unique_ptr<Swapchain>>;
+
+        [[nodiscard]] auto images() const noexcept -> const std::vector<Image>&;
+
+        [[nodiscard]] auto vkHandle() const noexcept -> const vk::raii::SwapchainKHR&;
+
+      private:
+        core::DeferInit<vk::raii::SwapchainKHR> m_vk_swapchain;
+
+        core::math::ExtentU m_extent;
+        PixelFormat         m_pixel_format;
+        core::UInt32        m_image_count;
+
+        std::vector<Image> m_images;
     };
 } // namespace stormkit::gpu
 
@@ -58,38 +68,54 @@ export namespace stormkit::gpu {
 ////////////////////////////////////////////////////////////////////
 
 namespace stormkit::gpu {
-    // /////////////////////////////////////
-    // /////////////////////////////////////
-    // STORMKIT_FORCE_INLINE Swapchain::~Swapchain() = default;
-    //
-    // /////////////////////////////////////
-    // /////////////////////////////////////
-    // STORMKIT_FORCE_INLINE Swapchain::Swapchain(Swapchain&& other) noexcept = default;
-    //
-    // /////////////////////////////////////
-    // /////////////////////////////////////
-    // STORMKIT_FORCE_INLINE auto
-    //     Swapchain::operator=(Swapchain&& other) noexcept -> Swapchain& = default;
-    //
-    // /////////////////////////////////////
-    // /////////////////////////////////////
-    // STORMKIT_FORCE_INLINE auto
-    //     Swapchain::create(std::string app_name,
-    //                      bool        enable_validation) noexcept -> Expected<Swapchain> try {
-    //     return Swapchain { std::move(app_name), enable_validation, Tag {} };
-    // } catch (Result result) { return std::unexpected(result); }
-    //
-    // /////////////////////////////////////
-    // /////////////////////////////////////
-    // STORMKIT_FORCE_INLINE auto Swapchain::allocate(std::string app_name,
-    //                                               bool        enable_validation) noexcept
-    //     -> Expected<std::unique_ptr<Swapchain>> try {
-    //     return std::make_unique<Swapchain>(std::move(app_name), enable_validation, Tag {});
-    // } catch (Result result) { return std::unexpected(result); }
-    //
-    // /////////////////////////////////////
-    // /////////////////////////////////////
-    // STORMKIT_FORCE_INLINE auto Swapchain::vkHandle() const noexcept -> const vk::raii::SwapchainKHR& {
-    //     return m_vk_swapchain;
-    // }
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE Swapchain::~Swapchain() = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE Swapchain::Swapchain(Swapchain&& other) noexcept = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto
+        Swapchain::operator=(Swapchain&& other) noexcept -> Swapchain& = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Swapchain::create(
+        const Device&                         device,
+        const Surface&                        surface,
+        const core::math::ExtentU&            extent,
+        std::optional<vk::raii::SwapchainKHR> old_swapchain) noexcept -> Expected<Swapchain> try {
+        return Swapchain { Tag {}, device, surface, extent, std::move(old_swapchain) };
+    } catch (Result result) { return std::unexpected(result); }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto
+        Swapchain::allocate(const Device&                         device,
+                            const Surface&                        surface,
+                            const core::math::ExtentU&            extent,
+                            std::optional<vk::raii::SwapchainKHR> old_swapchain) noexcept
+        -> Expected<std::unique_ptr<Swapchain>> try {
+        return std::make_unique<Swapchain>(Tag {},
+                                           device,
+                                           surface,
+                                           extent,
+                                           std::move(old_swapchain));
+    } catch (Result result) { return std::unexpected(result); }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Swapchain::images() const noexcept -> const std::vector<Image>& {
+        return m_images;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto
+        Swapchain::vkHandle() const noexcept -> const vk::raii::SwapchainKHR& {
+        return m_vk_swapchain;
+    }
 } // namespace stormkit::gpu

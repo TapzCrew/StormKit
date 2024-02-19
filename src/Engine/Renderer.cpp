@@ -113,32 +113,6 @@ namespace stormkit::engine {
 
         /////////////////////////////////////
         /////////////////////////////////////
-        auto chooseSwapSurfaceFormat(std::span<const gpu::SurfaceFormat> formats) noexcept
-            -> gpu::SurfaceFormat {
-            for (const auto& format : formats) {
-                if (format.format == gpu::PixelFormat::BGRA8_UNorm &&
-                    format.color_space == gpu::ColorSpace::SRGB_NonLinear)
-                    return format;
-            }
-
-            return formats[0];
-        }
-
-        /////////////////////////////////////
-        /////////////////////////////////////
-        auto chooseSwapPresentMode(std::span<const gpu::PresentMode> present_modes) noexcept
-            -> gpu::PresentMode {
-            for (const auto& present_mode : present_modes) {
-                if (present_mode == gpu::PresentMode::Immediate) return present_mode;
-                else if (present_mode == gpu::PresentMode::Mailbox)
-                    return present_mode;
-            }
-
-            return gpu::PresentMode::Fifo;
-        }
-
-        /////////////////////////////////////
-        /////////////////////////////////////
         // auto
         //     chooseSwapExtent(const core::math::ExtentU&      extent,
         //                      const gpu::SurfaceCapabilities& capabilities) noexcept ->
@@ -210,14 +184,42 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto Renderer::doInitRenderSurface(std::optional<core::NakedRef<const wsi::Window>>) noexcept
-        -> gpu::Expected<void> {
-        return {};
+    auto Renderer::doInitRenderSurface(
+        std::optional<core::NakedRef<const wsi::Window>> window) noexcept -> gpu::Expected<void> {
+        if (window)
+            return RenderSurface::createFromWindow(*m_instance, *m_device, *(window.value()))
+                .transform(core::monadic::set(m_surface));
+
+        core::ensures(not window, "Offscreen rendering not yet implemented");
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     auto Renderer::threadLoop(std::stop_token token) noexcept -> void {
+        const auto raster_queue =
+            *gpu::Queue::create(*m_device, m_device->rasterQueueEntry())
+                 .transform_error(core::expectsWithMessage("Failed to create raster Queue"));
+
+        const auto command_pool =
+            *gpu::CommandPool::create(*m_device, raster_queue)
+                 .transform_error(core::expectsWithMessage("Failed to raster Queue command pool"));
+
+        // auto transition_command_buffers =
+        //           raster_queue
+        //
+        // transition_command_buffer.begin(true);
+        // for (auto& image : m_images)
+        //     transition_command_buffer.transitionImageLayout(image,
+        //                                                     ImageLayout::Undefined,
+        //                                                     ImageLayout::Present_Src);
+        // transition_command_buffer.end();
+        //
+        // auto fence = m_device->createFence();
+        //
+        // transition_command_buffer.submit({}, {}, &fence);
+        //
+        // const auto fences = core::makeConstRefStaticArray(fence);
+        // m_device->waitForFences(fences);
         //    const auto create_info = gpu::CommandPoolCreateInfo {}.setFlags(
         //        gpu::CommandPoolCreateFlagBits::eTransient |
         //        gpu::CommandPoolCreateFlagBits::eResetCommandBuffer);
@@ -250,17 +252,14 @@ namespace stormkit::engine {
         //
         // //        fence.wait();
         //
-        //    for (;;) {
-        //        if (token.stop_requested()) return;
-        //
-        //        m_render_surface->acquireNextFrame()
-        //            .transform([this](auto&& frame) { m_render_surface->present(frame); })
-        //            .transform_error([](auto&& error) {
-        //                elog("Failed to acquire frame, reason: {}", error);
-        //                return std::forward<decltype(error)>(error);
-        //            });
-        //    }
-        //
-        //    m_device->waitIdle();
+        for (;;) {
+            if (token.stop_requested()) return;
+
+            m_surface->acquireNextFrame()
+                .transform([this](auto&& frame) { m_surface->present(frame); })
+                .transform_error(core::expectsWithMessage("Failed to acquire frame"));
+        }
+
+        m_device->waitIdle();
     }
 } // namespace stormkit::engine
