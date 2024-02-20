@@ -8,8 +8,6 @@
 extern auto userMain(std::span<const std::string_view>) -> int;
 
 auto main(const int argc, const char **argv) -> int {
-    stormkit::core::backtraceInit(argv[0]);
-
     [[NSFileManager defaultManager]
         changeCurrentDirectoryPath:[[NSBundle mainBundle] resourcePath]];
 

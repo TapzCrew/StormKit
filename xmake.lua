@@ -8,12 +8,6 @@ modules = {
         add_packages("wil")
       end
 
-      if not is_plat("windows") and get_config("toolchain") and (get_config("toolchain") == "clang" or get_config("toolchain") == "llvm") then
-        add_packages("libbacktrace", { public = true })
-      elseif is_plat("windows") then
-        add_syslinks("dbghelp")
-      end
-
       set_configdir("$(buildir)/.gens/modules/stormkit/Core")
       add_filegroups("generated", { rootdir = "$(buildir)/.gens/modules" })
 
@@ -39,6 +33,27 @@ modules = {
         output, errors = os.iorunv("git", { "rev-parse", "--verify", "HEAD" })
 
         target:set("configvar", "STORMKIT_GIT_COMMIT_HASH", output:trim())
+
+        local has_stacktrace = target:check_cxxsnippets({test = [[
+             void test() {
+                 std::stacktrace::current();
+             }
+         ]]}, {configs = {languages = "c++23"}, includes = {"stacktrace"}})
+
+        if not has_stacktrace then
+            print("No C++23 stacktrace support, falling back to boost stacktrace")
+            target:add("packages", "boost", {public = true})
+            if target:is_plat("linux") or target:is_plat("mingw") then
+                target:add("packages", "libbacktrace", {public = true})
+                target:add("defines", "BOOST_STACKTRACE_USE_ADDR2LINE", {public = true})
+                target:add("defines", "BOOST_STACKTRACE_LINK", {public = true})
+                target:add("syslinks", "dl", {public = true})
+            end
+        end
+
+        if is_mode("debug") and target:is_plat("linux") then
+            target:add("cxflags", "-no-pie", "-fno-pie")
+        end
       end)
     end,
   },
@@ -246,6 +261,8 @@ option("examples_entities",
 option("examples", { default = false, category = "root menu/others", })
 option("applications", { default = false, category = "root menu/others" })
 option("tests", { default = false, category = "root menu/others" })
+option("tests_core",
+  { default = false, category = "root menu/others", deps = { "tests" }, after_check = function(option) if option:dep("tests"):enabled() then option:enable(true) end end })
 
 option("sanitizers", { default = false, category = "root menu/build" })
 option("mold", { default = false, category = "root menu/build" })
@@ -362,15 +379,16 @@ end
 -- add_defines("FROZEN_DONT_INCLUDE_STL", "ANKERL_UNORDERED_DENSE_USE_STD_IMPORT")
 add_requireconfs("*", { configs = { modules = true } })
 
-if not is_plat("windows") and get_config("toolchain") and (get_config("toolchain") == "clang" or get_config("toolchain") == "llvm") then
-  add_requires("libbacktrace")
-end
-
 if get_config("lto") then
   set_policy("build.optimization.lto", true)
   if get_config("kind") == "static" then
     add_defines("STORMKIT_LTO")
   end
+end
+
+add_requires("boost", {system = false, configs = {stacktrace = true, filesystem = false}})
+if is_plat("linux") then
+    add_requires("libbacktrace", {system = false})
 end
 
 ---------------------------- targets ----------------------------
