@@ -99,7 +99,11 @@ export namespace stormkit::gpu {
         static constexpr auto DEBUG_TYPE = DebugObjectType::Command_Buffer;
 
         using Deleter = std::function<void(vk::raii::CommandBuffer&)>;
-
+        CommandBuffer(const CommandPool&,
+                      CommandBufferLevel,
+                      vk::raii::CommandBuffer&&,
+                      Deleter,
+                      Tag);
         ~CommandBuffer();
 
         CommandBuffer(const CommandBuffer&)                    = delete;
@@ -107,6 +111,15 @@ export namespace stormkit::gpu {
 
         CommandBuffer(CommandBuffer&&) noexcept;
         auto operator=(CommandBuffer&&) noexcept -> CommandBuffer&;
+
+        [[nodiscard]] static auto create(const CommandPool&,
+                                         CommandBufferLevel,
+                                         vk::raii::CommandBuffer&&,
+                                         Deleter) noexcept -> CommandBuffer;
+        [[nodiscard]] static auto allocate(const CommandPool&,
+                                           CommandBufferLevel,
+                                           vk::raii::CommandBuffer&&,
+                                           Deleter) noexcept -> std::unique_ptr<CommandBuffer>;
 
         auto reset() noexcept -> void;
         auto submit(std::span<core::NakedRef<const Semaphore>> wait_semaphores   = {},
@@ -169,16 +182,15 @@ export namespace stormkit::gpu {
                                  core::UInt32      draw_count,
                                  core::UInt32      stride) -> void;
 
-        auto bindVertexBuffers(std::span<const core::NakedRef<const Buffer>> buffers,
-                               std::span<const core::UInt64>                 offsets) -> void;
+        auto bindVertexBuffers(std::span<core::NakedRef<const Buffer>> buffers,
+                               std::span<const core::UInt64>           offsets) -> void;
         auto bindIndexBuffer(const Buffer& buffer,
                              core::UInt64  offset        = 0,
                              bool          large_indices = false) -> void;
-        auto
-            bindDescriptorSets(const Pipeline&                                      pipeline,
-                               const PipelineLayout&                                layout,
-                               std::span<const core::NakedRef<const DescriptorSet>> descriptor_sets,
-                               std::span<const core::UInt32> dynamic_offsets = {}) -> void;
+        auto bindDescriptorSets(const Pipeline&                                pipeline,
+                                const PipelineLayout&                          layout,
+                                std::span<core::NakedRef<const DescriptorSet>> descriptor_sets,
+                                std::span<const core::UInt32> dynamic_offsets = {}) -> void;
 
         auto copyBuffer(const Buffer&     src,
                         const Buffer&     dst,
@@ -236,8 +248,6 @@ export namespace stormkit::gpu {
         [[nodiscard]] auto vkHandle() const noexcept -> const vk::raii::CommandBuffer&;
 
       private:
-        CommandBuffer(const CommandPool&, CommandBufferLevel, vk::raii::CommandBuffer&&, Deleter);
-
         CommandBufferLevel m_level = CommandBufferLevel::Primary;
 
         vk::raii::CommandBuffer m_vk_command_buffer;
@@ -265,14 +275,32 @@ export namespace stormkit::gpu {
         [[nodiscard]] static auto allocate(const Device& device, const Queue& queue) noexcept
             -> Expected<std::unique_ptr<CommandPool>>;
 
+        [[nodiscard]] auto createCommandBuffer(
+            CommandBufferLevel level = CommandBufferLevel::Primary) const noexcept -> CommandBuffer;
+        [[nodiscard]] auto
+            createCommandBuffers(core::RangeExtent  count,
+                                 CommandBufferLevel level = CommandBufferLevel::Primary)
+                const noexcept -> std::vector<CommandBuffer>;
+
+        [[nodiscard]] auto
+            allocateCommandBuffer(CommandBufferLevel level = CommandBufferLevel::Primary)
+                const noexcept -> std::unique_ptr<CommandBuffer>;
+        [[nodiscard]] auto
+            allocateCommandBuffers(core::RangeExtent  count,
+                                   CommandBufferLevel level = CommandBufferLevel::Primary)
+                const noexcept -> std::vector<std::unique_ptr<CommandBuffer>>;
+
         [[nodiscard]] auto vkHandle() const noexcept -> const vk::raii::CommandPool&;
 
       private:
-        auto createCommandBuffers(core::RangeExtent count, CommandBufferLevel level) const noexcept
-            -> std::vector<vk::raii::CommandBuffer>;
-        auto deleteCommandBuffer(vk::raii::CommandBuffer cmb) const noexcept -> void;
+        auto createVkCommandBuffers(core::RangeExtent count, CommandBufferLevel level)
+            const noexcept -> std::vector<vk::raii::CommandBuffer>;
+        auto deleteVkCommandBuffer(vk::raii::CommandBuffer& cmb) noexcept -> void;
 
         core::DeferInit<vk::raii::CommandPool> m_vk_command_pool;
+
+        // std::mutex                           m_reuse_mutex;
+        std::vector<vk::raii::CommandBuffer> m_reusable_command_buffers;
     };
 } // namespace stormkit::gpu
 
@@ -445,10 +473,34 @@ namespace stormkit::gpu {
     STORMKIT_FORCE_INLINE CommandBuffer::CommandBuffer(const CommandPool&        command_pool,
                                                        CommandBufferLevel        level,
                                                        vk::raii::CommandBuffer&& command_buffer,
-                                                       Deleter                   deleter)
+                                                       Deleter                   deleter,
+                                                       Tag)
         : DeviceObject { command_pool.device() }, QueueObject { command_pool.queue() },
           CommandPoolObject { command_pool }, m_level { level },
           m_vk_command_buffer { std::move(command_buffer) }, m_deleter { std::move(deleter) } {
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto CommandBuffer::create(const CommandPool&        pool,
+                                                     CommandBufferLevel        level,
+                                                     vk::raii::CommandBuffer&& cmb,
+                                                     Deleter deleter) noexcept -> CommandBuffer {
+        return CommandBuffer { pool, level, std::move(cmb), std::move(deleter), Tag {} };
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto
+        CommandBuffer::allocate(const CommandPool&        pool,
+                                CommandBufferLevel        level,
+                                vk::raii::CommandBuffer&& cmb,
+                                Deleter deleter) noexcept -> std::unique_ptr<CommandBuffer> {
+        return std::make_unique<CommandBuffer>(pool,
+                                               level,
+                                               std::move(cmb),
+                                               std::move(deleter),
+                                               Tag {});
     }
 
     /////////////////////////////////////
@@ -477,7 +529,7 @@ namespace stormkit::gpu {
     auto CommandBuffer::submit(std::span<core::NakedRef<const Semaphore>> wait_semaphores,
                                std::span<core::NakedRef<const Semaphore>> signal_semaphores,
                                core::OptionalRef<const Fence> fence) const noexcept -> void {
-        auto cmbs = std::array { core::NakedRef<const CommandBuffer> { *this } };
+        auto cmbs = core::makeNakedRefs<std::array>(*this);
 
         queue().submit(cmbs, wait_semaphores, signal_semaphores, std::move(fence));
     }
@@ -542,7 +594,7 @@ namespace stormkit::gpu {
     STORMKIT_FORCE_INLINE auto
         CommandBuffer::begin(bool                           one_time_submit,
                              std::optional<InheritanceInfo> inheritance_info) -> void {
-        core::expects(m_state == State::Recording);
+        core::expects(m_state == State::Initial);
 
         const auto vk_inheritance_info = core::either(
             inheritance_info,
@@ -807,8 +859,8 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE auto
-        CommandBuffer::bindVertexBuffers(std::span<const core::NakedRef<const Buffer>> buffers,
-                                         std::span<const core::UInt64> offsets) -> void {
+        CommandBuffer::bindVertexBuffers(std::span<core::NakedRef<const Buffer>> buffers,
+                                         std::span<const core::UInt64>           offsets) -> void {
         core::expects(m_state == State::Recording);
         core::expects(not std::empty(buffers));
         core::expects(std::size(buffers) == std::size(offsets));
@@ -835,10 +887,10 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE auto CommandBuffer::bindDescriptorSets(
-        const Pipeline&                                      pipeline,
-        const PipelineLayout&                                layout,
-        std::span<const core::NakedRef<const DescriptorSet>> descriptor_sets,
-        std::span<const core::UInt32>                        dynamic_offsets) -> void {
+        const Pipeline&                                pipeline,
+        const PipelineLayout&                          layout,
+        std::span<core::NakedRef<const DescriptorSet>> descriptor_sets,
+        std::span<const core::UInt32>                  dynamic_offsets) -> void {
         core::expects(m_state == State::Recording);
 
         const auto bind_point = (pipeline.type() == Pipeline::Type::Raster)
@@ -1221,6 +1273,12 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE CommandPool::CommandPool(const Device& device, const Queue& queue, Tag)
         : DeviceObject { device }, QueueObject { queue } {
+        device.vkHandle()
+            .createCommandPool(vk::CommandPoolCreateInfo {
+                .flags = vk::CommandPoolCreateFlagBits::eTransient |
+                         vk::CommandPoolCreateFlagBits::eResetCommandBuffer })
+            .transform(core::monadic::set(m_vk_command_pool))
+            .transform_error(core::monadic::map(core::monadic::as<Result>(), core::throwError()));
     }
 
     /////////////////////////////////////
@@ -1255,7 +1313,63 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE auto
+        CommandPool::createCommandBuffer(CommandBufferLevel level) const noexcept -> CommandBuffer {
+        return std::move(createCommandBuffers(1, level).front());
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto CommandPool::createCommandBuffers(
+        core::RangeExtent  count,
+        CommandBufferLevel level) const noexcept -> std::vector<CommandBuffer> {
+        return createVkCommandBuffers(count, level) | std::views::as_rvalue |
+               std::views::transform(
+                   [this, &level](vk::raii::CommandBuffer&& cmb) noexcept -> decltype(auto) {
+                       return CommandBuffer::create(*this,
+                                                    level,
+                                                    std::move(cmb),
+                                                    core::curry(&CommandPool::deleteVkCommandBuffer,
+                                                                const_cast<CommandPool*>(this)));
+                   }) |
+               std::ranges::to<std::vector>();
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto CommandPool::allocateCommandBuffer(
+        CommandBufferLevel level) const noexcept -> std::unique_ptr<CommandBuffer> {
+        return std::move(allocateCommandBuffers(1, level).front());
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto CommandPool::allocateCommandBuffers(
+        core::RangeExtent  count,
+        CommandBufferLevel level) const noexcept -> std::vector<std::unique_ptr<CommandBuffer>> {
+        return createVkCommandBuffers(count, level) | std::views::as_rvalue |
+               std::views::transform([this, &level](
+                                         vk::raii::CommandBuffer&& cmb) noexcept -> decltype(auto) {
+                   return CommandBuffer::allocate(*this,
+                                                  level,
+                                                  std::move(cmb),
+                                                  core::curry(&CommandPool::deleteVkCommandBuffer,
+                                                              const_cast<CommandPool*>(this)));
+               }) |
+               std::ranges::to<std::vector>();
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto
         CommandPool::vkHandle() const noexcept -> const vk::raii::CommandPool& {
         return m_vk_command_pool;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto
+        CommandPool::deleteVkCommandBuffer(vk::raii::CommandBuffer& cmb) noexcept -> void {
+        // auto lock = std::unique_lock { m_reuse_mutex };
+        // m_reusable_command_buffers.emplace_back(std::move(cmb));
     }
 } // namespace stormkit::gpu
