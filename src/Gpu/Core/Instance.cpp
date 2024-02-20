@@ -63,7 +63,7 @@ namespace stormkit::gpu {
                            vk::DebugUtilsMessageTypeFlagsEXT             type,
                            const vk::DebugUtilsMessengerCallbackDataEXT& callback_data,
                            [[maybe_unused]] void*                        user_data) -> bool {
-            auto message = std::format("[{}] {}", vk::to_string(severity), callback_data.pMessage);
+            auto message = std::format("{}", callback_data.pMessage);
 
             if (checkFlag(severity, vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo))
                 ilog("{}", message);
@@ -157,7 +157,7 @@ namespace stormkit::gpu {
         }();
 
         const auto instance_extensions = [this]() noexcept {
-            auto e = core::concat(BASE_EXTENSIONS, SURFACE_EXTENSIONS);
+            auto e = core::concat(BASE_EXTENSIONS, SURFACE_EXTENSIONS, WSI_SURFACE_EXTENSIONS);
 
             if (m_validation_layers_enabled) core::merge(e, std::array { "VK_EXT_debug_utils" });
 
