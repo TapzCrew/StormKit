@@ -1,4 +1,4 @@
-// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// Copyright (C) 2024 Arthur LAURENT <arthur.laurent4@gmail.com>
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
@@ -15,8 +15,8 @@ import std;
 import stormkit.Core;
 
 export namespace stormkit::entities {
-    using Entity                         = core::UInt32;
-    inline constexpr auto INVALID_ENTITY = Entity { 0 };
+    using Entity                                  = core::UInt32;
+    STORMKIT_INLINE constexpr auto INVALID_ENTITY = Entity { 0 };
 
     struct EntityHashFunc {
         [[nodiscard]] auto operator()(Entity k) const noexcept -> core::Hash64;
@@ -228,7 +228,7 @@ export namespace stormkit::entities {
 namespace stormkit::entities {
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto EntityHashFunc::operator()(Entity k) const noexcept -> core::Hash64 {
+    STORMKIT_INLINE auto EntityHashFunc::operator()(Entity k) const noexcept -> core::Hash64 {
         return core::as<core::Hash64>(k);
     }
 
@@ -269,19 +269,19 @@ namespace stormkit::entities {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto MessageBus::empty() const noexcept -> bool {
+    STORMKIT_INLINE auto MessageBus::empty() const noexcept -> bool {
         return std::empty(m_messages);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto System::priority() const noexcept -> core::UInt32 {
+    STORMKIT_INLINE auto System::priority() const noexcept -> core::UInt32 {
         return m_priority;
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto System::componentsUsed() const noexcept -> const ComponentTypes& {
+    STORMKIT_INLINE auto System::componentsUsed() const noexcept -> const ComponentTypes& {
         return m_types;
     }
 
@@ -333,7 +333,7 @@ namespace stormkit::entities {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto EntityManager::entities() const noexcept -> const std::vector<Entity>& {
+    STORMKIT_INLINE auto EntityManager::entities() const noexcept -> const std::vector<Entity>& {
         if (m_cached_entities_dirty) {
             m_cached_entities       = m_entities | std::ranges::to<std::vector>();
             m_cached_entities_dirty = false;
@@ -444,7 +444,7 @@ namespace stormkit::entities {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto EntityManager::entityCount() const noexcept -> core::RangeExtent {
+    STORMKIT_INLINE auto EntityManager::entityCount() const noexcept -> core::RangeExtent {
         return std::size(m_entities);
     }
 

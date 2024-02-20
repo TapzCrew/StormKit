@@ -1,4 +1,4 @@
-// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// Copyright (C) 2024 Arthur LAURENT <arthur.laurent4@gmail.com>
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
@@ -25,11 +25,11 @@ export namespace stormkit::core {
 
     template<typename T, typename U>
         requires(not IsArithmetic<T> and not IsArithmetic<U>)
-    [[nodiscard]] constexpr auto isEqual(const T& a, const U& b) noexcept -> bool;
+    [[nodiscard]] constexpr auto equal(const T& a, const U& b) noexcept -> bool;
 
     template<typename Func, typename... Args>
     // requires(std::invocable<Func, Args...>)
-    [[nodiscard]] constexpr auto toUnary(Func&& func, Args&&... args) noexcept -> decltype(auto);
+    [[nodiscard]] constexpr auto curry(Func&& func, Args&&... args) noexcept -> decltype(auto);
 } // namespace stormkit::core
 
 ////////////////////////////////////////////////////////////////////
@@ -62,7 +62,7 @@ namespace stormkit::core {
     /////////////////////////////////////
     template<typename T, typename U>
         requires(not IsArithmetic<T> and not IsArithmetic<U>)
-    STORMKIT_FORCE_INLINE constexpr auto isEqual(const T& a, const U& b) noexcept -> bool {
+    STORMKIT_FORCE_INLINE constexpr auto equal(const T& a, const U& b) noexcept -> bool {
         return a == b;
     }
 
@@ -70,11 +70,20 @@ namespace stormkit::core {
     /////////////////////////////////////
     template<typename Func, typename... Args>
     // requires(std::invocable<Func, Args...>)
-    STORMKIT_FORCE_INLINE constexpr auto toUnary(Func&& func,
-                                                 Args&&... args) noexcept -> decltype(auto) {
-        return [_func = std::forward<Func>(func), ... _args = std::forward<Args>(args)](
-                   auto&& first) noexcept(noexcept(func(first, std::forward<Args>(args)...))) {
-            return _func(std::forward<decltype(first)>(first), std::forward<Args>(_args)...);
+    STORMKIT_FORCE_INLINE constexpr auto curry(Func&& func,
+                                               Args&&... args) noexcept -> decltype(auto) {
+        return std::bind_front(std::forward<Func>(func), std::forward<Args>(args)...);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<typename Func, typename... Args>
+    // requires(std::invocable<Func, Args...>)
+    STORMKIT_FORCE_INLINE constexpr auto curryBack(Func&& func,
+                                                   Args&&... args) noexcept -> decltype(auto) {
+        return [&]<typename... CallArgs>(CallArgs&&... call_args)
+                   noexcept(std::is_nothrow_invocable_v<Func, CallArgs..., Args...>) -> decltype(auto) {
+            return std::invoke(std::forward<Func>(func), std::forward<CallArgs>(call_args)..., std::forward<Args>(args)...);
         };
     }
 } // namespace stormkit::core

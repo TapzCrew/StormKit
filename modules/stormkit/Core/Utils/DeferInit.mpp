@@ -1,4 +1,4 @@
-// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// Copyright (C) 2024 Arthur LAURENT <arthur.laurent4@gmail.com>
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
@@ -165,7 +165,7 @@ namespace stormkit::core {
     template<typename T>
     [[nodiscard]] STORMKIT_FORCE_INLINE constexpr auto
         DeferInit<T>::get(this auto&& self) noexcept -> decltype(auto) {
-        core::expects(self.m_initialized);
+        core::expects(self.m_initialized, "Underlying object is not initialized");
 
         using U = LikeCVType<decltype(self), T>;
 
@@ -177,7 +177,7 @@ namespace stormkit::core {
     template<typename T>
     STORMKIT_FORCE_INLINE constexpr auto
         DeferInit<T>::operator->(this auto&& self) noexcept -> decltype(auto) {
-        core::expects(self.m_initialized);
+        core::expects(self.m_initialized, "Underlying object is not initialized");
 
         using U = LikeCVType<decltype(self), T>;
 

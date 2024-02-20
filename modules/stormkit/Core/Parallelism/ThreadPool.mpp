@@ -1,4 +1,4 @@
-// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// Copyright (C) 2024 Arthur LAURENT <arthur.laurent4@gmail.com>
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
@@ -53,7 +53,7 @@ export namespace stormkit::core {
 
             Task() = default;
 
-            inline Task(Type _type, std::function<void()> _work)
+            STORMKIT_INLINE Task(Type _type, std::function<void()> _work)
                 : type { _type }, work { std::move(_work) } {}
 
             Task(Task&&) noexcept                    = default;

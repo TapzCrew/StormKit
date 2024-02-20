@@ -1,4 +1,4 @@
-// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// Copyright (C) 2024 Arthur LAURENT <arthur.laurent4@gmail.com>
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
@@ -13,10 +13,10 @@ export import :Utils.Color;
 export import :Utils.Descriptors;
 export import :Utils.DeferInit;
 export import :Utils.DynamicLoader;
-export import :Utils.Expected;
 export import :Utils.ErrorHandling;
 export import :Utils.Filesystem;
 export import :Utils.Functional;
+export import :Utils.FunctionRef;
 export import :Utils.Flags;
 export import :Utils.Handle;
 export import :Utils.Math;
@@ -24,7 +24,6 @@ export import :Utils.Monadic;
 export import :Utils.NakedRef;
 export import :Utils.Numerics;
 export import :Utils.Pimpl;
-export import :Utils.Predicates;
 export import :Utils.Random;
 export import :Utils.Singleton;
 export import :Utils.Stacktrace;

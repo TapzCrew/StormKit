@@ -1,4 +1,4 @@
-// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// Copyright (C) 2024 Arthur LAURENT <arthur.laurent4@gmail.com>
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
@@ -18,8 +18,6 @@ import App;
 ////////////////////////////////////////
 auto main(std::span<const std::string_view> args) -> int {
     using namespace stormkit;
-
-    stormkit::core::printStacktrace();
 
     wsi::parseArgs(args);
     // core::setupSignalHandler();

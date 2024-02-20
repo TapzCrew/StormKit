@@ -11,6 +11,7 @@ module;
 #include <xcb/xinput.h>
 
 #include <stormkit/Core/MemoryMacro.hpp>
+#include <stormkit/Core/PlatformMacro.hpp>
 
 export module stormkit.Wsi:Linux.X11.XCB;
 
@@ -121,7 +122,7 @@ namespace stormkit::wsi::linux::x11 {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto getXCBConnection() noexcept -> XCBConnectionScoped {
+    STORMKIT_INLINE auto getXCBConnection() noexcept -> XCBConnectionScoped {
         if (!xcb_connection) [[unlikely]] {
             xcb_connection = xcb_connect(nullptr, nullptr);
             dlog("New xcb connection {}", std::bit_cast<void*>(xcb_connection));
@@ -133,7 +134,7 @@ namespace stormkit::wsi::linux::x11 {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto getXCBAtom(std::string_view name, bool only_if_exists) noexcept
+    STORMKIT_INLINE auto getXCBAtom(std::string_view name, bool only_if_exists) noexcept
         -> std::expected<xcb_atom_t, Error> {
         STORMKIT_RAII_CAPSULE(Reply, xcb_intern_atom_reply_t, std::free)
 
@@ -158,7 +159,7 @@ namespace stormkit::wsi::linux::x11 {
         return atom;
     }
 
-    inline auto getXCBAtomName(xcb_atom_t atom) -> std::expected<std::string, Error> {
+    STORMKIT_INLINE auto getXCBAtomName(xcb_atom_t atom) -> std::expected<std::string, Error> {
         STORMKIT_RAII_CAPSULE(Reply, xcb_get_atom_name_reply_t, std::free)
 
         auto connection = getXCBConnection();
@@ -175,7 +176,7 @@ namespace stormkit::wsi::linux::x11 {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto getXCBErrorContext() noexcept -> XCBErrorContextScoped {
+    STORMKIT_INLINE auto getXCBErrorContext() noexcept -> XCBErrorContextScoped {
         if (!xcb_error_context) [[unlikely]] {
             xcb_errors_context_new(getXCBConnection(), &xcb_error_context);
             dlog("New xcb error context {}", std::bit_cast<void*>(xcb_error_context));
@@ -187,7 +188,7 @@ namespace stormkit::wsi::linux::x11 {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto getXCBError(XCBErrorPtr error) -> std::string {
+    STORMKIT_INLINE auto getXCBError(XCBErrorPtr error) -> std::string {
         core::expects(error);
 
         auto guard = XCBGenericErrorScoped { error };
@@ -211,7 +212,7 @@ namespace stormkit::wsi::linux::x11 {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto getXIDeviceInfo(xcb_input_device_id_t device_id)
+    STORMKIT_INLINE auto getXIDeviceInfo(xcb_input_device_id_t device_id)
         -> std::expected<xcb_input_xi_device_info_t*, Error> {
         STORMKIT_RAII_CAPSULE(Reply, xcb_input_xi_query_device_reply_t, std::free)
 

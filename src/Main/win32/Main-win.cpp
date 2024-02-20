@@ -1,4 +1,4 @@
-// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// Copyright (C) 2024 Arthur LAURENT <arthur.laurent4@gmail.com>
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
@@ -21,10 +21,6 @@ namespace {
 extern auto userMain(std::span<const std::string_view>) -> int;
 
 auto __stdcall main(int argc, char** argv) -> int {
-#if not(defined(__cpp_lib_stacktrace) and __cpp_lib_stacktrace >= 202011L)
-    stormkit::core::backtraceInit(argv[0]);
-#endif
-
     std::locale::global(std::locale { "" });
     SetConsoleOutputCP(CP_UTF8);
     SetConsoleCP(CP_UTF8);
@@ -34,6 +30,8 @@ auto __stdcall main(int argc, char** argv) -> int {
             BUF_SIZE); // on Windows 10+ we need buffering or console will get 1
                        // byte at a time (screwing up utf-8 encoding)
     setvbuf(stdout, nullptr, _IOFBF, BUF_SIZE);
+
+    stormkit::core::backtraceInit(argv[0]);
 
     auto args = std::vector<std::string_view> {};
     args.reserve(argc);
@@ -47,10 +45,6 @@ auto __stdcall WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) -> int {
     const auto argc = __argc;
     const auto argv = __argv;
 
-#if not(defined(__cpp_lib_stacktrace) and __cpp_lib_stacktrace >= 202011L)
-    stormkit::core::backtraceInit(argv[0]);
-#endif
-
     std::locale::global(std::locale { "" });
     SetConsoleOutputCP(CP_UTF8);
     SetConsoleCP(CP_UTF8);
@@ -60,6 +54,8 @@ auto __stdcall WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) -> int {
             BUF_SIZE); // on Windows 10+ we need buffering or console will get 1
                        // byte at a time (screwing up utf-8 encoding)
     setvbuf(stdout, nullptr, _IOFBF, BUF_SIZE);
+
+    stormkit::core::backtraceInit(argv[0]);
 
     auto args = std::vector<std::string_view> {};
     args.reserve(argc);

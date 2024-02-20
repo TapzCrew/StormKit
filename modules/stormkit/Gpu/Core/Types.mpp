@@ -5,7 +5,7 @@
 module;
 
 #include <stormkit/Core/PlatformMacro.hpp>
-
+#include <stormkit/Core/FlagsMacro.hpp>
 #include <stormkit/Core/HashMacro.hpp>
 
 export module stormkit.Gpu:Core.Types;
@@ -13,9 +13,6 @@ export module stormkit.Gpu:Core.Types;
 import std;
 
 import stormkit.Core;
-
-#include <stormkit/Core/FlagsMacro.hpp>
-
 import stormkit.Gpu.Vulkan;
 
 export {

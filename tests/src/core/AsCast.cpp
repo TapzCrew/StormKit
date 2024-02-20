@@ -1,4 +1,4 @@
-// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// Copyright (C) 2024 Arthur LAURENT <arthur.laurent4@gmail.com>
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
@@ -162,8 +162,8 @@ namespace {
                                     expects((as<unsigned int>(14) == 14u));
                                     expects((as<unsigned int>(-1) != 1));
 
-                                    expects((isEqual(as<float>(19), 19.f)));
-                                    expects((isEqual(as<float>(-5), -5.)));
+                                    expects((equal(as<float>(19), 19.f)));
+                                    expects((equal(as<float>(-5), -5.)));
                                 } },
                           } };
 }

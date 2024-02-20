@@ -1,4 +1,4 @@
-// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// Copyright (C) 2024 Arthur LAURENT <arthur.laurent4@gmail.com>
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
@@ -28,6 +28,7 @@ namespace stormkit::gpu {
             "VK_LAYER_MESA_overlay",
 #endif
         };
+
         [[maybe_unused]] constexpr auto VALIDATION_FEATURES =
             std::array { vk::ValidationFeatureEnableEXT::eBestPractices,
                          vk::ValidationFeatureEnableEXT::eGpuAssisted };
@@ -37,16 +38,15 @@ namespace stormkit::gpu {
                                        core::STORMKIT_MINOR_VERSION,
                                        core::STORMKIT_PATCH_VERSION);
 
-        inline constexpr auto BASE_EXTENSIONS =
-            std::array { "VK_KHR_get_physical_device_properties2" };
+        constexpr auto BASE_EXTENSIONS = std::array { "VK_KHR_get_physical_device_properties2" };
 
-        inline constexpr auto SURFACE_EXTENSIONS = std::array {
+        constexpr auto SURFACE_EXTENSIONS = std::array {
             "VK_KHR_surface",
         };
 
-        inline constexpr auto WSI_SURFACE_EXTENSIONS = std::array {
+        constexpr auto WSI_SURFACE_EXTENSIONS = std::array {
 #ifdef STORMKIT_OS_WINDOWS
-            "VK_KHR_WIN32_surface"
+            "VK_KHR_win32_surface"
 #elif defined(STORMKIT_OS_LINUX)
             "VK_KHR_xcb_surface",
             "VK_KHR_wayland_surface"
@@ -65,13 +65,14 @@ namespace stormkit::gpu {
                            [[maybe_unused]] void*                        user_data) -> bool {
             auto message = std::format("[{}] {}", vk::to_string(severity), callback_data.pMessage);
 
-            if (checkFlag(severity, vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo)) ilog(message);
+            if (checkFlag(severity, vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo))
+                ilog("{}", message);
             else if (checkFlag(severity, vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose))
-                dlog(message);
+                dlog("{}", message);
             else if (checkFlag(severity, vk::DebugUtilsMessageSeverityFlagBitsEXT::eError))
-                elog(message);
+                elog("{}", message);
             else if (checkFlag(severity, vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning))
-                wlog(message);
+                wlog("{}", message);
 
             return false;
         }
@@ -147,10 +148,7 @@ namespace stormkit::gpu {
             m_validation_layers_enabled =
                 checkValidationLayerSupport(m_vk_context, m_validation_layers_enabled);
             if (m_validation_layers_enabled) {
-                dlog("Validation layers enabled");
-                dlog("enabling layers: -----------");
-                for (const auto& str : VALIDATION_LAYERS) dlog("	{}", str);
-                dlog("-------------------------------");
+                dlog("Enabling layers: {}", VALIDATION_LAYERS);
 
                 output = VALIDATION_LAYERS | std::ranges::to<std::vector>();
             }
@@ -161,7 +159,7 @@ namespace stormkit::gpu {
         const auto instance_extensions = [this]() noexcept {
             auto e = core::concat(BASE_EXTENSIONS, SURFACE_EXTENSIONS);
 
-            if (m_validation_layers_enabled) core::merge(e, std::array { "EXT_debug_utils" });
+            if (m_validation_layers_enabled) core::merge(e, std::array { "VK_EXT_debug_utils" });
 
             return e;
         }();
@@ -184,6 +182,7 @@ namespace stormkit::gpu {
 
         return m_vk_context->createInstance(create_info)
             .transform(core::monadic::set(m_vk_instance))
+            .and_then(core::curry(&Instance::doInitDebugReportCallback, this))
             .transform(
                 [this]() noexcept { VULKAN_HPP_DEFAULT_DISPATCHER.init(*m_vk_instance.get()); });
     }
@@ -192,7 +191,6 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     auto Instance::doInitDebugReportCallback() noexcept -> VulkanExpected<void> {
         if (!m_validation_layers_enabled) return {};
-
         constexpr auto severity = vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose |
                                   vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning |
                                   vk::DebugUtilsMessageSeverityFlagBitsEXT::eError;
@@ -210,7 +208,8 @@ namespace stormkit::gpu {
                         &debugCallback));
 
         return m_vk_instance->createDebugUtilsMessengerEXT(create_info)
-            .transform(core::monadic::set(m_vk_messenger));
+            .transform(core::monadic::set(m_vk_messenger))
+            .transform([] noexcept { ilog("Validation layers enabled !"); });
     }
 
     /////////////////////////////////////

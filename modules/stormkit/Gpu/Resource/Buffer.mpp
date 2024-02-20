@@ -11,9 +11,9 @@ export module stormkit.Gpu:Resource.Buffer;
 import std;
 
 import stormkit.Core;
+import stormkit.Gpu.Vulkan;
 
 import :Core;
-import stormkit.Gpu.Vulkan;
 
 export namespace stormkit::gpu {
     class STORMKIT_API Buffer: public DeviceObject {

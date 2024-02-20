@@ -1,4 +1,4 @@
-// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// Copyright (C) 2024 Arthur LAURENT <arthur.laurent4@gmail.com>
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
@@ -19,8 +19,7 @@ export module stormkit.Image:JPEGImage;
 import std;
 
 import stormkit.Core;
-
-import :Image;
+import stormkit.Image;
 
 export namespace stormkit::image::details {
     [[nodiscard]] auto loadJPG(std::span<const core::Byte> data) noexcept

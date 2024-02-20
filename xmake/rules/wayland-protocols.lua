@@ -19,8 +19,8 @@ do
 	set_extensions(".xml")
 
 	on_load(function(target)
-		if target:rule("c++.build") then
-			local rule = target:rule("c++.build"):clone()
+		if target:rule("c++.build.modules.builder") then
+			local rule = target:rule("c++.build.modules.builder"):clone()
 			rule:add("deps", "wayland.protocols", { order = true })
 			target:rule_add(rule)
 		end

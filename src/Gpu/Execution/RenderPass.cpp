@@ -1,4 +1,4 @@
-// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// Copyright (C) 2024 Arthur LAURENT <arthur.laurent4@gmail.com>
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
@@ -16,7 +16,7 @@ import :Execution.RenderPass;
 
 namespace stormkit::gpu {
     namespace monadic {
-        inline auto vkRef() noexcept -> decltype(auto) {
+        auto vkRef() noexcept -> decltype(auto) {
             return [](auto&& attachment_ref) noexcept -> vk::AttachmentReference {
                 return vk::AttachmentReference {}
                     .setAttachment(attachment_ref.attachment_id)
@@ -101,9 +101,8 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     // TODO finish this
-    auto
-        RenderPassDescription::isCompatible(const RenderPassDescription& description) const noexcept
-        -> bool {
+    auto RenderPassDescription::isCompatible(
+        const RenderPassDescription& description) const noexcept -> bool {
         if (std::size(subpasses) == std::size(description.subpasses)) return false;
 
         for (auto i : core::range(std::size(subpasses))) {

@@ -1,6 +1,6 @@
 modules = {
   core = {
-    public_packages = { "glm", "frozen", "unordered_dense", "magic_enum" },
+    public_packages = { "glm", "frozen", "unordered_dense", "magic_enum", "tl_function_ref" },
     modulename = "Core",
     has_headers = true,
     custom = function()
@@ -9,7 +9,9 @@ modules = {
       end
 
       if not is_plat("windows") and get_config("toolchain") and (get_config("toolchain") == "clang" or get_config("toolchain") == "llvm") then
-        add_packages("libbacktrace", {public = true})
+        add_packages("libbacktrace", { public = true })
+      elseif is_plat("windows") then
+        add_syslinks("dbghelp")
       end
 
       set_configdir("$(buildir)/.gens/modules/stormkit/Core")
@@ -139,16 +141,22 @@ modules = {
       "VULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1",
       "VULKAN_HPP_NO_STRUCT_CONSTRUCTORS",
       "VULKAN_HPP_NO_UNION_CONSTRUCTORS",
-      "VULKAN_HPP_STORAGE_SHARED",
       "VULKAN_HPP_NO_EXCEPTIONS",
       "VULKAN_HPP_NO_CONSTRUCTORS"
     },
     custom = function()
+      on_load(function(target)
+        if target:kind() == "shared" then
+          target:add("defines", "VK_HPP_STORAGE_SHARED", { public = true })
+        else
+          target:add("defines", "VK_HPP_STORAGE_API", { public = true })
+        end
+      end)
       if is_plat("linux") then
-        add_defines("VK_USE_PLATFORM_XCB_KHR")
-        add_defines("VK_USE_PLATFORM_WAYLAND_KHR")
+        add_defines("VK_USE_PLATFORM_XCB_KHR", { public = true })
+        add_defines("VK_USE_PLATFORM_WAYLAND_KHR", { public = true })
       elseif is_plat("windows") then
-        add_defines("VK_USE_PLATFORM_WIN32_KHR")
+        add_defines("VK_USE_PLATFORM_WIN32_KHR", { public = true })
       end
     end,
   },
@@ -172,15 +180,16 @@ set_project("StormKit")
 
 set_version("0.1.0", { build = "%Y%m%d%H%M" })
 
-includes("xmake/**.lua")
+includes("xmake/rules/*.lua")
+includes("xmake/*.lua")
 
 ---------------------------- global rules ----------------------------
 if get_config("vsxmake") then
-    add_rules("plugin.vsxmake.autoupdate")
+  add_rules("plugin.vsxmake.autoupdate")
 end
 
 if get_config("compile_commands") then
-    add_rules("plugin.compile_commands.autoupdate", { outputdir = "build", lsp = "clangd" })
+  add_rules("plugin.compile_commands.autoupdate", { outputdir = "build", lsp = "clangd" })
 end
 
 add_rules(
@@ -199,16 +208,48 @@ if not is_plat("windows") or not is_plat("mingw") then
 end
 
 ---------------------------- global options ----------------------------
-option("examples_engine", { default = false, category = "root menu/others", deps = {"examples"}, after_check = function(option) if option:dep("examples"):enabled() then option:enable(true) end end })
-option("examples_wsi", { default = false, category = "root menu/others", deps = {"examples"}, after_check = function(option) if option:dep("examples"):enabled() then option:enable(true) end end })
-option("examples_log", { default = false, category = "root menu/others", deps = {"examples"}, after_check = function(option) if option:dep("examples"):enabled() then option:enable(true) end end })
-option("examples_entities", { default = false, category = "root menu/others", deps = {"examples"}, after_check = function(option) if option:dep("examples"):enabled() then end end }) --option:enable(true) end end })
-option("examples", { default = false, category = "root menu/others",  })
+option("examples_engine",
+  {
+    default = false,
+    category = "root menu/others",
+    deps = { "examples" },
+    after_check = function(option)
+      if option:dep("examples"):enabled() then
+        option:enable(true)
+      end
+    end
+  })
+option("examples_wsi",
+  {
+    default = false,
+    category = "root menu/others",
+    deps = { "examples" },
+    after_check = function(option)
+      if option:dep("examples"):enabled() then
+        option:enable(true)
+      end
+    end
+  })
+option("examples_log",
+  {
+    default = false,
+    category = "root menu/others",
+    deps = { "examples" },
+    after_check = function(option)
+      if option:dep("examples"):enabled() then
+        option:enable(true)
+      end
+    end
+  })
+option("examples_entities",
+  { default = false, category = "root menu/others", deps = { "examples" }, after_check = function(option) if option:dep("examples"):enabled() then end end }) --option:enable(true) end end })
+option("examples", { default = false, category = "root menu/others", })
 option("applications", { default = false, category = "root menu/others" })
 option("tests", { default = false, category = "root menu/others" })
 
 option("sanitizers", { default = false, category = "root menu/build" })
 option("mold", { default = false, category = "root menu/build" })
+option("lto", { default = false, category = "root menu/build" })
 
 ---------------------------- module options ----------------------------
 option("log", { default = true, category = "root menu/modules" })
@@ -225,8 +266,8 @@ option("engine", {
   category = "root menu/modules",
   deps = { "log", "entities", "image", "wsi", "gpu" },
 })
-option("compile_commands", { default = false, category = "root menu/support"})
-option("vsxmake", { default = false, category = "root menu/support"})
+option("compile_commands", { default = false, category = "root menu/support" })
+option("vsxmake", { default = false, category = "root menu/support" })
 
 ---------------------------- global config ----------------------------
 set_allowedmodes(allowedmodes)
@@ -323,6 +364,13 @@ add_requireconfs("*", { configs = { modules = true } })
 
 if not is_plat("windows") and get_config("toolchain") and (get_config("toolchain") == "clang" or get_config("toolchain") == "llvm") then
   add_requires("libbacktrace")
+end
+
+if get_config("lto") then
+  set_policy("build.optimization.lto", true)
+  if get_config("kind") == "static" then
+    add_defines("STORMKIT_LTO")
+  end
 end
 
 ---------------------------- targets ----------------------------
@@ -461,19 +509,16 @@ for name, module in pairs(modules) do
       if module.frameworks then
         add_frameworks(module.frameworks, { public = is_kind("static") })
       end
-      if is_mode("release") then
-        -- set_policy("build.optimization.lto", true)
-      end
     end)
   end
 end
 
 for name, _ in pairs(modules) do
   if get_config("examples_" .. name) then
-      local example_dir = path.join("examples", name)
-      if os.exists(example_dir) and has_config("" .. name) then
-        includes(path.join(example_dir, "**", "xmake.lua"))
-      end
+    local example_dir = path.join("examples", name)
+    if os.exists(example_dir) and has_config("" .. name) then
+      includes(path.join(example_dir, "**", "xmake.lua"))
+    end
   end
 end
 

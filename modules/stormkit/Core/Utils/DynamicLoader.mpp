@@ -1,4 +1,4 @@
-// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// Copyright (C) 2024 Arthur LAURENT <arthur.laurent4@gmail.com>
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
@@ -67,7 +67,7 @@ export namespace stormkit::core {
 namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto DynamicLoader::load(std::filesystem::path filepath) noexcept
+    STORMKIT_INLINE auto DynamicLoader::load(std::filesystem::path filepath) noexcept
         -> Expected<DynamicLoader> {
         auto loader = DynamicLoader {};
 
@@ -76,7 +76,7 @@ namespace stormkit::core {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto DynamicLoader::allocateAndLoad(std::filesystem::path filepath) noexcept
+    STORMKIT_INLINE auto DynamicLoader::allocateAndLoad(std::filesystem::path filepath) noexcept
         -> Expected<std::unique_ptr<DynamicLoader>> {
         return load(std::move(filepath)).transform([](auto&& loader) {
             return std::make_unique<DynamicLoader>(std::move(loader));
@@ -104,7 +104,7 @@ namespace stormkit::core {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto DynamicLoader::filepath() const noexcept -> const std::filesystem::path& {
+    STORMKIT_INLINE auto DynamicLoader::filepath() const noexcept -> const std::filesystem::path& {
         return m_filepath;
     }
 } // namespace stormkit::core

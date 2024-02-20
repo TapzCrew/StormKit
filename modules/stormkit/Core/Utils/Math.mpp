@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// Copyright (C) 2024 Arthur LAURENT <arthur.laurent4@gmail.com>
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
@@ -458,8 +458,8 @@ namespace stormkit::core {
         /////////////////////////////////////
         template<IsArithmetic T>
         constexpr auto Extent<T>::operator==(const Extent<T>& other) const noexcept -> bool {
-            return isEqual<T>(width, other.width) and isEqual<T>(height, other.height) and
-                   isEqual<T>(depth, other.depth);
+            return core::equal<T>(width, other.width) and core::equal<T>(height, other.height) and
+                   core::equal<T>(depth, other.depth);
         }
 
         /////////////////////////////////////

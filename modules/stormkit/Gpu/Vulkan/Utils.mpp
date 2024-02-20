@@ -1,4 +1,4 @@
-// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// Copyright (C) 2024 Arthur LAURENT <arthur.laurent4@gmail.com>
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
@@ -126,16 +126,15 @@ namespace stormkit::gpu {
         auto func = std::mem_fn(std::forward<Func>(func_ref));
 
         const auto result = func(value, std::forward<Args>(args)...);
-        if (std::ranges::any_of(possible_results, core::toUnary(core::monadic::isEqual(), result)))
-            return result;
+        if (std::ranges::any_of(possible_results, core::monadic::equal(result))) return result;
 
         return std::unexpected { result };
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto toRaiiVkHandle() noexcept -> decltype(auto) {
-        return []<IsVulkanWrapper T>(T&& value) noexcept -> decltype(auto) {
+    inline auto toRaiiVkHandle() noexcept -> decltype(auto) {
+        return []<IsVulkanWrapper T>(T&& value) static noexcept -> decltype(auto) {
             if constexpr (core::IsPointer<core::PureType<T>>)
                 return std::forward<T>(value)->vkHandle();
             else
@@ -145,8 +144,8 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto toVkHandle() noexcept -> decltype(auto) {
-        return []<IsVulkanWrapper T>(T&& value) noexcept -> decltype(auto) {
+    inline auto toVkHandle() noexcept -> decltype(auto) {
+        return []<IsVulkanWrapper T>(T&& value) static noexcept -> decltype(auto) {
             if constexpr (core::IsPointer<core::PureType<T>>)
                 return *(std::forward<T>(value)->vkHandle());
             else

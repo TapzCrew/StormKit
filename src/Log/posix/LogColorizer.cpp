@@ -8,9 +8,6 @@ import std;
 
 import stormkit.Core;
 
-import :LogColorizer;
-import :Severity;
-
 using std::literals::string_view_literals::operator""sv;
 
 namespace stormkit::log::details {

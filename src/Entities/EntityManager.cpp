@@ -1,4 +1,4 @@
-// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// Copyright (C) 2024 Arthur LAURENT <arthur.laurent4@gmail.com>
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
@@ -69,8 +69,8 @@ namespace stormkit::entities {
     auto EntityManager::hasEntity(Entity entity) const -> bool {
         core::expects(entity != INVALID_ENTITY);
 
-        return std::ranges::any_of(entities(), core::predicates::equal(entity)) or
-               std::ranges::any_of(m_added_entities, core::predicates::equal(entity));
+        return std::ranges::any_of(entities(), core::monadic::equal(entity)) or
+               std::ranges::any_of(m_added_entities, core::monadic::equal(entity));
     }
 
     /////////////////////////////////////
@@ -79,7 +79,7 @@ namespace stormkit::entities {
         core::expects(entity != INVALID_ENTITY and type != Component::INVALID_TYPE);
 
         return std::ranges::any_of(m_registered_components_for_entities.at(entity),
-                                   core::predicates::equal(type));
+                                   core::monadic::equal(type));
     }
 
     /////////////////////////////////////
@@ -101,7 +101,7 @@ namespace stormkit::entities {
 
             removeFromSystems(entity);
 
-            if (not std::ranges::any_of(m_added_entities, core::predicates::equal(entity)))
+            if (not std::ranges::any_of(m_added_entities, core::monadic::equal(entity)))
                 m_free_entities.push(entity);
         }
         m_removed_entities.clear();

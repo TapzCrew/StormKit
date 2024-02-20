@@ -1,4 +1,4 @@
-// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// Copyright (C) 2024 Arthur LAURENT <arthur.laurent4@gmail.com>
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
@@ -59,7 +59,7 @@ namespace {
 
     auto _ = test::TestSuite {
         "Core.Numerics",
-        { { "isEqual.SameFloatT",
+        { { "equal.SameFloatT",
             [] {
                 auto float1 = 0.1f;
                 auto float2 = 0.2f;
@@ -70,13 +70,13 @@ namespace {
                 auto longdouble1 = 0.1l;
                 auto longdouble2 = 0.2l;
 
-                expects((isEqual(float1, float1)));
-                expects((isEqual(double1, double1)));
-                expects((isEqual(longdouble1, longdouble1)));
+                expects((equal(float1, float1)));
+                expects((equal(double1, double1)));
+                expects((equal(longdouble1, longdouble1)));
 
-                expects((not isEqual(float1, float2)));
-                expects((not isEqual(float1, double2)));
-                expects((not isEqual(longdouble1, longdouble2)));
+                expects((not equal(float1, float2)));
+                expects((not equal(float1, double2)));
+                expects((not equal(longdouble1, longdouble2)));
 
                 float1 = 100.1f;
                 float2 = 100.2f;
@@ -87,13 +87,13 @@ namespace {
                 longdouble1 = 10000.1l;
                 longdouble2 = 10000.2l;
 
-                expects((isEqual(float1, float1)));
-                expects((isEqual(double1, double1)));
-                expects((isEqual(longdouble1, longdouble1)));
+                expects((equal(float1, float1)));
+                expects((equal(double1, double1)));
+                expects((equal(longdouble1, longdouble1)));
 
-                expects((not isEqual(float1, float2)));
-                expects((not isEqual(double1, double2)));
-                expects((not isEqual(longdouble1, longdouble2)));
+                expects((not equal(float1, float2)));
+                expects((not equal(double1, double2)));
+                expects((not equal(longdouble1, longdouble2)));
             } },
           { "IsEqual.DifferentFloatT",
             [] {
@@ -106,25 +106,25 @@ namespace {
                 auto longdouble1 = 0.1l;
                 auto longdouble2 = 0.2l;
 
-                expects((isEqual(float1, double1)));
-                expects((isEqual(double1, float1)));
-                expects((isEqual(float1, longdouble1)));
-                expects((isEqual(longdouble1, float1)));
-                expects((isEqual(double1, longdouble1)));
-                expects((isEqual(longdouble1, double1)));
+                expects((equal(float1, double1)));
+                expects((equal(double1, float1)));
+                expects((equal(float1, longdouble1)));
+                expects((equal(longdouble1, float1)));
+                expects((equal(double1, longdouble1)));
+                expects((equal(longdouble1, double1)));
 
-                expects((not isEqual(float1, double2)));
-                expects((not isEqual(double2, float1)));
-                expects((not isEqual(float2, double1)));
-                expects((not isEqual(double1, float2)));
-                expects((not isEqual(float1, longdouble2)));
-                expects((not isEqual(longdouble2, float1)));
-                expects((not isEqual(float2, longdouble1)));
-                expects((not isEqual(longdouble1, float2)));
-                expects((not isEqual(double1, longdouble2)));
-                expects((not isEqual(longdouble2, double1)));
-                expects((not isEqual(double2, longdouble1)));
-                expects((not isEqual(longdouble1, double2)));
+                expects((not equal(float1, double2)));
+                expects((not equal(double2, float1)));
+                expects((not equal(float2, double1)));
+                expects((not equal(double1, float2)));
+                expects((not equal(float1, longdouble2)));
+                expects((not equal(longdouble2, float1)));
+                expects((not equal(float2, longdouble1)));
+                expects((not equal(longdouble1, float2)));
+                expects((not equal(double1, longdouble2)));
+                expects((not equal(longdouble2, double1)));
+                expects((not equal(double2, longdouble1)));
+                expects((not equal(longdouble1, double2)));
 
                 float1 = 1000.1f;
                 float2 = 1000.2f;
@@ -135,419 +135,419 @@ namespace {
                 longdouble1 = 1000.1l;
                 longdouble2 = 1000.2l;
 
-                expects((isEqual(float1, double1)));
-                expects((isEqual(double1, float1)));
-                expects((isEqual(float1, longdouble1)));
-                expects((isEqual(longdouble1, float1)));
-                expects((isEqual(double1, longdouble1)));
-                expects((isEqual(longdouble1, double1)));
+                expects((equal(float1, double1)));
+                expects((equal(double1, float1)));
+                expects((equal(float1, longdouble1)));
+                expects((equal(longdouble1, float1)));
+                expects((equal(double1, longdouble1)));
+                expects((equal(longdouble1, double1)));
 
-                expects((not isEqual(float1, double2)));
-                expects((not isEqual(double2, float1)));
-                expects((not isEqual(float2, double1)));
-                expects((not isEqual(double1, float2)));
-                expects((not isEqual(float1, longdouble2)));
-                expects((not isEqual(longdouble2, float1)));
-                expects((not isEqual(float2, longdouble1)));
-                expects((not isEqual(longdouble1, float2)));
-                expects((not isEqual(double1, longdouble2)));
-                expects((not isEqual(longdouble2, double1)));
-                expects((not isEqual(double2, longdouble1)));
-                expects((not isEqual(longdouble1, double2)));
+                expects((not equal(float1, double2)));
+                expects((not equal(double2, float1)));
+                expects((not equal(float2, double1)));
+                expects((not equal(double1, float2)));
+                expects((not equal(float1, longdouble2)));
+                expects((not equal(longdouble2, float1)));
+                expects((not equal(float2, longdouble1)));
+                expects((not equal(longdouble1, float2)));
+                expects((not equal(double1, longdouble2)));
+                expects((not equal(longdouble2, double1)));
+                expects((not equal(double2, longdouble1)));
+                expects((not equal(longdouble1, double2)));
             } },
-          { "isEqual.SameIntegerT",
+          { "equal.SameIntegerT",
             [] {
-                expects((isEqual(char1, char1)));
+                expects((equal(char1, char1)));
 
-                expects((isEqual(signed_char1, signed_char1)));
-                expects((isEqual(unsigned_char1, unsigned_char1)));
+                expects((equal(signed_char1, signed_char1)));
+                expects((equal(unsigned_char1, unsigned_char1)));
 
-                expects((isEqual(signed_short1, signed_short1)));
-                expects((isEqual(unsigned_short1, unsigned_short1)));
+                expects((equal(signed_short1, signed_short1)));
+                expects((equal(unsigned_short1, unsigned_short1)));
 
-                expects((isEqual(signed_int1, signed_int1)));
-                expects((isEqual(unsigned_int1, unsigned_int1)));
+                expects((equal(signed_int1, signed_int1)));
+                expects((equal(unsigned_int1, unsigned_int1)));
 
-                expects((isEqual(signed_longint1, signed_longint1)));
-                expects((isEqual(unsigned_longint1, unsigned_longint1)));
+                expects((equal(signed_longint1, signed_longint1)));
+                expects((equal(unsigned_longint1, unsigned_longint1)));
 
-                expects((isEqual(signed_longlongint1, signed_longlongint1)));
-                expects((isEqual(unsigned_longlongint1, unsigned_longlongint1)));
+                expects((equal(signed_longlongint1, signed_longlongint1)));
+                expects((equal(unsigned_longlongint1, unsigned_longlongint1)));
 
-                expects((not isEqual(char1, char2)));
+                expects((not equal(char1, char2)));
 
-                expects((not isEqual(signed_char1, signed_char2)));
-                expects((not isEqual(unsigned_char1, unsigned_char2)));
+                expects((not equal(signed_char1, signed_char2)));
+                expects((not equal(unsigned_char1, unsigned_char2)));
 
-                expects((not isEqual(signed_short1, signed_short2)));
-                expects((not isEqual(unsigned_short1, unsigned_short2)));
+                expects((not equal(signed_short1, signed_short2)));
+                expects((not equal(unsigned_short1, unsigned_short2)));
 
-                expects((not isEqual(signed_int1, signed_int2)));
-                expects((not isEqual(unsigned_int1, unsigned_int2)));
+                expects((not equal(signed_int1, signed_int2)));
+                expects((not equal(unsigned_int1, unsigned_int2)));
 
-                expects((not isEqual(signed_longint1, signed_longint2)));
-                expects((not isEqual(unsigned_longint1, unsigned_longint2)));
+                expects((not equal(signed_longint1, signed_longint2)));
+                expects((not equal(unsigned_longint1, unsigned_longint2)));
 
-                expects((not isEqual(signed_longlongint1, signed_longlongint2)));
-                expects((not isEqual(unsigned_longlongint1, unsigned_longlongint2)));
+                expects((not equal(signed_longlongint1, signed_longlongint2)));
+                expects((not equal(unsigned_longlongint1, unsigned_longlongint2)));
             } },
-          { "isEqual.DifferentIntegerT",
+          { "equal.DifferentIntegerT",
             [] {
                 // char
-                expects((isEqual(char1, signed_char1)));
-                expects((isEqual(char1, unsigned_char1)));
+                expects((equal(char1, signed_char1)));
+                expects((equal(char1, unsigned_char1)));
 
-                expects((isEqual(char1, signed_short1)));
-                expects((isEqual(char1, unsigned_short1)));
+                expects((equal(char1, signed_short1)));
+                expects((equal(char1, unsigned_short1)));
 
-                expects((isEqual(char1, signed_int1)));
-                expects((isEqual(char1, unsigned_int1)));
+                expects((equal(char1, signed_int1)));
+                expects((equal(char1, unsigned_int1)));
 
-                expects((isEqual(char1, signed_longint1)));
-                expects((isEqual(char1, unsigned_longint1)));
+                expects((equal(char1, signed_longint1)));
+                expects((equal(char1, unsigned_longint1)));
 
-                expects((isEqual(char1, signed_longlongint1)));
-                expects((isEqual(char1, unsigned_longlongint1)));
+                expects((equal(char1, signed_longlongint1)));
+                expects((equal(char1, unsigned_longlongint1)));
 
                 // signed char
-                expects((isEqual(signed_char1, char1)));
-                expects((isEqual(signed_char1, unsigned_char1)));
+                expects((equal(signed_char1, char1)));
+                expects((equal(signed_char1, unsigned_char1)));
 
-                expects((isEqual(signed_char1, signed_short1)));
-                expects((isEqual(signed_char1, unsigned_short1)));
+                expects((equal(signed_char1, signed_short1)));
+                expects((equal(signed_char1, unsigned_short1)));
 
-                expects((isEqual(signed_char1, signed_int1)));
-                expects((isEqual(signed_char1, unsigned_int1)));
+                expects((equal(signed_char1, signed_int1)));
+                expects((equal(signed_char1, unsigned_int1)));
 
-                expects((isEqual(signed_char1, signed_longint1)));
-                expects((isEqual(signed_char1, unsigned_longint1)));
+                expects((equal(signed_char1, signed_longint1)));
+                expects((equal(signed_char1, unsigned_longint1)));
 
-                expects((isEqual(signed_char1, signed_longlongint1)));
-                expects((isEqual(signed_char1, unsigned_longlongint1)));
+                expects((equal(signed_char1, signed_longlongint1)));
+                expects((equal(signed_char1, unsigned_longlongint1)));
 
                 // unsigned char
-                expects((isEqual(unsigned_char1, char1)));
-                expects((isEqual(unsigned_char1, signed_char1)));
+                expects((equal(unsigned_char1, char1)));
+                expects((equal(unsigned_char1, signed_char1)));
 
-                expects((isEqual(unsigned_char1, signed_short1)));
-                expects((isEqual(unsigned_char1, unsigned_short1)));
+                expects((equal(unsigned_char1, signed_short1)));
+                expects((equal(unsigned_char1, unsigned_short1)));
 
-                expects((isEqual(unsigned_char1, signed_int1)));
-                expects((isEqual(unsigned_char1, unsigned_int1)));
+                expects((equal(unsigned_char1, signed_int1)));
+                expects((equal(unsigned_char1, unsigned_int1)));
 
-                expects((isEqual(unsigned_char1, signed_longint1)));
-                expects((isEqual(unsigned_char1, unsigned_longint1)));
+                expects((equal(unsigned_char1, signed_longint1)));
+                expects((equal(unsigned_char1, unsigned_longint1)));
 
-                expects((isEqual(unsigned_char1, signed_longlongint1)));
-                expects((isEqual(unsigned_char1, unsigned_longlongint1)));
+                expects((equal(unsigned_char1, signed_longlongint1)));
+                expects((equal(unsigned_char1, unsigned_longlongint1)));
 
                 // signed short
-                expects((isEqual(signed_short1, char1)));
+                expects((equal(signed_short1, char1)));
 
-                expects((isEqual(signed_short1, signed_char1)));
-                expects((isEqual(signed_short1, unsigned_char1)));
+                expects((equal(signed_short1, signed_char1)));
+                expects((equal(signed_short1, unsigned_char1)));
 
-                expects((isEqual(signed_short1, unsigned_short1)));
+                expects((equal(signed_short1, unsigned_short1)));
 
-                expects((isEqual(signed_short1, signed_int1)));
-                expects((isEqual(signed_short1, unsigned_int1)));
+                expects((equal(signed_short1, signed_int1)));
+                expects((equal(signed_short1, unsigned_int1)));
 
-                expects((isEqual(signed_short1, signed_longint1)));
-                expects((isEqual(signed_short1, unsigned_longint1)));
+                expects((equal(signed_short1, signed_longint1)));
+                expects((equal(signed_short1, unsigned_longint1)));
 
-                expects((isEqual(signed_short1, signed_longlongint1)));
-                expects((isEqual(signed_short1, unsigned_longlongint1)));
+                expects((equal(signed_short1, signed_longlongint1)));
+                expects((equal(signed_short1, unsigned_longlongint1)));
 
                 // unsigned short
-                expects((isEqual(unsigned_short1, char1)));
-                expects((isEqual(unsigned_short1, signed_char1)));
-                expects((isEqual(unsigned_short1, unsigned_char1)));
+                expects((equal(unsigned_short1, char1)));
+                expects((equal(unsigned_short1, signed_char1)));
+                expects((equal(unsigned_short1, unsigned_char1)));
 
-                expects((isEqual(unsigned_short1, signed_short1)));
+                expects((equal(unsigned_short1, signed_short1)));
 
-                expects((isEqual(unsigned_short1, signed_int1)));
-                expects((isEqual(unsigned_short1, unsigned_int1)));
+                expects((equal(unsigned_short1, signed_int1)));
+                expects((equal(unsigned_short1, unsigned_int1)));
 
-                expects((isEqual(unsigned_short1, signed_longint1)));
-                expects((isEqual(unsigned_short1, unsigned_longint1)));
+                expects((equal(unsigned_short1, signed_longint1)));
+                expects((equal(unsigned_short1, unsigned_longint1)));
 
-                expects((isEqual(unsigned_short1, signed_longlongint1)));
-                expects((isEqual(unsigned_short1, unsigned_longlongint1)));
+                expects((equal(unsigned_short1, signed_longlongint1)));
+                expects((equal(unsigned_short1, unsigned_longlongint1)));
 
                 // signed int
-                expects((isEqual(signed_int1, char1)));
+                expects((equal(signed_int1, char1)));
 
-                expects((isEqual(signed_int1, signed_char1)));
-                expects((isEqual(signed_int1, unsigned_char1)));
+                expects((equal(signed_int1, signed_char1)));
+                expects((equal(signed_int1, unsigned_char1)));
 
-                expects((isEqual(signed_int1, signed_short1)));
-                expects((isEqual(signed_int1, unsigned_short1)));
+                expects((equal(signed_int1, signed_short1)));
+                expects((equal(signed_int1, unsigned_short1)));
 
-                expects((isEqual(signed_int1, unsigned_int1)));
+                expects((equal(signed_int1, unsigned_int1)));
 
-                expects((isEqual(signed_int1, signed_longint1)));
-                expects((isEqual(signed_int1, unsigned_longint1)));
+                expects((equal(signed_int1, signed_longint1)));
+                expects((equal(signed_int1, unsigned_longint1)));
 
-                expects((isEqual(signed_int1, signed_longlongint1)));
-                expects((isEqual(signed_int1, unsigned_longlongint1)));
+                expects((equal(signed_int1, signed_longlongint1)));
+                expects((equal(signed_int1, unsigned_longlongint1)));
 
                 // unsigned int
-                expects((isEqual(unsigned_int1, char1)));
-                expects((isEqual(unsigned_int1, signed_char1)));
-                expects((isEqual(unsigned_int1, unsigned_char1)));
+                expects((equal(unsigned_int1, char1)));
+                expects((equal(unsigned_int1, signed_char1)));
+                expects((equal(unsigned_int1, unsigned_char1)));
 
-                expects((isEqual(unsigned_int1, signed_short1)));
-                expects((isEqual(unsigned_int1, unsigned_short1)));
+                expects((equal(unsigned_int1, signed_short1)));
+                expects((equal(unsigned_int1, unsigned_short1)));
 
-                expects((isEqual(unsigned_int1, signed_int1)));
+                expects((equal(unsigned_int1, signed_int1)));
 
-                expects((isEqual(unsigned_int1, signed_longint1)));
-                expects((isEqual(unsigned_int1, unsigned_longint1)));
+                expects((equal(unsigned_int1, signed_longint1)));
+                expects((equal(unsigned_int1, unsigned_longint1)));
 
-                expects((isEqual(unsigned_int1, signed_longlongint1)));
-                expects((isEqual(unsigned_int1, unsigned_longlongint1)));
+                expects((equal(unsigned_int1, signed_longlongint1)));
+                expects((equal(unsigned_int1, unsigned_longlongint1)));
 
                 // signed longint
-                expects((isEqual(signed_longint1, char1)));
+                expects((equal(signed_longint1, char1)));
 
-                expects((isEqual(signed_longint1, signed_char1)));
-                expects((isEqual(signed_longint1, unsigned_char1)));
+                expects((equal(signed_longint1, signed_char1)));
+                expects((equal(signed_longint1, unsigned_char1)));
 
-                expects((isEqual(signed_longint1, signed_short1)));
-                expects((isEqual(signed_longint1, unsigned_short1)));
+                expects((equal(signed_longint1, signed_short1)));
+                expects((equal(signed_longint1, unsigned_short1)));
 
-                expects((isEqual(signed_longint1, unsigned_int1)));
+                expects((equal(signed_longint1, unsigned_int1)));
 
-                expects((isEqual(signed_longint1, unsigned_longint1)));
+                expects((equal(signed_longint1, unsigned_longint1)));
 
-                expects((isEqual(signed_longint1, signed_longlongint1)));
-                expects((isEqual(signed_longint1, unsigned_longlongint1)));
+                expects((equal(signed_longint1, signed_longlongint1)));
+                expects((equal(signed_longint1, unsigned_longlongint1)));
 
                 // unsigned longint
-                expects((isEqual(unsigned_longint1, char1)));
-                expects((isEqual(unsigned_longint1, signed_char1)));
-                expects((isEqual(unsigned_longint1, unsigned_char1)));
+                expects((equal(unsigned_longint1, char1)));
+                expects((equal(unsigned_longint1, signed_char1)));
+                expects((equal(unsigned_longint1, unsigned_char1)));
 
-                expects((isEqual(unsigned_longint1, signed_short1)));
-                expects((isEqual(unsigned_longint1, unsigned_short1)));
+                expects((equal(unsigned_longint1, signed_short1)));
+                expects((equal(unsigned_longint1, unsigned_short1)));
 
-                expects((isEqual(unsigned_longint1, signed_int1)));
-                expects((isEqual(unsigned_longint1, unsigned_int1)));
+                expects((equal(unsigned_longint1, signed_int1)));
+                expects((equal(unsigned_longint1, unsigned_int1)));
 
-                expects((isEqual(unsigned_longint1, signed_longint1)));
+                expects((equal(unsigned_longint1, signed_longint1)));
 
-                expects((isEqual(unsigned_longint1, signed_longlongint1)));
-                expects((isEqual(unsigned_longint1, unsigned_longlongint1)));
+                expects((equal(unsigned_longint1, signed_longlongint1)));
+                expects((equal(unsigned_longint1, unsigned_longlongint1)));
 
                 // signed longlongint
-                expects((isEqual(signed_longlongint1, char1)));
+                expects((equal(signed_longlongint1, char1)));
 
-                expects((isEqual(signed_longlongint1, signed_char1)));
-                expects((isEqual(signed_longlongint1, unsigned_char1)));
+                expects((equal(signed_longlongint1, signed_char1)));
+                expects((equal(signed_longlongint1, unsigned_char1)));
 
-                expects((isEqual(signed_longlongint1, signed_short1)));
-                expects((isEqual(signed_longlongint1, unsigned_short1)));
+                expects((equal(signed_longlongint1, signed_short1)));
+                expects((equal(signed_longlongint1, unsigned_short1)));
 
-                expects((isEqual(signed_longlongint1, unsigned_int1)));
+                expects((equal(signed_longlongint1, unsigned_int1)));
 
-                expects((isEqual(signed_longlongint1, signed_longint1)));
-                expects((isEqual(signed_longlongint1, unsigned_longint1)));
+                expects((equal(signed_longlongint1, signed_longint1)));
+                expects((equal(signed_longlongint1, unsigned_longint1)));
 
-                expects((isEqual(signed_longlongint1, unsigned_longlongint1)));
+                expects((equal(signed_longlongint1, unsigned_longlongint1)));
 
                 // unsigned longlongint
-                expects((isEqual(unsigned_longlongint1, char1)));
-                expects((isEqual(unsigned_longlongint1, signed_char1)));
-                expects((isEqual(unsigned_longlongint1, unsigned_char1)));
+                expects((equal(unsigned_longlongint1, char1)));
+                expects((equal(unsigned_longlongint1, signed_char1)));
+                expects((equal(unsigned_longlongint1, unsigned_char1)));
 
-                expects((isEqual(unsigned_longlongint1, signed_short1)));
-                expects((isEqual(unsigned_longlongint1, unsigned_short1)));
+                expects((equal(unsigned_longlongint1, signed_short1)));
+                expects((equal(unsigned_longlongint1, unsigned_short1)));
 
-                expects((isEqual(unsigned_longlongint1, signed_int1)));
-                expects((isEqual(unsigned_longlongint1, unsigned_int1)));
+                expects((equal(unsigned_longlongint1, signed_int1)));
+                expects((equal(unsigned_longlongint1, unsigned_int1)));
 
-                expects((isEqual(unsigned_longlongint1, signed_longint1)));
-                expects((isEqual(unsigned_longlongint1, unsigned_longint1)));
+                expects((equal(unsigned_longlongint1, signed_longint1)));
+                expects((equal(unsigned_longlongint1, unsigned_longint1)));
 
-                expects((isEqual(unsigned_longlongint1, signed_longlongint1)));
+                expects((equal(unsigned_longlongint1, signed_longlongint1)));
 
                 // char
-                expects((not isEqual(char1, signed_char2)));
-                expects((not isEqual(char1, unsigned_char2)));
+                expects((not equal(char1, signed_char2)));
+                expects((not equal(char1, unsigned_char2)));
 
-                expects((not isEqual(char1, signed_short2)));
-                expects((not isEqual(char1, unsigned_short2)));
+                expects((not equal(char1, signed_short2)));
+                expects((not equal(char1, unsigned_short2)));
 
-                expects((not isEqual(char1, signed_int2)));
-                expects((not isEqual(char1, unsigned_int2)));
+                expects((not equal(char1, signed_int2)));
+                expects((not equal(char1, unsigned_int2)));
 
-                expects((not isEqual(char1, signed_longint2)));
-                expects((not isEqual(char1, unsigned_longint2)));
+                expects((not equal(char1, signed_longint2)));
+                expects((not equal(char1, unsigned_longint2)));
 
-                expects((not isEqual(char1, signed_longlongint2)));
-                expects((not isEqual(char1, unsigned_longlongint2)));
+                expects((not equal(char1, signed_longlongint2)));
+                expects((not equal(char1, unsigned_longlongint2)));
 
                 // signed char
-                expects((not isEqual(signed_char1, char2)));
-                expects((not isEqual(signed_char1, unsigned_char2)));
+                expects((not equal(signed_char1, char2)));
+                expects((not equal(signed_char1, unsigned_char2)));
 
-                expects((not isEqual(signed_char1, signed_short2)));
-                expects((not isEqual(signed_char1, unsigned_short2)));
+                expects((not equal(signed_char1, signed_short2)));
+                expects((not equal(signed_char1, unsigned_short2)));
 
-                expects((not isEqual(signed_char1, signed_int2)));
-                expects((not isEqual(signed_char1, unsigned_int2)));
+                expects((not equal(signed_char1, signed_int2)));
+                expects((not equal(signed_char1, unsigned_int2)));
 
-                expects((not isEqual(signed_char1, signed_longint2)));
-                expects((not isEqual(signed_char1, unsigned_longint2)));
+                expects((not equal(signed_char1, signed_longint2)));
+                expects((not equal(signed_char1, unsigned_longint2)));
 
-                expects((not isEqual(signed_char1, signed_longlongint2)));
-                expects((not isEqual(signed_char1, unsigned_longlongint2)));
+                expects((not equal(signed_char1, signed_longlongint2)));
+                expects((not equal(signed_char1, unsigned_longlongint2)));
 
                 // unsigned char
-                expects((not isEqual(unsigned_char1, char2)));
-                expects((not isEqual(unsigned_char1, signed_char2)));
+                expects((not equal(unsigned_char1, char2)));
+                expects((not equal(unsigned_char1, signed_char2)));
 
-                expects((not isEqual(unsigned_char1, signed_short2)));
-                expects((not isEqual(unsigned_char1, unsigned_short2)));
+                expects((not equal(unsigned_char1, signed_short2)));
+                expects((not equal(unsigned_char1, unsigned_short2)));
 
-                expects((not isEqual(unsigned_char1, signed_int2)));
-                expects((not isEqual(unsigned_char1, unsigned_int2)));
+                expects((not equal(unsigned_char1, signed_int2)));
+                expects((not equal(unsigned_char1, unsigned_int2)));
 
-                expects((not isEqual(unsigned_char1, signed_longint2)));
-                expects((not isEqual(unsigned_char1, unsigned_longint2)));
+                expects((not equal(unsigned_char1, signed_longint2)));
+                expects((not equal(unsigned_char1, unsigned_longint2)));
 
-                expects((not isEqual(unsigned_char1, signed_longlongint2)));
-                expects((not isEqual(unsigned_char1, unsigned_longlongint2)));
+                expects((not equal(unsigned_char1, signed_longlongint2)));
+                expects((not equal(unsigned_char1, unsigned_longlongint2)));
 
                 // signed short
-                expects((not isEqual(signed_short1, char2)));
+                expects((not equal(signed_short1, char2)));
 
-                expects((not isEqual(signed_short1, signed_char2)));
-                expects((not isEqual(signed_short1, unsigned_char2)));
+                expects((not equal(signed_short1, signed_char2)));
+                expects((not equal(signed_short1, unsigned_char2)));
 
-                expects((not isEqual(signed_short1, unsigned_short2)));
+                expects((not equal(signed_short1, unsigned_short2)));
 
-                expects((not isEqual(signed_short1, signed_int2)));
-                expects((not isEqual(signed_short1, unsigned_int2)));
+                expects((not equal(signed_short1, signed_int2)));
+                expects((not equal(signed_short1, unsigned_int2)));
 
-                expects((not isEqual(signed_short1, signed_longint2)));
-                expects((not isEqual(signed_short1, unsigned_longint2)));
+                expects((not equal(signed_short1, signed_longint2)));
+                expects((not equal(signed_short1, unsigned_longint2)));
 
-                expects((not isEqual(signed_short1, signed_longlongint2)));
-                expects((not isEqual(signed_short1, unsigned_longlongint2)));
+                expects((not equal(signed_short1, signed_longlongint2)));
+                expects((not equal(signed_short1, unsigned_longlongint2)));
 
                 // unsigned short
-                expects((not isEqual(unsigned_short1, char2)));
-                expects((not isEqual(unsigned_short1, signed_char2)));
-                expects((not isEqual(unsigned_short1, unsigned_char2)));
+                expects((not equal(unsigned_short1, char2)));
+                expects((not equal(unsigned_short1, signed_char2)));
+                expects((not equal(unsigned_short1, unsigned_char2)));
 
-                expects((not isEqual(unsigned_short1, signed_short2)));
+                expects((not equal(unsigned_short1, signed_short2)));
 
-                expects((not isEqual(unsigned_short1, signed_int2)));
-                expects((not isEqual(unsigned_short1, unsigned_int2)));
+                expects((not equal(unsigned_short1, signed_int2)));
+                expects((not equal(unsigned_short1, unsigned_int2)));
 
-                expects((not isEqual(unsigned_short1, signed_longint2)));
-                expects((not isEqual(unsigned_short1, unsigned_longint2)));
+                expects((not equal(unsigned_short1, signed_longint2)));
+                expects((not equal(unsigned_short1, unsigned_longint2)));
 
-                expects((not isEqual(unsigned_short1, signed_longlongint2)));
-                expects((not isEqual(unsigned_short1, unsigned_longlongint2)));
+                expects((not equal(unsigned_short1, signed_longlongint2)));
+                expects((not equal(unsigned_short1, unsigned_longlongint2)));
 
                 // signed int
-                expects((not isEqual(signed_int1, char2)));
+                expects((not equal(signed_int1, char2)));
 
-                expects((not isEqual(signed_int1, signed_char2)));
-                expects((not isEqual(signed_int1, unsigned_char2)));
+                expects((not equal(signed_int1, signed_char2)));
+                expects((not equal(signed_int1, unsigned_char2)));
 
-                expects((not isEqual(signed_int1, signed_short2)));
-                expects((not isEqual(signed_int1, unsigned_short2)));
+                expects((not equal(signed_int1, signed_short2)));
+                expects((not equal(signed_int1, unsigned_short2)));
 
-                expects((not isEqual(signed_int1, unsigned_int2)));
+                expects((not equal(signed_int1, unsigned_int2)));
 
-                expects((not isEqual(signed_int1, signed_longint2)));
-                expects((not isEqual(signed_int1, unsigned_longint2)));
+                expects((not equal(signed_int1, signed_longint2)));
+                expects((not equal(signed_int1, unsigned_longint2)));
 
-                expects((not isEqual(signed_int1, signed_longlongint2)));
-                expects((not isEqual(signed_int1, unsigned_longlongint2)));
+                expects((not equal(signed_int1, signed_longlongint2)));
+                expects((not equal(signed_int1, unsigned_longlongint2)));
 
                 // unsigned int
-                expects((not isEqual(unsigned_int1, char2)));
-                expects((not isEqual(unsigned_int1, signed_char2)));
-                expects((not isEqual(unsigned_int1, unsigned_char2)));
+                expects((not equal(unsigned_int1, char2)));
+                expects((not equal(unsigned_int1, signed_char2)));
+                expects((not equal(unsigned_int1, unsigned_char2)));
 
-                expects((not isEqual(unsigned_int1, signed_short2)));
-                expects((not isEqual(unsigned_int1, unsigned_short2)));
+                expects((not equal(unsigned_int1, signed_short2)));
+                expects((not equal(unsigned_int1, unsigned_short2)));
 
-                expects((not isEqual(unsigned_int1, signed_int2)));
+                expects((not equal(unsigned_int1, signed_int2)));
 
-                expects((not isEqual(unsigned_int1, signed_longint2)));
-                expects((not isEqual(unsigned_int1, unsigned_longint2)));
+                expects((not equal(unsigned_int1, signed_longint2)));
+                expects((not equal(unsigned_int1, unsigned_longint2)));
 
-                expects((not isEqual(unsigned_int1, signed_longlongint2)));
-                expects((not isEqual(unsigned_int1, unsigned_longlongint2)));
+                expects((not equal(unsigned_int1, signed_longlongint2)));
+                expects((not equal(unsigned_int1, unsigned_longlongint2)));
 
                 // signed longint
-                expects((not isEqual(signed_longint1, char2)));
+                expects((not equal(signed_longint1, char2)));
 
-                expects((not isEqual(signed_longint1, signed_char2)));
-                expects((not isEqual(signed_longint1, unsigned_char2)));
+                expects((not equal(signed_longint1, signed_char2)));
+                expects((not equal(signed_longint1, unsigned_char2)));
 
-                expects((not isEqual(signed_longint1, signed_short2)));
-                expects((not isEqual(signed_longint1, unsigned_short2)));
+                expects((not equal(signed_longint1, signed_short2)));
+                expects((not equal(signed_longint1, unsigned_short2)));
 
-                expects((not isEqual(signed_longint1, unsigned_int2)));
+                expects((not equal(signed_longint1, unsigned_int2)));
 
-                expects((not isEqual(signed_longint1, unsigned_longint2)));
+                expects((not equal(signed_longint1, unsigned_longint2)));
 
-                expects((not isEqual(signed_longint1, signed_longlongint2)));
-                expects((not isEqual(signed_longint1, unsigned_longlongint2)));
+                expects((not equal(signed_longint1, signed_longlongint2)));
+                expects((not equal(signed_longint1, unsigned_longlongint2)));
 
                 // unsigned longint
-                expects((not isEqual(unsigned_longint1, char2)));
-                expects((not isEqual(unsigned_longint1, signed_char2)));
-                expects((not isEqual(unsigned_longint1, unsigned_char2)));
+                expects((not equal(unsigned_longint1, char2)));
+                expects((not equal(unsigned_longint1, signed_char2)));
+                expects((not equal(unsigned_longint1, unsigned_char2)));
 
-                expects((not isEqual(unsigned_longint1, signed_short2)));
-                expects((not isEqual(unsigned_longint1, unsigned_short2)));
+                expects((not equal(unsigned_longint1, signed_short2)));
+                expects((not equal(unsigned_longint1, unsigned_short2)));
 
-                expects((not isEqual(unsigned_longint1, signed_int2)));
-                expects((not isEqual(unsigned_longint1, unsigned_int2)));
+                expects((not equal(unsigned_longint1, signed_int2)));
+                expects((not equal(unsigned_longint1, unsigned_int2)));
 
-                expects((not isEqual(unsigned_longint1, signed_longint2)));
+                expects((not equal(unsigned_longint1, signed_longint2)));
 
-                expects((not isEqual(unsigned_longint1, signed_longlongint2)));
-                expects((not isEqual(unsigned_longint1, unsigned_longlongint2)));
+                expects((not equal(unsigned_longint1, signed_longlongint2)));
+                expects((not equal(unsigned_longint1, unsigned_longlongint2)));
 
                 // signed longlongint
-                expects((not isEqual(signed_longlongint1, char2)));
+                expects((not equal(signed_longlongint1, char2)));
 
-                expects((not isEqual(signed_longlongint1, signed_char2)));
-                expects((not isEqual(signed_longlongint1, unsigned_char2)));
+                expects((not equal(signed_longlongint1, signed_char2)));
+                expects((not equal(signed_longlongint1, unsigned_char2)));
 
-                expects((not isEqual(signed_longlongint1, signed_short2)));
-                expects((not isEqual(signed_longlongint1, unsigned_short2)));
+                expects((not equal(signed_longlongint1, signed_short2)));
+                expects((not equal(signed_longlongint1, unsigned_short2)));
 
-                expects((not isEqual(signed_longlongint1, unsigned_int2)));
+                expects((not equal(signed_longlongint1, unsigned_int2)));
 
-                expects((not isEqual(signed_longlongint1, signed_longint2)));
-                expects((not isEqual(signed_longlongint1, unsigned_longint2)));
+                expects((not equal(signed_longlongint1, signed_longint2)));
+                expects((not equal(signed_longlongint1, unsigned_longint2)));
 
-                expects((not isEqual(signed_longlongint1, unsigned_longlongint2)));
+                expects((not equal(signed_longlongint1, unsigned_longlongint2)));
 
                 // unsigned longlongint
-                expects((not isEqual(unsigned_longlongint1, char2)));
-                expects((not isEqual(unsigned_longlongint1, signed_char2)));
-                expects((not isEqual(unsigned_longlongint1, unsigned_char2)));
+                expects((not equal(unsigned_longlongint1, char2)));
+                expects((not equal(unsigned_longlongint1, signed_char2)));
+                expects((not equal(unsigned_longlongint1, unsigned_char2)));
 
-                expects((not isEqual(unsigned_longlongint1, signed_short2)));
-                expects((not isEqual(unsigned_longlongint1, unsigned_short2)));
+                expects((not equal(unsigned_longlongint1, signed_short2)));
+                expects((not equal(unsigned_longlongint1, unsigned_short2)));
 
-                expects((not isEqual(unsigned_longlongint1, signed_int2)));
-                expects((not isEqual(unsigned_longlongint1, unsigned_int2)));
+                expects((not equal(unsigned_longlongint1, signed_int2)));
+                expects((not equal(unsigned_longlongint1, unsigned_int2)));
 
-                expects((not isEqual(unsigned_longlongint1, signed_longint2)));
-                expects((not isEqual(unsigned_longlongint1, unsigned_longint2)));
+                expects((not equal(unsigned_longlongint1, signed_longint2)));
+                expects((not equal(unsigned_longlongint1, unsigned_longint2)));
 
-                expects((not isEqual(unsigned_longlongint1, signed_longlongint2)));
+                expects((not equal(unsigned_longlongint1, signed_longlongint2)));
             } },
           { "map", [] { expects((map(10, 0, 20, 0, 10) == 5)); } },
           { "range.simple",

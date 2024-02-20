@@ -1,4 +1,4 @@
-// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// Copyright (C) 2024 Arthur LAURENT <arthur.laurent4@gmail.com>
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
@@ -11,9 +11,6 @@ module stormkit.Wsi;
 import std;
 
 import stormkit.Core;
-
-import :Window;
-import :Types;
 
 #if defined(STORMKIT_OS_WINDOWS)
 import :Win32.WindowImpl;

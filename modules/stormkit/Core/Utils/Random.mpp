@@ -1,6 +1,10 @@
-// Copyright (C) 2023 Arthur LAURENT <arthur.laurent4@gmail.com>
+// Copyright (C) 2024 Arthur LAURENT <arthur.laurent4@gmail.com>
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
+
+module;
+
+#include <stormkit/Core/PlatformMacro.hpp>
 
 export module stormkit.Core:Utils.Random;
 
@@ -30,20 +34,20 @@ namespace stormkit::core {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto randomGenerator() noexcept -> std::default_random_engine& {
+    STORMKIT_FORCE_INLINE auto randomGenerator() noexcept -> std::default_random_engine& {
         return generator;
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto seed(Int seed) noexcept -> void {
+    STORMKIT_FORCE_INLINE auto seed(Int seed) noexcept -> void {
         randomGenerator().seed(seed);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<std::floating_point T>
-    auto rand(T min, T max) noexcept -> T {
+    STORMKIT_FORCE_INLINE auto rand(T min, T max) noexcept -> T {
         std::uniform_real_distribution<T> dis(min, max);
         return dis(randomGenerator());
     }
@@ -51,7 +55,7 @@ namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
     template<std::integral T>
-    auto rand(T min, T max) noexcept -> T {
+    STORMKIT_FORCE_INLINE auto rand(T min, T max) noexcept -> T {
         std::uniform_int_distribution<T> dis(min, max);
         return dis(randomGenerator());
     }
