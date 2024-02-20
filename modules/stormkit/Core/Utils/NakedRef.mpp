@@ -37,7 +37,13 @@ export namespace stormkit::core {
         [[nodiscard]] constexpr auto operator->(this auto&& self) noexcept -> decltype(auto);
         [[nodiscard]] constexpr auto operator*(this auto&& self) noexcept -> decltype(auto);
 
-        [[nodiscard]] constexpr operator T&(this auto&& self) noexcept;
+        template<typename Self>
+        [[nodiscard]] constexpr operator std::conditional_t<std::is_const_v<Self>, const T&, T&>(
+            this Self&& self) noexcept;
+
+        template<typename Self>
+        [[nodiscard]] constexpr operator std::enable_if<not std::is_const_v<T>, NakedRef<const T>>(
+            this Self&& self) noexcept;
 
       private:
         PointerType m_value;
@@ -46,19 +52,24 @@ export namespace stormkit::core {
     template<typename T>
     using OptionalRef = std::optional<NakedRef<T>>;
 
-    template<typename T>
-        requires IsRawPointer<T> or IsLValueReference<T>
+    template<IsRawIndirection T>
+    constexpr auto makeNakedRef(T&& value) noexcept -> decltype(auto);
+    template<IsFancyPointer T>
     constexpr auto makeNakedRef(T&& value) noexcept -> decltype(auto);
 
-    constexpr auto makeNakedRef(IsFancyPointer auto& value) noexcept -> decltype(auto);
+    template<template<typename...> typename Out = std::vector, typename First, typename... Args>
+        requires(AreIndirections<Args...>)
+    constexpr auto makeNakedRefs(Args&&... args) -> decltype(auto);
+    template<template<typename, std::size_t> typename Out, typename... Args>
+        requires(AreIndirections<Args...>)
+    constexpr auto makeNakedRefs(Args&&... args) -> decltype(auto);
 
-    template<typename... Args>
-        requires((IsLValueReference<Args> or IsPointer<Args>) && ...)
-    constexpr auto makeNakedRefArray(Args&&... args);
-
-    template<typename... Args>
-        requires((IsLValueReference<Args> or IsPointer<Args>) && ...)
-    constexpr auto makeNakedRefVector(Args&&... args);
+    template<template<typename...> typename Out = std::vector>
+        requires std::ranges::range<Out<int>>
+    constexpr auto toNakedRefs(std::ranges::range auto&& args) -> decltype(auto);
+    template<template<typename, std::size_t> typename Out>
+        requires std::ranges::range<Out<int, 1>>
+    constexpr auto toNakedRefs(std::ranges::range auto&& args) -> decltype(auto);
 } // namespace stormkit::core
 
 ////////////////////////////////////////////////////////////////////
@@ -128,37 +139,77 @@ namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
     template<typename T>
-    constexpr NakedRef<T>::operator T&(this auto&& self) noexcept {
+    template<typename Self>
+    constexpr NakedRef<T>::operator std::conditional_t<std::is_const_v<Self>, const T&, T&>(
+        this Self &&
+            self) noexcept {
         return std::forward<decltype(self)>(self).get();
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<typename T>
-        requires IsRawPointer<T> or IsLValueReference<T>
+    template<typename Self>
+    constexpr NakedRef<T>::operator std::enable_if<not std::is_const_v<T>,
+                                                   NakedRef<const T>>(this Self && self) noexcept {
+        return { std::as_const(self.m_value) };
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<IsRawIndirection T>
     constexpr auto makeNakedRef(T&& value) noexcept -> decltype(auto) {
-        return NakedRef<std::remove_reference_t<std::remove_pointer_t<T>>> { value };
+        using PureT = PureType<T>;
+        using Out =
+            std::conditional_t<std::is_const_v<T>, NakedRef<PureT>, const NakedRef<const PureT>>;
+        return Out { std::forward<T>(value) };
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    constexpr auto makeNakedRef(IsFancyPointer auto& value) noexcept -> decltype(auto) {
-        return NakedRef<typename PureType<decltype(value)>::value_type> { value.get() };
+    template<IsFancyPointer T>
+    constexpr auto makeNakedRef(T&& value) noexcept -> decltype(auto) {
+        using PureT = PureType<typename PureType<T>::value_type>;
+        using Out =
+            std::conditional_t<std::is_const_v<T>, NakedRef<PureT>, const NakedRef<const PureT>>;
+        return Out { value.get() };
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    template<typename... Args>
-        requires((IsLValueReference<Args> or IsPointer<Args>) && ...)
-    constexpr auto makeNakedRefArray(Args&&... args) {
-        return std::array { (makeNakedRef(std::forward<Args>(args)), ...) };
+    template<template<typename...> typename Out = std::vector, typename First, typename... Args>
+        requires(AreIndirections<Args...>)
+    constexpr auto makeNakedRefs(Args&&... args) -> decltype(auto) {
+        return Out { (makeNakedRef(std::forward<Args>(args)), ...) };
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    template<typename... Args>
-        requires((IsLValueReference<Args> or IsPointer<Args>) && ...)
-    constexpr auto makeNakedRefVector(Args&&... args) {
-        return std::vector { (makeNakedRef(std::forward<Args>(args)), ...) };
+    template<template<typename, std::size_t> typename Out, typename... Args>
+        requires(AreIndirections<Args...>)
+    constexpr auto makeNakedRefs(Args&&... args) -> decltype(auto) {
+        return Out { (makeNakedRef(std::forward<Args>(args)), ...) };
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<template<typename...> typename Out = std::vector>
+        requires std::ranges::range<Out<int>>
+    constexpr auto toNakedRefs(std::ranges::range auto&& args) -> decltype(auto) {
+        return args | std::views::transform([](auto&& val) static noexcept -> decltype(auto) {
+                   return makeNakedRef(std::forward<decltype(val)>(val));
+               }) |
+               std::ranges::to<Out>();
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<template<typename, std::size_t> typename Out>
+        requires std::ranges::range<Out<int, 1>>
+    constexpr auto toNakedRefs(std::ranges::range auto&& args) -> decltype(auto) {
+        return args | std::views::transform([](auto&& val) static noexcept -> decltype(auto) {
+                   return makeNakedRef(std::forward<decltype(val)>(val));
+               }) |
+               std::ranges::to<Out>();
     }
 } // namespace stormkit::core
