@@ -157,19 +157,18 @@ namespace stormkit::core {
     ////////////////////////////////////////
     constexpr auto log(std::invocable auto&& logger,
                        std::string&&         message) noexcept -> decltype(auto) {
-        return
-            [logger = std::forward<decltype(logger)>, message = std::move(message)] NORETURN_LAMBDA(
-                auto&& error) -> std::expected<void, PureType<decltype(error)>> {
-                logger(message, error);
+        return [logger = std::forward<decltype(logger)>, message = std::move(message)](
+                   auto&& error) -> std::expected<void, PureType<decltype(error)>> {
+            logger(message, error);
 
-                return {};
-            };
+            return {};
+        };
     }
 
     ////////////////////////////////////////
     ////////////////////////////////////////
     constexpr auto throwError() noexcept -> decltype(auto) {
-        return [] NORETURN_LAMBDA(auto&& error) -> std::expected<void, PureType<decltype(error)>> {
+        return [] NORETURN_LAMBDA(auto&& error) static -> std::expected<void, PureType<decltype(error)>> {
             throw std::forward<decltype(error)>(error);
         };
     }
