@@ -28,8 +28,14 @@ namespace stormkit::core {
         template<class T, class U>
         concept Is = std::same_as<T, U> or std::derived_from<T, U>;
 
+        template<class T, class... U>
+        concept Are = ((std::same_as<T, U> or std::derived_from<T, U>) and ...);
+
         template<class T, class U>
         concept IsPure = Is<std::remove_cvref_t<T>, std::remove_cvref_t<U>>;
+
+        template<class T, class... U>
+        concept ArePures = ((std::same_as<T, U> or std::derived_from<T, U>) and ...);
 
         template<class T, class... U>
         concept IsOneOf = (Is<T, U> or ...);
@@ -83,6 +89,9 @@ namespace stormkit::core {
         template<class T>
         concept IsIndirection = IsLValueReference<T> or IsPointer<T>;
 
+        template<class... T>
+        concept AreIndirections = ((IsLValueReference<T> or IsPointer<T>) && ...);
+
         template<class T>
         concept IsRawIndirection = IsLValueReference<T> or IsRawPointer<T>;
 
@@ -112,7 +121,7 @@ namespace stormkit::core {
 
         template<class T>
         concept IsArithmetic =
-            (IsIntegral<T> or IsFloatingPoint<T>)and not IsPointer<T> and not IsEnumeration<T>;
+            (IsIntegral<T> or IsFloatingPoint<T>) and not IsPointer<T> and not IsEnumeration<T>;
 
         template<class T>
         concept IsArithmeticPure = IsArithmetic<std::remove_cvref_t<T>>;
