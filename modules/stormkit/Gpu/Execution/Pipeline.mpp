@@ -178,8 +178,8 @@ namespace stormkit::gpu {
     PipelineCache::PipelineCache(const Device& device, std::filesystem::path path, Tag)
         : DeviceObject { device }, m_path { std::move(path) } {
         core::either(std::filesystem::exists(m_path),
-                     std::bind_front(&PipelineCache::readPipelineCache, this),
-                     std::bind_front(&PipelineCache::createNewPipelineCache, this))
+                     core::curry(&PipelineCache::readPipelineCache, this),
+                     core::curry(&PipelineCache::createNewPipelineCache, this))
             .transform_error(core::monadic::map(core::monadic::as<Result>(), core::throwError()));
     }
 
