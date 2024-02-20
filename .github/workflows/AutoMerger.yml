@@ -8,7 +8,7 @@ env:
   MY_REPO: https://Arthapz:${{secrets.GITHUB_TOKEN}}@github.com/TapzCrew/StormKit.git
   MY_BRANCH: develop
 
-  MASTER_REPO: https://github.com/TapzCrew/StormKit.git
+  MASTER_REPO: https://Arthapz:${{secrets.GITHUB_TOKEN}}@github.com/TapzCrew/StormKit.git
   MASTER_BRANCH: main
 
 jobs:
