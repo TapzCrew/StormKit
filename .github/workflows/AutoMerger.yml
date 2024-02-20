@@ -3,6 +3,7 @@ name: Automerge
 on:
   schedule:
     - cron: '0 0 * * 0'
+  workflow_dispatch
 
 env:
   MY_REPO: https://Arthapz:${{secrets.GITHUB_TOKEN}}@github.com/TapzCrew/StormKit.git
