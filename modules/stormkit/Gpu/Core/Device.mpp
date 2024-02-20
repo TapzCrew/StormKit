@@ -158,13 +158,13 @@ namespace stormkit::gpu {
     STORMKIT_FORCE_INLINE auto Device::waitForFence(
         const Fence&                     fence,
         const std::chrono::milliseconds& timeout) const noexcept -> Expected<Result> {
-        return waitForFences(core::makeNakedRefArray(fence), true, timeout);
+        return waitForFences(core::makeNakedRefs<std::array>(fence), true, timeout);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE auto Device::resetFence(const Fence& fence) const noexcept -> void {
-        resetFences(core::makeNakedRefArray(fence));
+        resetFences(core::makeNakedRefs<std::array>(fence));
     }
 
     /////////////////////////////////////
