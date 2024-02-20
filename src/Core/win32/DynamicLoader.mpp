@@ -60,7 +60,7 @@ export namespace stormkit::core {
 
         /////////////////////////////////////
         /////////////////////////////////////
-        STORMKIT_FORCE_INLINE auto doLoad(const std::filesystem::path& filepath) -> Expected<void> {
+        STORMKIT_INLINE auto doLoad(const std::filesystem::path& filepath) -> Expected<void> {
             const auto wfilepath = filepath.wstring();
 
             m_library_handle = ::LoadLibraryExW(std::data(wfilepath), nullptr, 0);
@@ -74,7 +74,7 @@ export namespace stormkit::core {
 
         /////////////////////////////////////
         /////////////////////////////////////
-        STORMKIT_FORCE_INLINE auto doGetFunc(std::string_view name) const -> Expected<void*> {
+        STORMKIT_INLINE auto doGetFunc(std::string_view name) const -> Expected<void*> {
             core::expects(m_library_handle);
             auto func = ::GetProcAddress(m_library_handle, std::data(name));
 
