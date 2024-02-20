@@ -14,6 +14,7 @@ namespace stormkit::engine {
     /////////////////////////////////////
     RenderSurface::RenderSurface(const gpu::Instance& instance,
                                  const gpu::Device&   device,
+                                 const gpu::Queue&    raster_queue,
                                  const wsi::Window&   window,
                                  Tag) {
         gpu::Surface::createFromWindow(instance, window)
@@ -40,6 +41,33 @@ namespace stormkit::engine {
                 .transform(emplaceTo(m_in_flight_fences))
                 .transform_error(map(narrow<gpu::Result>(), throwError()));
         }
+
+        const auto command_pool =
+            gpu::CommandPool::create(device, raster_queue)
+                .transform_error(core::expectsWithMessage("Failed to raster Queue command pool"))
+                .value();
+
+        auto transition_command_buffers =
+            command_pool.createCommandBuffers(std::size(m_swapchain->images()));
+
+        for(auto i : core::range(std::size(transition_command_buffers))) {
+            auto &&image = m_swapchain->images()[i];
+            auto &&transition_command_buffer = transition_command_buffers[i];
+
+            transition_command_buffer.begin(true);
+            transition_command_buffer.transitionImageLayout(image, gpu::ImageLayout::Undefined, gpu::ImageLayout::Present_Src);
+            transition_command_buffer.end();
+        }
+
+
+        auto fence = gpu::Fence::create(device)
+                         .transform_error(map(narrow<gpu::Result>(), throwError()))
+                         .value();
+
+        auto _foo = core::toNakedRefs(transition_command_buffers);
+        raster_queue.submit(_foo, {}, {}, fence);
+
+        fence.wait();
     }
 
     /////////////////////////////////////
