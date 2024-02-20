@@ -84,8 +84,8 @@ namespace stormkit::gpu {
         const auto& physical_device = device.physicalDevice();
         const auto  capabilities =
             physical_device.vkHandle().getSurfaceCapabilitiesKHR(*surface.vkHandle());
-        const auto formats       = physical_device.vkHandle().getSurfaceFormatsKHR();
-        const auto present_modes = physical_device.vkHandle().getSurfacePresentModesKHR();
+        const auto formats       = physical_device.vkHandle().getSurfaceFormatsKHR(*(surface.vkHandle()));
+        const auto present_modes = physical_device.vkHandle().getSurfacePresentModesKHR(*(surface.vkHandle()));
 
         const auto format             = chooseSwapSurfaceFormat(formats);
         const auto present_mode       = chooseSwapPresentMode(present_modes);
