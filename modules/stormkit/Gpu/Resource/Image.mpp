@@ -428,7 +428,7 @@ namespace stormkit::gpu {
                                        gpu::PixelFormat           format,
                                        const vk::Image&           image,
                                        Tag)
-        : Image { device, CreateInfo { extent, format, 1u, 1u }, Tag {} } {
+        : Image { device, CreateInfo { extent, format, 1u, 1u } } {
         m_vk_image = image;
     }
 
