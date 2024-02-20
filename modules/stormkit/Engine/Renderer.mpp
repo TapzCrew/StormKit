@@ -26,6 +26,7 @@ export {
 
             RenderSurface(const gpu::Instance& instance,
                           const gpu::Device&   device,
+                          const gpu::Queue&    raster_queue,
                           const wsi::Window&   window,
                           Tag);
             ~RenderSurface();
@@ -38,10 +39,12 @@ export {
 
             static auto createFromWindow(const gpu::Instance& instance,
                                          const gpu::Device&   device,
+                                         const gpu::Queue&    raster_queue,
                                          const wsi::Window&   window) noexcept
                 -> gpu::Expected<RenderSurface>;
             static auto allocateFromWindow(const gpu::Instance& instance,
                                            const gpu::Device&   device,
+                                           const gpu::Queue&    raster_queue,
                                            const wsi::Window&   window) noexcept
                 -> gpu::Expected<std::unique_ptr<RenderSurface>>;
 
@@ -98,6 +101,7 @@ export {
             core::DeferInit<gpu::Instance> m_instance;
             core::DeferInit<gpu::Device>   m_device;
             core::DeferInit<RenderSurface> m_surface;
+            core::DeferInit<gpu::Queue>    m_raster_queue;
 
             std::jthread m_render_thread;
         };
@@ -152,7 +156,7 @@ namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE auto Renderer::startRendering() noexcept -> void {
-        m_render_thread = std::jthread { std::bind_front(&Renderer::threadLoop, this) };
+        m_render_thread = std::jthread { core::curry(&Renderer::threadLoop, this) };
         core::setThreadName(m_render_thread, "StormKit:RenderThread");
     }
 
@@ -173,17 +177,19 @@ namespace stormkit::engine {
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE auto RenderSurface::createFromWindow(const gpu::Instance& instance,
                                                                const gpu::Device&   device,
+                                                               const gpu::Queue&    raster_queue,
                                                                const wsi::Window&   window) noexcept
         -> gpu::Expected<RenderSurface> try {
-        return RenderSurface { instance, device, window, Tag {} };
+        return RenderSurface { instance, device, raster_queue, window, Tag {} };
     } catch (const gpu::Result& err) { return std::unexpected { err }; }
 
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE auto RenderSurface::allocateFromWindow(const gpu::Instance& instance,
                                                                  const gpu::Device&   device,
+                                                                 const gpu::Queue&    raster_queue,
                                                                  const wsi::Window& window) noexcept
         -> gpu::Expected<std::unique_ptr<RenderSurface>> try {
-        return std::make_unique<RenderSurface>(instance, device, window, Tag {});
+        return std::make_unique<RenderSurface>(instance, device, raster_queue, window, Tag {});
     } catch (const gpu::Result& err) { return std::unexpected { err }; }
 } // namespace stormkit::engine
