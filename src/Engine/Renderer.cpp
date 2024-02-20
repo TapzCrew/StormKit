@@ -152,7 +152,10 @@ namespace stormkit::engine {
         -> gpu::Expected<void> {
         ilog("Initializing Renderer");
         return doInitInstance(application_name)
-            .and_then(std::bind_front(&Renderer::doInitDevice, this))
+            .and_then(core::curry(&Renderer::doInitDevice, this))
+            .and_then(
+                core::curry(gpu::Queue::create, std::cref(*m_device), m_device->rasterQueueEntry()))
+            .transform(core::monadic::set(m_raster_queue))
             .and_then([this, window = std::move(window)] {
                 return doInitRenderSurface(std::move(window));
             });
@@ -187,23 +190,19 @@ namespace stormkit::engine {
     auto Renderer::doInitRenderSurface(
         std::optional<core::NakedRef<const wsi::Window>> window) noexcept -> gpu::Expected<void> {
         if (window)
-            return RenderSurface::createFromWindow(*m_instance, *m_device, *(window.value()))
+            return RenderSurface::createFromWindow(*m_instance,
+                                                   *m_device,
+                                                   *m_raster_queue,
+                                                   *(window.value()))
                 .transform(core::monadic::set(m_surface));
 
         core::ensures(not window, "Offscreen rendering not yet implemented");
+        return {};
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     auto Renderer::threadLoop(std::stop_token token) noexcept -> void {
-        const auto raster_queue =
-            *gpu::Queue::create(*m_device, m_device->rasterQueueEntry())
-                 .transform_error(core::expectsWithMessage("Failed to create raster Queue"));
-
-        const auto command_pool =
-            *gpu::CommandPool::create(*m_device, raster_queue)
-                 .transform_error(core::expectsWithMessage("Failed to raster Queue command pool"));
-
         // auto transition_command_buffers =
         //           raster_queue
         //
