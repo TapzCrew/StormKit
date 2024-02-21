@@ -22,7 +22,14 @@ export {
             struct Tag {};
 
           public:
-            struct Frame {};
+            struct Frame {
+                core::UInt32 current_frame;
+                core::UInt32 image_index;
+
+                core::NakedRef<const gpu::Semaphore> image_available;
+                core::NakedRef<const gpu::Semaphore> render_finished;
+                core::NakedRef<gpu::Fence>      in_flight;
+            };
 
             RenderSurface(const gpu::Instance& instance,
                           const gpu::Device&   device,
@@ -48,16 +55,17 @@ export {
                                            const wsi::Window&   window) noexcept
                 -> gpu::Expected<std::unique_ptr<RenderSurface>>;
 
-            [[nodiscard]] auto acquireNextFrame() -> gpu::Expected<Frame>;
-            auto               present(const Frame& frame) -> void;
+            [[nodiscard]] auto beginFrame() -> gpu::Expected<Frame>;
+            auto               presentFrame(const Frame& frame) -> void;
 
           private:
             core::DeferInit<gpu::Surface>   m_surface;
             core::DeferInit<gpu::Swapchain> m_swapchain;
             std::optional<gpu::Swapchain>   m_old_swapchain;
 
+            core::RangeExtent           m_current_frame = 0;
             std::vector<gpu::Semaphore> m_image_availables;
-            std::vector<gpu::Semaphore> m_render_finished;
+            std::vector<gpu::Semaphore> m_render_finisheds;
             std::vector<gpu::Fence>     m_in_flight_fences;
 
             bool m_need_recreate;

@@ -84,8 +84,9 @@ namespace stormkit::gpu {
         const auto& physical_device = device.physicalDevice();
         const auto  capabilities =
             physical_device.vkHandle().getSurfaceCapabilitiesKHR(*surface.vkHandle());
-        const auto formats       = physical_device.vkHandle().getSurfaceFormatsKHR(*(surface.vkHandle()));
-        const auto present_modes = physical_device.vkHandle().getSurfacePresentModesKHR(*(surface.vkHandle()));
+        const auto formats = physical_device.vkHandle().getSurfaceFormatsKHR(*(surface.vkHandle()));
+        const auto present_modes =
+            physical_device.vkHandle().getSurfacePresentModesKHR(*(surface.vkHandle()));
 
         const auto format             = chooseSwapSurfaceFormat(formats);
         const auto present_mode       = chooseSwapPresentMode(present_modes);
@@ -127,5 +128,20 @@ namespace stormkit::gpu {
         m_image_count  = core::as<core::UInt32>(std::size(m_images));
         m_pixel_format = core::narrow<PixelFormat>(format.format);
         m_extent       = as<core::math::ExtentU>(swapchain_extent);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    auto Swapchain::acquireNextImage(std::chrono::nanoseconds wait,
+                                     const Semaphore&         image_available) const noexcept
+        -> Expected<std::pair<gpu::Result, core::UInt32>> {
+        auto&& [result, index] =
+            m_vk_swapchain->acquireNextImage(wait.count(), toVkHandle()(image_available));
+
+        if (result != vk::Result::eSuccess | result != vk::Result::eErrorOutOfDateKHR |
+            result != vk::Result::eSuboptimalKHR)
+            return std::unexpected { core::narrow<gpu::Result>(result) };
+
+        return std::make_pair(core::narrow<gpu::Result>(result), index);
     }
 } // namespace stormkit::gpu

@@ -9,6 +9,8 @@ import stormkit.Gpu;
 
 import :Renderer;
 
+using namespace std::chrono_literals;
+
 namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
@@ -36,7 +38,7 @@ namespace stormkit::engine {
             gpu::Semaphore::create(device)
                 .transform(emplaceTo(m_image_availables))
                 .and_then(curry(gpu::Semaphore::create, std::cref(device)))
-                .transform(emplaceTo(m_render_finished))
+                .transform(emplaceTo(m_render_finisheds))
                 .and_then(curry(gpu::Fence::createSignaled, std::cref(device)))
                 .transform(emplaceTo(m_in_flight_fences))
                 .transform_error(map(narrow<gpu::Result>(), throwError()));
@@ -50,15 +52,16 @@ namespace stormkit::engine {
         auto transition_command_buffers =
             command_pool.createCommandBuffers(std::size(m_swapchain->images()));
 
-        for(auto i : core::range(std::size(transition_command_buffers))) {
-            auto &&image = m_swapchain->images()[i];
-            auto &&transition_command_buffer = transition_command_buffers[i];
+        for (auto i : core::range(std::size(transition_command_buffers))) {
+            auto&& image                     = m_swapchain->images()[i];
+            auto&& transition_command_buffer = transition_command_buffers[i];
 
             transition_command_buffer.begin(true);
-            transition_command_buffer.transitionImageLayout(image, gpu::ImageLayout::Undefined, gpu::ImageLayout::Present_Src);
+            transition_command_buffer.transitionImageLayout(image,
+                                                            gpu::ImageLayout::Undefined,
+                                                            gpu::ImageLayout::Present_Src);
             transition_command_buffer.end();
         }
-
 
         auto fence = gpu::Fence::create(device)
                          .transform_error(map(narrow<gpu::Result>(), throwError()))
@@ -72,12 +75,32 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto RenderSurface::acquireNextFrame() -> gpu::Expected<Frame> {
-        return {};
+    auto RenderSurface::beginFrame() -> gpu::Expected<Frame> {
+        core::expects(m_surface.initialized());
+        core::expects(m_swapchain.initialized());
+
+        const auto& image_available = m_image_availables[m_current_frame];
+        const auto& render_finished = m_render_finisheds[m_current_frame];
+        auto&       in_flight       = m_in_flight_fences[m_current_frame];
+
+        return in_flight.wait(std::chrono::milliseconds { 1000 })
+            .transform([&in_flight](auto&& result) { in_flight.reset(); })
+            .and_then(core::curry(&gpu::Swapchain::acquireNextImage,
+                                  &(m_swapchain.get()),
+                                  1000ns,
+                                  std::cref(image_available)))
+            .transform([&, this](auto&& _result) noexcept {
+                auto&& [result, image_index] = _result; // TODO handle result
+                return Frame { .current_frame   = core::narrow<core::UInt32>(m_current_frame),
+                               .image_index     = image_index,
+                               .image_available = image_available,
+                               .render_finished  = render_finished,
+                               .in_flight        = in_flight };
+            });
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto RenderSurface::present(const Frame& frame) -> void {
+    auto RenderSurface::presentFrame(const Frame& frame) -> void {
     }
 } // namespace stormkit::engine

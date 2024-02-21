@@ -156,9 +156,7 @@ namespace stormkit::engine {
             .and_then(
                 core::curry(gpu::Queue::create, std::cref(*m_device), m_device->rasterQueueEntry()))
             .transform(core::monadic::set(m_raster_queue))
-            .and_then([this, window = std::move(window)] {
-                return doInitRenderSurface(std::move(window));
-            });
+            .and_then(core::curry(&Renderer::doInitRenderSurface, this, std::move(window)));
     }
 
     /////////////////////////////////////
@@ -254,8 +252,8 @@ namespace stormkit::engine {
         for (;;) {
             if (token.stop_requested()) return;
 
-            m_surface->acquireNextFrame()
-                .transform([this](auto&& frame) { m_surface->present(frame); })
+            m_surface->beginFrame()
+                .transform([this](auto&& frame) { m_surface->presentFrame(frame); })
                 .transform_error(core::expectsWithMessage("Failed to acquire frame"));
         }
 
