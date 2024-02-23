@@ -38,14 +38,7 @@ export {
         using Descriptor = std::variant<BufferDescriptor, ImageDescriptor>;
         class DescriptorPool;
 
-        class DescriptorPoolObject: public ParentRef<DescriptorPool> {
-          public:
-            using ParentRef<DescriptorPool>::ParentRef;
-
-            [[nodiscard]] auto image() const noexcept -> const DescriptorPool&;
-        };
-
-        class STORMKIT_API DescriptorSet: public DeviceObject, public DescriptorPoolObject {
+        class STORMKIT_API DescriptorSet {
           public:
             static constexpr auto DEBUG_TYPE = DebugObjectType::Descriptor_Set;
 
@@ -66,8 +59,7 @@ export {
           private:
             using Deleter = std::function<void(vk::raii::DescriptorSet&)>;
 
-            DescriptorSet(const DescriptorPool&       pool,
-                          std::vector<DescriptorType> type,
+            DescriptorSet(std::vector<DescriptorType> type,
                           vk::raii::DescriptorSet&&   sets,
                           Deleter                     deleter);
 
@@ -86,7 +78,7 @@ export {
             core::RangeExtent descriptor_count;
         };
 
-        class STORMKIT_API DescriptorSetLayout: public DeviceObject {
+        class STORMKIT_API DescriptorSetLayout {
             struct Tag {};
 
           public:
@@ -123,7 +115,7 @@ export {
             core::DeferInit<vk::raii::DescriptorSetLayout> m_vk_descriptor_set_layout;
         };
 
-        class STORMKIT_API DescriptorPool: public DeviceObject {
+        class STORMKIT_API DescriptorPool {
             struct Tag {};
 
           public:
@@ -215,12 +207,10 @@ export {
 namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE DescriptorSet::DescriptorSet(const DescriptorPool&       pool,
-                                                       std::vector<DescriptorType> type,
+    STORMKIT_FORCE_INLINE DescriptorSet::DescriptorSet(std::vector<DescriptorType> type,
                                                        vk::raii::DescriptorSet&&   set,
                                                        Deleter                     deleter)
-        : DeviceObject { pool.device() }, DescriptorPoolObject { pool },
-          m_types { std::move(type) }, m_vk_descriptor_set { std::move(set) },
+        : m_types { std::move(type) }, m_vk_descriptor_set { std::move(set) },
           m_deleter { std::move(deleter) } {
     }
 
@@ -286,8 +276,7 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE DescriptorSetLayout::DescriptorSetLayout(const Device& device)
-        : DeviceObject { device } {
+    STORMKIT_FORCE_INLINE DescriptorSetLayout::DescriptorSetLayout(const Device& device) {
         const auto vk_bindings =
             m_bindings | std::views::transform([](auto&& binding) noexcept {
                 return vk::DescriptorSetLayoutBinding {}
@@ -300,8 +289,7 @@ namespace stormkit::gpu {
 
         const auto create_info = vk::DescriptorSetLayoutCreateInfo {}.setBindings(vk_bindings);
 
-        this->device()
-            .vkHandle()
+        device.vkHandle()
             .createDescriptorSetLayout(create_info)
             .transform(core::monadic::set(m_vk_descriptor_set_layout))
             .transform_error(core::monadic::map(core::monadic::as<Result>(), core::throwError()));
@@ -374,8 +362,7 @@ namespace stormkit::gpu {
     STORMKIT_FORCE_INLINE DescriptorPool::DescriptorPool(const Device&         device,
                                                          std::span<const Size> sizes,
                                                          core::UInt32          max_sets,
-                                                         Tag)
-        : DeviceObject { device } {
+                                                         Tag) {
         const auto pool_sizes = sizes | std::views::transform([&](const auto& size) {
                                     return vk::DescriptorPoolSize {}
                                         .setType(core::narrow<vk::DescriptorType>(size.type))
@@ -388,8 +375,7 @@ namespace stormkit::gpu {
                                      .setMaxSets(max_sets)
                                      .setPoolSizes(pool_sizes);
 
-        this->device()
-            .vkHandle()
+        device.vkHandle()
             .createDescriptorPool(create_info)
             .transform(core::monadic::set(m_vk_descriptor_pool))
             .transform_error(core::monadic::map(core::monadic::as<Result>(), core::throwError()));

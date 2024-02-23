@@ -19,7 +19,7 @@ import :Core.Device;
 export namespace stormkit::gpu {
     class Device;
 
-    class STORMKIT_API Fence: public DeviceObject {
+    class STORMKIT_API Fence {
         struct Tag {};
 
       public:
@@ -59,7 +59,7 @@ export namespace stormkit::gpu {
         core::DeferInit<vk::raii::Fence> m_vk_fence;
     };
 
-    class STORMKIT_API Semaphore: public DeviceObject {
+    class STORMKIT_API Semaphore {
         struct Tag {};
 
       public:
@@ -92,15 +92,13 @@ export namespace stormkit::gpu {
 namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE Fence::Fence(const Device& device, bool signaled, Tag)
-        : DeviceObject { device } {
+    STORMKIT_FORCE_INLINE Fence::Fence(const Device& device, bool signaled, Tag) {
         const auto flags =
             (signaled) ? vk::FenceCreateFlagBits::eSignaled : vk::FenceCreateFlags {};
 
         const auto create_info = vk::FenceCreateInfo {}.setFlags(flags);
 
-        this->device()
-            .vkHandle()
+        device.vkHandle()
             .createFence(create_info)
             .transform(core::monadic::set(m_vk_fence))
             .transform_error(
@@ -164,13 +162,22 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE auto
         Fence::wait(const std::chrono::milliseconds& wait_for) const -> Expected<Result> {
-        return device().waitForFence(*this, wait_for);
+        const auto result = m_vk_fence->getDevice().waitForFences(
+            std::array { *vkHandle() },
+            true,
+            std::chrono::duration_cast<std::chrono::nanoseconds>(wait_for).count());
+        const auto possible_results = std::array { vk::Result::eSuccess, vk::Result::eNotReady };
+
+        if (std::ranges::any_of(possible_results, core::monadic::equal(result))) [[likely]]
+            return core::narrow<Result>(result);
+
+        return std::unexpected { core::narrow<Result>(result) };
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE auto Fence::reset() -> void {
-        device().resetFence(*this);
+        m_vk_fence->getDevice().resetFences(std::array { *vkHandle() });
     }
 
     /////////////////////////////////////
@@ -181,12 +188,10 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE Semaphore::Semaphore(const Device& device, Tag)
-        : DeviceObject { device } {
+    STORMKIT_FORCE_INLINE Semaphore::Semaphore(const Device& device, Tag) {
         const auto create_info = vk::SemaphoreCreateInfo {};
 
-        this->device()
-            .vkHandle()
+        device.vkHandle()
             .createSemaphore(create_info)
             .transform(core::monadic::set(m_vk_semaphore))
             .transform_error(

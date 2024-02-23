@@ -57,7 +57,7 @@ export namespace stormkit::core {
     template<IsFancyPointer T>
     constexpr auto makeNakedRef(T&& value) noexcept -> decltype(auto);
 
-    template<template<typename...> typename Out = std::vector, typename First, typename... Args>
+    template<template<typename...> typename Out = std::vector, typename... Args>
         requires(AreIndirections<Args...>)
     constexpr auto makeNakedRefs(Args&&... args) -> decltype(auto);
     template<template<typename, std::size_t> typename Out, typename... Args>
@@ -177,7 +177,7 @@ namespace stormkit::core {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    template<template<typename...> typename Out = std::vector, typename First, typename... Args>
+    template<template<typename...> typename Out = std::vector, typename... Args>
         requires(AreIndirections<Args...>)
     constexpr auto makeNakedRefs(Args&&... args) -> decltype(auto) {
         return Out { (makeNakedRef(std::forward<Args>(args)), ...) };

@@ -52,7 +52,7 @@ namespace stormkit::gpu {
                    const Instance&       instance,
                    const Info&           info,
                    Tag)
-        : InstanceObject { instance }, m_physical_device { &physical_device } {
+        : m_physical_device { &physical_device } {
         const auto& queue_families = m_physical_device->queueFamilies();
 
         struct Queue_ {
@@ -192,16 +192,16 @@ namespace stormkit::gpu {
         m_physical_device->vkHandle()
             .createDevice(create_info)
             .transform(core::monadic::set(m_vk_device))
-            .transform([this]() noexcept -> VulkanExpected<void> {
+            .transform([this, &instance] noexcept -> VulkanExpected<void> {
                 VULKAN_HPP_DEFAULT_DISPATCHER.init(*vkHandle());
 
                 m_vma_function_table =
-                    vma::functionsFromDispatcher(this->instance().vkHandle().getDispatcher(),
+                    vma::functionsFromDispatcher(instance.vkHandle().getDispatcher(),
                                                  vkHandle().getDispatcher());
 
                 const auto alloc_create_info =
                     vma::AllocatorCreateInfo {}
-                        .setInstance(*(this->instance().vkHandle()))
+                        .setInstance(*(instance.vkHandle()))
                         .setPhysicalDevice(*m_physical_device->vkHandle())
                         .setDevice(*vkHandle())
                         .setPVulkanFunctions(&vmaFunctionTable());

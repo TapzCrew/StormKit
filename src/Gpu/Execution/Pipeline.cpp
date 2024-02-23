@@ -17,11 +17,11 @@ import :Execution.RasterPipelineState;
 namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
-    auto Pipeline::doInitRasterPipeline(
-        const PipelineLayout&                              layout,
-        const RenderPass&                                  render_pass,
-        std::optional<core::NakedRef<const PipelineCache>> pipeline_cache) noexcept
-        -> VulkanExpected<void> {
+    auto Pipeline::doInitRasterPipeline(const Device&         device,
+                                        const PipelineLayout& layout,
+                                        const RenderPass&     render_pass,
+                                        std::optional<core::NakedRef<const PipelineCache>>
+                                            pipeline_cache) noexcept -> VulkanExpected<void> {
         const auto& state = core::as<RasterPipelineState>(m_state);
 
         const auto binding_descriptions =
@@ -178,8 +178,7 @@ namespace stormkit::gpu {
                          core::monadic::map(toRaiiVkHandle(), core::monadic::init<OptCache>()),
                          core::monadic::init<OptCache>(nullptr));
 
-        return device()
-            .vkHandle()
+        return device.vkHandle()
             .createGraphicsPipelines(vk_pipeline_cache, create_info)
             .transform([this](auto&& pipelines) noexcept {
                 m_vk_pipeline = std::move(pipelines.front());

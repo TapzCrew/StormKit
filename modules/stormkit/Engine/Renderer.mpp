@@ -28,7 +28,7 @@ export {
 
                 core::NakedRef<const gpu::Semaphore> image_available;
                 core::NakedRef<const gpu::Semaphore> render_finished;
-                core::NakedRef<gpu::Fence>      in_flight;
+                core::NakedRef<gpu::Fence>           in_flight;
             };
 
             RenderSurface(const gpu::Instance& instance,
@@ -55,8 +55,11 @@ export {
                                            const wsi::Window&   window) noexcept
                 -> gpu::Expected<std::unique_ptr<RenderSurface>>;
 
-            [[nodiscard]] auto beginFrame() -> gpu::Expected<Frame>;
-            auto               presentFrame(const Frame& frame) -> void;
+            [[nodiscard]] auto beginFrame(const gpu::Device& device) -> gpu::Expected<Frame>;
+            [[nodiscard]] auto presentFrame(const gpu::Queue& queue,
+                                            const Frame&      frame) -> gpu::Expected<void>;
+
+            [[nodiscard]] auto bufferingCount() const noexcept -> core::UInt32;
 
           private:
             core::DeferInit<gpu::Surface>   m_surface;
@@ -104,12 +107,17 @@ export {
                 -> gpu::Expected<void>;
 
             auto threadLoop(std::stop_token) noexcept -> void;
+            auto doRender(RenderSurface::Frame&&) noexcept -> gpu::Expected<RenderSurface::Frame>;
 
-            bool                           m_validation_layers_enabled = false;
-            core::DeferInit<gpu::Instance> m_instance;
-            core::DeferInit<gpu::Device>   m_device;
-            core::DeferInit<RenderSurface> m_surface;
-            core::DeferInit<gpu::Queue>    m_raster_queue;
+            bool                              m_validation_layers_enabled = false;
+            core::DeferInit<gpu::Instance>    m_instance;
+            core::DeferInit<gpu::Device>      m_device;
+            core::DeferInit<RenderSurface>    m_surface;
+            core::DeferInit<gpu::Queue>       m_raster_queue;
+            core::DeferInit<gpu::CommandPool> m_main_command_pool;
+
+            std::vector<gpu::CommandBuffer> m_command_buffers;
+            std::vector<gpu::Fence>         m_fences;
 
             std::jthread m_render_thread;
         };
@@ -122,6 +130,13 @@ export {
 ////////////////////////////////////////////////////////////////////
 
 namespace stormkit::engine {
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE
+    auto RenderSurface::bufferingCount() const noexcept -> core::UInt32 {
+        return core::narrow<core::UInt32>(std::size(m_swapchain->images()));
+    }
+
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE

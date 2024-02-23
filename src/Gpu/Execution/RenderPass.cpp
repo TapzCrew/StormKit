@@ -27,7 +27,7 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto RenderPass::doInitRenderPass() noexcept -> VulkanExpected<void> {
+    auto RenderPass::doInitRenderPass(const Device& device) noexcept -> VulkanExpected<void> {
         const auto attachments =
             m_description.attachments | std::views::transform([](auto&& attachment) {
                 return vk::AttachmentDescription {}
@@ -92,8 +92,7 @@ namespace stormkit::gpu {
                                      .setSubpasses(subpasses)
                                      .setDependencies(subpasses_deps);
 
-        return device()
-            .vkHandle()
+        return device.vkHandle()
             .createRenderPass(create_info)
             .transform(core::monadic::set(m_vk_render_pass));
     }

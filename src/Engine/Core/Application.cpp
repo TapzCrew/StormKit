@@ -30,12 +30,12 @@ namespace stormkit::engine {
     }
 
     auto Application::update() -> void {
-        m_world->addSystem<RenderSystem>();
+        // m_world->addSystem<RenderSystem>();
 
         m_renderer->startRendering();
         while (m_window->isOpen()) {
             m_event_handler->update(m_window);
-            m_world->step(core::Secondf { 0 });
+            // m_world->step(core::Secondf { 0 });
             // if (m_surf0ace->needRecreate()) {
             // m_surface->recreate();
             // doInitPerFrameObjects();

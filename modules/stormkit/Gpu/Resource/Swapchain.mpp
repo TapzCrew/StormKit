@@ -17,7 +17,8 @@ import :Core;
 import :Resource.Image;
 
 export namespace stormkit::gpu {
-    class STORMKIT_API Swapchain: public DeviceObject {
+    class Queue;
+    class STORMKIT_API Swapchain {
         struct Tag {};
 
       public:
@@ -49,7 +50,8 @@ export namespace stormkit::gpu {
             -> Expected<std::unique_ptr<Swapchain>>;
 
         [[nodiscard]] auto images() const noexcept -> const std::vector<Image>&;
-        [[nodiscard]] auto acquireNextImage(std::chrono::nanoseconds wait, const Semaphore &image_available) const noexcept
+        [[nodiscard]] auto acquireNextImage(std::chrono::nanoseconds wait,
+                                            const Semaphore&         image_available) const noexcept
             -> Expected<std::pair<gpu::Result, core::UInt32>>;
 
         [[nodiscard]] auto vkHandle() const noexcept -> const vk::raii::SwapchainKHR&;

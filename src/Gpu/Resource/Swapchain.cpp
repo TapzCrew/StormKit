@@ -79,8 +79,7 @@ namespace stormkit::gpu {
                          const Device&                         device,
                          const Surface&                        surface,
                          const core::math::ExtentU&            extent,
-                         std::optional<vk::raii::SwapchainKHR> old_swapchain)
-        : DeviceObject { device } {
+                         std::optional<vk::raii::SwapchainKHR> old_swapchain) {
         const auto& physical_device = device.physicalDevice();
         const auto  capabilities =
             physical_device.vkHandle().getSurfaceCapabilitiesKHR(*surface.vkHandle());
@@ -137,11 +136,14 @@ namespace stormkit::gpu {
         -> Expected<std::pair<gpu::Result, core::UInt32>> {
         auto&& [result, index] =
             m_vk_swapchain->acquireNextImage(wait.count(), toVkHandle()(image_available));
+        const auto possible_results = std::array { vk::Result::eSuccess,
+                                                   vk::Result::eErrorOutOfDateKHR,
+                                                   vk::Result::eSuboptimalKHR };
 
-        if (result != vk::Result::eSuccess | result != vk::Result::eErrorOutOfDateKHR |
-            result != vk::Result::eSuboptimalKHR)
+        if (not std::ranges::any_of(possible_results, core::monadic::equal(result))) [[likely]]
             return std::unexpected { core::narrow<gpu::Result>(result) };
 
         return std::make_pair(core::narrow<gpu::Result>(result), index);
     }
+
 } // namespace stormkit::gpu

@@ -15,8 +15,10 @@ import :Execution.CommandBuffer;
 namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
-    auto CommandPool::createVkCommandBuffers(core::RangeExtent count, CommandBufferLevel level)
-        const noexcept -> std::vector<vk::raii::CommandBuffer> {
+    auto CommandPool::createVkCommandBuffers(const Device&      device,
+                                             core::RangeExtent  count,
+                                             CommandBufferLevel level) const noexcept
+        -> std::vector<vk::raii::CommandBuffer> {
         auto out          = std::vector<vk::raii::CommandBuffer> {};
         auto reuse_count  = std::empty(m_reusable_command_buffers)
                                 ? 0
@@ -46,7 +48,8 @@ namespace stormkit::gpu {
             };
 
             // TODO handle error here
-            core::moveAndMerge(out, device().vkHandle().allocateCommandBuffers(allocate_info).value());
+            core::moveAndMerge(out,
+                               device.vkHandle().allocateCommandBuffers(allocate_info).value());
         }
 
         return out;

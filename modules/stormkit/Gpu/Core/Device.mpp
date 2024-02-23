@@ -21,7 +21,7 @@ export namespace stormkit::gpu {
     class Fence;
     class Semaphore;
 
-    class STORMKIT_API Device: public InstanceObject {
+    class STORMKIT_API Device {
         struct Tag {};
 
       public:

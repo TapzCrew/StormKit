@@ -156,6 +156,10 @@ namespace stormkit::engine {
             .and_then(
                 core::curry(gpu::Queue::create, std::cref(*m_device), m_device->rasterQueueEntry()))
             .transform(core::monadic::set(m_raster_queue))
+            .and_then(core::curry(gpu::CommandPool::create,
+                                  std::cref(*m_device),
+                                  std::cref(*m_raster_queue)))
+            .transform(core::monadic::set(m_main_command_pool))
             .and_then(core::curry(&Renderer::doInitRenderSurface, this, std::move(window)));
     }
 
@@ -249,14 +253,46 @@ namespace stormkit::engine {
         //
         // //        fence.wait();
         //
+        m_command_buffers =
+            m_main_command_pool->createCommandBuffers(m_device, m_surface->bufferingCount());
+        for (auto i : core::range(m_surface->bufferingCount()))
+            gpu::Fence::createSignaled(m_device)
+                .transform(core::monadic::emplaceTo(m_fences))
+                .transform_error(core::expectsWithMessage("Failed to create swapchain fences"));
+
         for (;;) {
             if (token.stop_requested()) return;
 
-            m_surface->beginFrame()
-                .transform([this](auto&& frame) { m_surface->presentFrame(frame); })
-                .transform_error(core::expectsWithMessage("Failed to acquire frame"));
+            m_surface->beginFrame(m_device)
+                .and_then(core::curry(&Renderer::doRender, this))
+                .and_then(core::curry(&RenderSurface::presentFrame,
+                                      &m_surface.get(),
+                                      std::cref(*m_raster_queue)))
+                .transform_error(core::expectsWithMessage("Failed to render frame"));
         }
 
         m_device->waitIdle();
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    auto Renderer::doRender(RenderSurface::Frame&& frame) noexcept
+        -> gpu::Expected<RenderSurface::Frame> {
+        auto&& command_buffer = m_command_buffers[frame.current_frame];
+        auto&& fence          = m_fences[frame.current_frame];
+
+        return fence.wait()
+            .transform([&fence](auto&& _) noexcept { fence.reset(); })
+            .transform([frame = std::move(frame), &command_buffer, &fence, this]() {
+                command_buffer.reset();
+                command_buffer.begin(true);
+                command_buffer.end();
+                command_buffer.submit(m_raster_queue,
+                                      {},
+                                      core::makeNakedRefs<std::array>(*frame.render_finished),
+                                      fence);
+
+                return frame;
+            });
     }
 } // namespace stormkit::engine

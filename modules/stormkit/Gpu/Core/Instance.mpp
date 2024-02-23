@@ -96,7 +96,7 @@ export {
             std::vector<PhysicalDevice> m_physical_devices;
         };
 
-        class STORMKIT_API PhysicalDevice: public InstanceObject {
+        class STORMKIT_API PhysicalDevice {
           public:
             static constexpr auto DEBUG_TYPE = DebugObjectType::Physical_Device;
 
@@ -141,7 +141,7 @@ export {
             friend class Instance;
         };
 
-        class STORMKIT_API Surface: public InstanceObject {
+        class STORMKIT_API Surface {
             struct Tag {};
 
           public:

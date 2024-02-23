@@ -16,7 +16,7 @@ import stormkit.Gpu.Vulkan;
 import :Core;
 
 namespace stormkit::gpu {
-    class STORMKIT_API Shader: public DeviceObject {
+    class STORMKIT_API Shader {
         struct Tag {};
 
       public:
@@ -50,10 +50,10 @@ namespace stormkit::gpu {
                                                           const std::filesystem::path& filepath,
                                                           ShaderStageFlag type) noexcept
             -> Expected<std::unique_ptr<Shader>>;
-        [[nodiscard]] static auto allocateFromBytes(const Device&               device,
+        [[nodiscard]] static auto
+                                  allocateFromBytes(const Device&               device,
                                                     std::span<const core::Byte> data,
-                                                    ShaderStageFlag             type) noexcept
-            -> Expected<std::unique_ptr<Shader>>;
+                                                    ShaderStageFlag type) noexcept -> Expected<std::unique_ptr<Shader>>;
         [[nodiscard]] static auto allocateFromSpirvIDs(const Device&            device,
                                                        std::span<const SpirvID> data,
                                                        ShaderStageFlag          type) noexcept
@@ -66,7 +66,7 @@ namespace stormkit::gpu {
         [[nodiscard]] auto vkHandle() const noexcept -> const vk::raii::ShaderModule&;
 
       private:
-        auto compile() -> void;
+        auto compile(const Device& device) -> void;
         auto reflect() noexcept -> void;
 
         ShaderStageFlag      m_type   = ShaderStageFlag::None;
@@ -88,7 +88,7 @@ namespace stormkit::gpu {
                    const std::filesystem::path& filepath,
                    ShaderStageFlag              type,
                    Tag)
-        : DeviceObject { device }, m_type { type } {
+        : m_type { type } {
         auto       stream = std::ifstream { filepath.string(), std::ios::binary | std::ios::ate };
         const auto size   = stream.tellg();
 
@@ -96,7 +96,7 @@ namespace stormkit::gpu {
 
         core::read(stream, core::viewAsBytes(m_source));
 
-        compile();
+        compile(device);
     }
 
     /////////////////////////////////////
@@ -113,11 +113,11 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE
     Shader::Shader(const Device& device, std::span<const SpirvID> data, ShaderStageFlag type, Tag)
-        : DeviceObject { device }, m_type { type } {
+        : m_type { type } {
         m_source.reserve(std::size(data));
         std::ranges::copy(data, std::back_inserter(m_source));
 
-        compile();
+        compile(device);
     }
 
     /////////////////////////////////////
@@ -134,38 +134,37 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto Shader::loadFromFile(const Device&                device,
-                                                    const std::filesystem::path& filepath,
-                                                    ShaderStageFlag              type) noexcept
-        -> Expected<Shader> try {
+    STORMKIT_FORCE_INLINE auto
+        Shader::loadFromFile(const Device&                device,
+                             const std::filesystem::path& filepath,
+                             ShaderStageFlag              type) noexcept -> Expected<Shader> try {
         return Shader { device, std::move(filepath), type, Tag {} };
     } catch (const Result& result) { return std::unexpected(result); }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto Shader::fromBytes(const Device&               device,
-                                                 std::span<const core::Byte> data,
-                                                 ShaderStageFlag             type) noexcept
-        -> Expected<Shader> try {
-        return Shader { device, data, type, Tag {} };
-    } catch (const Result& result) { return std::unexpected(result); }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto Shader::fromSpirvIDs(const Device&            device,
-                                                    std::span<const SpirvID> data,
-                                                    ShaderStageFlag          type) noexcept
-        -> Expected<Shader> try {
+    STORMKIT_FORCE_INLINE auto
+        Shader::fromBytes(const Device&               device,
+                          std::span<const core::Byte> data,
+                          ShaderStageFlag             type) noexcept -> Expected<Shader> try {
         return Shader { device, data, type, Tag {} };
     } catch (const Result& result) { return std::unexpected(result); }
 
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE auto
-        Shader::allocateAndLoadFromFile(const Device&                device,
-                                        const std::filesystem::path& filepath,
-                                        ShaderStageFlag              type) noexcept
-        -> Expected<std::unique_ptr<Shader>> try {
+        Shader::fromSpirvIDs(const Device&            device,
+                             std::span<const SpirvID> data,
+                             ShaderStageFlag          type) noexcept -> Expected<Shader> try {
+        return Shader { device, data, type, Tag {} };
+    } catch (const Result& result) { return std::unexpected(result); }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto Shader::allocateAndLoadFromFile(
+        const Device&                device,
+        const std::filesystem::path& filepath,
+        ShaderStageFlag              type) noexcept -> Expected<std::unique_ptr<Shader>> try {
         return std::make_unique<Shader>(device, filepath, type, Tag {});
     } catch (const Result& result) { return std::unexpected(result); }
 
@@ -189,11 +188,10 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto Shader::compile() -> void {
+    STORMKIT_FORCE_INLINE auto Shader::compile(const Device& device) -> void {
         const auto create_info = vk::ShaderModuleCreateInfo {}.setCode(m_source);
 
-        this->device()
-            .vkHandle()
+        device.vkHandle()
             .createShaderModule(create_info)
             .transform(core::monadic::set(m_vk_shader_module))
             .transform_error(core::monadic::map(core::monadic::as<Result>(), core::throwError()));

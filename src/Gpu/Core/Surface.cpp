@@ -25,28 +25,26 @@ import stormkit.Gpu.Vulkan;
 namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
-    Surface::Surface(const Instance& instance, const wsi::Window& window, Tag)
-        : InstanceObject { instance } {
+    Surface::Surface(const Instance& instance, const wsi::Window& window, Tag) {
 #if defined(STORMKIT_OS_WINDOWS)
-        const auto create_surface = [this, &window] {
-            const auto create_info = vk::Win32SurfaceCreateInfoKHR {
-                .flags     = {},
-                .hinstance = GetModuleHandleW(nullptr),
-                .hwnd      = reinterpret_cast<HWND>(window.nativeHandle())
-            };
-            return this->instance().vkHandle().createWin32SurfaceKHR(create_info, nullptr);
+        const auto create_surface = [this, &window, &instance] {
+            const auto create_info =
+                vk::Win32SurfaceCreateInfoKHR { .flags     = {},
+                                                .hinstance = GetModuleHandleW(nullptr),
+                                                .hwnd =
+                                                    reinterpret_cast<HWND>(window.nativeHandle()) };
+            return instance.vkHandle().createWin32SurfaceKHR(create_info, nullptr);
         };
 #elif defined(STORMKIT_OS_MACOS)
-        const auto create_surface = [this, &window] {
+        const auto create_surface = [this, &window, &instance] {
             const auto create_info = VkMacOSSurfaceCreateInfoMVK {
                 .sType = VK_STRUCTURE_TYPE_MACOS_SURFACE_CREATE_INFO_MVK,
                 .pView = m_window->nativeHandle();
             };
-            CHECK_VK_ERROR(
-                vkCreateMacOSSurfaceMVK(this->instance(), &create_info, nullptr, &m_surface));
+            CHECK_VK_ERROR(vkCreateMacOSSurfaceMVK(instance, &create_info, nullptr, &m_surface));
         };
 #elif defined(STORMKIT_OS_LINUX)
-        const auto make_wayland_surface = [this, &window] {
+        const auto make_wayland_surface = [&window, &instance] {
             struct Handles {
                 wl_display* display;
                 wl_surface* surface;
@@ -56,9 +54,9 @@ namespace stormkit::gpu {
                 vk::WaylandSurfaceCreateInfoKHR { .display = handles->display,
                                                   .surface = handles->surface };
 
-            return this->instance().vkHandle().createWaylandSurfaceKHR(create_info, nullptr);
+            return instance.vkHandle().createWaylandSurfaceKHR(create_info, nullptr);
         };
-        const auto make_xcb_surface = [this, &window] {
+        const auto make_xcb_surface = [&window, &instance] {
             struct Handles {
                 xcb_connection_t* connection;
                 xcb_window_t      window;
@@ -68,7 +66,7 @@ namespace stormkit::gpu {
                 vk::XcbSurfaceCreateInfoKHR { .connection = handles->connection,
                                               .window     = handles->window };
 
-            return this->instance().vkHandle().createXcbSurfaceKHR(create_info, nullptr);
+            return instance.vkHandle().createXcbSurfaceKHR(create_info, nullptr);
         };
 
         const auto create_surface = [&make_wayland_surface, &make_xcb_surface] noexcept
@@ -81,11 +79,11 @@ namespace stormkit::gpu {
         }();
 
 #elif defined(STORMKIT_OS_IOS)
-        const auto create_surface = [this, &window] {
+        const auto create_surface = [this, &window, &instance] {
             const auto create_info =
                 VkIOSSurfaceCreateInfoMVK { .sType = VK_STRUCTURE_TYPE_IOS_SURFACE_CREATE_INFO_MVK,
                                             .pView = m_window->nativeHandle() };
-            CHECK_VK_ERROR(vkCreateIOSSurfaceMVK(this->instance(), &create_info, &m_surface));
+            CHECK_VK_ERROR(vkCreateIOSSurfaceMVK(instance, &create_info, &m_surface));
         };
 #else
         core::assertWithMessage(true, "This platform WSI is not supported !");

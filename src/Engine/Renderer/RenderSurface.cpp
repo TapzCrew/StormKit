@@ -50,7 +50,7 @@ namespace stormkit::engine {
                 .value();
 
         auto transition_command_buffers =
-            command_pool.createCommandBuffers(std::size(m_swapchain->images()));
+            command_pool.createCommandBuffers(device, std::size(m_swapchain->images()));
 
         for (auto i : core::range(std::size(transition_command_buffers))) {
             auto&& image                     = m_swapchain->images()[i];
@@ -67,15 +67,15 @@ namespace stormkit::engine {
                          .transform_error(map(narrow<gpu::Result>(), throwError()))
                          .value();
 
-        auto _foo = core::toNakedRefs(transition_command_buffers);
-        raster_queue.submit(_foo, {}, {}, fence);
+        auto cmbs = core::toNakedRefs(transition_command_buffers);
+        raster_queue.submit(cmbs, {}, {}, fence);
 
-        fence.wait();
+        fence.wait().transform_error(map(narrow<gpu::Result>(), throwError()));
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto RenderSurface::beginFrame() -> gpu::Expected<Frame> {
+    auto RenderSurface::beginFrame(const gpu::Device& device) -> gpu::Expected<Frame> {
         core::expects(m_surface.initialized());
         core::expects(m_swapchain.initialized());
 
@@ -83,24 +83,33 @@ namespace stormkit::engine {
         const auto& render_finished = m_render_finisheds[m_current_frame];
         auto&       in_flight       = m_in_flight_fences[m_current_frame];
 
-        return in_flight.wait(std::chrono::milliseconds { 1000 })
-            .transform([&in_flight](auto&& result) { in_flight.reset(); })
+        return in_flight.wait(100ms)
+            .transform([&in_flight](auto&& _) noexcept { in_flight.reset(); })
             .and_then(core::curry(&gpu::Swapchain::acquireNextImage,
                                   &(m_swapchain.get()),
-                                  1000ns,
+                                  100ms,
                                   std::cref(image_available)))
             .transform([&, this](auto&& _result) noexcept {
                 auto&& [result, image_index] = _result; // TODO handle result
                 return Frame { .current_frame   = core::narrow<core::UInt32>(m_current_frame),
                                .image_index     = image_index,
                                .image_available = image_available,
-                               .render_finished  = render_finished,
-                               .in_flight        = in_flight };
+                               .render_finished = render_finished,
+                               .in_flight       = in_flight };
             });
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto RenderSurface::presentFrame(const Frame& frame) -> void {
+    auto RenderSurface::presentFrame(const gpu::Queue& queue,
+                                     const Frame&      frame) -> gpu::Expected<void> {
+        const auto image_indices   = std::array { frame.image_index };
+        const auto wait_semaphores = core::makeNakedRefs<std::array>(*frame.render_finished);
+        const auto swapchains      = core::makeNakedRefs<std::array>(*m_swapchain);
+
+        return queue.present(swapchains, wait_semaphores, image_indices)
+            .transform([this](auto&& _) noexcept {
+                if (++m_current_frame >= bufferingCount()) m_current_frame = 0;
+            });
     }
 } // namespace stormkit::engine

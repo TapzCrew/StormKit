@@ -23,7 +23,7 @@ import :Execution.RenderPass;
 import :Execution.Pipeline;
 
 export namespace stormkit::gpu {
-    class STORMKIT_API Queue: public DeviceObject {
+    class STORMKIT_API Queue {
         struct Tag {};
 
       public:
@@ -47,10 +47,15 @@ export namespace stormkit::gpu {
 
         auto waitIdle() const noexcept -> void;
 
-        auto submit(std::span<core::NakedRef<const CommandBuffer>> commandbuffers,
-                    std::span<core::NakedRef<const Semaphore>>     wait_semaphores   = {},
-                    std::span<core::NakedRef<const Semaphore>>     signal_semaphores = {},
+        auto submit(std::span<const core::NakedRef<const CommandBuffer>> commandbuffers,
+                    std::span<const core::NakedRef<const Semaphore>>     wait_semaphores   = {},
+                    std::span<const core::NakedRef<const Semaphore>>     signal_semaphores = {},
                     core::OptionalRef<const Fence> fence = std::nullopt) const noexcept -> void;
+
+        [[nodiscard]] auto present(std::span<const core::NakedRef<const Swapchain>> swapchains,
+                                   std::span<const core::NakedRef<const Semaphore>> wait_semaphores,
+                                   std::span<const core::UInt32> image_indices) const noexcept
+            -> Expected<gpu::Result>;
 
         [[nodiscard]] auto entry() const noexcept -> const Device::QueueEntry&;
 
@@ -62,21 +67,7 @@ export namespace stormkit::gpu {
         core::DeferInit<vk::raii::Queue> m_vk_queue;
     };
 
-    class QueueObject: public ParentRef<Queue> {
-      public:
-        using ParentRef<Queue>::ParentRef;
-
-        [[nodiscard]] auto queue() const noexcept -> const Queue&;
-    };
-
     class CommandPool;
-
-    class CommandPoolObject: public ParentRef<CommandPool> {
-      public:
-        using ParentRef<CommandPool>::ParentRef;
-
-        [[nodiscard]] auto commandPool() const noexcept -> const CommandPool&;
-    };
 
     struct InheritanceInfo {
         const RenderPass*  render_pass = nullptr;
@@ -84,9 +75,7 @@ export namespace stormkit::gpu {
         const FrameBuffer* framebuffer = nullptr;
     };
 
-    class STORMKIT_API CommandBuffer: public DeviceObject,
-                                      public QueueObject,
-                                      public CommandPoolObject {
+    class STORMKIT_API CommandBuffer {
         struct Tag {};
 
       public:
@@ -122,8 +111,9 @@ export namespace stormkit::gpu {
                                            Deleter) noexcept -> std::unique_ptr<CommandBuffer>;
 
         auto reset() noexcept -> void;
-        auto submit(std::span<core::NakedRef<const Semaphore>> wait_semaphores   = {},
-                    std::span<core::NakedRef<const Semaphore>> signal_semaphores = {},
+        auto submit(const Queue&                               queue,
+                    std::span<const core::NakedRef<const Semaphore>> wait_semaphores   = {},
+                    std::span<const core::NakedRef<const Semaphore>> signal_semaphores = {},
                     core::OptionalRef<const Fence> fence = std::nullopt) const noexcept -> void;
 
         [[nodiscard]] auto state() const noexcept -> State;
@@ -257,7 +247,7 @@ export namespace stormkit::gpu {
         State m_state = State::Initial;
     };
 
-    class STORMKIT_API CommandPool: public DeviceObject, public QueueObject {
+    class STORMKIT_API CommandPool {
         struct Tag {};
 
       public:
@@ -276,25 +266,31 @@ export namespace stormkit::gpu {
             -> Expected<std::unique_ptr<CommandPool>>;
 
         [[nodiscard]] auto createCommandBuffer(
+            const Device&      device,
             CommandBufferLevel level = CommandBufferLevel::Primary) const noexcept -> CommandBuffer;
         [[nodiscard]] auto
-            createCommandBuffers(core::RangeExtent  count,
+            createCommandBuffers(const Device&      device,
+                                 core::RangeExtent  count,
                                  CommandBufferLevel level = CommandBufferLevel::Primary)
                 const noexcept -> std::vector<CommandBuffer>;
 
         [[nodiscard]] auto
-            allocateCommandBuffer(CommandBufferLevel level = CommandBufferLevel::Primary)
+            allocateCommandBuffer(const Device&      device,
+                                  CommandBufferLevel level = CommandBufferLevel::Primary)
                 const noexcept -> std::unique_ptr<CommandBuffer>;
         [[nodiscard]] auto
-            allocateCommandBuffers(core::RangeExtent  count,
+            allocateCommandBuffers(const Device&      device,
+                                   core::RangeExtent  count,
                                    CommandBufferLevel level = CommandBufferLevel::Primary)
                 const noexcept -> std::vector<std::unique_ptr<CommandBuffer>>;
 
         [[nodiscard]] auto vkHandle() const noexcept -> const vk::raii::CommandPool&;
 
       private:
-        auto createVkCommandBuffers(core::RangeExtent count, CommandBufferLevel level)
-            const noexcept -> std::vector<vk::raii::CommandBuffer>;
+        auto createVkCommandBuffers(const Device&      device,
+                                    core::RangeExtent  count,
+                                    CommandBufferLevel level) const noexcept
+            -> std::vector<vk::raii::CommandBuffer>;
         auto deleteVkCommandBuffer(vk::raii::CommandBuffer& cmb) noexcept -> void;
 
         core::DeferInit<vk::raii::CommandPool> m_vk_command_pool;
@@ -374,9 +370,8 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE Queue::Queue(const Device& device, const Device::QueueEntry& entry, Tag)
-        : DeviceObject { device }, m_entry { entry } {
-        this->device()
-            .vkHandle()
+        : m_entry { entry } {
+        device.vkHandle()
             .getQueue(entry.id, 0)
             .transform(core::monadic::set(m_vk_queue))
             .transform_error(core::monadic::map(core::monadic::as<Result>(), core::throwError()));
@@ -419,9 +414,9 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE auto
-        Queue::submit(std::span<core::NakedRef<const CommandBuffer>> command_buffers,
-                      std::span<core::NakedRef<const Semaphore>>     wait_semaphores,
-                      std::span<core::NakedRef<const Semaphore>>     signal_semaphores,
+        Queue::submit(std::span<const core::NakedRef<const CommandBuffer>> command_buffers,
+                      std::span<const core::NakedRef<const Semaphore>>     wait_semaphores,
+                      std::span<const core::NakedRef<const Semaphore>>     signal_semaphores,
                       core::OptionalRef<const Fence>                 fence) const noexcept -> void {
         const auto vk_command_buffers =
             command_buffers | std::views::transform(toVkHandle()) | std::ranges::to<std::vector>();
@@ -445,6 +440,34 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
+    auto Queue::present(std::span<const core::NakedRef<const Swapchain>> swapchains,
+                        std::span<const core::NakedRef<const Semaphore>> wait_semaphores,
+                        std::span<const core::UInt32>              image_indices) const noexcept
+        -> Expected<gpu::Result> {
+        core::expects(std::size(wait_semaphores) >= 1);
+        core::expects(std::size(image_indices) >= 1);
+        const auto vk_wait_semaphores =
+            wait_semaphores | std::views::transform(toVkHandle()) | std::ranges::to<std::vector>();
+        const auto vk_swapchains =
+            swapchains | std::views::transform(toVkHandle()) | std::ranges::to<std::vector>();
+        const auto present_info = vk::PresentInfoKHR {}
+                                      .setWaitSemaphores(vk_wait_semaphores)
+                                      .setSwapchains(vk_swapchains)
+                                      .setImageIndices(image_indices);
+
+        const auto result = m_vk_queue->presentKHR(present_info);
+        const auto possible_results = std::array { vk::Result::eSuccess,
+                                                   vk::Result::eErrorOutOfDateKHR,
+                                                   vk::Result::eSuboptimalKHR };
+
+        if (not std::ranges::any_of(possible_results, core::monadic::equal(result))) [[likely]]
+            return std::unexpected { core::narrow<gpu::Result>(result) };
+
+        return core::narrow<gpu::Result>(result);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
     STORMKIT_FORCE_INLINE auto Queue::entry() const noexcept -> const Device::QueueEntry& {
         return m_entry;
     }
@@ -457,27 +480,13 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto QueueObject::queue() const noexcept -> const Queue& {
-        return ParentRef<Queue>::parent();
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    STORMKIT_FORCE_INLINE
-    auto CommandPoolObject::commandPool() const noexcept -> const CommandPool& {
-        return ParentRef<CommandPool>::parent();
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
     STORMKIT_FORCE_INLINE CommandBuffer::CommandBuffer(const CommandPool&        command_pool,
                                                        CommandBufferLevel        level,
                                                        vk::raii::CommandBuffer&& command_buffer,
                                                        Deleter                   deleter,
                                                        Tag)
-        : DeviceObject { command_pool.device() }, QueueObject { command_pool.queue() },
-          CommandPoolObject { command_pool }, m_level { level },
-          m_vk_command_buffer { std::move(command_buffer) }, m_deleter { std::move(deleter) } {
+        : m_level { level }, m_vk_command_buffer { std::move(command_buffer) },
+          m_deleter { std::move(deleter) } {
     }
 
     /////////////////////////////////////
@@ -526,12 +535,13 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE
-    auto CommandBuffer::submit(std::span<core::NakedRef<const Semaphore>> wait_semaphores,
-                               std::span<core::NakedRef<const Semaphore>> signal_semaphores,
+    auto CommandBuffer::submit(const Queue&                               queue,
+                               std::span<const core::NakedRef<const Semaphore>> wait_semaphores,
+                               std::span<const core::NakedRef<const Semaphore>> signal_semaphores,
                                core::OptionalRef<const Fence> fence) const noexcept -> void {
         auto cmbs = core::makeNakedRefs<std::array>(*this);
 
-        queue().submit(cmbs, wait_semaphores, signal_semaphores, std::move(fence));
+        queue.submit(cmbs, wait_semaphores, signal_semaphores, std::move(fence));
     }
 
     /////////////////////////////////////
@@ -553,8 +563,9 @@ namespace stormkit::gpu {
                                         const core::RGBColorF& color) -> void {
         core::expects(m_state == State::Recording);
 
-        const auto& dispatcher = toRaiiVkHandle()(device()).getDispatcher();
-        if (not dispatcher->vkCmdBeginDebugUtilsLabelEXT) return;
+        const auto& dispatcher = m_vk_command_buffer.getDispatcher();
+        if (not dispatcher->vkCmdBeginDebugUtilsLabelEXT) [[unlikely]]
+            return;
 
         const auto payload =
             vk::DebugUtilsLabelEXT {}.setPLabelName(std::data(name)).setColor(color);
@@ -569,8 +580,9 @@ namespace stormkit::gpu {
                                         const core::RGBColorF& color) -> void {
         core::expects(m_state == State::Recording);
 
-        const auto& dispatcher = toRaiiVkHandle()(device()).getDispatcher();
-        if (not dispatcher->vkCmdInsertDebugUtilsLabelEXT) return;
+        const auto& dispatcher = m_vk_command_buffer.getDispatcher();
+        if (not dispatcher->vkCmdInsertDebugUtilsLabelEXT) [[unlikely]]
+            return;
 
         const auto payload =
             vk::DebugUtilsLabelEXT {}.setPLabelName(std::data(name)).setColor(color);
@@ -583,8 +595,9 @@ namespace stormkit::gpu {
     STORMKIT_FORCE_INLINE auto CommandBuffer::endDebugRegion() -> void {
         core::expects(m_state == State::Recording);
 
-        const auto& dispatcher = toRaiiVkHandle()(device()).getDispatcher();
-        if (not dispatcher->vkCmdEndDebugUtilsLabelEXT) return;
+        const auto& dispatcher = m_vk_command_buffer.getDispatcher();
+        if (not dispatcher->vkCmdEndDebugUtilsLabelEXT) [[unlikely]]
+            return;
 
         m_vk_command_buffer.endDebugUtilsLabelEXT();
     }
@@ -1271,8 +1284,7 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE CommandPool::CommandPool(const Device& device, const Queue& queue, Tag)
-        : DeviceObject { device }, QueueObject { queue } {
+    STORMKIT_FORCE_INLINE CommandPool::CommandPool(const Device& device, const Queue& queue, Tag) {
         device.vkHandle()
             .createCommandPool(vk::CommandPoolCreateInfo {
                 .flags = vk::CommandPoolCreateFlagBits::eTransient |
@@ -1313,16 +1325,18 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE auto
-        CommandPool::createCommandBuffer(CommandBufferLevel level) const noexcept -> CommandBuffer {
-        return std::move(createCommandBuffers(1, level).front());
+        CommandPool::createCommandBuffer(const Device&      device,
+                                         CommandBufferLevel level) const noexcept -> CommandBuffer {
+        return std::move(createCommandBuffers(device, 1, level).front());
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE auto CommandPool::createCommandBuffers(
+        const Device&      device,
         core::RangeExtent  count,
         CommandBufferLevel level) const noexcept -> std::vector<CommandBuffer> {
-        return createVkCommandBuffers(count, level) | std::views::as_rvalue |
+        return createVkCommandBuffers(device, count, level) | std::views::as_rvalue |
                std::views::transform(
                    [this, &level](vk::raii::CommandBuffer&& cmb) noexcept -> decltype(auto) {
                        return CommandBuffer::create(*this,
@@ -1337,16 +1351,18 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE auto CommandPool::allocateCommandBuffer(
+        const Device&      device,
         CommandBufferLevel level) const noexcept -> std::unique_ptr<CommandBuffer> {
-        return std::move(allocateCommandBuffers(1, level).front());
+        return std::move(allocateCommandBuffers(device, 1, level).front());
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE auto CommandPool::allocateCommandBuffers(
+        const Device&      device,
         core::RangeExtent  count,
         CommandBufferLevel level) const noexcept -> std::vector<std::unique_ptr<CommandBuffer>> {
-        return createVkCommandBuffers(count, level) | std::views::as_rvalue |
+        return createVkCommandBuffers(device, count, level) | std::views::as_rvalue |
                std::views::transform([this, &level](
                                          vk::raii::CommandBuffer&& cmb) noexcept -> decltype(auto) {
                    return CommandBuffer::allocate(*this,

@@ -30,7 +30,7 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     PhysicalDevice::PhysicalDevice(vk::raii::PhysicalDevice physical_device,
                                    const Instance&          instance)
-        : InstanceObject { instance }, m_vk_physical_device { std::move(physical_device) } {
+        : m_vk_physical_device { std::move(physical_device) } {
         const auto properties = m_vk_physical_device.getProperties();
         const auto features   = m_vk_physical_device.getFeatures();
 
@@ -382,22 +382,4 @@ namespace stormkit::gpu {
 
         return std::ranges::empty(required_extensions);
     }
-
-    ///////////////////////////////////////
-    ///////////////////////////////////////
-    // auto PhysicalDevice::createLogicalDevice() const -> Device {
-    // return Device { *this, instance() };
-    //}
-
-    ///////////////////////////////////////
-    ///////////////////////////////////////
-    // auto PhysicalDevice::allocateLogicalDevice() const -> std::unique_ptr<Device> {
-    // return std::make_unique<Device>(*this, instance());
-    //}
-
-    ///////////////////////////////////////
-    ///////////////////////////////////////
-    // auto PhysicalDevice::allocateRefCountedLogicalDevice() const -> std::shared_ptr<Device> {
-    // return std::make_shared<Device>(*this, instance());
-    //}
 } // namespace stormkit::gpu

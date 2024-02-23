@@ -17,7 +17,7 @@ import stormkit.Gpu.Vulkan;
 import :Core;
 
 export namespace stormkit::gpu {
-    class STORMKIT_API Sampler: public DeviceObject {
+    class STORMKIT_API Sampler {
         struct Tag {};
 
       public:
@@ -81,7 +81,7 @@ export namespace stormkit::gpu {
         [[nodiscard]] auto image() const noexcept -> const Image&;
     };
 
-    class STORMKIT_API ImageView: public DeviceObject, public ImageObject {
+    class STORMKIT_API ImageView {
         struct Tag {};
 
       public:
@@ -124,7 +124,7 @@ export namespace stormkit::gpu {
         core::DeferInit<vk::raii::ImageView> m_vk_image_view;
     };
 
-    class STORMKIT_API Image: public DeviceObject {
+    class STORMKIT_API Image {
         struct Tag {};
 
       public:
@@ -217,9 +217,8 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE Sampler::Sampler(const Device& device, const Settings& settings, Tag)
-        : DeviceObject { device }, m_settings { settings } {
-        this->device()
-            .vkHandle()
+        : m_settings { settings } {
+        device.vkHandle()
             .createSampler(
                 { .magFilter    = core::narrow<vk::Filter>(m_settings.mag_filter),
                   .minFilter    = core::narrow<vk::Filter>(m_settings.min_filter),
@@ -292,8 +291,7 @@ namespace stormkit::gpu {
                                                ImageViewType                type,
                                                const ImageSubresourceRange& subresource_range,
                                                Tag)
-        : DeviceObject { device }, ImageObject { image }, m_type { type },
-          m_subresource_range { subresource_range } {
+        : m_type { type }, m_subresource_range { subresource_range } {
         const auto vk_subresource_range =
             vk::ImageSubresourceRange {}
                 .setAspectMask(
@@ -303,12 +301,11 @@ namespace stormkit::gpu {
                 .setBaseArrayLayer(m_subresource_range.base_array_layer)
                 .setLayerCount(m_subresource_range.layer_count);
 
-        this->device()
-            .vkHandle()
+        device.vkHandle()
             .createImageView({
-                .image            = this->image().vkHandle(),
+                .image            = image.vkHandle(),
                 .viewType         = core::narrow<vk::ImageViewType>(m_type),
-                .format           = core::narrow<vk::Format>(this->image().format()),
+                .format           = core::narrow<vk::Format>(image.format()),
                 .components       = { .r = vk::ComponentSwizzle::eR,
                                       .g = vk::ComponentSwizzle::eG,
                                       .b = vk::ComponentSwizzle::eB,
@@ -375,10 +372,9 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE Image::Image(const Device& device, const CreateInfo& info)
-        : DeviceObject { device }, m_extent { info.extent }, m_format { info.format },
-          m_layers { info.layers }, m_faces { 1 }, m_mip_levels { info.mip_levels },
-          m_type { info.type }, m_flags { info.flags }, m_samples { info.samples },
-          m_usages { info.usages } {
+        : m_extent { info.extent }, m_format { info.format }, m_layers { info.layers },
+          m_faces { 1 }, m_mip_levels { info.mip_levels }, m_type { info.type },
+          m_flags { info.flags }, m_samples { info.samples }, m_usages { info.usages } {
         if (core::checkFlag(m_flags, gpu::ImageCreateFlag::Cube_Compatible)) m_faces = 6u;
     }
 
@@ -399,18 +395,17 @@ namespace stormkit::gpu {
                                      .setSharingMode(vk::SharingMode::eExclusive)
                                      .setInitialLayout(vk::ImageLayout::eUndefined);
 
-        this->device()
-            .vkHandle()
+        device.vkHandle()
             .createImage(create_info)
             .transform(core::monadic::set(m_vk_image))
-            .transform([this, &info]() noexcept -> VulkanExpected<void> {
+            .transform([this, &info, &device] noexcept -> VulkanExpected<void> {
                 const auto requirements =
                     core::as<vk::raii::Image>(*m_vk_image).getMemoryRequirements();
 
                 const auto allocate_info = vma::AllocationCreateInfo {}.setRequiredFlags(
                     core::narrow<vk::MemoryPropertyFlagBits>(info.property));
 
-                auto&& allocator = this->device().vmaAllocator();
+                auto&& allocator = device.vmaAllocator();
 
                 auto&& [error, m_vma_allocation] =
                     allocator.allocateMemoryUnique(requirements, allocate_info);
