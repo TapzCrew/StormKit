@@ -134,7 +134,7 @@ namespace {
                                     struct Foo {};
                                     struct Bar {
                                         Bar(Foo) {};
-                                        operator bool() { return true; }
+                                        explicit operator bool() { return true; }
                                     };
 
                                     auto foo = Foo {};
