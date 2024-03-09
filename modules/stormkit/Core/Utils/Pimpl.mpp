@@ -38,7 +38,7 @@ export namespace stormkit::core {
         auto get() noexcept -> T&;
         auto get() const noexcept -> const T&;
 
-        operator bool() const noexcept;
+        explicit operator bool() const noexcept;
 
       private:
         std::unique_ptr<T> m_data;
