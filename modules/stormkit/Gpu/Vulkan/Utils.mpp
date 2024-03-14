@@ -23,8 +23,7 @@ export namespace stormkit::gpu {
     constexpr auto vkVersionPatch(std::integral auto version) noexcept -> core::UInt32;
 
     template<class T>
-    concept IsStormKitVulkanType =
-        requires(T&& t) { t.vkHandle(); };
+    concept IsStormKitVulkanType = requires(T&& t) { t.vkHandle(); };
 
     // clang-format off
     template<class T>
@@ -155,8 +154,7 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     template<IsStormKitVulkanWrappedType T>
     STORMKIT_FORCE_INLINE auto toRaiiVkHandle(T&& value) noexcept -> decltype(auto) {
-        if constexpr (core::IsPointer<core::PureType<T>>)
-            return std::forward<T>(value)->vkHandle();
+        if constexpr (core::IsPointer<core::PureType<T>>) return std::forward<T>(value)->vkHandle();
         else
             return std::forward<T>(value).vkHandle();
     }
