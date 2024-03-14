@@ -8,15 +8,11 @@ modules = {
         add_packages("wil")
       end
 
-      set_configdir("$(buildir)/.gens/modules/stormkit/Core")
-      add_filegroups("generated", { rootdir = "$(buildir)/.gens/modules" })
-
-      if not os.exists("$(buildir)/.gens/modules/stormkit/Core/Configuration.mpp") then
-        add_configfiles("modules/stormkit/Core/(**.mpp.in)")
-      end
+      set_configdir("$(buildir)/.gens/include/stormkit/Core")
+      add_configfiles("include/stormkit/Core/(**.hpp.in)")
 
       add_files("modules/stormkit/Core.mpp")
-      add_files("$(buildir)/.gens/modules/stormkit/Core/Configuration.mpp", { always_added = true, public = true })
+      add_includedirs("$(buildir)/.gens/include", {public = true})
       add_cxflags("clang::-Wno-language-extension-token")
 
       on_config(function(target)
@@ -52,7 +48,7 @@ modules = {
         end
 
         if is_mode("debug") and target:is_plat("linux") then
-            target:add("cxflags", "-no-pie", "-fno-pie")
+            -- target:add("cxflags", "-no-pie", "-fno-pie")
         end
       end)
     end,
@@ -204,7 +200,7 @@ if get_config("vsxmake") then
 end
 
 if get_config("compile_commands") then
-  add_rules("plugin.compile_commands.autoupdate", { outputdir = "build", lsp = "clangd" })
+  -- add_rules("plugin.compile_commands.autoupdate", { outputdir = ".vscode", lsp = "clangd" })
 end
 
 add_rules(
@@ -377,7 +373,7 @@ if has_config("gpu") then
 end
 
 -- add_defines("FROZEN_DONT_INCLUDE_STL", "ANKERL_UNORDERED_DENSE_USE_STD_IMPORT")
-add_requireconfs("*", { configs = { modules = true } })
+add_requireconfs("*", { configs = { modules = true, std_import = true } })
 
 if get_config("lto") then
   set_policy("build.optimization.lto", true)
