@@ -375,9 +375,11 @@ namespace stormkit::engine {
             output.image_views.reserve(std::size(output.image_views) + std::size(pass.images));
 
             for (auto&& buffer : pass.buffers) {
-                auto gpu_buffer = *gpu::Buffer::create(device, buffer.create_info);
+                auto& gpu_buffer =
+                    output.buffers.emplace_back(gpu::Buffer::create(device, buffer.create_info)
+                                                    .transform_error(core::expects())
+                                                    .value());
                 device.setObjectName(gpu_buffer, std::format("FrameGraph:Buffer:{}", buffer.name));
-                output.buffers.emplace_back(std::move(gpu_buffer));
             }
 
             auto extent       = core::math::ExtentU {};
@@ -389,13 +391,17 @@ namespace stormkit::engine {
 
                 clear_values.emplace_back(image.clear_value);
                 auto& gpu_image =
-                    output.images.emplace_back(*gpu::Image::create(device, image.create_info));
+                    output.images.emplace_back(gpu::Image::create(device, image.create_info)
+                                                   .transform_error(core::expects())
+                                                   .value());
                 device.setObjectName(gpu_image, std::format("FrameGraph:Image:{}", image.name));
 
                 if (image.id == m_final_resource) backbuffer = &gpu_image;
 
                 auto& gpu_image_view =
-                    output.image_views.emplace_back(*gpu::ImageView::create(device, gpu_image));
+                    output.image_views.emplace_back(gpu::ImageView::create(device, gpu_image)
+                                                        .transform_error(core::expects())
+                                                        .value());
                 device.setObjectName(gpu_image_view,
                                      std::format("FrameGraph:ImageView:{}", image.name));
 
