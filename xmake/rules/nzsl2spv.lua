@@ -28,7 +28,7 @@ do
 			local sourcebatches = target:sourcebatches()
 			if not dryrun and sourcebatches["compile.shaders"] and sourcebatches["compile.shaders"].sourcefiles then
 				for _, shaderfile in ipairs(sourcebatches["compile.shaders"].sourcefiles) do
-					local outputfile = path.join(outputdir, path.basename(shaderfile) .. ".nzslb.h")
+					local outputfile = path.join(outputdir, path.basename(shaderfile) .. ".spv.h")
 
 					-- for c++ module dependency discovery
 					if not os.exists(outputfile) then
@@ -72,7 +72,7 @@ do
 
 		-- add commands
 		batchcmds:show_progress(opt.progress, "${color.build.object}compiling.shader %s", shaderfile)
-		local argv = { "--compile=nzslb-header", "--partial", "--optimize", "--output=" .. outputdir }
+		local argv = { "--compile=spv-header", "--optimize", "--output=" .. outputdir }
 		batchcmds:mkdir(outputdir)
 
 		-- handle --log-format

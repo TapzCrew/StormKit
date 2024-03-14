@@ -5,5 +5,5 @@ import stormkit.Core;
 import std;
 
 export inline constexpr auto SHADER_DATA = stormkit::core::makeStaticByteArray(
-#include <shader.nzslb.h>
+#include <shader.spv.h>
 );
