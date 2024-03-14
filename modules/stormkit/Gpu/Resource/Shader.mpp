@@ -15,7 +15,7 @@ import stormkit.Gpu.Vulkan;
 
 import :Core;
 
-namespace stormkit::gpu {
+export namespace stormkit::gpu {
     class STORMKIT_API Shader {
         struct Tag {};
 

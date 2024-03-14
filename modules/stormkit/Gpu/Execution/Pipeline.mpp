@@ -229,7 +229,7 @@ namespace stormkit::gpu {
     PipelineLayout::PipelineLayout(const Device& device, const RasterPipelineLayout& layout, Tag)
         : m_layout { layout } {
         const auto set_layouts = m_layout.descriptor_set_layouts |
-                                 std::views::transform(toVkHandle()) |
+                                 std::views::transform(monadic::toVkHandle()) |
                                  std::ranges::to<std::vector>();
 
         const auto push_constant_ranges =

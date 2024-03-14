@@ -19,8 +19,9 @@ namespace stormkit::core {
         };
 
         template<class T>
-        concept IsFancyPointer = requires(T&& a) {
-            T::value_type;
+        concept IsFancyPointer = requires {
+            typename T::element_type;
+        } and requires(T a) {
             a.operator->();
             a.operator*();
             a.get();

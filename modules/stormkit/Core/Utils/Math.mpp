@@ -240,7 +240,8 @@ export {
             /// \unique_name ExtentBase<T>
             template<IsArithmetic T>
             struct Extent {
-                using UnderlyingType = T;
+                using ValueType = T;
+                using value_type = ValueType;
 
                 using OrderingType = std::
                     conditional_t<std::floating_point<T>, std::weak_ordering, std::strong_ordering>;
@@ -254,94 +255,94 @@ export {
                 /// \brief Construct an extent from width, height and optionnaly depth
                 /// \param red The amound of width.
                 /// \param green The amound of height.
-                constexpr Extent(UnderlyingType width,
-                                 UnderlyingType height,
-                                 UnderlyingType depth = UnderlyingType { 1 }) noexcept;
+                constexpr Extent(ValueType width,
+                                 ValueType height,
+                                 ValueType depth = ValueType { 1 }) noexcept;
 
                 /// \brief Copy constructor.
                 ///
                 /// Construct a copy of other.
                 ///
-                /// \param other UnderlyingType copied extent.
-                constexpr Extent(const Extent<UnderlyingType>& other) noexcept = default;
+                /// \param other ValueType copied extent.
+                constexpr Extent(const Extent<ValueType>& other) noexcept = default;
 
                 /// \brief Move constructor.
                 ///
                 /// Move-constructs a `Extent` instance, making it point at the same object that
                 /// other was pointing to.
                 ///
-                /// \param other UnderlyingType moved extent.
-                constexpr Extent(Extent<UnderlyingType>&& other) noexcept = default;
+                /// \param other ValueType moved extent.
+                constexpr Extent(Extent<ValueType>&& other) noexcept = default;
 
                 /// \brief Assigns other to this extent and returns a reference to this extent.
-                /// \param other UnderlyingType extent copied.
-                /// \returns UnderlyingType reference of the copied extent.
-                constexpr auto operator=(const Extent<UnderlyingType>& other) noexcept
-                    -> Extent<UnderlyingType>& = default;
+                /// \param other ValueType extent copied.
+                /// \returns ValueType reference of the copied extent.
+                constexpr auto operator=(const Extent<ValueType>& other) noexcept
+                    -> Extent<ValueType>& = default;
 
                 /// \brief Move assign other to this Extent instance.
-                /// \param other UnderlyingType extent moved.
-                /// \returns UnderlyingType reference of the moved extent.
-                constexpr auto operator=(Extent<UnderlyingType>&& other) noexcept
-                    -> Extent<UnderlyingType>& = default;
+                /// \param other ValueType extent moved.
+                /// \returns ValueType reference of the moved extent.
+                constexpr auto operator=(Extent<ValueType>&& other) noexcept
+                    -> Extent<ValueType>& = default;
 
                 /// \brief Construct a extent from the convertion of an other extent.
                 ///
                 /// Values are converted with static_cast.
                 ///
-                /// \param other UnderlyingType extent converted.
+                /// \param other ValueType extent converted.
                 /// \requires `U` need to be an arithmetic type (satisfy std::is_floating_point or
                 /// std::is_integral).
                 template<IsArithmetic U>
                 constexpr Extent(const Extent<U>& other) noexcept;
 
                 /// \output_section Publics operators members
-                /// \brief UnderlyingType the equality with an other extent.
-                /// \param other UnderlyingType extent to test
+                /// \brief ValueType the equality with an other extent.
+                /// \param other ValueType extent to test
                 /// \returns true if this extent is equal to `other`, otherwise returns false.
                 [[nodiscard]] constexpr auto
-                    operator<=>(const Extent<UnderlyingType>& other) const noexcept -> OrderingType;
+                    operator<=>(const Extent<ValueType>& other) const noexcept -> OrderingType;
 
-                /// \brief UnderlyingType the equality with an other extent.
-                /// \param other UnderlyingType extent to test
+                /// \brief ValueType the equality with an other extent.
+                /// \param other ValueType extent to test
                 /// \returns true if this extent is equal to `other`, otherwise returns false.
                 [[nodiscard]] constexpr auto
-                    operator==(const Extent<UnderlyingType>& other) const noexcept -> bool;
+                    operator==(const Extent<ValueType>& other) const noexcept -> bool;
 
                 /// \brief Multiply an extent with a factor.
-                /// \param factor UnderlyingType factor to multiply
+                /// \param factor ValueType factor to multiply
                 /// \returns A newly constructed extent equal to this extent multiplied with
                 /// `factor`
-                [[nodiscard]] constexpr auto operator*(UnderlyingType factor) const noexcept
-                    -> Extent<UnderlyingType>;
+                [[nodiscard]] constexpr auto operator*(ValueType factor) const noexcept
+                    -> Extent<ValueType>;
 
                 /// \brief Divide an extent with a factor.
-                /// \param factor UnderlyingType factor to divide
+                /// \param factor ValueType factor to divide
                 /// \returns A newly constructed extent equal to this extent Divided with `factor`
-                [[nodiscard]] constexpr auto operator/(UnderlyingType factor) const noexcept
-                    -> Extent<UnderlyingType>;
+                [[nodiscard]] constexpr auto operator/(ValueType factor) const noexcept
+                    -> Extent<ValueType>;
 
                 /// \brief Multiply this extent with a factor.
-                /// \param factor UnderlyingType factor to multiply
+                /// \param factor ValueType factor to multiply
                 /// \returns A reference to this after the multiplication with `factor`
-                [[nodiscard]] constexpr auto operator*=(UnderlyingType factor) noexcept
-                    -> Extent<UnderlyingType>&;
+                [[nodiscard]] constexpr auto operator*=(ValueType factor) noexcept
+                    -> Extent<ValueType>&;
 
                 /// \brief Divide this extent with a factor.
-                /// \param factor UnderlyingType factor to divide
+                /// \param factor ValueType factor to divide
                 /// \returns A reference to this after the division with `factor`
-                [[nodiscard]] constexpr auto operator/=(UnderlyingType factor) noexcept
-                    -> Extent<UnderlyingType>&;
+                [[nodiscard]] constexpr auto operator/=(ValueType factor) noexcept
+                    -> Extent<ValueType>&;
 
                 /// \output_section Publics member
                 /// \brief Width attribute.
-                UnderlyingType width = 0;
+                ValueType width = 0;
 
                 /// \brief Height attribute.
-                UnderlyingType height = 0;
+                ValueType height = 0;
 
                 /// \brief Depth attribute.
-                UnderlyingType depth = 1;
+                ValueType depth = 1;
             };
 
             /// \brief Alias of `Extent<Int32>`.
@@ -426,9 +427,9 @@ namespace stormkit::core {
         /////////////////////////////////////
         /////////////////////////////////////
         template<IsArithmetic T>
-        constexpr Extent<T>::Extent(UnderlyingType _width,
-                                    UnderlyingType _height,
-                                    UnderlyingType _depth) noexcept
+        constexpr Extent<T>::Extent(ValueType _width,
+                                    ValueType _height,
+                                    ValueType _depth) noexcept
             : width { _width }, height { _height }, depth { _depth } {
         }
 
@@ -437,9 +438,9 @@ namespace stormkit::core {
         template<IsArithmetic T>
         template<IsArithmetic U>
         constexpr Extent<T>::Extent(const Extent<U>& other) noexcept
-            : width { narrow<UnderlyingType>(other.width) },
-              height { narrow<UnderlyingType>(other.height) },
-              depth { narrow<UnderlyingType>(other.depth) } {
+            : width { narrow<ValueType>(other.width) },
+              height { narrow<ValueType>(other.height) },
+              depth { narrow<ValueType>(other.depth) } {
         }
 
         /////////////////////////////////////
@@ -465,21 +466,21 @@ namespace stormkit::core {
         /////////////////////////////////////
         /////////////////////////////////////
         template<IsArithmetic T>
-        constexpr auto Extent<T>::operator*(UnderlyingType factor) const noexcept -> Extent {
+        constexpr auto Extent<T>::operator*(ValueType factor) const noexcept -> Extent {
             return Extent { width, height, depth } *= factor;
         }
 
         /////////////////////////////////////
         /////////////////////////////////////
         template<IsArithmetic T>
-        constexpr auto Extent<T>::operator/(UnderlyingType factor) const noexcept -> Extent {
+        constexpr auto Extent<T>::operator/(ValueType factor) const noexcept -> Extent {
             return Extent { width, height, depth } /= factor;
         }
 
         /////////////////////////////////////
         /////////////////////////////////////
         template<IsArithmetic T>
-        constexpr auto Extent<T>::operator*=(UnderlyingType factor) noexcept -> Extent& {
+        constexpr auto Extent<T>::operator*=(ValueType factor) noexcept -> Extent& {
             width *= factor;
             height *= factor;
             depth *= factor;
@@ -489,7 +490,7 @@ namespace stormkit::core {
         /////////////////////////////////////
         /////////////////////////////////////
         template<IsArithmetic T>
-        constexpr auto Extent<T>::operator/=(UnderlyingType factor) noexcept -> Extent& {
+        constexpr auto Extent<T>::operator/=(ValueType factor) noexcept -> Extent& {
             width /= factor;
             height /= factor;
             depth /= factor;

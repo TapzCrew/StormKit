@@ -244,15 +244,15 @@ namespace stormkit::gpu {
                 core::monadic::either(
                     [&buffers](const BufferDescriptor& descriptor) noexcept -> decltype(auto) {
                         buffers.emplace_back(vk::DescriptorBufferInfo {}
-                                                 .setBuffer(toVkHandle()(descriptor.buffer))
+                                                 .setBuffer(toVkHandle(descriptor.buffer))
                                                  .setOffset(descriptor.offset)
                                                  .setRange(descriptor.range));
                     },
                     [&images](const ImageDescriptor& descriptor) noexcept -> decltype(auto) {
                         images.emplace_back(
                             vk::DescriptorImageInfo {}
-                                .setSampler(toVkHandle()(descriptor.sampler))
-                                .setImageView(toVkHandle()(descriptor.image_view))
+                                .setSampler(toVkHandle(descriptor.sampler))
+                                .setImageView(toVkHandle(descriptor.image_view))
                                 .setImageLayout(core::narrow<vk::ImageLayout>(descriptor.layout)));
                     }));
 

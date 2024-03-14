@@ -17,11 +17,11 @@ import :Execution.RasterPipelineState;
 namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
-    auto Pipeline::doInitRasterPipeline(const Device&         device,
-                                        const PipelineLayout& layout,
-                                        const RenderPass&     render_pass,
-                                        std::optional<core::NakedRef<const PipelineCache>>
-                                            pipeline_cache) noexcept -> VulkanExpected<void> {
+    auto Pipeline::doInitRasterPipeline(
+        const Device&                          device,
+        const PipelineLayout&                  layout,
+        const RenderPass&                      render_pass,
+        core::OptionalRef<const PipelineCache> pipeline_cache) noexcept -> VulkanExpected<void> {
         const auto& state = core::as<RasterPipelineState>(m_state);
 
         const auto binding_descriptions =
@@ -139,7 +139,7 @@ namespace stormkit::gpu {
                 static auto NAME = "main";
                 return vk::PipelineShaderStageCreateInfo {}
                     .setStage(core::narrow<vk::ShaderStageFlagBits>(shader->type()))
-                    .setModule(toVkHandle()(shader))
+                    .setModule(toVkHandle(shader))
                     .setPName(NAME);
             }) |
             std::ranges::to<std::vector>();
@@ -165,21 +165,21 @@ namespace stormkit::gpu {
                                      .setPDepthStencilState(&depth_stencil)
                                      .setPColorBlendState(&color_blending)
                                      .setPDynamicState(&dynamic_state)
-                                     .setLayout(toVkHandle()(layout))
-                                     .setRenderPass(toVkHandle()(render_pass))
+                                     .setLayout(toVkHandle(layout))
+                                     .setRenderPass(toVkHandle(render_pass))
                                      .setSubpass(0)
                                      .setBasePipelineHandle(nullptr)
                                      .setBasePipelineIndex(-1);
 
-        using OptCache = vk::Optional<const vk::raii::PipelineCache>;
+        using PipelineCacheRef = core::NakedRef<const vk::raii::PipelineCache>;
 
-        const auto vk_pipeline_cache =
-            core::either(pipeline_cache,
-                         core::monadic::map(toRaiiVkHandle(), core::monadic::init<OptCache>()),
-                         core::monadic::init<OptCache>(nullptr));
+        const auto vk_pipeline_cache = [&pipeline_cache] -> const vk::raii::PipelineCache & {
+            if(pipeline_cache) return toRaiiVkHandle(*pipeline_cache);
+            return nullptr;
+        };
 
-        return device.vkHandle()
-            .createGraphicsPipelines(vk_pipeline_cache, create_info)
+        return toRaiiVkHandle(device)
+            .createGraphicsPipelines(vk_pipeline_cache(), create_info)
             .transform([this](auto&& pipelines) noexcept {
                 m_vk_pipeline = std::move(pipelines.front());
             });

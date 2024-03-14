@@ -135,7 +135,7 @@ namespace stormkit::gpu {
                                      const Semaphore&         image_available) const noexcept
         -> Expected<std::pair<gpu::Result, core::UInt32>> {
         auto&& [result, index] =
-            m_vk_swapchain->acquireNextImage(wait.count(), toVkHandle()(image_available));
+            m_vk_swapchain->acquireNextImage(wait.count(), toVkHandle(image_available));
         const auto possible_results = std::array { vk::Result::eSuccess,
                                                    vk::Result::eErrorOutOfDateKHR,
                                                    vk::Result::eSuboptimalKHR };

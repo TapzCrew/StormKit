@@ -20,12 +20,12 @@ export namespace stormkit::core {
     template<typename T, typename Storage = DeferInitDefaultStorage<T>>
     class [[nodiscard]] DeferInit {
       public:
-        using UnderlyingType = T;
-        using PointerType    = UnderlyingType*;
-        using ReferenceType  = UnderlyingType&;
+        using ElementType = T;
+        using PointerType    = ElementType*;
+        using ReferenceType  = ElementType&;
 
         // STL compatible
-        using value_type     = UnderlyingType;
+        using element_type   = ElementType;
         using pointer_type   = PointerType;
         using reference_type = ReferenceType;
 
@@ -67,7 +67,7 @@ export namespace stormkit::core {
         bool m_initialized = false;
 
         alignas(T) Storage m_data;
-        T* m_pointer = nullptr;
+        PointerType m_pointer = nullptr;
     };
 } // namespace stormkit::core
 

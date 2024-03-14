@@ -23,8 +23,18 @@ export namespace stormkit::gpu {
     constexpr auto vkVersionPatch(std::integral auto version) noexcept -> core::UInt32;
 
     template<class T>
-    concept IsVulkanWrapper =
-        requires(T&& t) { t.vkHandle(); } or requires(T&& t) { t->vkHandle(); };
+    concept IsStormKitVulkanType =
+        requires(T&& t) { t.vkHandle(); };
+
+    // clang-format off
+    template<class T>
+    concept IsStormKitVulkanWrappedType =
+        (core::IsFancyPointer<core::PureType<T>> 
+           and IsStormKitVulkanType<typename core::PureType<T>::element_type>)
+         or (core::IsRawIndirection<T> 
+               and not core::IsRValueReference<T> 
+               and IsStormKitVulkanType<core::RawType<T>>);
+    // clang-format on
 
     template<class T>
     concept IsVulkanFlagsType = vk::FlagTraits<T>::isBitmask;
@@ -50,9 +60,16 @@ export namespace stormkit::gpu {
                 std::span<const vk::Result> possible_results,
                 Args&&... args) noexcept -> VulkanExpected<vk::Result>;
 
-    auto toRaiiVkHandle() noexcept -> decltype(auto);
-    auto toVkHandle() noexcept -> decltype(auto);
+    template<IsStormKitVulkanWrappedType T>
+    auto toRaiiVkHandle(T&& value) noexcept -> decltype(auto);
 
+    template<IsStormKitVulkanWrappedType T>
+    auto toVkHandle(T&& value) noexcept -> decltype(auto);
+
+    namespace monadic {
+        auto toRaiiVkHandle() noexcept -> decltype(auto);
+        auto toVkHandle() noexcept -> decltype(auto);
+    } // namespace monadic
 } // namespace stormkit::gpu
 
 ////////////////////////////////////////////////////////////////////
@@ -128,30 +145,44 @@ namespace stormkit::gpu {
         auto func = std::mem_fn(std::forward<Func>(func_ref));
 
         const auto result = std::invoke(func, value, std::forward<Args>(args)...);
-        if (std::ranges::any_of(possible_results, core::monadic::equal(result))) [[likely]] return result;
+        if (std::ranges::any_of(possible_results, core::monadic::equal(result))) [[likely]]
+            return result;
 
         return std::unexpected { result };
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto toRaiiVkHandle() noexcept -> decltype(auto) {
-        return []<IsVulkanWrapper T>(T&& value) static noexcept -> decltype(auto) {
-            if constexpr (core::IsPointer<core::PureType<T>>)
-                return std::forward<T>(value)->vkHandle();
-            else
-                return std::forward<T>(value).vkHandle();
-        };
+    template<IsStormKitVulkanWrappedType T>
+    STORMKIT_FORCE_INLINE auto toRaiiVkHandle(T&& value) noexcept -> decltype(auto) {
+        if constexpr (core::IsPointer<core::PureType<T>>)
+            return std::forward<T>(value)->vkHandle();
+        else
+            return std::forward<T>(value).vkHandle();
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    inline auto toVkHandle() noexcept -> decltype(auto) {
-        return []<IsVulkanWrapper T>(T&& value) static noexcept -> decltype(auto) {
-            if constexpr (core::IsPointer<core::PureType<T>>)
-                return *(std::forward<T>(value)->vkHandle());
-            else
-                return *(std::forward<T>(value).vkHandle());
-        };
+    template<IsStormKitVulkanWrappedType T>
+    STORMKIT_FORCE_INLINE auto toVkHandle(T&& value) noexcept -> decltype(auto) {
+        return *toRaiiVkHandle(std::forward<T>(value));
     }
+
+    namespace monadic {
+        /////////////////////////////////////
+        /////////////////////////////////////
+        STORMKIT_FORCE_INLINE auto toRaiiVkHandle() noexcept -> decltype(auto) {
+            return []<typename T>(T&& value) static noexcept -> decltype(auto) {
+                return gpu::toRaiiVkHandle(std::forward<T>(value));
+            };
+        }
+
+        /////////////////////////////////////
+        /////////////////////////////////////
+        STORMKIT_FORCE_INLINE auto toVkHandle() noexcept -> decltype(auto) {
+            return []<typename T>(T&& value) static noexcept -> decltype(auto) {
+                return gpu::toVkHandle(std::forward<T>(value));
+            };
+        }
+    } // namespace monadic
 } // namespace stormkit::gpu

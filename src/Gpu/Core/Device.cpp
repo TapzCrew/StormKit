@@ -206,8 +206,10 @@ namespace stormkit::gpu {
                         .setDevice(*vkHandle())
                         .setPVulkanFunctions(&vmaFunctionTable());
 
-                auto&& [result, m_vma_allocator] = vma::createAllocatorUnique(alloc_create_info);
+                auto&& [result, allocator] = vma::createAllocatorUnique(alloc_create_info);
                 if (result != vk::Result::eSuccess) return std::unexpected { result };
+
+                m_vma_allocator = std::move(allocator);
 
                 return {};
             })
@@ -229,7 +231,7 @@ namespace stormkit::gpu {
                                const std::chrono::milliseconds&             timeout) const noexcept
         -> Expected<Result> {
         const auto vk_fences =
-            fences | std::views::transform(toVkHandle()) | std::ranges::to<std::vector>();
+            fences | std::views::transform(monadic::toVkHandle()) | std::ranges::to<std::vector>();
 
         return vkCall(*m_vk_device,
                       &vk::raii::Device::waitForFences,
@@ -246,7 +248,7 @@ namespace stormkit::gpu {
     auto Device::resetFences(std::span<const core::NakedRef<const Fence>> fences) const noexcept
         -> void {
         const auto vk_fences =
-            fences | std::views::transform(toVkHandle()) | std::ranges::to<std::vector>();
+            fences | std::views::transform(monadic::toVkHandle()) | std::ranges::to<std::vector>();
 
         m_vk_device->resetFences(vk_fences);
     }

@@ -15,6 +15,8 @@ namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     auto FrameGraphBuilder::bake() -> void {
+        core::expects(not m_baked);
+
         for (auto& task : m_tasks)
             task.m_ref_count = std::size(task.creates()) + std::size(task.writes());
 
@@ -24,24 +26,29 @@ namespace stormkit::engine {
 
         cullUnreferencedResources();
         buildPhysicalDescriptions();
+
+        m_baked = true;
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto FrameGraphBuilder::createFrameGraph(const gpu::Device& device, BakedFrameGraph* old)
-        -> BakedFrameGraph {
-        auto data = allocatePhysicalResources(device);
+    auto FrameGraphBuilder::createFrameGraph(const gpu::Device&      device,
+                                             const gpu::CommandPool& command_pool,
+                                             BakedFrameGraph*        old) -> BakedFrameGraph {
+        auto&& [backbuffer, data] = allocatePhysicalResources(command_pool, device);
 
-        return BakedFrameGraph { *this, std::move(data), old };
+        return BakedFrameGraph { backbuffer, std::move(data), old };
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto FrameGraphBuilder::allocateFrameGraph(const gpu::Device& device, BakedFrameGraph* old)
+    auto FrameGraphBuilder::allocateFrameGraph(const gpu::Device&      device,
+                                               const gpu::CommandPool& command_pool,
+                                               BakedFrameGraph*        old)
         -> std::unique_ptr<BakedFrameGraph> {
-        auto data = allocatePhysicalResources(device);
+        auto&& [backbuffer, data] = allocatePhysicalResources(command_pool, device);
 
-        return std::make_unique<BakedFrameGraph>(*this, std::move(data), old);
+        return std::make_unique<BakedFrameGraph>(backbuffer, std::move(data), old);
     }
 
     /////////////////////////////////////
@@ -117,6 +124,7 @@ namespace stormkit::engine {
             }) |
             std::views::transform([&layouts, this](const auto& task) noexcept -> decltype(auto) {
                 return Pass { .id         = task.id(),
+                              .type       = task.type(),
                               .renderpass = buildRenderPassPhysicalDescription(task, layouts),
                               .name       = task.name(),
                               .buffers    = buildBufferPhysicalDescriptions(task),
@@ -334,114 +342,113 @@ namespace stormkit::engine {
         }
 
         // TODO support multiple subpasses
-        output.description.subpasses.emplace_back(
-            gpu::Subpass { .bind_point            = task.type() == GraphTask::Type::Graphics
-                                                        ? gpu::PipelineBindPoint::Graphics
-                                                        : gpu::PipelineBindPoint::Compute,
-                           .color_attachment_refs = std::move(color_refs),
-                           .depth_attachment_ref  = std::move(depth_attachment_ref) });
+        output.description.subpasses.emplace_back(gpu::Subpass {
+            .bind_point = task.type() == GraphTask::Type::Raster ? gpu::PipelineBindPoint::Graphics
+                                                                 : gpu::PipelineBindPoint::Compute,
+            .color_attachment_refs = std::move(color_refs),
+            .depth_attachment_ref  = std::move(depth_attachment_ref) });
 
         return output;
     }
 
-    auto FrameGraphBuilder::allocatePhysicalResources(const gpu::Device& device)
-        -> BakedFrameGraph::Data {
+    auto FrameGraphBuilder::allocatePhysicalResources(const gpu::CommandPool& command_pool,
+                                                      const gpu::Device&      device)
+        -> std::pair<core::NakedRef<const gpu::Image>, BakedFrameGraph::Data> {
         using Data = BakedFrameGraph::Data;
 
         auto output = Data {};
-        // output.raster_command_pool = gpu::CommandPool::create(device, device.rasterQueue());
-        // output.main_cmb            = output.raster_command_pool.
-        // output.blit_cmb            = createCommandBuffer(device, output.raster_command_pool);
+        output.cmb  = command_pool.createCommandBuffer(device);
+        device.setObjectName(*output.cmb, "FrameGraph:CommandBuffer:Main");
 
-        // auto future = core::parallelTransform(
-        //     m_thread_pool,
-        //     m_preprocessed_framegraph,
-        //     [&](const auto& pass) {
-        //         auto task = Data::Task {};
-        //         task.id   = pass.id;
-        //
-        //         for (const auto& info : pass.buffers) {
-        //             auto create_info = gpu::BufferCreateInfo{}
-        //             auto& buffer =
-        //                 output.buffers.emplace_back(device.createBuffer(info.create_info));
-        //             device.setObjectName(buffer, std::format("FrameGraph:{}", info.name));
-        //         }
-        //
-        //         auto extent      = core::math::ExtentU {};
-        //         auto attachments = std::vector<gpu::ImageViewConstRef> {};
-        //         for (const auto& info : pass.images) {
-        //             extent.width  = std::max(info.create_info.extent.width, extent.width);
-        //             extent.height = std::max(info.create_info.extent.height, extent.height);
-        //
-        //             auto& image =
-        //             output.images.emplace_back(device.createImage(info.create_info));
-        //             device.setObjectName(image, std::format("FrameGraph:{}", info.name));
-        //             auto& image_view = output.image_views.emplace_back(image.createView());
-        //             device.setObjectName(image_view, std::format("FrameGraph:{}View",
-        //             info.name));
-        //
-        //             attachments.emplace_back(std::cref(image_view));
-        //
-        //             task.clear_values.emplace_back(info.clear_value);
-        //         }
-        //
-        //         if (pass.description) { // TODO support of async Compute and Transfert queue
-        //             task.renderpass = device.allocateRenderPass(*pass.description);
-        //             device.setObjectName(*task.renderpass, std::format("{}:RenderPass",
-        //             pass.name)); task.framebuffer =
-        //             task.renderpass->allocateFramebuffer(extent, attachments);
-        //             device.setObjectName(*task.framebuffer,
-        //                                  std::format("{}:FrameBuffer", pass.name));
-        //
-        //             {
-        //                 task.commandbuffer = graphics_queue.allocateCommandBuffer(
-        //                     gpu::CommandBufferLevel::Secondary);
-        //             }
-        //         } else {
-        //             task.commandbuffer =
-        //                 compute_queue.allocateCommandBuffer(gpu::CommandBufferLevel::Secondary);
-        //         }
-        //
-        //         device.setObjectName(*task.commandbuffer,
-        //                              std::format("FrameGraph:{}:CommandBuffer", pass.name));
-        //
-        //         auto& graph_task = getTask(pass.id);
-        //
-        //         const auto inheritance_info = gpu::CommandBufferInheritanceInfo {
-        //         }
-        //         const auto secondary_begin_info =
-        //             gpu::CommandBufferBeginInfo {}
-        //                 .setIneri
-        //
-        //                     task.commandbuffer->begin(false,
-        //                                               gpu::InheritanceInfo {
-        //                                                   task.renderpass.get(),
-        //                                                   0,
-        //                                                   task.framebuffer.get() });
-        //         graph_task.execute(task.renderpass.get(), *task.commandbuffer);
-        //         task.commandbuffer->end();
-        //
-        //         return task;
-        //     });
-        //
-        // output.tasks = std::move(future.get());
+        output.semaphore = *gpu::Semaphore::create(device);
+        device.setObjectName(*output.cmb, "FrameGraph:Semaphore:Main");
 
-        // m_data.main_cmb->begin();
-        //
-        // for (const auto& task : m_data.tasks) {
-        //     if (task.renderpass)
-        //         m_data.main_cmb->beginRenderPass(*task.renderpass,
-        //                                     *task.framebuffer,
-        //                                     task.clear_values,
-        //                                     true);
-        //
-        //     auto command_buffers = core::makeConstObserverStaticArray(task.commandbuffer);
-        //     m_main_cmb->executeSubCommandBuffers(command_buffers);
-        //
-        //     if (task.renderpass) m_main_cmb->endRenderPass();
-        // }
-        //
-        // m_main_cmb->end();
-        return output;
+        output.tasks.reserve(std::size(m_preprocessed_framegraph));
+
+        using ImagePtr  = const gpu::Image*;
+        auto backbuffer = ImagePtr { nullptr };
+
+        // TODO support of async Compute and Transfert queue
+        for (auto&& pass : m_preprocessed_framegraph) {
+            output.buffers.reserve(std::size(output.buffers) + std::size(pass.buffers));
+            output.images.reserve(std::size(output.images) + std::size(pass.images));
+            output.image_views.reserve(std::size(output.image_views) + std::size(pass.images));
+
+            for (auto&& buffer : pass.buffers) {
+                auto gpu_buffer = *gpu::Buffer::create(device, buffer.create_info);
+                device.setObjectName(gpu_buffer, std::format("FrameGraph:Buffer:{}", buffer.name));
+                output.buffers.emplace_back(std::move(gpu_buffer));
+            }
+
+            auto extent       = core::math::ExtentU {};
+            auto clear_values = std::vector<gpu::ClearValue> {};
+            auto attachments  = std::vector<core::NakedRef<const gpu::ImageView>> {};
+            for (const auto& image : pass.images) {
+                extent.width  = std::max(image.create_info.extent.width, extent.width);
+                extent.height = std::max(image.create_info.extent.height, extent.height);
+
+                clear_values.emplace_back(image.clear_value);
+                auto& gpu_image =
+                    output.images.emplace_back(*gpu::Image::create(device, image.create_info));
+                device.setObjectName(gpu_image, std::format("FrameGraph:Image:{}", image.name));
+
+                if (image.id == m_final_resource) backbuffer = &gpu_image;
+
+                auto& gpu_image_view =
+                    output.image_views.emplace_back(*gpu::ImageView::create(device, gpu_image));
+                device.setObjectName(gpu_image_view,
+                                     std::format("FrameGraph:ImageView:{}", image.name));
+
+                attachments.emplace_back(gpu_image_view);
+            }
+
+            core::expects(backbuffer != nullptr, "No final resource set !");
+
+            auto renderpass = *gpu::RenderPass::create(device, pass.renderpass.description);
+            device.setObjectName(renderpass, std::format("FrameGraph:RenderPass:{}", pass.name));
+
+            auto framebuffer = *gpu::FrameBuffer::create(device, renderpass, extent, attachments);
+            device.setObjectName(framebuffer, std::format("FrameGraph:FrameBuffer:{}", pass.name));
+
+            auto cmb = command_pool.createCommandBuffer(device, gpu::CommandBufferLevel::Secondary);
+            device.setObjectName(cmb, std::format("FrameGraph:CommandBuffer:{}", pass.name));
+
+            cmb.begin(false, gpu::InheritanceInfo { &renderpass, 0, &framebuffer });
+            cmb.beginRenderPass(renderpass, framebuffer, clear_values);
+            auto&& graph_task = getTask(pass.id);
+            graph_task.onExecute(m_datas[pass.id].front(), &renderpass, cmb);
+            cmb.endRenderPass();
+            cmb.end();
+
+            output.tasks.emplace_back(
+                BakedFrameGraph::Data::RasterTask { .id           = pass.id,
+                                                    .cmb          = std::move(cmb),
+                                                    .clear_values = std::move(clear_values),
+                                                    .renderpass   = std::move(renderpass),
+                                                    .framebuffer  = std::move(framebuffer) });
+        }
+
+        output.cmb->begin();
+        const auto visitors =
+            core::Overloaded { [&output](const BakedFrameGraph::Data::RasterTask& task) {
+                                  output.cmb->beginRenderPass(task.renderpass,
+                                                              task.framebuffer,
+                                                              task.clear_values,
+                                                              true);
+
+                                  const auto command_buffers =
+                                      core::makeNakedRefs<std::array>(task.cmb);
+                                  output.cmb->executeSubCommandBuffers(command_buffers);
+                                  output.cmb->endRenderPass();
+                              },
+                               [&output](const BakedFrameGraph::Data::ComputeTask& task) {
+                                   const auto command_buffers =
+                                       core::makeNakedRefs<std::array>(task.cmb);
+                                   output.cmb->executeSubCommandBuffers(command_buffers);
+                               } };
+        for (auto&& task : output.tasks) std::visit(visitors, task);
+        output.cmb->end();
+
+        return std::make_pair(core::NakedRef { backbuffer }, std::move(output));
     } // namespace stormkit::engine
 } // namespace stormkit::engine

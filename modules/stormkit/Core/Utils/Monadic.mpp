@@ -25,15 +25,20 @@ export namespace stormkit::core::monadic {
     };
 
     template<typename T>
+    [[nodiscard]] constexpr auto value() noexcept -> decltype(auto);
+    template<typename T>
     [[nodiscard]] constexpr auto as() noexcept -> decltype(auto);
     template<typename T>
     [[nodiscard]] constexpr auto narrow() noexcept -> decltype(auto);
     [[nodiscard]] constexpr auto discard() noexcept -> decltype(auto);
     [[nodiscard]] constexpr auto set(auto& output) noexcept -> decltype(auto);
-    [[nodiscard]] constexpr auto emplaceTo(auto& container) noexcept -> decltype(auto);
+    [[nodiscard]] constexpr auto
+        emplaceTo(std::ranges::range auto& container) noexcept -> decltype(auto);
     [[nodiscard]] constexpr auto equal(auto&& value) noexcept;
     [[nodiscard]] constexpr auto appendTo(std::ranges::range auto& range) noexcept;
-    [[nodiscard]] constexpr auto wrap(std::invocable auto&& func) noexcept;
+    [[nodiscard]] constexpr auto wrap(auto&& func) noexcept;
+    template<auto Func>
+    [[nodiscard]] constexpr auto wrap() noexcept;
     [[nodiscard]] constexpr auto asByte() noexcept;
 
     template<typename T,
@@ -67,6 +72,14 @@ export namespace stormkit::core::monadic {
 ////////////////////////////////////////////////////////////////////
 
 namespace stormkit::core::monadic {
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE constexpr auto value() noexcept -> decltype(auto) {
+        return []<IsFancyPointer T>(T&& value) noexcept -> decltype(auto) {
+            return std::forward_like<T>(value.get());
+        };
+    }
+
     /////////////////////////////////////
     /////////////////////////////////////
     template<typename T>
@@ -104,9 +117,19 @@ namespace stormkit::core::monadic {
 
     ////////////////////////////////////////
     ////////////////////////////////////////
-    STORMKIT_FORCE_INLINE constexpr auto wrap(std::invocable auto&& func) noexcept {
-        return [func = std::forward<decltype(func)>(func)](auto&&... args) {
-            return func(std::forward<decltype(args)>(args)...);
+    STORMKIT_FORCE_INLINE constexpr auto wrap(auto&& func) noexcept {
+        return
+            [func = std::forward<decltype(func)>(func)]<typename... Args>(Args&&... args) noexcept {
+                return std::invoke(func, std::forward<Args>(args)...);
+            };
+    }
+
+    ////////////////////////////////////////
+    ////////////////////////////////////////
+    template<auto Func>
+    STORMKIT_FORCE_INLINE constexpr auto wrap() noexcept {
+        return []<typename... Args>(Args&&... args) static noexcept {
+            return std::invoke(Func, std::forward<Args>(args)...);
         };
     }
 
@@ -132,7 +155,8 @@ namespace stormkit::core::monadic {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE constexpr auto emplaceTo(auto& container) noexcept -> decltype(auto) {
+    STORMKIT_FORCE_INLINE constexpr auto
+        emplaceTo(std::ranges::range auto& container) noexcept -> decltype(auto) {
         return [&container](auto&& value) noexcept -> void {
             container.emplace_back(std::forward<decltype(value)>(value));
         };
@@ -145,22 +169,30 @@ namespace stormkit::core::monadic {
              std::invocable<std::invoke_result_t<First, T&&>&&> Second>
     STORMKIT_FORCE_INLINE constexpr auto map(First&&  first,
                                              Second&& second) noexcept -> decltype(auto) {
-        return
-            [first  = std::forward<decltype(first)>(first),
-             second = std::forward<decltype(second)>(second)](T&& args) noexcept -> decltype(auto) {
-                return second(first(std::forward<T>(args)));
-            };
+        return [first  = std::forward<decltype(first)>(first),
+                second = std::forward<decltype(second)>(second)](
+                   T&& args) noexcept(noexcept(std::
+                                                   declval<Second>()(std::declval<First>()(
+                                                       std::declval<T>())))) -> decltype(auto) {
+            return second(first(std::forward<T>(args)));
+        };
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE constexpr auto map(auto&& first,
                                              auto&& second) noexcept -> decltype(auto) {
-        return [first  = std::forward<decltype(first)>(first),
-                second = std::forward<decltype(second)>(second)](
-                   auto&&... args) noexcept -> decltype(auto) {
-            return second(first(std::forward<decltype(args)>(args)...));
-        };
+        using First  = core::PureType<decltype(first)>;
+        using Second = core::PureType<decltype(second)>;
+        return
+            [first  = std::forward<decltype(first)>(first),
+             second = std::forward<decltype(second)>(
+                 second)]<typename... Args, typename First = First, typename Second = Second>(
+                Args&&... args) noexcept(noexcept(std::
+                                                      declval<Second>()(std::declval<First>()(
+                                                          std::declval<Args>()...))))
+
+                -> decltype(auto) { return second(first(std::forward<decltype(args)>(args)...)); };
     }
 
     /////////////////////////////////////
@@ -225,3 +257,4 @@ namespace stormkit::core::monadic {
         };
     }
 } // namespace stormkit::core::monadic
+

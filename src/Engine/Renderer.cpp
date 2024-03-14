@@ -204,67 +204,22 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto Renderer::threadLoop(std::stop_token token) noexcept -> void {
-        // auto transition_command_buffers =
-        //           raster_queue
-        //
-        // transition_command_buffer.begin(true);
-        // for (auto& image : m_images)
-        //     transition_command_buffer.transitionImageLayout(image,
-        //                                                     ImageLayout::Undefined,
-        //                                                     ImageLayout::Present_Src);
-        // transition_command_buffer.end();
-        //
-        // auto fence = m_device->createFence();
-        //
-        // transition_command_buffer.submit({}, {}, &fence);
-        //
-        // const auto fences = core::makeConstRefStaticArray(fence);
-        // m_device->waitForFences(fences);
-        //    const auto create_info = gpu::CommandPoolCreateInfo {}.setFlags(
-        //        gpu::CommandPoolCreateFlagBits::eTransient |
-        //        gpu::CommandPoolCreateFlagBits::eResetCommandBuffer);
-        //    auto command_pool = gpu::CommandPool { m_device, create_info };
-        //
-        //    const auto& images     = m_render_surface->images();
-        //    auto&& command_buffers = createCommandBuffers(m_device, command_pool,
-        //    std::size(images));
-        //
-        //    for (const auto i : core::range(std::size(images))) {
-        //        const auto& image          = images[i];
-        //        auto      & command_buffer = command_buffers[i];
-        //
-        //        command_buffer.begin(gpu::CommandBufferBeginInfo {}.setFlags(
-        //            gpu::CommandBufferUsageFlagBits::eOneTimeSubmit));
-        //
-        //        transitionImageLayout(command_buffer,
-        //                              image,
-        //                              gpu::ImageLayout::eUndefined,
-        //                              gpu::ImageLayout::ePresentSrc);
-        //
-        //        command_buffer.end();
-        //    }
-        //
-        //    auto fence = gpu::Fence { m_device,
-        //                                   gpu::FenceCreateInfo {}.setFlags(
-        //                                       gpu::FenceCreateFlagBits::eSignaled) };
-        //
-        //    submit(m_raster_queue, command_buffers, {}, {}, *fence);
-        //
-        // //        fence.wait();
-        //
+    auto Renderer::threadLoop(std::mutex&       framegraph_mutex,
+                              std::atomic_bool& rebuild_graph,
+                              std::stop_token   token) noexcept -> void {
         m_command_buffers =
             m_main_command_pool->createCommandBuffers(m_device, m_surface->bufferingCount());
-        for (auto i : core::range(m_surface->bufferingCount()))
-            gpu::Fence::createSignaled(m_device)
-                .transform(core::monadic::emplaceTo(m_fences))
-                .transform_error(core::expectsWithMessage("Failed to create swapchain fences"));
+
+        m_framegraphs.resize(m_surface->bufferingCount());
 
         for (;;) {
             if (token.stop_requested()) return;
 
             m_surface->beginFrame(m_device)
-                .and_then(core::curry(&Renderer::doRender, this))
+                .and_then(core::curry(&Renderer::doRender,
+                                      this,
+                                      std::ref(framegraph_mutex),
+                                      std::ref(rebuild_graph)))
                 .and_then(core::curry(&RenderSurface::presentFrame,
                                       &m_surface.get(),
                                       std::cref(*m_raster_queue)))
@@ -276,23 +231,46 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto Renderer::doRender(RenderSurface::Frame&& frame) noexcept
+    auto Renderer::doRender(std::mutex&            framegraph_mutex,
+                            std::atomic_bool&      rebuild_graph,
+                            RenderSurface::Frame&& frame) noexcept
         -> gpu::Expected<RenderSurface::Frame> {
-        auto&& command_buffer = m_command_buffers[frame.current_frame];
-        auto&& fence          = m_fences[frame.current_frame];
+        if (rebuild_graph) {
+            auto _ = std::unique_lock { framegraph_mutex };
+            m_graph_builder.bake();
 
-        return fence.wait()
-            .transform([&fence](auto&& _) noexcept { fence.reset(); })
-            .transform([frame = std::move(frame), &command_buffer, &fence, this]() {
-                command_buffer.reset();
-                command_buffer.begin(true);
-                command_buffer.end();
-                command_buffer.submit(m_raster_queue,
-                                      {},
-                                      core::makeNakedRefs<std::array>(*frame.render_finished),
-                                      fence);
+            for (auto&& framegraph : m_framegraphs)
+                framegraph = m_graph_builder.createFrameGraph(m_device, m_main_command_pool);
 
-                return frame;
-            });
+            rebuild_graph = false;
+        }
+
+        auto&& framegraph = m_framegraphs[frame.current_frame];
+
+        auto&& present_image = m_surface->images()[frame.current_frame];
+        auto&& blit_cmb      = m_command_buffers[frame.current_frame];
+
+        blit_cmb.reset();
+        blit_cmb.begin(true);
+        auto&& semaphore  = framegraph->execute(m_raster_queue, frame);
+        auto&& backbuffer = framegraph->backbuffer();
+        blit_cmb.blitImage(
+            backbuffer,
+            present_image,
+            gpu::ImageLayout::Color_Attachment_Optimal,
+            gpu::ImageLayout::Present_Src,
+            std::array { gpu::BlitRegion {
+                .src        = {},
+                .dst        = {},
+                .src_offset = { core::math::ExtentI { 0, 0, 0 }, backbuffer.extent() },
+                .dst_offset = { core::math::ExtentI { 0, 0, 0 }, present_image.extent() } } },
+            gpu::Filter::Linear);
+        blit_cmb.end();
+
+        auto wait   = core::makeNakedRefs<std::array>(semaphore, *frame.image_available);
+        auto signal = core::makeNakedRefs<std::array>(*frame.render_finished);
+
+        blit_cmb.submit(m_raster_queue, wait, signal, frame.in_flight);
+        return frame;
     }
 } // namespace stormkit::engine

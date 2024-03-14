@@ -14,12 +14,12 @@ export namespace stormkit::core {
     template<typename T>
     class [[nodiscard]] NakedRef {
       public:
-        using UnderlyingType = T;
-        using PointerType    = UnderlyingType*;
-        using ReferenceType  = UnderlyingType&;
+        using ElementType   = T;
+        using PointerType   = ElementType*;
+        using ReferenceType = ElementType&;
 
         // STL compatible
-        using value_type     = UnderlyingType;
+        using element_type   = ElementType;
         using pointer_type   = PointerType;
         using reference_type = ReferenceType;
 
@@ -58,8 +58,10 @@ export namespace stormkit::core {
     template<IsRawIndirection T>
         requires(not IsRValueReference<T>)
     [[nodiscard]] constexpr auto makeNakedRef(T&& value) noexcept -> decltype(auto);
+    template<typename T>
+    [[nodiscard]] constexpr auto makeNakedRef(const NakedRef<T>& value) noexcept -> decltype(auto);
     template<IsFancyPointer T>
-    [[nodiscard]] constexpr auto makeNakedRef(T& value) noexcept -> decltype(auto);
+    [[nodiscard]] constexpr auto makeNakedRef(T&& value) noexcept -> decltype(auto);
 
     template<template<typename...> typename Out = std::vector, typename... Args>
         requires(AreIndirections<Args...>)
@@ -186,12 +188,19 @@ namespace stormkit::core {
 
     /////////////////////////////////////
     /////////////////////////////////////
+    template<typename T>
+    constexpr auto makeNakedRef(const NakedRef<T>& value) noexcept -> decltype(auto) {
+        return auto{value};
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
     template<IsFancyPointer T>
-    constexpr auto makeNakedRef(T& value) noexcept -> decltype(auto) {
-        using PureT = PureType<typename PureType<T>::value_type>;
+    constexpr auto makeNakedRef(T&& value) noexcept -> decltype(auto) {
+        using PureT = PureType<typename PureType<T>::element_type>;
         using Out =
             std::conditional_t<std::is_const_v<T>, NakedRef<PureT>, const NakedRef<const PureT>>;
-        return Out { value.get() };
+        return Out { *value };
     }
 
     /////////////////////////////////////

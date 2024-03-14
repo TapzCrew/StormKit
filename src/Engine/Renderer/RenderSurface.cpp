@@ -83,7 +83,7 @@ namespace stormkit::engine {
         const auto& render_finished = m_render_finisheds[m_current_frame];
         auto&       in_flight       = m_in_flight_fences[m_current_frame];
 
-        return in_flight.wait(100ms)
+        return in_flight.wait()
             .transform([&in_flight](auto&& _) noexcept { in_flight.reset(); })
             .and_then(core::curry(&gpu::Swapchain::acquireNextImage,
                                   &(m_swapchain.get()),

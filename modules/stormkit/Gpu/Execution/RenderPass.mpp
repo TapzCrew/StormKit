@@ -190,10 +190,10 @@ namespace stormkit::gpu {
                              Tag)
         : m_extent { std::move(extent) }, m_attachments { std::move(attachments) } {
         const auto vk_attachments =
-            m_attachments | std::views::transform(toVkHandle()) | std::ranges::to<std::vector>();
+            m_attachments | std::views::transform(monadic::toVkHandle()) | std::ranges::to<std::vector>();
 
         const auto create_info = vk::FramebufferCreateInfo {}
-                                     .setRenderPass(toVkHandle()(render_pass))
+                                     .setRenderPass(toVkHandle(render_pass))
                                      .setAttachments(vk_attachments)
                                      .setWidth(m_extent.width)
                                      .setHeight(m_extent.height)

@@ -68,7 +68,6 @@ namespace stormkit::image::details {
         const auto& data         = output_image.imageData();
 
         auto output = std::vector<core::Byte> {};
-
         if (args == image::Image::CodecArgs::Ascii) {
             auto result = std::format("P3\n{}\n{}\n255\n"sv, data.extent.width, data.extent.height);
 

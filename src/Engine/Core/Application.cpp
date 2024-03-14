@@ -29,27 +29,21 @@ namespace stormkit::engine {
         m_world = entities::EntityManager {};
     }
 
-    auto Application::update() -> void {
-        // m_world->addSystem<RenderSystem>();
+    auto Application::run() -> void {
+        auto framegraph_mutex = std::mutex {};
+        auto rebuild_graph    = std::atomic_bool { true };
 
-        m_renderer->startRendering();
+        m_world->addSystem<RenderSystem>(m_renderer);
+
+        m_renderer->startRendering(framegraph_mutex, rebuild_graph);
         while (m_window->isOpen()) {
+            m_renderer->updateFrameGraph(framegraph_mutex, rebuild_graph, m_update_framegraph);
             m_event_handler->update(m_window);
-            // m_world->step(core::Secondf { 0 });
+            m_world->step(core::Secondf { 0 });
             // if (m_surf0ace->needRecreate()) {
             // m_surface->recreate();
             // doInitPerFrameObjects();
             //}
-
-            // auto frame       = std::move(m_surface->acquireNextFrame().value());
-            // auto& frame_data = m_frame_datas[frame.image_index];
-
-            // auto wait   = core::makeConstObserverStaticArray(frame.image_available);
-            // auto signal = core::makeConstObserverStaticArray(frame.render_finished);
-
-            // frame_data.commandbuffer.submit(wait, signal, frame.in_flight);
-
-            // m_surface->present(frame);
         }
     }
 } // namespace stormkit::engine

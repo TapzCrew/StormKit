@@ -28,23 +28,24 @@ export {
 
         template<IsColorComponent T>
         struct RGBColor {
-            using UnderlyingType = T;
+            using ValueType = T;
+            using value_type = ValueType;
 
             constexpr RGBColor(
-                UnderlyingType red,
-                UnderlyingType green,
-                UnderlyingType blue,
-                UnderlyingType alpha = maxColorComponentValue<UnderlyingType>()) noexcept;
+                ValueType red,
+                ValueType green,
+                ValueType blue,
+                ValueType alpha = maxColorComponentValue<ValueType>()) noexcept;
 
-            constexpr explicit RGBColor(const math::Vector3<UnderlyingType>& vector) noexcept;
+            constexpr explicit RGBColor(const math::Vector3<ValueType>& vector) noexcept;
 
-            constexpr explicit RGBColor(const math::Vector4<UnderlyingType>& vector) noexcept;
+            constexpr explicit RGBColor(const math::Vector4<ValueType>& vector) noexcept;
 
-            constexpr RGBColor(const RGBColor<UnderlyingType>& other) noexcept;
-            constexpr auto operator=(const RGBColor<UnderlyingType>& other) noexcept -> RGBColor&;
+            constexpr RGBColor(const RGBColor<ValueType>& other) noexcept;
+            constexpr auto operator=(const RGBColor<ValueType>& other) noexcept -> RGBColor&;
 
-            constexpr RGBColor(RGBColor<UnderlyingType>&& other) noexcept;
-            constexpr auto operator=(RGBColor<UnderlyingType>&& other) noexcept -> RGBColor&;
+            constexpr RGBColor(RGBColor<ValueType>&& other) noexcept;
+            constexpr auto operator=(RGBColor<ValueType>&& other) noexcept -> RGBColor&;
 
             template<IsColorComponent U>
             constexpr RGBColor(const RGBColor<U>& other) noexcept;
@@ -52,17 +53,17 @@ export {
             template<IsColorComponent U>
             constexpr auto operator=(const RGBColor<U>& other) noexcept -> RGBColor&;
 
-            constexpr auto toVector3() const noexcept -> math::Vector3<UnderlyingType>;
-            constexpr auto toVector4() const noexcept -> math::Vector4<UnderlyingType>;
+            constexpr auto toVector3() const noexcept -> math::Vector3<ValueType>;
+            constexpr auto toVector4() const noexcept -> math::Vector4<ValueType>;
 
-            constexpr operator math::Vector3<UnderlyingType>() const noexcept;
-            constexpr operator math::Vector4<UnderlyingType>() const noexcept;
-            constexpr operator std::array<UnderlyingType, 4>() const noexcept;
+            constexpr operator math::Vector3<ValueType>() const noexcept;
+            constexpr operator math::Vector4<ValueType>() const noexcept;
+            constexpr operator std::array<ValueType, 4>() const noexcept;
 
-            UnderlyingType red;
-            UnderlyingType green;
-            UnderlyingType blue;
-            UnderlyingType alpha;
+            ValueType red;
+            ValueType green;
+            ValueType blue;
+            ValueType alpha;
         };
 
         using RGBColorU = RGBColor<UInt8>;
@@ -232,17 +233,17 @@ namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
     template<IsColorComponent T>
-    constexpr RGBColor<T>::RGBColor(UnderlyingType _red,
-                                    UnderlyingType _green,
-                                    UnderlyingType _blue,
-                                    UnderlyingType _alpha) noexcept
+    constexpr RGBColor<T>::RGBColor(ValueType _red,
+                                    ValueType _green,
+                                    ValueType _blue,
+                                    ValueType _alpha) noexcept
         : red { _red }, green { _green }, blue { _blue }, alpha { _alpha } {
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<IsColorComponent T>
-    constexpr RGBColor<T>::RGBColor(const math::Vector3<UnderlyingType>& vector) noexcept
+    constexpr RGBColor<T>::RGBColor(const math::Vector3<ValueType>& vector) noexcept
         : red { vector.r }, green { vector.g }, blue { vector.b },
           alpha(maxColorComponentValue<T>()) {
     }
@@ -250,30 +251,30 @@ namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
     template<IsColorComponent T>
-    constexpr RGBColor<T>::RGBColor(const math::Vector4<UnderlyingType>& vector) noexcept
+    constexpr RGBColor<T>::RGBColor(const math::Vector4<ValueType>& vector) noexcept
         : red { vector.r }, green { vector.g }, blue { vector.b }, alpha { vector.a } {
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<IsColorComponent T>
-    constexpr RGBColor<T>::RGBColor(const RGBColor<UnderlyingType>& other) noexcept = default;
+    constexpr RGBColor<T>::RGBColor(const RGBColor<ValueType>& other) noexcept = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<IsColorComponent T>
-    constexpr auto RGBColor<T>::operator=(const RGBColor<UnderlyingType>& other) noexcept
+    constexpr auto RGBColor<T>::operator=(const RGBColor<ValueType>& other) noexcept
         -> RGBColor& = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<IsColorComponent T>
-    constexpr RGBColor<T>::RGBColor(RGBColor<UnderlyingType>&& other) noexcept = default;
+    constexpr RGBColor<T>::RGBColor(RGBColor<ValueType>&& other) noexcept = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<IsColorComponent T>
-    constexpr auto RGBColor<T>::operator=(RGBColor<UnderlyingType>&& other) noexcept
+    constexpr auto RGBColor<T>::operator=(RGBColor<ValueType>&& other) noexcept
         -> RGBColor& = default;
 
     /////////////////////////////////////
@@ -299,35 +300,35 @@ namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
     template<IsColorComponent T>
-    constexpr auto RGBColor<T>::toVector3() const noexcept -> math::Vector3<UnderlyingType> {
+    constexpr auto RGBColor<T>::toVector3() const noexcept -> math::Vector3<ValueType> {
         return { red, green, blue };
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<IsColorComponent T>
-    constexpr auto RGBColor<T>::toVector4() const noexcept -> math::Vector4<UnderlyingType> {
+    constexpr auto RGBColor<T>::toVector4() const noexcept -> math::Vector4<ValueType> {
         return { red, green, blue, alpha };
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<IsColorComponent T>
-    constexpr RGBColor<T>::operator math::Vector3<UnderlyingType>() const noexcept {
+    constexpr RGBColor<T>::operator math::Vector3<ValueType>() const noexcept {
         return toVector3();
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<IsColorComponent T>
-    constexpr RGBColor<T>::operator math::Vector4<UnderlyingType>() const noexcept {
+    constexpr RGBColor<T>::operator math::Vector4<ValueType>() const noexcept {
         return toVector4();
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<IsColorComponent T>
-    constexpr RGBColor<T>::operator std::array<UnderlyingType, 4>() const noexcept {
+    constexpr RGBColor<T>::operator std::array<ValueType, 4>() const noexcept {
         return { red, green, blue, alpha };
     }
 } // namespace stormkit::core

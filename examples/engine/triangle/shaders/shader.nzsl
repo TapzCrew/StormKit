@@ -1,6 +1,6 @@
 [nzsl_version("1.0")]
 
-    module Shader;
+module Shader;
 
 struct VertIn {
     [builtin(vertex_index)] vertex_id: i32
@@ -8,13 +8,9 @@ struct VertIn {
 
 struct VertOut {
     [builtin(position)] position: vec4[f32], [location(0)] color: vec3[f32]
-
 }
 
-    [entry(vert)] fn
-    main(input
-         : VertIn)
-        ->VertOut {
+[entry(vert)] fn main(input: VertIn) -> VertOut {
     let output: VertOut;
 
     let position: vec2[f32];
@@ -39,13 +35,9 @@ struct VertOut {
 
 struct FragOut {
     [location(0)] color: vec4[f32]
-
 }
 
-    [entry(frag)] fn
-    main(input
-         : VertOut)
-        ->FragOut {
+[entry(frag)] fn main(input: VertOut) -> FragOut {
     let output: FragOut;
     output.color = vec4[f32](input.color, 1.);
 

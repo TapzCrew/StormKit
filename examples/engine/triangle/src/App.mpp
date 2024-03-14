@@ -7,70 +7,112 @@ export module App;
 import std;
 
 import stormkit.Core;
+import stormkit.Gpu;
 import stormkit.Engine;
 import stormkit.Wsi;
 
 import Constants;
 import ShaderData;
 
-export class App: public stormkit::core::App {
-  public:
-    App();
+using namespace stormkit;
 
-    auto run(std::span<const std::string_view> args) -> stormkit::core::Int override;
+export class App: public core::App {
+  public:
+    ~App() override;
+    auto run(std::span<const std::string_view> args) -> core::Int override;
 
   private:
-    auto doInitEngine() noexcept -> void;
+    auto updateFrameGraph(engine::FrameGraphBuilder&, std::atomic_bool&) -> void;
 
-    stormkit::core::DeferInit<stormkit::engine::Application> m_application;
+    core::DeferInit<engine::Application> m_application;
 
     bool m_fullscreen_enabled = false;
+
+    core::DeferInit<gpu::Shader> m_vertex_shader;
+    core::DeferInit<gpu::Shader> m_fragment_shader;
 };
-
-module :private;
-
-using namespace stormkit;
 
 ////////////////////////////////////////////////////////////////////
 ///                      IMPLEMENTATION                          ///
 ////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////
-////////////////////////////////////////
-App::App() = default;
+module :private;
+
+App::~App() = default;
 
 ////////////////////////////////////////
 ////////////////////////////////////////
-auto App::run([[maybe_unused]] std::span<const std::string_view> args) -> core::Int {
-    doInitEngine();
+auto App::run(std::span<const std::string_view> _) -> core::Int {
+    m_application =
+        engine::Application::create(APPLICATION_NAME, { 800u, 600u }, WINDOW_TITLE)
+            .transform_error(core::expectsWithMessage("Failed to initialize Render engine"))
+            .value();
+    m_application->setUpdateFrameGraphCallback(core::curry(&App::updateFrameGraph, this));
 
     auto& window        = m_application->window();
     auto& event_handler = m_application->eventHandler();
+    auto& renderer      = m_application->renderer();
+
+    m_vertex_shader =
+        gpu::Shader::fromBytes(renderer.device(), SHADER_DATA, gpu::ShaderStageFlag::Vertex)
+            .transform_error(core::expectsWithMessage("Failed to load vertex shader"))
+            .value();
+
+    m_fragment_shader =
+        gpu::Shader::fromBytes(renderer.device(), SHADER_DATA, gpu::ShaderStageFlag::Fragment)
+            .transform_error(core::expectsWithMessage("Failed to load fragment shader"))
+            .value();
 
     event_handler.setCallbacks(
-        { { wsi::EventType::Closed,
-            [&window]([[maybe_unused]] const wsi::Event& event) { window.close(); } },
-          { wsi::EventType::KeyReleased, [this, &window](const wsi::Event& event) {
+        { { wsi::EventType::Closed, [&window](const wsi::Event& _) noexcept { window.close(); } },
+          { wsi::EventType::KeyReleased, [this, &window](const wsi::Event& event) noexcept {
                const auto& event_data = core::as<wsi::KeyReleasedEventData>(event.data);
 
                if (event_data.key == wsi::Key::Escape) [[unlikely]]
                    window.close();
 
-               if (event_data.key == wsi::Key::F11) {
-                   window.setFullscreenEnabled(!m_fullscreen_enabled);
-                   m_fullscreen_enabled = !m_fullscreen_enabled;
+               if (event_data.key == wsi::Key::F11) [[unlikely]] {
+                   m_fullscreen_enabled = not m_fullscreen_enabled;
+                   window.setFullscreenEnabled(m_fullscreen_enabled);
                }
            } } });
 
-    m_application->update();
+    m_application->run();
 
     return 0;
 }
 
 ////////////////////////////////////////
 ////////////////////////////////////////
-auto App::doInitEngine() noexcept -> void {
-    m_application = engine::Application::create(APPLICATION_NAME, { 800u, 600u }, WINDOW_TITLE)
-                        .transform_error(core::expects())
-                        .value();
+auto App::updateFrameGraph(engine::FrameGraphBuilder& graph,
+                           std::atomic_bool&          rebuild_graph) -> void {
+    static auto initialized = false;
+
+    if (not initialized) {
+        struct DrawTask {
+            engine::GraphID backbuffer;
+        };
+
+        auto&& render_task = graph.addRasterTask<DrawTask>(
+            "Render",
+            [&](DrawTask& task_data, engine::GraphTaskBuilder& builder) {
+                task_data.backbuffer = builder
+                                           .create("color",
+                                                   engine::ImageDescription {
+                                                       .extent = {},
+                                                       .type   = gpu::ImageType::T2D,
+                                                       .format = gpu::PixelFormat::BGRA8_UNorm })
+                                           .id();
+
+                graph.setFinalResource(task_data.backbuffer);
+            },
+            [](const DrawTask&                    task_data,
+               core::OptionalRef<gpu::RenderPass> render_pass,
+               gpu::CommandBuffer&                cmb) {});
+
+        render_task.setCullImune(true);
+
+        initialized   = true;
+        rebuild_graph = true;
+    }
 }

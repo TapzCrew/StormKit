@@ -17,7 +17,7 @@ import :Renderer;
 namespace stormkit::engine {
     class RenderSystem final: public entities::System {
       public:
-        RenderSystem(entities::EntityManager& manager);
+        RenderSystem(Renderer& renderer, entities::EntityManager& manager);
         ~RenderSystem() final;
 
         RenderSystem(const RenderSystem&)                    = delete;
@@ -30,6 +30,8 @@ namespace stormkit::engine {
 
       private:
         auto onMessageReceived(const entities::Message& message) -> void override;
+
+        core::NakedRef<Renderer> m_renderer;
     };
 } // namespace stormkit::engine
 
@@ -40,8 +42,8 @@ namespace stormkit::engine {
 namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_INLINE RenderSystem::RenderSystem(entities::EntityManager& manager)
-        : System { manager, 0, {} } {
+    STORMKIT_INLINE RenderSystem::RenderSystem(Renderer& renderer, entities::EntityManager& manager)
+        : System { manager, 0, {} }, m_renderer { renderer } {
     }
 
     /////////////////////////////////////
@@ -54,8 +56,8 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_INLINE auto RenderSystem::operator=(RenderSystem&&) noexcept
-        -> RenderSystem& = default;
+    STORMKIT_INLINE auto
+        RenderSystem::operator=(RenderSystem&&) noexcept -> RenderSystem& = default;
 
     /////////////////////////////////////
     /////////////////////////////////////

@@ -84,6 +84,10 @@ namespace stormkit::gpu {
             if (!validation_layers_enabled) return validation_layers_enabled;
 
             const auto layers = context.enumerateInstanceLayerProperties();
+            dlog("Layers found: {}",
+                 layers | std::views::transform([](auto&& layer) static noexcept {
+                     return std::string_view { layer.layerName };
+                 }));
             for (const auto& layer_name : std::as_const(VALIDATION_LAYERS)) {
                 auto layer_found = false;
 
@@ -148,7 +152,7 @@ namespace stormkit::gpu {
             m_validation_layers_enabled =
                 checkValidationLayerSupport(m_vk_context, m_validation_layers_enabled);
             if (m_validation_layers_enabled) {
-                dlog("Enabling layers: {}", VALIDATION_LAYERS);
+                ilog("Enabling layers: {}", VALIDATION_LAYERS);
 
                 output = VALIDATION_LAYERS | std::ranges::to<std::vector>();
             }
@@ -209,7 +213,7 @@ namespace stormkit::gpu {
 
         return m_vk_instance->createDebugUtilsMessengerEXT(create_info)
             .transform(core::monadic::set(m_vk_messenger))
-            .transform([] noexcept { ilog("Validation layers enabled !"); });
+            .transform([] noexcept { ilog("Validation layers successfully enabled !"); });
     }
 
     /////////////////////////////////////

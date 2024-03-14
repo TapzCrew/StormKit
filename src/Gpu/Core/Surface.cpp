@@ -70,7 +70,7 @@ namespace stormkit::gpu {
         };
 
         const auto create_surface = [&make_wayland_surface, &make_xcb_surface] noexcept
-            -> core::FunctionRef<VulkanExpected<vk::raii::SurfaceKHR>> {
+            -> core::FunctionRef<VulkanExpected<vk::raii::SurfaceKHR>()> {
             const auto is_wayland = std::getenv("WAYLAND_DISPLAY") != nullptr;
 
             if (is_wayland) return make_wayland_surface;

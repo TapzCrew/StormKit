@@ -118,7 +118,7 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE Device::~Device() {
-        if(m_vk_device.initialized()) [[likely]]
+        if (m_vk_device.initialized()) [[likely]]
             waitIdle();
     }
 
@@ -235,7 +235,7 @@ namespace stormkit::gpu {
     template<class T>
     STORMKIT_FORCE_INLINE auto Device::setObjectName(const T&         object,
                                                      std::string_view name) const -> void {
-        setObjectName(std::bit_cast<core::UInt64>(*(object.vkHandle())), T::DEBUG_TYPE, name);
+        setObjectName(*std::bit_cast<core::UInt64*>(&toVkHandle(object)), T::DEBUG_TYPE, name);
     }
 
     /////////////////////////////////////
