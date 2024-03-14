@@ -26,7 +26,6 @@ export namespace stormkit::gpu {
                const std::filesystem::path& filepath,
                ShaderStageFlag              type,
                Tag);
-        Shader(const Device& device, std::span<const core::Byte> data, ShaderStageFlag type, Tag);
         Shader(const Device& device, std::span<const SpirvID> data, ShaderStageFlag type, Tag);
         ~Shader();
 
@@ -102,16 +101,6 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE
-    Shader::Shader(const Device&               device,
-                   std::span<const core::Byte> data,
-                   ShaderStageFlag             type,
-                   Tag)
-        : Shader { device, core::viewAs<const SpirvID>(data), type, Tag {} } {
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    STORMKIT_FORCE_INLINE
     Shader::Shader(const Device& device, std::span<const SpirvID> data, ShaderStageFlag type, Tag)
         : m_type { type } {
         m_source.reserve(std::size(data));
@@ -147,7 +136,7 @@ namespace stormkit::gpu {
         Shader::fromBytes(const Device&               device,
                           std::span<const core::Byte> data,
                           ShaderStageFlag             type) noexcept -> Expected<Shader> try {
-        return Shader { device, data, type, Tag {} };
+        return Shader { device, core::viewAs<const SpirvID>(data), type, Tag {} };
     } catch (const Result& result) { return std::unexpected(result); }
 
     /////////////////////////////////////
@@ -174,7 +163,7 @@ namespace stormkit::gpu {
                                                          std::span<const core::Byte> data,
                                                          ShaderStageFlag             type) noexcept
         -> Expected<std::unique_ptr<Shader>> try {
-        return std::make_unique<Shader>(device, data, type, Tag {});
+        return std::make_unique<Shader>(device, core::viewAs<const SpirvID>(data), type, Tag {});
     } catch (const Result& result) { return std::unexpected(result); }
 
     /////////////////////////////////////
