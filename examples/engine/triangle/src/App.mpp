@@ -30,6 +30,8 @@ export class App: public core::App {
 
     core::DeferInit<gpu::Shader> m_vertex_shader;
     core::DeferInit<gpu::Shader> m_fragment_shader;
+
+    core::math::ExtentU m_window_extent;
 };
 
 ////////////////////////////////////////////////////////////////////
@@ -52,6 +54,8 @@ auto App::run(std::span<const std::string_view> _) -> core::Int {
     auto& window        = m_application->window();
     auto& event_handler = m_application->eventHandler();
     auto& renderer      = m_application->renderer();
+
+    m_window_extent = window.extent();
 
     m_vertex_shader =
         gpu::Shader::fromBytes(renderer.device(), SHADER_DATA, gpu::ShaderStageFlag::Vertex)
@@ -99,7 +103,7 @@ auto App::updateFrameGraph(engine::FrameGraphBuilder& graph,
                 task_data.backbuffer = builder
                                            .create("color",
                                                    engine::ImageDescription {
-                                                       .extent = {},
+                                                       .extent = m_window_extent,
                                                        .type   = gpu::ImageType::T2D,
                                                        .format = gpu::PixelFormat::BGRA8_UNorm })
                                            .id();
