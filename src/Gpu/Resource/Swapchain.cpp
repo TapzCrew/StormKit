@@ -121,7 +121,7 @@ namespace stormkit::gpu {
 
         m_images = m_vk_swapchain->getImages() |
                    std::views::transform([&, this](auto&& image) noexcept {
-                       return Image { device, m_extent, m_pixel_format, image, Image::Tag {} };
+                       return SwapchainImage::create(m_extent, m_pixel_format, image);
                    }) |
                    std::ranges::to<std::vector>();
         m_image_count  = core::as<core::UInt32>(std::size(m_images));

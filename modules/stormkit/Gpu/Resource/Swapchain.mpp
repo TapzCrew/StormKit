@@ -18,6 +18,57 @@ import :Resource.Image;
 
 export namespace stormkit::gpu {
     class Queue;
+
+    class STORMKIT_API SwapchainImage {
+        struct Tag {};
+
+      public:
+        static constexpr auto DEBUG_TYPE = DebugObjectType::Image;
+
+        SwapchainImage(const core::math::ExtentU& extent,
+                       PixelFormat                format,
+                       const vk::Image&           image,
+                       Tag) noexcept;
+        ~SwapchainImage();
+
+        SwapchainImage(const SwapchainImage&)                    = delete;
+        auto operator=(const SwapchainImage&) -> SwapchainImage& = delete;
+
+        SwapchainImage(SwapchainImage&&) noexcept;
+        auto operator=(SwapchainImage&&) noexcept -> SwapchainImage&;
+
+        [[nodiscard]] static auto create(const core::math::ExtentU& extent,
+                                         PixelFormat                format,
+                                         const vk::Image& image) noexcept -> SwapchainImage;
+        [[nodiscard]] static auto
+            allocate(const core::math::ExtentU& extent,
+                     PixelFormat                format,
+                     const vk::Image&           image) noexcept -> std::unique_ptr<SwapchainImage>;
+
+        [[nodiscard]] auto extent() const noexcept -> const core::math::ExtentU&;
+        [[nodiscard]] auto format() const noexcept -> PixelFormat;
+        [[nodiscard]] auto type() const noexcept -> ImageType;
+        [[nodiscard]] auto samples() const noexcept -> SampleCountFlag;
+        [[nodiscard]] auto layers() const noexcept -> core::UInt32;
+        [[nodiscard]] auto faces() const noexcept -> core::UInt32;
+        [[nodiscard]] auto mipLevels() const noexcept -> core::UInt32;
+        [[nodiscard]] auto usages() const noexcept -> ImageUsageFlag;
+
+        [[nodiscard]] auto vkHandle() const noexcept -> const vk::Image&;
+
+      private:
+        core::math::ExtentU m_extent     = { 0, 0, 0 };
+        PixelFormat         m_format     = {};
+        core::UInt32        m_layers     = 0;
+        core::UInt32        m_faces      = 0;
+        core::UInt32        m_mip_levels = 0;
+        ImageType           m_type       = {};
+        SampleCountFlag     m_samples    = {};
+        ImageUsageFlag      m_usages     = {};
+
+        vk::Image m_vk_image;
+    };
+
     class STORMKIT_API Swapchain {
         struct Tag {};
 
@@ -49,7 +100,7 @@ export namespace stormkit::gpu {
                      std::optional<vk::raii::SwapchainKHR> old_swapchain = std::nullopt) noexcept
             -> Expected<std::unique_ptr<Swapchain>>;
 
-        [[nodiscard]] auto images() const noexcept -> const std::vector<Image>&;
+        [[nodiscard]] auto images() const noexcept -> const std::vector<SwapchainImage>&;
         [[nodiscard]] auto acquireNextImage(std::chrono::nanoseconds wait,
                                             const Semaphore&         image_available) const noexcept
             -> Expected<std::pair<gpu::Result, core::UInt32>>;
@@ -63,8 +114,14 @@ export namespace stormkit::gpu {
         PixelFormat         m_pixel_format;
         core::UInt32        m_image_count;
 
-        std::vector<Image> m_images;
+        std::vector<SwapchainImage> m_images;
     };
+
+    template<>
+    auto toVkHandle(const SwapchainImage& value) noexcept -> decltype(auto);
+
+    template<>
+    auto toRaiiVkHandle(const SwapchainImage& value) noexcept -> decltype(auto) = delete;
 } // namespace stormkit::gpu
 
 ////////////////////////////////////////////////////////////////////
@@ -72,6 +129,103 @@ export namespace stormkit::gpu {
 ////////////////////////////////////////////////////////////////////
 
 namespace stormkit::gpu {
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE SwapchainImage::SwapchainImage(const core::math::ExtentU& extent,
+                                                         gpu::PixelFormat           format,
+                                                         const vk::Image&           image,
+                                                         Tag) noexcept
+        : m_extent { extent }, m_format { format }, m_layers { 1 }, m_faces { 1 },
+          m_mip_levels { 1 }, m_type { ImageType::T2D }, m_samples { SampleCountFlag::C1 },
+          m_usages { ImageUsageFlag::Transfert_Dst }, m_vk_image { image } {
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE SwapchainImage::~SwapchainImage() = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE SwapchainImage::SwapchainImage(SwapchainImage&& other) noexcept = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto
+        SwapchainImage::operator=(SwapchainImage&& other) noexcept -> SwapchainImage& = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto
+        SwapchainImage::create(const core::math::ExtentU& extent,
+                               gpu::PixelFormat           format,
+                               const vk::Image&           image) noexcept -> SwapchainImage {
+        return SwapchainImage { extent, format, image, Tag {} };
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto SwapchainImage::allocate(const core::math::ExtentU& extent,
+                                                        gpu::PixelFormat           format,
+                                                        const vk::Image&           image) noexcept
+        -> std::unique_ptr<SwapchainImage> {
+        return std::make_unique<SwapchainImage>(extent, format, image, Tag {});
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto
+        SwapchainImage::extent() const noexcept -> const core::math::ExtentU& {
+        return m_extent;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto SwapchainImage::format() const noexcept -> PixelFormat {
+        return m_format;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto SwapchainImage::type() const noexcept -> ImageType {
+        return m_type;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto SwapchainImage::samples() const noexcept -> SampleCountFlag {
+        return m_samples;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto SwapchainImage::layers() const noexcept -> core::UInt32 {
+        return m_layers;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto SwapchainImage::faces() const noexcept -> core::UInt32 {
+        return m_faces;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto SwapchainImage::mipLevels() const noexcept -> core::UInt32 {
+        return m_mip_levels;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto SwapchainImage::usages() const noexcept -> ImageUsageFlag {
+        return m_usages;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto SwapchainImage::vkHandle() const noexcept -> const vk::Image& {
+        return m_vk_image;
+    }
+
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE Swapchain::~Swapchain() = default;
@@ -112,7 +266,8 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto Swapchain::images() const noexcept -> const std::vector<Image>& {
+    STORMKIT_FORCE_INLINE auto
+        Swapchain::images() const noexcept -> const std::vector<SwapchainImage>& {
         return m_images;
     }
 
@@ -121,5 +276,13 @@ namespace stormkit::gpu {
     STORMKIT_FORCE_INLINE auto
         Swapchain::vkHandle() const noexcept -> const vk::raii::SwapchainKHR& {
         return m_vk_swapchain;
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<>
+    STORMKIT_FORCE_INLINE auto
+        toVkHandle(const SwapchainImage& image) noexcept -> decltype(auto) {
+        return image.vkHandle();
     }
 } // namespace stormkit::gpu

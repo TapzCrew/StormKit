@@ -58,7 +58,7 @@ export namespace stormkit::engine {
 
         [[nodiscard]] auto bufferingCount() const noexcept -> core::UInt32;
 
-        [[nodiscard]] auto images() const noexcept -> const std::vector<gpu::Image>&;
+        [[nodiscard]] auto images() const noexcept -> const std::vector<gpu::SwapchainImage>&;
 
       private:
         core::DeferInit<gpu::Surface>   m_surface;
@@ -122,7 +122,7 @@ namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE auto
-        RenderSurface::images() const noexcept -> const std::vector<gpu::Image>& {
+        RenderSurface::images() const noexcept -> const std::vector<gpu::SwapchainImage>& {
         return m_swapchain->images();
     }
 } // namespace stormkit::engine
