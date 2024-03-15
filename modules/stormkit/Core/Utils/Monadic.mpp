@@ -71,6 +71,9 @@ export namespace stormkit::core::monadic {
     [[nodiscard]] constexpr auto init(Args&&... args) noexcept -> decltype(auto);
 
     [[nodiscard]] constexpr auto borrow() noexcept -> decltype(auto);
+
+    template<typename T>
+    [[nodiscard]] constexpr auto forwardLike() noexcept -> decltype(auto);
 } // namespace stormkit::core::monadic
 
 ////////////////////////////////////////////////////////////////////
@@ -272,6 +275,15 @@ namespace stormkit::core::monadic {
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE constexpr auto borrow() noexcept -> decltype(auto) {
-        return []<typename T>(T&& value) static noexcept { return core::borrow(std::forward<T>(value)); };
+        return []<typename T>(T&& value) static noexcept {
+            return core::borrow(std::forward<T>(value));
+        };
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    template<typename T>
+    STORMKIT_FORCE_INLINE constexpr auto forwardLike() noexcept -> decltype(auto) {
+        return [](auto&& value) static noexcept -> decltype(auto) { return std::forward_like<T>(value); };
     }
 } // namespace stormkit::core::monadic
