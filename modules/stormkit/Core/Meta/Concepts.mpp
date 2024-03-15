@@ -19,9 +19,7 @@ namespace stormkit::core {
         };
 
         template<class T>
-        concept IsFancyPointer = requires {
-            typename T::element_type;
-        } and requires(T a) {
+        concept IsFancyPointer = requires { typename T::element_type; } and requires(T a) {
             a.operator->();
             a.operator*();
             a.get();
@@ -138,7 +136,7 @@ namespace stormkit::core {
 
         template<class T>
         concept IsOptionalType = requires(T&& t) {
-            t.has_value();
+            *t;
             { t == std::nullopt } -> details::IsBooleanTestable;
             { t != std::nullopt } -> details::IsBooleanTestable;
         };
