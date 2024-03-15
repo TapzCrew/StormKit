@@ -21,7 +21,7 @@ export import :Utils.Flags;
 export import :Utils.Handle;
 export import :Utils.Math;
 export import :Utils.Monadic;
-export import :Utils.NakedRef;
+export import :Utils.Borrowed;
 export import :Utils.Numerics;
 export import :Utils.Pimpl;
 export import :Utils.Random;

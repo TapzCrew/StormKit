@@ -62,7 +62,7 @@ namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     auto FrameGraphBuilder::cullUnreferencedResources() noexcept -> void {
-        auto unreferenced_resources = std::stack<NakedRef<GraphResourceVariant>> {};
+        auto unreferenced_resources = std::stack<Borrowed<GraphResourceVariant>> {};
 
         constexpr auto decrementRefcount = [](auto& value) noexcept {
             if (value.m_ref_count > 0) --value.m_ref_count;
@@ -353,7 +353,7 @@ namespace stormkit::engine {
 
     auto FrameGraphBuilder::allocatePhysicalResources(const gpu::CommandPool& command_pool,
                                                       const gpu::Device&      device)
-        -> std::pair<NakedRef<const gpu::Image>, BakedFrameGraph::Data> {
+        -> std::pair<Borrowed<const gpu::Image>, BakedFrameGraph::Data> {
         using Data = BakedFrameGraph::Data;
 
         auto output = Data {};
@@ -384,7 +384,7 @@ namespace stormkit::engine {
 
             auto extent       = math::ExtentU {};
             auto clear_values = std::vector<gpu::ClearValue> {};
-            auto attachments  = std::vector<NakedRef<const gpu::ImageView>> {};
+            auto attachments  = std::vector<Borrowed<const gpu::ImageView>> {};
             for (const auto& image : pass.images) {
                 extent.width  = std::max(image.create_info.extent.width, extent.width);
                 extent.height = std::max(image.create_info.extent.height, extent.height);
@@ -440,17 +440,17 @@ namespace stormkit::engine {
                                                         task.clear_values,
                                                         true);
 
-                            const auto command_buffers = makeNakedRefs<std::array>(task.cmb);
+                            const auto command_buffers = borrows<std::array>(task.cmb);
                             output.cmb->executeSubCommandBuffers(command_buffers);
                             output.cmb->endRenderPass();
                         },
                          [&output](const BakedFrameGraph::Data::ComputeTask& task) {
-                             const auto command_buffers = makeNakedRefs<std::array>(task.cmb);
+                             const auto command_buffers = borrows<std::array>(task.cmb);
                              output.cmb->executeSubCommandBuffers(command_buffers);
                          } };
         for (auto&& task : output.tasks) std::visit(visitors, task);
         output.cmb->end();
 
-        return std::make_pair(NakedRef { backbuffer }, std::move(output));
+        return std::make_pair(Borrowed { backbuffer }, std::move(output));
     } // namespace stormkit::engine
 } // namespace stormkit::engine

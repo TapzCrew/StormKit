@@ -110,7 +110,7 @@ auto TriangleApp::updateFrameGraph(engine::FrameGraphBuilder& graph, std::atomic
                 graph.setFinalResource(task_data.backbuffer);
             },
             [](const DrawTask&              task_data,
-               OptionalRef<gpu::RenderPass> render_pass,
+               MaybeBorrowed<gpu::RenderPass> render_pass,
                gpu::CommandBuffer&          cmb) {});
 
         render_task.setCullImune(true);

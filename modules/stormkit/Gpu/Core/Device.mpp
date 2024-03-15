@@ -63,7 +63,7 @@ export namespace stormkit::gpu {
 
         auto waitIdle() const noexcept -> void;
 
-        [[nodiscard]] auto waitForFences(std::span<const NakedRef<const Fence>> fences,
+        [[nodiscard]] auto waitForFences(std::span<const Borrowed<const Fence>> fences,
                                          bool                                   wait_all = true,
                                          const std::chrono::milliseconds&       timeout =
                                              std::chrono::milliseconds::max()) const noexcept
@@ -73,7 +73,7 @@ export namespace stormkit::gpu {
                                             std::chrono::milliseconds::max()) const noexcept
             -> Expected<Result>;
 
-        auto resetFences(std::span<const NakedRef<const Fence>> fences) const noexcept -> void;
+        auto resetFences(std::span<const Borrowed<const Fence>> fences) const noexcept -> void;
         auto resetFence(const Fence& fence) const noexcept -> void;
 
         [[nodiscard]] auto rasterQueueEntry() const noexcept -> const QueueEntry&;
@@ -97,7 +97,7 @@ export namespace stormkit::gpu {
             -> void;
 
       private:
-        NakedRef<const PhysicalDevice> m_physical_device;
+        Borrowed<const PhysicalDevice> m_physical_device;
 
         DeferInit<vk::raii::Device> m_vk_device;
 
@@ -159,13 +159,13 @@ namespace stormkit::gpu {
         Device::waitForFence(const Fence&                     fence,
                              const std::chrono::milliseconds& timeout) const noexcept
         -> Expected<Result> {
-        return waitForFences(makeNakedRefs<std::array>(fence), true, timeout);
+        return waitForFences(borrows<std::array>(fence), true, timeout);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE auto Device::resetFence(const Fence& fence) const noexcept -> void {
-        resetFences(makeNakedRefs<std::array>(fence));
+        resetFences(borrows<std::array>(fence));
     }
 
     /////////////////////////////////////

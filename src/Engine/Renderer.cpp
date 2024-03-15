@@ -64,8 +64,8 @@ namespace stormkit::engine {
         /////////////////////////////////////
         /////////////////////////////////////
         auto pickPhysicalDevice(std::span<const gpu::PhysicalDevice> physical_devices) noexcept
-            -> std::optional<NakedRef<const gpu::PhysicalDevice>> {
-            auto ranked_devices = std::multimap<UInt64, NakedRef<const gpu::PhysicalDevice>> {};
+            -> std::optional<Borrowed<const gpu::PhysicalDevice>> {
+            auto ranked_devices = std::multimap<UInt64, Borrowed<const gpu::PhysicalDevice>> {};
 
             for (const auto& physical_device : physical_devices) {
                 if (not physical_device.checkExtensionSupport(BASE_EXTENSIONS)) {
@@ -147,7 +147,7 @@ namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     auto Renderer::doInit(std::string_view                           application_name,
-                          std::optional<NakedRef<const wsi::Window>> window) noexcept
+                          std::optional<Borrowed<const wsi::Window>> window) noexcept
         -> gpu::Expected<void> {
         ilog("Initializing Renderer");
         return doInitInstance(application_name)
@@ -173,7 +173,7 @@ namespace stormkit::engine {
     auto Renderer::doInitDevice() noexcept -> gpu::Expected<void> {
         const auto& physical_devices = m_instance->physicalDevices();
         auto        physical_device  = pickPhysicalDevice(physical_devices)
-                                   .or_else(expectsWithMessage<NakedRef<const gpu::PhysicalDevice>>(
+                                   .or_else(expectsWithMessage<Borrowed<const gpu::PhysicalDevice>>(
                                        "No suitable GPU found !"))
                                    .value();
 
@@ -184,7 +184,7 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto Renderer::doInitRenderSurface(std::optional<NakedRef<const wsi::Window>> window) noexcept
+    auto Renderer::doInitRenderSurface(std::optional<Borrowed<const wsi::Window>> window) noexcept
         -> gpu::Expected<void> {
         if (window)
             return RenderSurface::createFromWindow(*m_instance,
@@ -275,8 +275,8 @@ namespace stormkit::engine {
                                        gpu::ImageLayout::Present_Src);
         blit_cmb.end();
 
-        auto wait   = makeNakedRefs<std::array>(semaphore, *frame.image_available);
-        auto signal = makeNakedRefs<std::array>(*frame.render_finished);
+        auto wait   = borrows<std::array>(semaphore, *frame.image_available);
+        auto signal = borrows<std::array>(*frame.render_finished);
 
         blit_cmb.submit(m_raster_queue, wait, signal, frame.in_flight);
         return frame;

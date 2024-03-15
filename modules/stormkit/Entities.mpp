@@ -169,10 +169,10 @@ export namespace stormkit::entities {
 
         template<class Self>
         auto components(this Self& self, Entity entity)
-            -> std::vector<NakedRef<LikeType<Self, Component>>>;
+            -> std::vector<Borrowed<LikeType<Self, Component>>>;
 
         template<IsComponentTypeOrFail T, class Self>
-        auto componentsOfType(this Self& self) noexcept -> std::vector<NakedRef<LikeType<Self, T>>>;
+        auto componentsOfType(this Self& self) noexcept -> std::vector<Borrowed<LikeType<Self, T>>>;
 
         template<Is<System> T, typename... Args>
         auto addSystem(Args&&... args) -> T&;
@@ -181,7 +181,7 @@ export namespace stormkit::entities {
         auto hasSystem() const noexcept -> bool;
 
         template<class Self>
-        auto systems(this Self& self) noexcept -> std::vector<NakedRef<LikeType<Self, System>>>;
+        auto systems(this Self& self) noexcept -> std::vector<Borrowed<LikeType<Self, System>>>;
 
         template<Is<System> T, class Self>
         auto getSystem(this Self& self) noexcept -> LikeType<Self, T&>;
@@ -362,7 +362,7 @@ namespace stormkit::entities {
     /////////////////////////////////////
     template<class Self>
     auto EntityManager::components(this Self& self, Entity entity)
-        -> std::vector<NakedRef<LikeType<Self, Component>>> {
+        -> std::vector<Borrowed<LikeType<Self, Component>>> {
         if (not self.hasEntity(entity)) [[unlikely]]
             return {};
 
@@ -370,7 +370,7 @@ namespace stormkit::entities {
                    return EntityManager::isKeyEntity(entity, pair.first);
                }) |
                std::views::values | std::views::transform([](auto&& component) {
-                   return NakedRef<Component> { component.get() };
+                   return Borrowed<Component> { component.get() };
                }) |
                std::ranges::to<std::vector>();
     }
@@ -379,11 +379,11 @@ namespace stormkit::entities {
     /////////////////////////////////////
     template<IsComponentTypeOrFail T, class Self>
     auto EntityManager::componentsOfType(this Self& self) noexcept
-        -> std::vector<NakedRef<LikeType<Self, T>>> {
+        -> std::vector<Borrowed<LikeType<Self, T>>> {
         return self.m_entities |
                std::views::filter([&self](auto&& e) { return self.template hasComponent<T>(e); }) |
                std::views::transform(
-                   [&self](auto&& e) { return NakedRef { self.template getComponent<T>(e) }; }) |
+                   [&self](auto&& e) { return Borrowed { self.template getComponent<T>(e) }; }) |
                std::ranges::to<std::vector>();
     }
 
@@ -411,9 +411,9 @@ namespace stormkit::entities {
     /////////////////////////////////////
     template<class Self>
     auto EntityManager::systems(this Self& self) noexcept
-        -> std::vector<NakedRef<LikeType<Self, System>>> {
+        -> std::vector<Borrowed<LikeType<Self, System>>> {
         return self.m_systems |
-               std::views::transform([](auto&& system) { return NakedRef { system.get() }; }) |
+               std::views::transform([](auto&& system) { return Borrowed { system.get() }; }) |
                std::ranges::to<std::vector>();
     }
 

@@ -23,9 +23,9 @@ export namespace stormkit::engine {
             UInt32 current_frame;
             UInt32 image_index;
 
-            NakedRef<const gpu::Semaphore> image_available;
-            NakedRef<const gpu::Semaphore> render_finished;
-            NakedRef<const gpu::Fence>     in_flight;
+            Borrowed<const gpu::Semaphore> image_available;
+            Borrowed<const gpu::Semaphore> render_finished;
+            Borrowed<const gpu::Fence>     in_flight;
         };
 
         RenderSurface(const gpu::Instance& instance,

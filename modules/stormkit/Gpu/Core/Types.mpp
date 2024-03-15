@@ -985,7 +985,7 @@ export {
             [[nodiscard]] auto parent() const noexcept -> const T&;
 
           private:
-            NakedRef<const T> m_parent;
+            Borrowed<const T> m_parent;
         };
 
         template<class T>

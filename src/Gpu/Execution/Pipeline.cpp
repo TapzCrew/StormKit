@@ -20,7 +20,7 @@ namespace stormkit::gpu {
     auto Pipeline::doInitRasterPipeline(const Device&                    device,
                                         const PipelineLayout&            layout,
                                         const RenderPass&                render_pass,
-                                        OptionalRef<const PipelineCache> pipeline_cache) noexcept
+                                        MaybeBorrowed<const PipelineCache> pipeline_cache) noexcept
         -> VulkanExpected<void> {
         const auto& state = as<RasterPipelineState>(m_state);
 
@@ -166,7 +166,7 @@ namespace stormkit::gpu {
                                      .setBasePipelineHandle(nullptr)
                                      .setBasePipelineIndex(-1);
 
-        using PipelineCacheRef = NakedRef<const vk::raii::PipelineCache>;
+        using PipelineCacheRef = Borrowed<const vk::raii::PipelineCache>;
 
         const auto vk_pipeline_cache = [&pipeline_cache] -> const vk::raii::PipelineCache& {
             if (pipeline_cache) return toRaiiVkHandle(*pipeline_cache);

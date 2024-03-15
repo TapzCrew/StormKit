@@ -121,7 +121,7 @@ export namespace stormkit::gpu {
                  const RasterPipelineState&                   state,
                  const PipelineLayout&                        layout,
                  const RenderPass&                            render_pass,
-                 std::optional<NakedRef<const PipelineCache>> cache,
+                 std::optional<Borrowed<const PipelineCache>> cache,
                  Tag);
         ~Pipeline();
 
@@ -136,14 +136,14 @@ export namespace stormkit::gpu {
                    const RasterPipelineState&                   state,
                    const PipelineLayout&                        layout,
                    const RenderPass&                            render_pass,
-                   std::optional<NakedRef<const PipelineCache>> cache) noexcept
+                   std::optional<Borrowed<const PipelineCache>> cache) noexcept
             -> Expected<Pipeline>;
         [[nodiscard]] static auto
             allocate(const Device&                                device,
                      const RasterPipelineState&                   state,
                      const PipelineLayout&                        layout,
                      const RenderPass&                            render_pass,
-                     std::optional<NakedRef<const PipelineCache>> cache) noexcept
+                     std::optional<Borrowed<const PipelineCache>> cache) noexcept
             -> Expected<std::unique_ptr<Pipeline>>;
 
         // auto bind(CommandBuffer& commandbuffer) const noexcept -> void;
@@ -157,7 +157,7 @@ export namespace stormkit::gpu {
         auto doInitRasterPipeline(const Device&,
                                   const PipelineLayout&,
                                   const RenderPass&,
-                                  std::optional<NakedRef<const PipelineCache>>) noexcept
+                                  std::optional<Borrowed<const PipelineCache>>) noexcept
             -> VulkanExpected<void>;
 
         Type m_type;
@@ -295,7 +295,7 @@ namespace stormkit::gpu {
                        const RasterPipelineState&                   state,
                        const PipelineLayout&                        layout,
                        const RenderPass&                            render_pass,
-                       std::optional<NakedRef<const PipelineCache>> cache,
+                       std::optional<Borrowed<const PipelineCache>> cache,
                        Tag)
         : m_state { state } {
         doInitRasterPipeline(device, layout, render_pass, std::move(cache))
@@ -322,7 +322,7 @@ namespace stormkit::gpu {
                          const RasterPipelineState&                   state,
                          const PipelineLayout&                        layout,
                          const RenderPass&                            render_pass,
-                         std::optional<NakedRef<const PipelineCache>> cache) noexcept
+                         std::optional<Borrowed<const PipelineCache>> cache) noexcept
         -> Expected<Pipeline> try {
         return Pipeline { device, state, layout, render_pass, std::move(cache), Tag {} };
     } catch (const Result& result) { return std::unexpected(result); }
@@ -334,7 +334,7 @@ namespace stormkit::gpu {
                            const RasterPipelineState&                   state,
                            const PipelineLayout&                        layout,
                            const RenderPass&                            render_pass,
-                           std::optional<NakedRef<const PipelineCache>> cache) noexcept
+                           std::optional<Borrowed<const PipelineCache>> cache) noexcept
         -> Expected<std::unique_ptr<Pipeline>> try {
         return std::make_unique<Pipeline>(device,
                                           state,

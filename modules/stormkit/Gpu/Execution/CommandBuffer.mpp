@@ -47,13 +47,13 @@ export namespace stormkit::gpu {
 
         auto waitIdle() const noexcept -> void;
 
-        auto submit(std::span<const NakedRef<const CommandBuffer>> commandbuffers,
-                    std::span<const NakedRef<const Semaphore>>     wait_semaphores   = {},
-                    std::span<const NakedRef<const Semaphore>>     signal_semaphores = {},
-                    OptionalRef<const Fence> fence = std::nullopt) const noexcept -> void;
+        auto submit(std::span<const Borrowed<const CommandBuffer>> commandbuffers,
+                    std::span<const Borrowed<const Semaphore>>     wait_semaphores   = {},
+                    std::span<const Borrowed<const Semaphore>>     signal_semaphores = {},
+                    MaybeBorrowed<const Fence> fence = std::nullopt) const noexcept -> void;
 
-        [[nodiscard]] auto present(std::span<const NakedRef<const Swapchain>> swapchains,
-                                   std::span<const NakedRef<const Semaphore>> wait_semaphores,
+        [[nodiscard]] auto present(std::span<const Borrowed<const Swapchain>> swapchains,
+                                   std::span<const Borrowed<const Semaphore>> wait_semaphores,
                                    std::span<const UInt32> image_indices) const noexcept
             -> Expected<gpu::Result>;
 
@@ -125,9 +125,9 @@ export namespace stormkit::gpu {
 
         auto reset() noexcept -> void;
         auto submit(const Queue&                               queue,
-                    std::span<const NakedRef<const Semaphore>> wait_semaphores   = {},
-                    std::span<const NakedRef<const Semaphore>> signal_semaphores = {},
-                    OptionalRef<const Fence> fence = std::nullopt) const noexcept -> void;
+                    std::span<const Borrowed<const Semaphore>> wait_semaphores   = {},
+                    std::span<const Borrowed<const Semaphore>> signal_semaphores = {},
+                    MaybeBorrowed<const Fence> fence = std::nullopt) const noexcept -> void;
 
         [[nodiscard]] auto state() const noexcept -> State;
         [[nodiscard]] auto level() const noexcept -> CommandBufferLevel;
@@ -180,13 +180,13 @@ export namespace stormkit::gpu {
                                  UInt32        draw_count,
                                  UInt32        stride) -> void;
 
-        auto bindVertexBuffers(std::span<NakedRef<const Buffer>> buffers,
+        auto bindVertexBuffers(std::span<Borrowed<const Buffer>> buffers,
                                std::span<const UInt64>           offsets) -> void;
         auto bindIndexBuffer(const Buffer& buffer, UInt64 offset = 0, bool large_indices = false)
             -> void;
         auto bindDescriptorSets(const Pipeline&                          pipeline,
                                 const PipelineLayout&                    layout,
-                                std::span<NakedRef<const DescriptorSet>> descriptor_sets,
+                                std::span<Borrowed<const DescriptorSet>> descriptor_sets,
                                 std::span<const UInt32> dynamic_offsets = {}) -> void;
 
         auto copyBuffer(const Buffer& src,
@@ -227,7 +227,7 @@ export namespace stormkit::gpu {
                                    ImageLayout                  dst_layout,
                                    const ImageSubresourceRange& subresource_range = {}) -> void;
 
-        auto executeSubCommandBuffers(std::span<const NakedRef<const CommandBuffer>> commandbuffers)
+        auto executeSubCommandBuffers(std::span<const Borrowed<const CommandBuffer>> commandbuffers)
             -> void;
 
         auto pipelineBarrier(PipelineStageFlag                    src_mask,
@@ -421,10 +421,10 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE auto
-        Queue::submit(std::span<const NakedRef<const CommandBuffer>> command_buffers,
-                      std::span<const NakedRef<const Semaphore>>     wait_semaphores,
-                      std::span<const NakedRef<const Semaphore>>     signal_semaphores,
-                      OptionalRef<const Fence>                       fence) const noexcept -> void {
+        Queue::submit(std::span<const Borrowed<const CommandBuffer>> command_buffers,
+                      std::span<const Borrowed<const Semaphore>>     wait_semaphores,
+                      std::span<const Borrowed<const Semaphore>>     signal_semaphores,
+                      MaybeBorrowed<const Fence>                       fence) const noexcept -> void {
         const auto vk_command_buffers = command_buffers |
                                         std::views::transform(monadic::toVkHandle()) |
                                         std::ranges::to<std::vector>();
@@ -448,8 +448,8 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto Queue::present(std::span<const NakedRef<const Swapchain>> swapchains,
-                        std::span<const NakedRef<const Semaphore>> wait_semaphores,
+    auto Queue::present(std::span<const Borrowed<const Swapchain>> swapchains,
+                        std::span<const Borrowed<const Semaphore>> wait_semaphores,
                         std::span<const UInt32>                    image_indices) const noexcept
         -> Expected<gpu::Result> {
         expects(std::size(wait_semaphores) >= 1);
@@ -545,10 +545,10 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE
     auto CommandBuffer::submit(const Queue&                               queue,
-                               std::span<const NakedRef<const Semaphore>> wait_semaphores,
-                               std::span<const NakedRef<const Semaphore>> signal_semaphores,
-                               OptionalRef<const Fence> fence) const noexcept -> void {
-        auto cmbs = makeNakedRefs<std::array>(*this);
+                               std::span<const Borrowed<const Semaphore>> wait_semaphores,
+                               std::span<const Borrowed<const Semaphore>> signal_semaphores,
+                               MaybeBorrowed<const Fence> fence) const noexcept -> void {
+        auto cmbs = borrows<std::array>(*this);
 
         queue.submit(cmbs, wait_semaphores, signal_semaphores, std::move(fence));
     }
@@ -877,7 +877,7 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE auto
-        CommandBuffer::bindVertexBuffers(std::span<NakedRef<const Buffer>> buffers,
+        CommandBuffer::bindVertexBuffers(std::span<Borrowed<const Buffer>> buffers,
                                          std::span<const UInt64>           offsets) -> void {
         expects(m_state == State::Recording);
         expects(not std::empty(buffers));
@@ -907,7 +907,7 @@ namespace stormkit::gpu {
     STORMKIT_FORCE_INLINE auto
         CommandBuffer::bindDescriptorSets(const Pipeline&                          pipeline,
                                           const PipelineLayout&                    layout,
-                                          std::span<NakedRef<const DescriptorSet>> descriptor_sets,
+                                          std::span<Borrowed<const DescriptorSet>> descriptor_sets,
                                           std::span<const UInt32> dynamic_offsets) -> void {
         expects(m_state == State::Recording);
 
@@ -1268,7 +1268,7 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE auto CommandBuffer::executeSubCommandBuffers(
-        std::span<const NakedRef<const CommandBuffer>> commandbuffers) -> void {
+        std::span<const Borrowed<const CommandBuffer>> commandbuffers) -> void {
         expects(m_state == State::Recording);
 
         constexpr auto expectsSecondary = [](auto&& cmb) noexcept -> decltype(auto) {

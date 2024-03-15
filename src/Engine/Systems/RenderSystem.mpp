@@ -31,7 +31,7 @@ namespace stormkit::engine {
       private:
         auto onMessageReceived(const entities::Message& message) -> void override;
 
-        NakedRef<Renderer> m_renderer;
+        Borrowed<Renderer> m_renderer;
     };
 } // namespace stormkit::engine
 

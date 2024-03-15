@@ -2,7 +2,7 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-export module stormkit.Core:Utils.NakedRef;
+export module stormkit.Core:Utils.Borrowed;
 
 import std;
 
@@ -12,7 +12,7 @@ import :Utils.Assert;
 
 export namespace stormkit::core {
     template<typename T>
-    class [[nodiscard]] NakedRef {
+    class [[nodiscard]] Borrowed {
       public:
         using ElementType   = T;
         using PointerType   = ElementType*;
@@ -23,15 +23,15 @@ export namespace stormkit::core {
         using pointer_type   = PointerType;
         using reference_type = ReferenceType;
 
-        constexpr NakedRef(ReferenceType value) noexcept;
-        constexpr NakedRef(PointerType value) noexcept;
-        constexpr ~NakedRef() noexcept;
+        constexpr Borrowed(ReferenceType value) noexcept;
+        constexpr Borrowed(PointerType value) noexcept;
+        constexpr ~Borrowed() noexcept;
 
-        constexpr NakedRef(const NakedRef&) noexcept;
-        constexpr NakedRef(NakedRef&&) noexcept;
+        constexpr Borrowed(const Borrowed&) noexcept;
+        constexpr Borrowed(Borrowed&&) noexcept;
 
-        constexpr auto operator=(const NakedRef&) noexcept -> NakedRef&;
-        constexpr auto operator=(NakedRef&&) noexcept -> NakedRef&;
+        constexpr auto operator=(const Borrowed&) noexcept -> Borrowed&;
+        constexpr auto operator=(Borrowed&&) noexcept -> Borrowed&;
 
         constexpr auto get(this auto&& self) noexcept -> decltype(auto);
         constexpr auto operator->(this auto&& self) noexcept -> decltype(auto);
@@ -45,7 +45,7 @@ export namespace stormkit::core {
             this Self&& self) noexcept;
 
         template<typename Self>
-        constexpr operator std::enable_if<not std::is_const_v<T>, NakedRef<const T>>(
+        constexpr operator std::enable_if<not std::is_const_v<T>, Borrowed<const T>>(
             this Self&& self) noexcept;
 
       private:
@@ -53,29 +53,29 @@ export namespace stormkit::core {
     };
 
     template<typename T>
-    using OptionalRef = std::optional<NakedRef<T>>;
+    using MaybeBorrowed = std::optional<Borrowed<T>>;
 
     template<IsRawIndirection T>
         requires(not IsRValueReference<T>)
-    [[nodiscard]] constexpr auto makeNakedRef(T&& value) noexcept -> decltype(auto);
+    [[nodiscard]] constexpr auto borrow(T&& value) noexcept -> decltype(auto);
     template<typename T>
-    [[nodiscard]] constexpr auto makeNakedRef(const NakedRef<T>& value) noexcept -> decltype(auto);
+    [[nodiscard]] constexpr auto borrow(const Borrowed<T>& value) noexcept -> decltype(auto);
     template<IsFancyPointer T>
-    [[nodiscard]] constexpr auto makeNakedRef(T&& value) noexcept -> decltype(auto);
+    [[nodiscard]] constexpr auto borrow(T&& value) noexcept -> decltype(auto);
 
     template<template<typename...> typename Out = std::vector, typename... Args>
         requires(AreIndirections<Args...>)
-    [[nodiscard]] constexpr auto makeNakedRefs(Args&&... args) -> decltype(auto);
+    [[nodiscard]] constexpr auto borrows(Args&&... args) -> decltype(auto);
     template<template<typename, std::size_t> typename Out, typename... Args>
         requires(AreIndirections<Args...>)
-    [[nodiscard]] constexpr auto makeNakedRefs(Args&&... args) -> decltype(auto);
+    [[nodiscard]] constexpr auto borrows(Args&&... args) -> decltype(auto);
 
     template<template<typename...> typename Out = std::vector>
         requires std::ranges::range<Out<int>>
-    [[nodiscard]] constexpr auto toNakedRefs(std::ranges::range auto&& args) -> decltype(auto);
+    [[nodiscard]] constexpr auto toBorroweds(std::ranges::range auto&& args) -> decltype(auto);
     template<template<typename, std::size_t> typename Out>
         requires std::ranges::range<Out<int, 1>>
-    [[nodiscard]] constexpr auto toNakedRefs(std::ranges::range auto&& args) -> decltype(auto);
+    [[nodiscard]] constexpr auto toBorroweds(std::ranges::range auto&& args) -> decltype(auto);
 } // namespace stormkit::core
 
 ////////////////////////////////////////////////////////////////////
@@ -86,73 +86,73 @@ namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
     template<typename T>
-    constexpr NakedRef<T>::NakedRef(ReferenceType value) noexcept : m_value { &value } {
+    constexpr Borrowed<T>::Borrowed(ReferenceType value) noexcept : m_value { &value } {
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<typename T>
-    constexpr NakedRef<T>::NakedRef(PointerType value) noexcept : m_value { value } {
+    constexpr Borrowed<T>::Borrowed(PointerType value) noexcept : m_value { value } {
         core::expects(m_value != nullptr);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<typename T>
-    constexpr NakedRef<T>::~NakedRef() noexcept = default;
+    constexpr Borrowed<T>::~Borrowed() noexcept = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<typename T>
-    constexpr NakedRef<T>::NakedRef(const NakedRef&) noexcept = default;
+    constexpr Borrowed<T>::Borrowed(const Borrowed&) noexcept = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<typename T>
-    constexpr NakedRef<T>::NakedRef(NakedRef&&) noexcept = default;
+    constexpr Borrowed<T>::Borrowed(Borrowed&&) noexcept = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<typename T>
-    constexpr auto NakedRef<T>::operator=(const NakedRef&) noexcept -> NakedRef& = default;
+    constexpr auto Borrowed<T>::operator=(const Borrowed&) noexcept -> Borrowed& = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<typename T>
-    constexpr auto NakedRef<T>::operator=(NakedRef&&) noexcept -> NakedRef& = default;
+    constexpr auto Borrowed<T>::operator=(Borrowed&&) noexcept -> Borrowed& = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<typename T>
-    [[nodiscard]] constexpr auto NakedRef<T>::get(this auto&& self) noexcept -> decltype(auto) {
+    [[nodiscard]] constexpr auto Borrowed<T>::get(this auto&& self) noexcept -> decltype(auto) {
         return *std::forward_like<decltype(self)>(self.m_value);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<typename T>
-    constexpr auto NakedRef<T>::operator->(this auto&& self) noexcept -> decltype(auto) {
+    constexpr auto Borrowed<T>::operator->(this auto&& self) noexcept -> decltype(auto) {
         return std::forward_like<decltype(self)>(self.m_value);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<typename T>
-    constexpr auto NakedRef<T>::operator*(this auto&& self) noexcept -> decltype(auto) {
+    constexpr auto Borrowed<T>::operator*(this auto&& self) noexcept -> decltype(auto) {
         return std::forward_like<decltype(self)>(self.get());
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<typename T>
-    constexpr NakedRef<T>::operator bool() const noexcept {
+    constexpr Borrowed<T>::operator bool() const noexcept {
         return m_value != nullptr;
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<typename T>
-    constexpr auto NakedRef<T>::hasValue() const noexcept -> bool {
+    constexpr auto Borrowed<T>::hasValue() const noexcept -> bool {
         return operator bool();
     }
 
@@ -160,7 +160,7 @@ namespace stormkit::core {
     /////////////////////////////////////
     template<typename T>
     template<typename Self>
-    constexpr NakedRef<T>::operator std::conditional_t<std::is_const_v<Self>, const T&, T&>(
+    constexpr Borrowed<T>::operator std::conditional_t<std::is_const_v<Self>, const T&, T&>(
         this Self &&
             self) noexcept {
         return std::forward_like<decltype(self)>(self.get());
@@ -170,8 +170,8 @@ namespace stormkit::core {
     /////////////////////////////////////
     template<typename T>
     template<typename Self>
-    constexpr NakedRef<T>::operator std::enable_if<not std::is_const_v<T>,
-                                                   NakedRef<const T>>(this Self && self) noexcept {
+    constexpr Borrowed<T>::operator std::enable_if<not std::is_const_v<T>,
+                                                   Borrowed<const T>>(this Self && self) noexcept {
         return { std::as_const(self.m_value) };
     }
 
@@ -179,27 +179,27 @@ namespace stormkit::core {
     /////////////////////////////////////
     template<IsRawIndirection T>
         requires(not IsRValueReference<T>)
-    constexpr auto makeNakedRef(T&& value) noexcept -> decltype(auto) {
+    constexpr auto borrow(T&& value) noexcept -> decltype(auto) {
         using PureT = PureType<T>;
         using Out =
-            std::conditional_t<std::is_const_v<T>, NakedRef<PureT>, const NakedRef<const PureT>>;
+            std::conditional_t<std::is_const_v<T>, Borrowed<PureT>, const Borrowed<const PureT>>;
         return Out { value };
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<typename T>
-    constexpr auto makeNakedRef(const NakedRef<T>& value) noexcept -> decltype(auto) {
+    constexpr auto borrow(const Borrowed<T>& value) noexcept -> decltype(auto) {
         return auto { value };
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<IsFancyPointer T>
-    constexpr auto makeNakedRef(T&& value) noexcept -> decltype(auto) {
+    constexpr auto borrow(T&& value) noexcept -> decltype(auto) {
         using PureT = PureType<typename PureType<T>::element_type>;
         using Out =
-            std::conditional_t<std::is_const_v<T>, NakedRef<PureT>, const NakedRef<const PureT>>;
+            std::conditional_t<std::is_const_v<T>, Borrowed<PureT>, const Borrowed<const PureT>>;
         return Out { *value };
     }
 
@@ -207,25 +207,25 @@ namespace stormkit::core {
     /////////////////////////////////////
     template<template<typename...> typename Out = std::vector, typename... Args>
         requires(AreIndirections<Args...>)
-    constexpr auto makeNakedRefs(Args&&... args) -> decltype(auto) {
-        return Out { makeNakedRef(std::forward<Args>(args))... };
+    constexpr auto borrows(Args&&... args) -> decltype(auto) {
+        return Out { borrow(std::forward<Args>(args))... };
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<template<typename, std::size_t> typename Out, typename... Args>
         requires(AreIndirections<Args...>)
-    constexpr auto makeNakedRefs(Args&&... args) -> decltype(auto) {
-        return Out { makeNakedRef(std::forward<Args>(args))... };
+    constexpr auto borrows(Args&&... args) -> decltype(auto) {
+        return Out { borrow(std::forward<Args>(args))... };
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<template<typename...> typename Out = std::vector>
         requires std::ranges::range<Out<int>>
-    constexpr auto toNakedRefs(std::ranges::range auto&& args) -> decltype(auto) {
+    constexpr auto toBorroweds(std::ranges::range auto&& args) -> decltype(auto) {
         return args | std::views::transform([](auto&& val) static noexcept -> decltype(auto) {
-                   return makeNakedRef(std::forward<decltype(val)>(val));
+                   return borrow(std::forward<decltype(val)>(val));
                }) |
                std::ranges::to<Out>();
     }
@@ -234,9 +234,9 @@ namespace stormkit::core {
     /////////////////////////////////////
     template<template<typename, std::size_t> typename Out>
         requires std::ranges::range<Out<int, 1>>
-    constexpr auto toNakedRefs(std::ranges::range auto&& args) -> decltype(auto) {
+    constexpr auto toBorroweds(std::ranges::range auto&& args) -> decltype(auto) {
         return args | std::views::transform([](auto&& val) static noexcept -> decltype(auto) {
-                   return makeNakedRef(std::forward<decltype(val)>(val));
+                   return borrow(std::forward<decltype(val)>(val));
                }) |
                std::ranges::to<Out>();
     }
