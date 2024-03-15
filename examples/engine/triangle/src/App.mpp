@@ -45,10 +45,9 @@ App::~App() = default;
 ////////////////////////////////////////
 ////////////////////////////////////////
 auto App::run(std::span<const std::string_view> _) -> Int {
-    m_application =
-        engine::Application::create(APPLICATION_NAME, { 800u, 600u }, WINDOW_TITLE)
-            .transform_error(expectsWithMessage("Failed to initialize Render engine"))
-            .value();
+    m_application = engine::Application::create(APPLICATION_NAME, { 800u, 600u }, WINDOW_TITLE)
+                        .transform_error(expectsWithMessage("Failed to initialize Render engine"))
+                        .value();
     m_application->setUpdateFrameGraphCallback(curry(&App::updateFrameGraph, this));
 
     auto& window        = m_application->window();
@@ -88,8 +87,8 @@ auto App::run(std::span<const std::string_view> _) -> Int {
 
 ////////////////////////////////////////
 ////////////////////////////////////////
-auto App::updateFrameGraph(engine::FrameGraphBuilder& graph,
-                           std::atomic_bool&          rebuild_graph) -> void {
+auto App::updateFrameGraph(engine::FrameGraphBuilder& graph, std::atomic_bool& rebuild_graph)
+    -> void {
     static auto initialized = false;
 
     if (not initialized) {
@@ -110,9 +109,9 @@ auto App::updateFrameGraph(engine::FrameGraphBuilder& graph,
 
                 graph.setFinalResource(task_data.backbuffer);
             },
-            [](const DrawTask&                    task_data,
+            [](const DrawTask&              task_data,
                OptionalRef<gpu::RenderPass> render_pass,
-               gpu::CommandBuffer&                cmb) {});
+               gpu::CommandBuffer&          cmb) {});
 
         render_task.setCullImune(true);
 

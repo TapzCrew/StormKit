@@ -37,7 +37,7 @@ export namespace stormkit::core { inline namespace casts {
     template<IsPolymorphic To, IsIndirection From>
         requires(IsPolymorphic<RawType<From>> and Is<To, RawType<From>>)
     struct IsQueryer<To, From> {
-        [[nodiscard]] static constexpr auto operator()(const From &value) noexcept -> bool;
+        [[nodiscard]] static constexpr auto operator()(const From& value) noexcept -> bool;
     };
 
     // default
@@ -108,8 +108,8 @@ export namespace stormkit::core { inline namespace casts {
     template<Is<Underlying> To, typename From>
         requires IsEnumeration<PureType<From>>
     struct AsCaster<To, From> {
-        [[nodiscard]] static constexpr auto
-            operator()(From value) noexcept -> UnderlyingType<PureType<From>>;
+        [[nodiscard]] static constexpr auto operator()(From value) noexcept
+            -> UnderlyingType<PureType<From>>;
     };
 
     // explicit casts
@@ -246,8 +246,8 @@ namespace stormkit::core { inline namespace casts {
     /////////////////////////////////////
     template<IsPolymorphic To, IsIndirection From>
         requires(IsPolymorphic<RawType<From>> and Is<To, RawType<From>>)
-    STORMKIT_FORCE_INLINE constexpr auto
-        IsQueryer<To, From>::operator()(const From &value) noexcept -> bool {
+    STORMKIT_FORCE_INLINE constexpr auto IsQueryer<To, From>::operator()(const From& value) noexcept
+        -> bool {
         if constexpr (IsLValueReference<From> and not IsPointer<PureType<From>>)
             return dynamic_cast<const To*>(&std::forward<From>(value)) != nullptr;
         else
@@ -266,8 +266,8 @@ namespace stormkit::core { inline namespace casts {
     /////////////////////////////////////
     template<IsNotReference To, typename From>
         requires(IsVariantType<PureType<From>>)
-    STORMKIT_FORCE_INLINE constexpr auto
-        AsCaster<To, From>::operator()(From variant) noexcept -> decltype(auto) {
+    STORMKIT_FORCE_INLINE constexpr auto AsCaster<To, From>::operator()(From variant) noexcept
+        -> decltype(auto) {
         expects(is<To, From>(variant));
 
         return std::get<To>(std::forward<From>(variant));
@@ -326,7 +326,7 @@ namespace stormkit::core { inline namespace casts {
     /////////////////////////////////////
     template<IsEnumeration To, typename From>
         requires IsEnumeration<PureType<From>> and
-                     Is<UnderlyingType<To>, UnderlyingType<PureType<From>>>
+                 Is<UnderlyingType<To>, UnderlyingType<PureType<From>>>
     STORMKIT_FORCE_INLINE constexpr auto AsCaster<To, From>::operator()(From value) noexcept -> To {
         return as<To>(as<Underlying>(std::forward<From>(value)));
     }
@@ -343,8 +343,8 @@ namespace stormkit::core { inline namespace casts {
     /////////////////////////////////////
     template<Is<Underlying> To, typename From>
         requires IsEnumeration<PureType<From>>
-    STORMKIT_FORCE_INLINE constexpr auto
-        AsCaster<To, From>::operator()(From value) noexcept -> UnderlyingType<PureType<From>> {
+    STORMKIT_FORCE_INLINE constexpr auto AsCaster<To, From>::operator()(From value) noexcept
+        -> UnderlyingType<PureType<From>> {
         using T = UnderlyingType<PureType<From>>;
         return static_cast<T>(std::forward<From>(value));
     }
@@ -395,8 +395,8 @@ namespace stormkit::core { inline namespace casts {
     /////////////////////////////////////
     template<IsIntegral To, typename From>
         requires(IsIntegral<PureType<From>>)
-    STORMKIT_FORCE_INLINE constexpr auto
-        NarrowCaster<To, From>::operator()(From value) noexcept -> To {
+    STORMKIT_FORCE_INLINE constexpr auto NarrowCaster<To, From>::operator()(From value) noexcept
+        -> To {
         using Type = SafeNarrowHelperType<To, From>;
         if constexpr (IsPure<From, To>) {
             expects(std::numeric_limits<To>::lowest() <= value);
@@ -420,8 +420,8 @@ namespace stormkit::core { inline namespace casts {
     /////////////////////////////////////
     template<IsFloatingPoint To, typename From>
         requires(IsIntegral<PureType<From>>)
-    STORMKIT_FORCE_INLINE constexpr auto
-        NarrowCaster<To, From>::operator()(From value) noexcept -> To {
+    STORMKIT_FORCE_INLINE constexpr auto NarrowCaster<To, From>::operator()(From value) noexcept
+        -> To {
         expects(std::numeric_limits<To>::lowest() < value);
         expects(std::numeric_limits<To>::max() > value);
 
@@ -432,8 +432,8 @@ namespace stormkit::core { inline namespace casts {
     /////////////////////////////////////
     template<IsFloatingPoint To, typename From>
         requires(IsFloatingPoint<PureType<From>>)
-    STORMKIT_FORCE_INLINE constexpr auto
-        NarrowCaster<To, From>::operator()(From value) noexcept -> To {
+    STORMKIT_FORCE_INLINE constexpr auto NarrowCaster<To, From>::operator()(From value) noexcept
+        -> To {
         using Type = SafeNarrowHelperType<To, From>;
 
         expects(static_cast<Type>(std::numeric_limits<To>::lowest()) < static_cast<Type>(value));
@@ -446,8 +446,8 @@ namespace stormkit::core { inline namespace casts {
     /////////////////////////////////////
     template<IsIntegral To, typename From>
         requires(IsFloatingPoint<PureType<From>>)
-    STORMKIT_FORCE_INLINE constexpr auto
-        NarrowCaster<To, From>::operator()(From value) noexcept -> To {
+    STORMKIT_FORCE_INLINE constexpr auto NarrowCaster<To, From>::operator()(From value) noexcept
+        -> To {
         using Type = SafeNarrowHelperType<To, From>;
 
         expects(static_cast<Type>(std::numeric_limits<To>::lowest()) < static_cast<Type>(value));
@@ -460,8 +460,8 @@ namespace stormkit::core { inline namespace casts {
     /////////////////////////////////////
     template<IsEnumeration To, typename From>
         requires(IsIntegral<PureType<From>>)
-    STORMKIT_FORCE_INLINE constexpr auto
-        NarrowCaster<To, From>::operator()(From value) noexcept -> To {
+    STORMKIT_FORCE_INLINE constexpr auto NarrowCaster<To, From>::operator()(From value) noexcept
+        -> To {
         using T = UnderlyingType<To>;
         return as<To, T>(narrow<T>(std::forward<From>(value)));
     }
@@ -470,8 +470,8 @@ namespace stormkit::core { inline namespace casts {
     /////////////////////////////////////
     template<IsEnumeration To, typename From>
         requires(IsEnumeration<PureType<From>>)
-    STORMKIT_FORCE_INLINE constexpr auto
-        NarrowCaster<To, From>::operator()(From value) noexcept -> To {
+    STORMKIT_FORCE_INLINE constexpr auto NarrowCaster<To, From>::operator()(From value) noexcept
+        -> To {
         using T = UnderlyingType<To>;
         return as<To, T>(narrow<T>(as<Underlying>(std::forward<From>(value))));
     }
@@ -480,8 +480,8 @@ namespace stormkit::core { inline namespace casts {
     /////////////////////////////////////
     template<IsIntegral To, typename From>
         requires(IsEnumeration<PureType<From>>)
-    STORMKIT_FORCE_INLINE constexpr auto
-        NarrowCaster<To, From>::operator()(From value) noexcept -> To {
+    STORMKIT_FORCE_INLINE constexpr auto NarrowCaster<To, From>::operator()(From value) noexcept
+        -> To {
         return narrow<To>(as<Underlying>(std::forward<From>(value)));
     }
 
@@ -489,8 +489,8 @@ namespace stormkit::core { inline namespace casts {
     /////////////////////////////////////
     template<IsByte To, typename From>
         requires(IsIntegral<PureType<From>> and not IsSafeCastableToByte<PureType<From>>)
-    STORMKIT_FORCE_INLINE constexpr auto
-        NarrowCaster<To, From>::operator()(From value) noexcept -> To {
+    STORMKIT_FORCE_INLINE constexpr auto NarrowCaster<To, From>::operator()(From value) noexcept
+        -> To {
         expects(value < std::numeric_limits<std::byte>::max());
         return static_cast<To>(std::forward<From>(value));
     }

@@ -22,10 +22,10 @@ namespace stormkit::engine {
         gpu::Surface::createFromWindow(instance, window)
             .transform(monadic::set(m_surface))
             .and_then(curry(gpu::Swapchain::create,
-                                  std::cref(device),
-                                  std::cref(*m_surface),
-                                  std::cref(window.extent()),
-                                  std::nullopt))
+                            std::cref(device),
+                            std::cref(*m_surface),
+                            std::cref(window.extent()),
+                            std::nullopt))
             .transform(monadic::set(m_swapchain))
             .transform_error(throwError());
 
@@ -58,9 +58,10 @@ namespace stormkit::engine {
             transition_command_buffer.end();
         }
 
-        auto fence = gpu::Fence::create(device)
-                         .transform_error(monadic::map(monadic::narrow<gpu::Result>(), throwError()))
-                         .value();
+        auto fence =
+            gpu::Fence::create(device)
+                .transform_error(monadic::map(monadic::narrow<gpu::Result>(), throwError()))
+                .value();
 
         auto cmbs = toNakedRefs(transition_command_buffers);
         raster_queue.submit(cmbs, {}, {}, fence);
@@ -81,9 +82,9 @@ namespace stormkit::engine {
         return in_flight.wait()
             .transform([&in_flight](auto&& _) noexcept { in_flight.reset(); })
             .and_then(curry(&gpu::Swapchain::acquireNextImage,
-                                  &(m_swapchain.get()),
-                                  100ms,
-                                  std::cref(image_available)))
+                            &(m_swapchain.get()),
+                            100ms,
+                            std::cref(image_available)))
             .transform([&, this](auto&& _result) noexcept {
                 auto&& [result, image_index] = _result; // TODO handle result
                 return Frame { .current_frame   = narrow<UInt32>(m_current_frame),
@@ -96,8 +97,8 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto RenderSurface::presentFrame(const gpu::Queue& queue,
-                                     const Frame&      frame) -> gpu::Expected<void> {
+    auto RenderSurface::presentFrame(const gpu::Queue& queue, const Frame& frame)
+        -> gpu::Expected<void> {
         const auto image_indices   = std::array { frame.image_index };
         const auto wait_semaphores = makeNakedRefs<std::array>(*frame.render_finished);
         const auto swapchains      = makeNakedRefs<std::array>(*m_swapchain);

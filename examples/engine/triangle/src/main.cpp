@@ -4,7 +4,6 @@
 
 import std;
 
-
 import stormkit.Core;
 import stormkit.Main;
 import stormkit.Log;

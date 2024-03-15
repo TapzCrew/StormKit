@@ -58,8 +58,7 @@ auto main(std::span<const std::string_view> args) -> int {
                     break;
                 }
                 case wsi::EventType::MouseButtonReleased: {
-                    const auto& event_data =
-                        as<wsi::MouseButtonReleasedEventData>(event.data);
+                    const auto& event_data = as<wsi::MouseButtonReleasedEventData>(event.data);
                     polling_logger.ilog("Mouse button release event: {} {}",
                                         event_data.button,
                                         event_data.position);

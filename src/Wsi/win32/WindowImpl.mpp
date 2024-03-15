@@ -90,8 +90,8 @@ export namespace stormkit::wsi::win32 {
 
         WindowStyle m_style;
 
-        LONG                        m_last_style;
-        LONG                        m_last_style_ex;
+        LONG                  m_last_style;
+        LONG                  m_last_style_ex;
         mutable math::ExtentU m_current_size  = { 0u, 0u };
         math::ExtentU         m_last_size     = { 0u, 0u };
         math::Vector2U        m_last_position = { 0u, 0u };
@@ -116,17 +116,12 @@ namespace stormkit::wsi::win32 {
         /////////////////////////////////////
         /////////////////////////////////////
         auto fromStdString(std::string_view str) -> std::wstring {
-            const auto size = as<std::size_t>(
-                MultiByteToWideChar(CP_UTF8, 0, std::data(str), -1, nullptr, 0));
+            const auto size =
+                as<std::size_t>(MultiByteToWideChar(CP_UTF8, 0, std::data(str), -1, nullptr, 0));
             auto wstr = std::wstring {};
             wstr.resize(size);
 
-            MultiByteToWideChar(CP_UTF8,
-                                0,
-                                std::data(str),
-                                -1,
-                                std::data(wstr),
-                                as<int>(size));
+            MultiByteToWideChar(CP_UTF8, 0, std::data(str), -1, std::data(wstr), as<int>(size));
 
             return wstr;
         }
@@ -139,10 +134,7 @@ namespace stormkit::wsi::win32 {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    WindowImpl::WindowImpl(WM                         wm,
-                           std::string                title,
-                           const math::ExtentU& size,
-                           WindowStyle                style)
+    WindowImpl::WindowImpl(WM wm, std::string title, const math::ExtentU& size, WindowStyle style)
         : WindowImpl { wm } {
         create(std::move(title), size, style);
     }
@@ -434,9 +426,8 @@ namespace stormkit::wsi::win32 {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto WindowImpl::setMousePositionOnDesktop([[maybe_unused]] WM         wm,
-                                               const math::Vector2U& position) noexcept
-        -> void {
+    auto WindowImpl::setMousePositionOnDesktop([[maybe_unused]] WM   wm,
+                                               const math::Vector2U& position) noexcept -> void {
         SetCursorPos(position.x, position.y);
     }
 
@@ -467,8 +458,7 @@ namespace stormkit::wsi::win32 {
         ZeroMemory(&dm, sizeof(DEVMODE));
 
         for (auto i = 0; EnumDisplaySettings(monitor_info.szDevice, i, &dm) != 0; ++i) {
-            monitor.extents.emplace_back(as<UInt32>(dm.dmPelsWidth),
-                                         as<UInt32>(dm.dmPelsHeight));
+            monitor.extents.emplace_back(as<UInt32>(dm.dmPelsWidth), as<UInt32>(dm.dmPelsHeight));
         }
 
         monitor.extents.erase(std::unique(std::begin(monitor.extents), std::end(monitor.extents)),

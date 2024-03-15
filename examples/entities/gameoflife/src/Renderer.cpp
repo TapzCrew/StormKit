@@ -175,13 +175,12 @@ auto Renderer::doInitMeshRenderObjects() -> void {
                                                          gpu::BlendOperation::Add } } },
         .dynamic_state        = { { gpu::DynamicState::Viewport, gpu::DynamicState::Scissor } },
         .shader_state         = { .shaders = makeConstObserverArray(m_board.vertex_shader,
-                                                                  m_board.fragment_shader) },
+                                                            m_board.fragment_shader) },
         /*.vertex_input_state   = { .binding_descriptions =
                                     toArray(MESH_VERTEX_BINDING_DESCRIPTIONS),
                                   .input_attribute_descriptions =
                                     toArray(MESH_VERTEX_ATTRIBUTE_DESCRIPTIONS) },*/
-        .layout = { .descriptor_set_layouts =
-                        makeConstObserverArray(m_descriptor_set_layout) }
+        .layout = { .descriptor_set_layouts = makeConstObserverArray(m_descriptor_set_layout) }
 
     };
 

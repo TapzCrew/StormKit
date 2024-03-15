@@ -190,29 +190,29 @@ namespace stormkit::gpu {
         m_capabilities.limits.max_framebuffer_layers = properties.limits.maxFramebufferLayers;
         m_capabilities.limits.framebuffer_color_sample_counts =
             narrow<SampleCountFlag>(properties.limits.framebufferColorSampleCounts.
-                                          operator vk::SampleCountFlags::MaskType());
+                                    operator vk::SampleCountFlags::MaskType());
         m_capabilities.limits.framebuffer_depth_sample_counts =
             narrow<SampleCountFlag>(properties.limits.framebufferDepthSampleCounts.
-                                          operator vk::SampleCountFlags::MaskType());
+                                    operator vk::SampleCountFlags::MaskType());
         m_capabilities.limits.framebuffer_stencil_sample_counts =
             narrow<SampleCountFlag>(properties.limits.framebufferStencilSampleCounts.
-                                          operator vk::SampleCountFlags::MaskType());
+                                    operator vk::SampleCountFlags::MaskType());
         m_capabilities.limits.framebuffer_no_attachments_sample_counts =
             narrow<SampleCountFlag>(properties.limits.framebufferNoAttachmentsSampleCounts.
-                                          operator vk::SampleCountFlags::MaskType());
+                                    operator vk::SampleCountFlags::MaskType());
         m_capabilities.limits.max_color_attachments = properties.limits.maxColorAttachments;
         m_capabilities.limits.sampled_image_color_sample_counts =
             narrow<SampleCountFlag>(properties.limits.sampledImageColorSampleCounts.
-                                          operator vk::SampleCountFlags::MaskType());
+                                    operator vk::SampleCountFlags::MaskType());
         m_capabilities.limits.sampled_image_integer_sample_counts =
             narrow<SampleCountFlag>(properties.limits.sampledImageIntegerSampleCounts.
-                                          operator vk::SampleCountFlags::MaskType());
+                                    operator vk::SampleCountFlags::MaskType());
         m_capabilities.limits.sampled_image_depth_sample_counts =
             narrow<SampleCountFlag>(properties.limits.sampledImageDepthSampleCounts.
-                                          operator vk::SampleCountFlags::MaskType());
+                                    operator vk::SampleCountFlags::MaskType());
         m_capabilities.limits.sampled_image_stencil_sample_counts =
             narrow<SampleCountFlag>(properties.limits.sampledImageStencilSampleCounts.
-                                          operator vk::SampleCountFlags::MaskType());
+                                    operator vk::SampleCountFlags::MaskType());
         m_capabilities.limits.storage_image_sample_counts = narrow<SampleCountFlag>(
             properties.limits.storageImageSampleCounts.operator vk::SampleCountFlags::MaskType());
         m_capabilities.limits.max_sample_mask_words = properties.limits.maxSampleMaskWords;
@@ -362,7 +362,7 @@ namespace stormkit::gpu {
     auto PhysicalDevice::checkExtensionSupport(
         std::span<const std::string_view> extensions) const noexcept -> bool {
         auto required_extensions = HashSet<std::string_view> { std::ranges::begin(extensions),
-                                                                     std::ranges::end(extensions) };
+                                                               std::ranges::end(extensions) };
         // HashSet<std::string_view> { std::ranges::begin(extensions),
         // std::ranges::end(extensions) };
 
@@ -373,10 +373,10 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto PhysicalDevice::checkExtensionSupport(
-        std::span<const CZString> extensions) const noexcept -> bool {
+    auto PhysicalDevice::checkExtensionSupport(std::span<const CZString> extensions) const noexcept
+        -> bool {
         auto required_extensions = HashSet<std::string_view> { std::ranges::begin(extensions),
-                                                                     std::ranges::end(extensions) };
+                                                               std::ranges::end(extensions) };
 
         for (const auto& extension : m_extensions) required_extensions.erase(extension);
 

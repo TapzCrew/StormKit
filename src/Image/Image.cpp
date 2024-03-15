@@ -20,29 +20,22 @@ namespace stormkit::image {
     namespace details {
         using namespace stormkit::literals;
         inline constexpr auto KTX_HEADER = makeStaticByteArray(0xAB_b,
-                                                                     0x4B_b,
-                                                                     0x54_b,
-                                                                     0x58_b,
-                                                                     0x20_b,
-                                                                     0x31_b,
-                                                                     0x31_b,
-                                                                     0xBB_b,
-                                                                     0x0D_b,
-                                                                     0x0A_b,
-                                                                     0x1A_b,
-                                                                     0x0A_b);
+                                                               0x4B_b,
+                                                               0x54_b,
+                                                               0x58_b,
+                                                               0x20_b,
+                                                               0x31_b,
+                                                               0x31_b,
+                                                               0xBB_b,
+                                                               0x0D_b,
+                                                               0x0A_b,
+                                                               0x1A_b,
+                                                               0x0A_b);
 
-        inline constexpr auto PNG_HEADER = makeStaticByteArray(0x89_b,
-                                                                     0x50_b,
-                                                                     0x4E_b,
-                                                                     0x47_b,
-                                                                     0x0D_b,
-                                                                     0x0A_b,
-                                                                     0x1A_b,
-                                                                     0x0A_b);
+        inline constexpr auto PNG_HEADER =
+            makeStaticByteArray(0x89_b, 0x50_b, 0x4E_b, 0x47_b, 0x0D_b, 0x0A_b, 0x1A_b, 0x0A_b);
 
-        inline constexpr auto QOI_HEADER =
-            makeStaticByteArray(0x71_b, 0x6f_b, 0x69_b, 0x66_b);
+        inline constexpr auto QOI_HEADER = makeStaticByteArray(0x71_b, 0x6f_b, 0x69_b, 0x66_b);
 
         inline constexpr auto JPEG_HEADER = makeStaticByteArray(0xFF_b, 0xD8_b);
 
@@ -54,8 +47,7 @@ namespace stormkit::image {
 
             const auto ext = filename.extension().string();
 
-            if (toLower(ext) == ".jpg" or toLower(ext) == ".jpeg")
-                return Image::Codec::JPEG;
+            if (toLower(ext) == ".jpg" or toLower(ext) == ".jpeg") return Image::Codec::JPEG;
             else if (toLower(ext) == ".png")
                 return Image::Codec::PNG;
             else if (toLower(ext) == ".tga" or toLower(ext) == ".targa")
@@ -92,9 +84,9 @@ namespace stormkit::image {
 
         auto map(std::span<const Byte> bytes,
                  UInt32                source_count,
-                 UInt32 destination_count) noexcept -> std::vector<Byte> {
+                 UInt32                destination_count) noexcept -> std::vector<Byte> {
             expects(source_count <= 4u and source_count > 0u and destination_count <= 4u and
-                          destination_count > 0u);
+                    destination_count > 0u);
 
             static constexpr auto BYTE_1_MIN = std::numeric_limits<UInt8>::min();
             static constexpr auto BYTE_1_MAX = std::numeric_limits<UInt8>::max();
@@ -112,60 +104,60 @@ namespace stormkit::image {
 
                 for (auto i : range(std::size(bytes)))
                     output_it[i] = core::map<UInt16>(input_it[i],
-                                                           BYTE_1_MIN,
-                                                           BYTE_1_MAX,
-                                                           BYTE_2_MIN,
-                                                           BYTE_2_MAX);
+                                                     BYTE_1_MIN,
+                                                     BYTE_1_MAX,
+                                                     BYTE_2_MIN,
+                                                     BYTE_2_MAX);
             } else if (source_count == 1u and destination_count == 4u) {
                 const auto input_it  = std::bit_cast<const UInt8*>(std::data(data));
                 auto       output_it = std::bit_cast<UInt32*>(std::data(data));
 
                 for (auto i : range(std::size(bytes)))
                     output_it[i] = core::map<UInt32>(input_it[i],
-                                                           BYTE_1_MIN,
-                                                           BYTE_1_MAX,
-                                                           BYTE_4_MIN,
-                                                           BYTE_4_MAX);
+                                                     BYTE_1_MIN,
+                                                     BYTE_1_MAX,
+                                                     BYTE_4_MIN,
+                                                     BYTE_4_MAX);
             } else if (source_count == 2u and destination_count == 1u) {
                 const auto input_it  = std::bit_cast<const UInt16*>(std::data(data));
                 auto       output_it = std::bit_cast<UInt8*>(std::data(data));
 
                 for (auto i : range(std::size(bytes)))
                     output_it[i] = core::map<UInt8>(input_it[i],
-                                                          BYTE_2_MIN,
-                                                          BYTE_2_MAX,
-                                                          BYTE_1_MIN,
-                                                          BYTE_1_MAX);
+                                                    BYTE_2_MIN,
+                                                    BYTE_2_MAX,
+                                                    BYTE_1_MIN,
+                                                    BYTE_1_MAX);
             } else if (source_count == 2u and destination_count == 4u) {
                 const auto input_it  = std::bit_cast<const UInt16*>(std::data(data));
                 auto       output_it = std::bit_cast<UInt32*>(std::data(data));
 
                 for (auto i : range(std::size(bytes)))
                     output_it[i] = core::map<UInt32>(input_it[i],
-                                                           BYTE_2_MIN,
-                                                           BYTE_2_MAX,
-                                                           BYTE_4_MIN,
-                                                           BYTE_4_MAX);
+                                                     BYTE_2_MIN,
+                                                     BYTE_2_MAX,
+                                                     BYTE_4_MIN,
+                                                     BYTE_4_MAX);
             } else if (source_count == 4u and destination_count == 1u) {
                 const auto input_it  = std::bit_cast<const UInt32*>(std::data(data));
                 auto       output_it = std::bit_cast<UInt8*>(std::data(data));
 
                 for (auto i : range(std::size(bytes)))
                     output_it[i] = core::map<UInt8>(input_it[i],
-                                                          BYTE_4_MIN,
-                                                          BYTE_4_MAX,
-                                                          BYTE_1_MIN,
-                                                          BYTE_1_MAX);
+                                                    BYTE_4_MIN,
+                                                    BYTE_4_MAX,
+                                                    BYTE_1_MIN,
+                                                    BYTE_1_MAX);
             } else if (source_count == 4u and destination_count == 2u) {
                 const auto input_it  = std::bit_cast<const UInt32*>(std::data(data));
                 auto       output_it = std::bit_cast<UInt16*>(std::data(data));
 
                 for (auto i : range(std::size(bytes)))
                     output_it[i] = core::map<UInt16>(input_it[i],
-                                                           BYTE_4_MIN,
-                                                           BYTE_4_MAX,
-                                                           BYTE_2_MIN,
-                                                           BYTE_2_MAX);
+                                                     BYTE_4_MIN,
+                                                     BYTE_4_MAX,
+                                                     BYTE_2_MIN,
+                                                     BYTE_2_MAX);
             } else
                 data = { std::ranges::begin(bytes), std::ranges::end(bytes) };
 
@@ -661,7 +653,7 @@ namespace stormkit::image {
     /////////////////////////////////////
     auto Image::create(math::ExtentU extent, Format format) noexcept -> void {
         expects(extent.width > 0u and extent.height > 0u and extent.depth > 0u and
-                      format != Format::Undefined);
+                format != Format::Undefined);
         m_data.data.clear();
 
         m_data.extent            = extent;
@@ -707,11 +699,10 @@ namespace stormkit::image {
 
         for (auto [layer, face, level, i] :
              multiRange(image.layers(), image.faces(), image.layers(), pixel_count)) {
-            const auto from_image =
-                details::map(pixel(as<RangeExtent>(i), layer, face, level),
-                             m_data.bytes_per_channel,
-                             image.bytesPerChannel());
-            auto to_image = image.pixel(as<RangeExtent>(i), layer, face, level);
+            const auto from_image = details::map(pixel(as<RangeExtent>(i), layer, face, level),
+                                                 m_data.bytes_per_channel,
+                                                 image.bytesPerChannel());
+            auto       to_image   = image.pixel(as<RangeExtent>(i), layer, face, level);
 
             std::ranges::copy_n(std::ranges::begin(from_image),
                                 std::min(m_data.channel_count, image.channelCount()),
@@ -743,11 +734,11 @@ namespace stormkit::image {
         auto image = Image { std::move(image_data) };
 
         for (auto [layer, face, mip, x, y, z] : multiRange(m_data.layers,
-                                                                 m_data.faces,
-                                                                 m_data.mip_levels,
-                                                                 m_data.extent.width,
-                                                                 m_data.extent.height,
-                                                                 m_data.extent.depth)) {
+                                                           m_data.faces,
+                                                           m_data.mip_levels,
+                                                           m_data.extent.width,
+                                                           m_data.extent.height,
+                                                           m_data.extent.depth)) {
             const auto inv_x  = m_data.extent.width - x - 1u;
             auto       output = image.pixel({ inv_x, y, z }, layer, face, mip);
             // const auto data  = pixel({ x, y, z }, layer, face, mip);
@@ -774,11 +765,11 @@ namespace stormkit::image {
         auto image = Image { std::move(image_data) };
 
         for (auto [layer, face, mip, x, y, z] : multiRange(m_data.layers,
-                                                                 m_data.faces,
-                                                                 m_data.mip_levels,
-                                                                 m_data.extent.width,
-                                                                 m_data.extent.height,
-                                                                 m_data.extent.depth)) {
+                                                           m_data.faces,
+                                                           m_data.mip_levels,
+                                                           m_data.extent.width,
+                                                           m_data.extent.height,
+                                                           m_data.extent.depth)) {
             const auto inv_y  = m_data.extent.height - 1u - y;
             auto       output = image.pixel({ x, inv_y, z }, layer, face, mip);
 
@@ -803,11 +794,11 @@ namespace stormkit::image {
         auto image = Image { std::move(image_data) };
 
         for (auto [layer, face, mip, x, y, z] : multiRange(m_data.layers,
-                                                                 m_data.faces,
-                                                                 m_data.mip_levels,
-                                                                 m_data.extent.width,
-                                                                 m_data.extent.height,
-                                                                 m_data.extent.depth)) {
+                                                           m_data.faces,
+                                                           m_data.mip_levels,
+                                                           m_data.extent.width,
+                                                           m_data.extent.height,
+                                                           m_data.extent.depth)) {
             const auto inv_z  = m_data.extent.depth - 1u - z;
             auto       output = image.pixel({ x, z, inv_z }, layer, face, mip);
 

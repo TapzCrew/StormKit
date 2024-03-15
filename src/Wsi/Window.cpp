@@ -96,9 +96,8 @@ namespace stormkit::wsi {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto Window::create(std::string                title,
-                        const math::ExtentU& size,
-                        WindowStyle                style) noexcept -> void {
+    auto Window::create(std::string title, const math::ExtentU& size, WindowStyle style) noexcept
+        -> void {
         m_impl->create(std::move(title), size, style);
     }
 

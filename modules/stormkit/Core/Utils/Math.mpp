@@ -298,8 +298,8 @@ export {
                 /// \brief Move assign other to this Extent instance.
                 /// \param other ValueType extent moved.
                 /// \returns ValueType reference of the moved extent.
-                constexpr auto
-                    operator=(Extent<ValueType>&& other) noexcept -> Extent<ValueType>& = default;
+                constexpr auto operator=(Extent<ValueType>&& other) noexcept
+                    -> Extent<ValueType>& = default;
 
                 /// \brief Construct a extent from the convertion of an other extent.
                 ///
@@ -328,26 +328,26 @@ export {
                 /// \param factor ValueType factor to multiply
                 /// \returns A newly constructed extent equal to this extent multiplied with
                 /// `factor`
-                [[nodiscard]] constexpr auto
-                    operator*(ValueType factor) const noexcept -> Extent<ValueType>;
+                [[nodiscard]] constexpr auto operator*(ValueType factor) const noexcept
+                    -> Extent<ValueType>;
 
                 /// \brief Divide an extent with a factor.
                 /// \param factor ValueType factor to divide
                 /// \returns A newly constructed extent equal to this extent Divided with `factor`
-                [[nodiscard]] constexpr auto
-                    operator/(ValueType factor) const noexcept -> Extent<ValueType>;
+                [[nodiscard]] constexpr auto operator/(ValueType factor) const noexcept
+                    -> Extent<ValueType>;
 
                 /// \brief Multiply this extent with a factor.
                 /// \param factor ValueType factor to multiply
                 /// \returns A reference to this after the multiplication with `factor`
-                [[nodiscard]] constexpr auto
-                    operator*=(ValueType factor) noexcept -> Extent<ValueType>&;
+                [[nodiscard]] constexpr auto operator*=(ValueType factor) noexcept
+                    -> Extent<ValueType>&;
 
                 /// \brief Divide this extent with a factor.
                 /// \param factor ValueType factor to divide
                 /// \returns A reference to this after the division with `factor`
-                [[nodiscard]] constexpr auto
-                    operator/=(ValueType factor) noexcept -> Extent<ValueType>&;
+                [[nodiscard]] constexpr auto operator/=(ValueType factor) noexcept
+                    -> Extent<ValueType>&;
 
                 /// \output_section Publics member
                 /// \brief Width attribute.
@@ -446,7 +446,7 @@ export {
                 [[nodiscard]] static constexpr auto operator()(const From& from) noexcept -> To;
             };
         } // namespace casts
-    } // namespace stormkit::core
+    }     // namespace stormkit::core
 
     TEMPLATED_HASH_FUNC(stormkit::core::math::Vector2,
                         stormkit::core::IsArithmetic,
@@ -505,8 +505,8 @@ namespace stormkit::core {
         /////////////////////////////////////
         /////////////////////////////////////
         template<IsArithmetic T>
-        constexpr auto
-            Extent<T>::operator<=>(const Extent<T>& other) const noexcept -> OrderingType {
+        constexpr auto Extent<T>::operator<=>(const Extent<T>& other) const noexcept
+            -> OrderingType {
             if (auto ret = width <=> other.width; ret != 0) return ret;
             if (auto ret = height <=> other.height; ret != 0) return ret;
             if (auto ret = depth <=> other.depth; ret != 0) return ret;

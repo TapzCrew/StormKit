@@ -38,7 +38,7 @@ export namespace stormkit::gpu {
         [[nodiscard]] static auto loadFromFile(const Device&                device,
                                                const std::filesystem::path& filepath,
                                                ShaderStageFlag type) noexcept -> Expected<Shader>;
-        [[nodiscard]] static auto fromBytes(const Device&               device,
+        [[nodiscard]] static auto fromBytes(const Device&         device,
                                             std::span<const Byte> data,
                                             ShaderStageFlag type) noexcept -> Expected<Shader>;
         [[nodiscard]] static auto fromSpirv(const Device&            device,
@@ -49,14 +49,14 @@ export namespace stormkit::gpu {
                                                           const std::filesystem::path& filepath,
                                                           ShaderStageFlag type) noexcept
             -> Expected<std::unique_ptr<Shader>>;
-        [[nodiscard]] static auto
-            allocateFromBytes(const Device&               device,
-                              std::span<const Byte> data,
-                              ShaderStageFlag type) noexcept -> Expected<std::unique_ptr<Shader>>;
-        [[nodiscard]] static auto
-            allocateFromSpirv(const Device&            device,
-                              std::span<const SpirvID> data,
-                              ShaderStageFlag type) noexcept -> Expected<std::unique_ptr<Shader>>;
+        [[nodiscard]] static auto allocateFromBytes(const Device&         device,
+                                                    std::span<const Byte> data,
+                                                    ShaderStageFlag       type) noexcept
+            -> Expected<std::unique_ptr<Shader>>;
+        [[nodiscard]] static auto allocateFromSpirv(const Device&            device,
+                                                    std::span<const SpirvID> data,
+                                                    ShaderStageFlag          type) noexcept
+            -> Expected<std::unique_ptr<Shader>>;
 
         [[nodiscard]] auto type() const noexcept -> ShaderStageFlag;
         [[nodiscard]] auto source() const noexcept -> const std::vector<SpirvID>&;
@@ -123,45 +123,46 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto
-        Shader::loadFromFile(const Device&                device,
-                             const std::filesystem::path& filepath,
-                             ShaderStageFlag              type) noexcept -> Expected<Shader> try {
+    STORMKIT_FORCE_INLINE auto Shader::loadFromFile(const Device&                device,
+                                                    const std::filesystem::path& filepath,
+                                                    ShaderStageFlag              type) noexcept
+        -> Expected<Shader> try {
         return Shader { device, std::move(filepath), type, Tag {} };
     } catch (const Result& result) { return std::unexpected(result); }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto
-        Shader::fromBytes(const Device&               device,
-                          std::span<const Byte> data,
-                          ShaderStageFlag             type) noexcept -> Expected<Shader> try {
+    STORMKIT_FORCE_INLINE auto Shader::fromBytes(const Device&         device,
+                                                 std::span<const Byte> data,
+                                                 ShaderStageFlag       type) noexcept
+        -> Expected<Shader> try {
         return Shader { device, viewAs<const SpirvID>(data), type, Tag {} };
     } catch (const Result& result) { return std::unexpected(result); }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto
-        Shader::fromSpirv(const Device&            device,
-                          std::span<const SpirvID> data,
-                          ShaderStageFlag          type) noexcept -> Expected<Shader> try {
+    STORMKIT_FORCE_INLINE auto Shader::fromSpirv(const Device&            device,
+                                                 std::span<const SpirvID> data,
+                                                 ShaderStageFlag          type) noexcept
+        -> Expected<Shader> try {
         return Shader { device, data, type, Tag {} };
     } catch (const Result& result) { return std::unexpected(result); }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto Shader::allocateAndLoadFromFile(
-        const Device&                device,
-        const std::filesystem::path& filepath,
-        ShaderStageFlag              type) noexcept -> Expected<std::unique_ptr<Shader>> try {
+    STORMKIT_FORCE_INLINE auto
+        Shader::allocateAndLoadFromFile(const Device&                device,
+                                        const std::filesystem::path& filepath,
+                                        ShaderStageFlag              type) noexcept
+        -> Expected<std::unique_ptr<Shader>> try {
         return std::make_unique<Shader>(device, filepath, type, Tag {});
     } catch (const Result& result) { return std::unexpected(result); }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto Shader::allocateFromBytes(const Device&               device,
+    STORMKIT_FORCE_INLINE auto Shader::allocateFromBytes(const Device&         device,
                                                          std::span<const Byte> data,
-                                                         ShaderStageFlag             type) noexcept
+                                                         ShaderStageFlag       type) noexcept
         -> Expected<std::unique_ptr<Shader>> try {
         return std::make_unique<Shader>(device, viewAs<const SpirvID>(data), type, Tag {});
     } catch (const Result& result) { return std::unexpected(result); }

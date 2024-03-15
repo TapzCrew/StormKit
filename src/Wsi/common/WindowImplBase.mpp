@@ -79,9 +79,8 @@ namespace stormkit::wsi::common {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_INLINE auto WindowImplBase::mouseDownEvent(MouseButton button,
-                                                        Int32 x,
-                                                        Int32 y) noexcept -> void {
+    STORMKIT_INLINE auto
+        WindowImplBase::mouseDownEvent(MouseButton button, Int32 x, Int32 y) noexcept -> void {
         auto event = Event {};
         event.type = EventType::MouseButtonPushed;
         event.data = MouseButtonPushedEventData { .position = { x, y }, .button = button };
@@ -91,9 +90,8 @@ namespace stormkit::wsi::common {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_INLINE auto WindowImplBase::mouseUpEvent(MouseButton button,
-                                                      Int32 x,
-                                                      Int32 y) noexcept -> void {
+    STORMKIT_INLINE auto WindowImplBase::mouseUpEvent(MouseButton button, Int32 x, Int32 y) noexcept
+        -> void {
         auto event = Event {};
         event.type = EventType::MouseButtonReleased;
         event.data = MouseButtonReleasedEventData { .position = { x, y }, .button = button };
@@ -103,8 +101,7 @@ namespace stormkit::wsi::common {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_INLINE auto WindowImplBase::mouseMoveEvent(Int32 x, Int32 y) noexcept
-        -> void {
+    STORMKIT_INLINE auto WindowImplBase::mouseMoveEvent(Int32 x, Int32 y) noexcept -> void {
         auto event = Event {};
         event.type = EventType::MouseMoved;
         event.data = MouseMovedEventData { .position = { x, y } };
@@ -164,8 +161,7 @@ namespace stormkit::wsi::common {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_INLINE auto WindowImplBase::resizeEvent(UInt32 width,
-                                                     UInt32 height) noexcept -> void {
+    STORMKIT_INLINE auto WindowImplBase::resizeEvent(UInt32 width, UInt32 height) noexcept -> void {
         auto event = Event {};
         event.type = EventType::Resized;
         event.data = ResizedEventData { .extent { width, height } };

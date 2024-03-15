@@ -9,4 +9,4 @@ import stormkit.Log;
 export namespace stormkit::log::details {
     auto colorifyBegin(Severity severity, bool to_stderr) noexcept -> void;
     auto colorifyEnd(bool to_stderr) noexcept -> void;
-} // namespace stormkit::Log::details
+} // namespace stormkit::log::details

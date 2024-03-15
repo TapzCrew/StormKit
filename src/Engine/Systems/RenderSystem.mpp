@@ -56,8 +56,8 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_INLINE auto
-        RenderSystem::operator=(RenderSystem&&) noexcept -> RenderSystem& = default;
+    STORMKIT_INLINE auto RenderSystem::operator=(RenderSystem&&) noexcept
+        -> RenderSystem& = default;
 
     /////////////////////////////////////
     /////////////////////////////////////

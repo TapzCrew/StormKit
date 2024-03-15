@@ -33,10 +33,9 @@ namespace stormkit::gpu {
             std::array { vk::ValidationFeatureEnableEXT::eBestPractices,
                          vk::ValidationFeatureEnableEXT::eGpuAssisted };
 
-        constexpr auto STORMKIT_VK_VERSION =
-            vkMakeVersion<Int32>(STORMKIT_MAJOR_VERSION,
-                                       STORMKIT_MINOR_VERSION,
-                                       STORMKIT_PATCH_VERSION);
+        constexpr auto STORMKIT_VK_VERSION = vkMakeVersion<Int32>(STORMKIT_MAJOR_VERSION,
+                                                                  STORMKIT_MINOR_VERSION,
+                                                                  STORMKIT_PATCH_VERSION);
 
         constexpr auto BASE_EXTENSIONS = std::array { "VK_KHR_get_physical_device_properties2" };
 
@@ -111,9 +110,8 @@ namespace stormkit::gpu {
         /////////////////////////////////////
         auto checkExtensionSupport(std::span<const std::string>      supported_extensions,
                                    std::span<const std::string_view> extensions) noexcept -> bool {
-            auto required_extensions =
-                HashSet<std::string_view> { std::ranges::begin(extensions),
-                                                  std::ranges::end(extensions) };
+            auto required_extensions = HashSet<std::string_view> { std::ranges::begin(extensions),
+                                                                   std::ranges::end(extensions) };
 
             for (const auto& extension : supported_extensions) required_extensions.erase(extension);
 
@@ -122,8 +120,8 @@ namespace stormkit::gpu {
 
         /////////////////////////////////////
         /////////////////////////////////////
-        auto checkExtensionSupport(std::span<const std::string>    supported_extensions,
-                                   std::span<const CZString> extensions) noexcept -> bool {
+        auto checkExtensionSupport(std::span<const std::string> supported_extensions,
+                                   std::span<const CZString>    extensions) noexcept -> bool {
             const auto ext = extensions | std::views::transform([](const auto& extension) noexcept {
                                  return std::string_view { extension };
                              }) |

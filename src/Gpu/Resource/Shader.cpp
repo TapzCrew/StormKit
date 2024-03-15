@@ -23,9 +23,8 @@ namespace stormkit::gpu {
         std::memcpy(std::data(ir), std::data(m_source), std::size(m_source));
 
         auto       compiler     = spirv_cross::CompilerGLSL { std::move(ir) };
-        const auto add_bindings = [this,
-                                   &compiler](span<const spirv_cross::Resource> resources,
-                                              gpu::DescriptorType                     type) {
+        const auto add_bindings = [this, &compiler](span<const spirv_cross::Resource> resources,
+                                                    gpu::DescriptorType               type) {
             for (const auto& resource : resources) {
                 /*const auto set =
                     spvc_compiler_get_decoration(compiler, resources[i].id,

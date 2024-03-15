@@ -157,8 +157,7 @@ export namespace stormkit::wsi::linux::wayland {
         WindowImpl(WindowImpl&&) noexcept;
         auto operator=(WindowImpl&&) noexcept -> WindowImpl&;
 
-        auto create(std::string title, const math::ExtentU& extent, WindowStyle style)
-            -> void;
+        auto create(std::string title, const math::ExtentU& extent, WindowStyle style) -> void;
         auto close() noexcept -> void;
 
         [[nodiscard]] auto pollEvent(Event& event) noexcept -> bool;
@@ -193,8 +192,7 @@ export namespace stormkit::wsi::linux::wayland {
         auto setVirtualKeyboardVisible(bool visible) noexcept -> void;
 
         auto        setMousePosition(const math::Vector2I& position) noexcept -> void;
-        static auto setMousePositionOnDesktop(const math::Vector2U& position) noexcept
-            -> void;
+        static auto setMousePositionOnDesktop(const math::Vector2U& position) noexcept -> void;
 
         [[nodiscard]] static auto getMonitorSettings() -> std::vector<Monitor>;
 

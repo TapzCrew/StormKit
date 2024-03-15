@@ -59,15 +59,14 @@ namespace stormkit::gpu {
             std::optional<UInt32> id    = std::nullopt;
             UInt32                count = 0u;
             Byte                  _[3];
-            QueueFlag                   flags = QueueFlag {};
+            QueueFlag             flags = QueueFlag {};
         };
 
         const auto raster_queue = [&queue_families]() -> Queue_ {
             const auto it = std::ranges::find_if(queue_families, findQueue<QueueFlag::Graphics>());
             if (it == std::ranges::cend(queue_families)) return {};
 
-            return { .id = as<UInt32>(
-                         std::distance(std::ranges::cbegin(queue_families), it)),
+            return { .id    = as<UInt32>(std::distance(std::ranges::cbegin(queue_families), it)),
                      .count = it->count,
                      .flags = it->flags };
         }();
@@ -78,8 +77,7 @@ namespace stormkit::gpu {
                                      findQueue<QueueFlag::Transfert, QueueFlag::Graphics>());
             if (it == std::ranges::cend(queue_families)) return {};
 
-            return { .id = as<UInt32>(
-                         std::distance(std::ranges::cbegin(queue_families), it)),
+            return { .id    = as<UInt32>(std::distance(std::ranges::cbegin(queue_families), it)),
                      .count = it->count,
                      .flags = it->flags };
         }();
@@ -90,8 +88,7 @@ namespace stormkit::gpu {
                 findQueue<QueueFlag::Compute, QueueFlag::Graphics, QueueFlag::Transfert>());
             if (it == std::ranges::cend(queue_families)) return {};
 
-            return { .id = as<UInt32>(
-                         std::distance(std::ranges::cbegin(queue_families), it)),
+            return { .id    = as<UInt32>(std::distance(std::ranges::cbegin(queue_families), it)),
                      .count = it->count,
                      .flags = it->flags };
         }();
@@ -227,8 +224,8 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     auto Device::waitForFences(std::span<const NakedRef<const Fence>> fences,
-                               bool                                         wait_all,
-                               const std::chrono::milliseconds&             timeout) const noexcept
+                               bool                                   wait_all,
+                               const std::chrono::milliseconds&       timeout) const noexcept
         -> Expected<Result> {
         const auto vk_fences =
             fences | std::views::transform(monadic::toVkHandle()) | std::ranges::to<std::vector>();
@@ -245,8 +242,7 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto Device::resetFences(std::span<const NakedRef<const Fence>> fences) const noexcept
-        -> void {
+    auto Device::resetFences(std::span<const NakedRef<const Fence>> fences) const noexcept -> void {
         const auto vk_fences =
             fences | std::views::transform(monadic::toVkHandle()) | std::ranges::to<std::vector>();
 

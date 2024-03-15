@@ -65,8 +65,7 @@ namespace stormkit::engine {
         /////////////////////////////////////
         auto pickPhysicalDevice(std::span<const gpu::PhysicalDevice> physical_devices) noexcept
             -> std::optional<NakedRef<const gpu::PhysicalDevice>> {
-            auto ranked_devices =
-                std::multimap<UInt64, NakedRef<const gpu::PhysicalDevice>> {};
+            auto ranked_devices = std::multimap<UInt64, NakedRef<const gpu::PhysicalDevice>> {};
 
             for (const auto& physical_device : physical_devices) {
                 if (not physical_device.checkExtensionSupport(BASE_EXTENSIONS)) {
@@ -147,18 +146,16 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto Renderer::doInit(std::string_view                                 application_name,
+    auto Renderer::doInit(std::string_view                           application_name,
                           std::optional<NakedRef<const wsi::Window>> window) noexcept
         -> gpu::Expected<void> {
         ilog("Initializing Renderer");
         return doInitInstance(application_name)
             .and_then(curry(&Renderer::doInitDevice, this))
-            .and_then(
-                curry(gpu::Queue::create, std::cref(*m_device), m_device->rasterQueueEntry()))
+            .and_then(curry(gpu::Queue::create, std::cref(*m_device), m_device->rasterQueueEntry()))
             .transform(monadic::set(m_raster_queue))
-            .and_then(curry(gpu::CommandPool::create,
-                                  std::cref(*m_device),
-                                  std::cref(*m_raster_queue)))
+            .and_then(
+                curry(gpu::CommandPool::create, std::cref(*m_device), std::cref(*m_raster_queue)))
             .transform(monadic::set(m_main_command_pool))
             .and_then(curry(&Renderer::doInitRenderSurface, this, std::move(window)));
     }
@@ -175,22 +172,20 @@ namespace stormkit::engine {
     /////////////////////////////////////
     auto Renderer::doInitDevice() noexcept -> gpu::Expected<void> {
         const auto& physical_devices = m_instance->physicalDevices();
-        auto        physical_device =
-            pickPhysicalDevice(physical_devices)
-                .or_else(expectsWithMessage<NakedRef<const gpu::PhysicalDevice>>(
-                    "No suitable GPU found !"))
-                .value();
+        auto        physical_device  = pickPhysicalDevice(physical_devices)
+                                   .or_else(expectsWithMessage<NakedRef<const gpu::PhysicalDevice>>(
+                                       "No suitable GPU found !"))
+                                   .value();
 
         ilog("Using physical device {}", *physical_device);
 
-        return gpu::Device::create(*physical_device, *m_instance)
-            .transform(monadic::set(m_device));
+        return gpu::Device::create(*physical_device, *m_instance).transform(monadic::set(m_device));
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto Renderer::doInitRenderSurface(
-        std::optional<NakedRef<const wsi::Window>> window) noexcept -> gpu::Expected<void> {
+    auto Renderer::doInitRenderSurface(std::optional<NakedRef<const wsi::Window>> window) noexcept
+        -> gpu::Expected<void> {
         if (window)
             return RenderSurface::createFromWindow(*m_instance,
                                                    *m_device,
@@ -217,12 +212,12 @@ namespace stormkit::engine {
 
             m_surface->beginFrame(m_device)
                 .and_then(curry(&Renderer::doRender,
-                                      this,
-                                      std::ref(framegraph_mutex),
-                                      std::ref(rebuild_graph)))
+                                this,
+                                std::ref(framegraph_mutex),
+                                std::ref(rebuild_graph)))
                 .and_then(curry(&RenderSurface::presentFrame,
-                                      &m_surface.get(),
-                                      std::cref(*m_raster_queue)))
+                                &m_surface.get(),
+                                std::cref(*m_raster_queue)))
                 .transform_error(expectsWithMessage("Failed to render frame"));
         }
 
@@ -260,19 +255,18 @@ namespace stormkit::engine {
         blit_cmb.transitionImageLayout(present_image,
                                        gpu::ImageLayout::Present_Src,
                                        gpu::ImageLayout::Transfer_Dst_Optimal);
-        blit_cmb.blitImage(
-            backbuffer,
-            present_image,
-            gpu::ImageLayout::Transfer_Src_Optimal,
-            gpu::ImageLayout::Transfer_Dst_Optimal,
-            std::array { gpu::BlitRegion {
-                .src        = {},
-                .dst        = {},
-                .src_offset = { math::Vector3F { 0.f, 0.f, 0.f },
-                                as<math::Vector3F>(backbuffer.extent()) },
-                .dst_offset = { math::Vector3F { 0.f, 0.f, 0.f },
-                                as<math::Vector3F>(present_image.extent()) } } },
-            gpu::Filter::Linear);
+        blit_cmb.blitImage(backbuffer,
+                           present_image,
+                           gpu::ImageLayout::Transfer_Src_Optimal,
+                           gpu::ImageLayout::Transfer_Dst_Optimal,
+                           std::array { gpu::BlitRegion {
+                               .src        = {},
+                               .dst        = {},
+                               .src_offset = { math::Vector3F { 0.f, 0.f, 0.f },
+                                               as<math::Vector3F>(backbuffer.extent()) },
+                               .dst_offset = { math::Vector3F { 0.f, 0.f, 0.f },
+                                               as<math::Vector3F>(present_image.extent()) } } },
+                           gpu::Filter::Linear);
         blit_cmb.transitionImageLayout(backbuffer,
                                        gpu::ImageLayout::Transfer_Src_Optimal,
                                        gpu::ImageLayout::Color_Attachment_Optimal);

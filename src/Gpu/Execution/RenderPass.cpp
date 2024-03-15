@@ -35,10 +35,8 @@ namespace stormkit::gpu {
                     .setSamples(narrow<vk::SampleCountFlagBits>(attachment.samples))
                     .setLoadOp(narrow<vk::AttachmentLoadOp>(attachment.load_op))
                     .setStoreOp(narrow<vk::AttachmentStoreOp>(attachment.store_op))
-                    .setStencilLoadOp(
-                        narrow<vk::AttachmentLoadOp>(attachment.stencil_load_op))
-                    .setStencilStoreOp(
-                        narrow<vk::AttachmentStoreOp>(attachment.stencil_store_op))
+                    .setStencilLoadOp(narrow<vk::AttachmentLoadOp>(attachment.stencil_load_op))
+                    .setStencilStoreOp(narrow<vk::AttachmentStoreOp>(attachment.stencil_store_op))
                     .setInitialLayout(narrow<vk::ImageLayout>(attachment.source_layout))
                     .setFinalLayout(narrow<vk::ImageLayout>(attachment.destination_layout));
             }) |
@@ -68,8 +66,7 @@ namespace stormkit::gpu {
             subpasses.emplace_back(
                 vk::SubpassDescription {}
                     .setPipelineBindPoint(narrow<vk::PipelineBindPoint>(subpass.bind_point))
-                    .setColorAttachmentCount(
-                        as<UInt32>(std::size(color_attachment_ref)))
+                    .setColorAttachmentCount(as<UInt32>(std::size(color_attachment_ref)))
                     .setPColorAttachments(std::data(color_attachment_ref))
                     .setPResolveAttachments(std::data(resolve_attachment_ref))
                     .setPDepthStencilAttachment(depth_attachment_ref.has_value()
@@ -100,8 +97,9 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     // TODO finish this
-    auto RenderPassDescription::isCompatible(
-        const RenderPassDescription& description) const noexcept -> bool {
+    auto
+        RenderPassDescription::isCompatible(const RenderPassDescription& description) const noexcept
+        -> bool {
         if (std::size(subpasses) == std::size(description.subpasses)) return false;
 
         for (auto i : range(std::size(subpasses))) {

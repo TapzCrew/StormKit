@@ -28,14 +28,13 @@ export {
 
         template<IsColorComponent T>
         struct RGBColor {
-            using ValueType = T;
+            using ValueType  = T;
             using value_type = ValueType;
 
-            constexpr RGBColor(
-                ValueType red,
-                ValueType green,
-                ValueType blue,
-                ValueType alpha = maxColorComponentValue<ValueType>()) noexcept;
+            constexpr RGBColor(ValueType red,
+                               ValueType green,
+                               ValueType blue,
+                               ValueType alpha = maxColorComponentValue<ValueType>()) noexcept;
 
             constexpr explicit RGBColor(const math::Vector3<ValueType>& vector) noexcept;
 

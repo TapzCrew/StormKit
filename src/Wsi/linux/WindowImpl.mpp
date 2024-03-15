@@ -104,10 +104,10 @@ namespace stormkit::wsi::linux {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_INLINE WindowImpl::WindowImpl(WM                         wm,
-                                           std::string                title,
+    STORMKIT_INLINE WindowImpl::WindowImpl(WM                   wm,
+                                           std::string          title,
                                            const math::ExtentU& extent,
-                                           WindowStyle                style)
+                                           WindowStyle          style)
         : m_wm { wm } {
         if (m_wm == WM::X11) m_impl = x11::WindowImpl { std::move(title), extent, style };
         else if (m_wm == WM::Wayland)
@@ -124,9 +124,9 @@ namespace stormkit::wsi::linux {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_INLINE auto WindowImpl::create(std::string                title,
+    STORMKIT_INLINE auto WindowImpl::create(std::string          title,
                                             const math::ExtentU& extent,
-                                            WindowStyle                style) -> void {
+                                            WindowStyle          style) -> void {
         switch (m_wm) {
             CASE_DO(WM::X11, x11, create(std::move(title), extent, style));
             CASE_DO(WM::Wayland, wayland, create(std::move(title), extent, style));
@@ -251,8 +251,7 @@ namespace stormkit::wsi::linux {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_INLINE auto WindowImpl::extent() const noexcept
-        -> const stormkit::math::ExtentU& {
+    STORMKIT_INLINE auto WindowImpl::extent() const noexcept -> const stormkit::math::ExtentU& {
         switch (m_wm) {
             CASE_DO_RETURN(WM::X11, x11, extent());
             CASE_DO_RETURN(WM::Wayland, wayland, extent());

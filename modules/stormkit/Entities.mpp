@@ -46,18 +46,17 @@ export namespace stormkit::entities {
     template<class Result>
     constexpr auto componentHash(std::string_view str) noexcept -> Result;
 
-    constexpr auto componentHash(const char*       str,
-                                 RangeExtent size) noexcept -> Component::Type;
+    constexpr auto componentHash(const char* str, RangeExtent size) noexcept -> Component::Type;
 
     constexpr auto componentHash(std::string_view str) noexcept -> Component::Type;
 
     namespace literals {
-        constexpr auto operator""_component_type(const char*       str,
-                                                 RangeExtent size) -> Component::Type;
+        constexpr auto operator""_component_type(const char* str, RangeExtent size)
+            -> Component::Type;
     } // namespace literals
 
     struct Message {
-        UInt32        id;
+        UInt32              id;
         std::vector<Entity> entities;
     };
 
@@ -110,9 +109,9 @@ export namespace stormkit::entities {
         auto removeEntity(Entity e) -> void;
 
         struct Predicate {
-            [[nodiscard]] auto
-                operator()(const std::unique_ptr<System>& s1,
-                           const std::unique_ptr<System>& s2) const noexcept -> bool {
+            [[nodiscard]] auto operator()(const std::unique_ptr<System>& s1,
+                                          const std::unique_ptr<System>& s2) const noexcept
+                -> bool {
                 return s1->priority() < s2->priority();
             }
         };
@@ -120,13 +119,13 @@ export namespace stormkit::entities {
       protected:
         virtual auto onMessageReceived(const Message& message) -> void = 0;
 
-        EntityManager*        m_manager;
+        EntityManager*  m_manager;
         HashSet<Entity> m_entities;
 
         friend class EntityManager;
 
       private:
-        UInt32   m_priority;
+        UInt32         m_priority;
         ComponentTypes m_types;
     };
 
@@ -173,8 +172,7 @@ export namespace stormkit::entities {
             -> std::vector<NakedRef<LikeType<Self, Component>>>;
 
         template<IsComponentTypeOrFail T, class Self>
-        auto componentsOfType(this Self& self) noexcept
-            -> std::vector<NakedRef<LikeType<Self, T>>>;
+        auto componentsOfType(this Self& self) noexcept -> std::vector<NakedRef<LikeType<Self, T>>>;
 
         template<Is<System> T, typename... Args>
         auto addSystem(Args&&... args) -> T&;
@@ -183,8 +181,7 @@ export namespace stormkit::entities {
         auto hasSystem() const noexcept -> bool;
 
         template<class Self>
-        auto systems(this Self& self) noexcept
-            -> std::vector<NakedRef<LikeType<Self, System>>>;
+        auto systems(this Self& self) noexcept -> std::vector<NakedRef<LikeType<Self, System>>>;
 
         template<Is<System> T, class Self>
         auto getSystem(this Self& self) noexcept -> LikeType<Self, T&>;
@@ -198,8 +195,8 @@ export namespace stormkit::entities {
       private:
         using ComponentKey = UInt64;
 
-        static constexpr auto componentKeyFor(Entity          e,
-                                              Component::Type type) noexcept -> ComponentKey;
+        static constexpr auto componentKeyFor(Entity e, Component::Type type) noexcept
+            -> ComponentKey;
         static constexpr auto isKeyEntity(Entity e, ComponentKey key) noexcept -> bool;
 
         auto purposeToSystems(Entity e) -> void;
@@ -209,7 +206,7 @@ export namespace stormkit::entities {
         Entity             m_next_valid_entity = 1;
         std::queue<Entity> m_free_entities;
 
-        HashSet<Entity>       m_entities;
+        HashSet<Entity>             m_entities;
         mutable std::vector<Entity> m_cached_entities;
         mutable bool                m_cached_entities_dirty = true;
 
@@ -217,9 +214,9 @@ export namespace stormkit::entities {
         HashSet<Entity> m_updated_entities;
         HashSet<Entity> m_removed_entities;
 
-        HashMap<Entity, std::vector<Component::Type>>  m_registered_components_for_entities;
+        HashMap<Entity, std::vector<Component::Type>>        m_registered_components_for_entities;
         std::set<std::unique_ptr<System>, System::Predicate> m_systems;
-        HashMap<ComponentKey, std::unique_ptr<Component>> m_components;
+        HashMap<ComponentKey, std::unique_ptr<Component>>    m_components;
 
         MessageBus m_message_bus;
     };
@@ -244,8 +241,7 @@ namespace stormkit::entities {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    constexpr auto componentHash(const char*       str,
-                                 RangeExtent size) noexcept -> Component::Type {
+    constexpr auto componentHash(const char* str, RangeExtent size) noexcept -> Component::Type {
         return size == 0 ? 0xcbf29ce484222325UL
                          : (narrow<RangeExtent>(str[0]) ^
                             componentHash(std::string_view { str + 1, size - 1 })) *
@@ -261,8 +257,8 @@ namespace stormkit::entities {
     namespace literals {
         /////////////////////////////////////
         /////////////////////////////////////
-        constexpr auto operator""_component_type(const char*       str,
-                                                 RangeExtent size) -> Component::Type {
+        constexpr auto operator""_component_type(const char* str, RangeExtent size)
+            -> Component::Type {
             return stormkit::entities::componentHash(str, size);
         }
     } // namespace literals
@@ -386,9 +382,8 @@ namespace stormkit::entities {
         -> std::vector<NakedRef<LikeType<Self, T>>> {
         return self.m_entities |
                std::views::filter([&self](auto&& e) { return self.template hasComponent<T>(e); }) |
-               std::views::transform([&self](auto&& e) {
-                   return NakedRef { self.template getComponent<T>(e) };
-               }) |
+               std::views::transform(
+                   [&self](auto&& e) { return NakedRef { self.template getComponent<T>(e) }; }) |
                std::ranges::to<std::vector>();
     }
 
@@ -417,9 +412,8 @@ namespace stormkit::entities {
     template<class Self>
     auto EntityManager::systems(this Self& self) noexcept
         -> std::vector<NakedRef<LikeType<Self, System>>> {
-        return self.m_systems | std::views::transform([](auto&& system) {
-                   return NakedRef { system.get() };
-               }) |
+        return self.m_systems |
+               std::views::transform([](auto&& system) { return NakedRef { system.get() }; }) |
                std::ranges::to<std::vector>();
     }
 
@@ -444,8 +438,8 @@ namespace stormkit::entities {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    constexpr auto EntityManager::componentKeyFor(Entity          e,
-                                                  Component::Type type) noexcept -> ComponentKey {
+    constexpr auto EntityManager::componentKeyFor(Entity e, Component::Type type) noexcept
+        -> ComponentKey {
         return (static_cast<UInt64>(e) << 32) | static_cast<UInt64>(type);
     }
 

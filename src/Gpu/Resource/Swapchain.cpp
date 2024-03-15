@@ -42,7 +42,7 @@ namespace stormkit::gpu {
         /////////////////////////////////////
         /////////////////////////////////////
         auto chooseSwapExtent(const vk::SurfaceCapabilitiesKHR& capabilities,
-                              const math::ExtentU&        extent) noexcept -> vk::Extent2D {
+                              const math::ExtentU&              extent) noexcept -> vk::Extent2D {
             constexpr static auto int_max = std::numeric_limits<UInt32>::max();
 
             if (capabilities.currentExtent.width != int_max &&
@@ -62,8 +62,7 @@ namespace stormkit::gpu {
 
         /////////////////////////////////////
         /////////////////////////////////////
-        auto chooseImageCount(const vk::SurfaceCapabilitiesKHR& capabilities) noexcept
-            -> UInt32 {
+        auto chooseImageCount(const vk::SurfaceCapabilitiesKHR& capabilities) noexcept -> UInt32 {
             auto image_count = capabilities.minImageCount + 1;
 
             if (capabilities.maxImageCount > 0 && image_count > capabilities.maxImageCount)
@@ -78,7 +77,7 @@ namespace stormkit::gpu {
     Swapchain::Swapchain(Tag,
                          const Device&                         device,
                          const Surface&                        surface,
-                         const math::ExtentU&            extent,
+                         const math::ExtentU&                  extent,
                          std::optional<vk::raii::SwapchainKHR> old_swapchain) {
         const auto& physical_device = device.physicalDevice();
         const auto  capabilities =
@@ -115,8 +114,7 @@ namespace stormkit::gpu {
         device.vkHandle()
             .createSwapchainKHR(create_info)
             .transform(core::monadic::set(m_vk_swapchain))
-            .transform_error(
-                core::monadic::map(core::monadic::narrow<Result>(), throwError()));
+            .transform_error(core::monadic::map(core::monadic::narrow<Result>(), throwError()));
 
         m_images = m_vk_swapchain->getImages() |
                    std::views::transform([&, this](auto&& image) noexcept {

@@ -14,10 +14,10 @@ import :Meta;
 
 namespace stormkit::core::details {
     struct EitherFunc {
-        [[nodiscard]] static constexpr auto
-            operator()(bool                  condition,
-                       std::invocable auto&& true_,
-                       std::invocable auto&& false_) noexcept -> decltype(false_());
+        [[nodiscard]] static constexpr auto operator()(bool                  condition,
+                                                       std::invocable auto&& true_,
+                                                       std::invocable auto&& false_) noexcept
+            -> decltype(false_());
 
         template<typename T>
             requires IsOptionalType<PureType<T>>
@@ -81,8 +81,8 @@ namespace stormkit::core {
     /////////////////////////////////////
     template<typename Func, typename... Args>
     // requires(std::invocable<Func, Args...>)
-    STORMKIT_FORCE_INLINE constexpr auto curry(Func&& func,
-                                               Args&&... args) noexcept -> decltype(auto) {
+    STORMKIT_FORCE_INLINE constexpr auto curry(Func&& func, Args&&... args) noexcept
+        -> decltype(auto) {
         return std::bind_front(std::forward<Func>(func), std::forward<Args>(args)...);
     }
 
@@ -90,8 +90,8 @@ namespace stormkit::core {
     /////////////////////////////////////
     template<typename Func, typename... Args>
     // requires(std::invocable<Func, Args...>)
-    STORMKIT_FORCE_INLINE constexpr auto curryBack(Func&& func,
-                                                   Args&&... args) noexcept -> decltype(auto) {
+    STORMKIT_FORCE_INLINE constexpr auto curryBack(Func&& func, Args&&... args) noexcept
+        -> decltype(auto) {
         return [&]<typename... CallArgs>(CallArgs&&... call_args) noexcept(
                    std::is_nothrow_invocable_v<Func, CallArgs..., Args...>) -> decltype(auto) {
             return std::invoke(std::forward<Func>(func),

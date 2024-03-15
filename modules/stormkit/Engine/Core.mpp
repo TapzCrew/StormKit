@@ -43,9 +43,9 @@ export namespace stormkit::engine {
 
         using UpdateFrameGraphCallback = std::function<void(FrameGraphBuilder&, std::atomic_bool&)>;
 
-        Application(std::string_view           application_name,
+        Application(std::string_view     application_name,
                     const math::ExtentU& window_extent,
-                    std::string                window_title,
+                    std::string          window_title,
                     PrivateTag);
         ~Application();
 
@@ -55,13 +55,13 @@ export namespace stormkit::engine {
         Application(Application&&) noexcept;
         auto operator=(Application&&) noexcept -> Application&;
 
-        static auto create(std::string_view           application_name,
+        static auto create(std::string_view     application_name,
                            const math::ExtentU& window_extent,
-                           std::string                window_title = DEFAULT_WINDOW_TITLE) noexcept
+                           std::string          window_title = DEFAULT_WINDOW_TITLE) noexcept
             -> Expected<Application>;
-        static auto allocate(std::string_view           application_name,
+        static auto allocate(std::string_view     application_name,
                              const math::ExtentU& window_extent,
-                             std::string window_title = DEFAULT_WINDOW_TITLE) noexcept
+                             std::string          window_title = DEFAULT_WINDOW_TITLE) noexcept
             -> Expected<std::unique_ptr<Application>>;
 
         auto renderer(this auto& self) noexcept -> decltype(auto);
@@ -98,15 +98,15 @@ namespace stormkit::engine {
 
     ////////////////////////////////////////
     ////////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto
-        Application::operator=(Application&&) noexcept -> Application& = default;
+    STORMKIT_FORCE_INLINE auto Application::operator=(Application&&) noexcept
+        -> Application& = default;
 
     ////////////////////////////////////////
     ////////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto
-        Application::create(std::string_view           application_name,
-                            const math::ExtentU& window_extent,
-                            std::string window_title) noexcept -> Expected<Application> try {
+    STORMKIT_FORCE_INLINE auto Application::create(std::string_view     application_name,
+                                                   const math::ExtentU& window_extent,
+                                                   std::string          window_title) noexcept
+        -> Expected<Application> try {
         return Application { application_name,
                              window_extent,
                              std::move(window_title),
@@ -115,9 +115,9 @@ namespace stormkit::engine {
 
     ////////////////////////////////////////
     ////////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto Application::allocate(std::string_view           application_name,
+    STORMKIT_FORCE_INLINE auto Application::allocate(std::string_view     application_name,
                                                      const math::ExtentU& window_extent,
-                                                     std::string window_title) noexcept
+                                                     std::string          window_title) noexcept
         -> Expected<std::unique_ptr<Application>> try {
         return std::make_unique<Application>(application_name,
                                              window_extent,
@@ -145,8 +145,8 @@ namespace stormkit::engine {
 
     ////////////////////////////////////////
     ////////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto
-        Application::eventHandler(this auto& self) noexcept -> decltype(auto) {
+    STORMKIT_FORCE_INLINE auto Application::eventHandler(this auto& self) noexcept
+        -> decltype(auto) {
         return std::forward_like<decltype(self)>(self.m_event_handler.get());
     }
 

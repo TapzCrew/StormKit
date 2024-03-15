@@ -25,7 +25,7 @@ export namespace stormkit::engine {
         using UpdateFrameGraphCallbackRef =
             FunctionRef<void(FrameGraphBuilder&, std::atomic_bool&)>;
 
-        Renderer(std::string_view                                 application_name,
+        Renderer(std::string_view                           application_name,
                  std::optional<NakedRef<const wsi::Window>> window,
                  Tag);
         ~Renderer();
@@ -36,12 +36,11 @@ export namespace stormkit::engine {
         Renderer(Renderer&&) noexcept;
         auto operator=(Renderer&&) noexcept -> Renderer&;
 
-        [[nodiscard]] static auto
-            create(std::string_view                                 application_name,
-                   std::optional<NakedRef<const wsi::Window>> window) noexcept
+        [[nodiscard]] static auto create(std::string_view application_name,
+                                         std::optional<NakedRef<const wsi::Window>> window) noexcept
             -> gpu::Expected<Renderer>;
         [[nodiscard]] static auto
-            allocate(std::string_view                                 application_name,
+            allocate(std::string_view                           application_name,
                      std::optional<NakedRef<const wsi::Window>> window) noexcept
             -> gpu::Expected<std::unique_ptr<Renderer>>;
 
@@ -49,8 +48,8 @@ export namespace stormkit::engine {
                               std::atomic_bool&           rebuild_graph,
                               UpdateFrameGraphCallbackRef callback) noexcept;
 
-        auto startRendering(std::mutex&       framegraph_mutex,
-                            std::atomic_bool& rebuild_graph) noexcept -> void;
+        auto startRendering(std::mutex& framegraph_mutex, std::atomic_bool& rebuild_graph) noexcept
+            -> void;
 
         auto instance() const noexcept -> const gpu::Instance&;
         auto device() const noexcept -> const gpu::Device&;
@@ -67,11 +66,10 @@ export namespace stormkit::engine {
             -> gpu::Expected<void>;
 
         auto threadLoop(std::mutex&, std::atomic_bool&, std::stop_token) noexcept -> void;
-        auto doRender(std::mutex&,
-                      std::atomic_bool&,
-                      RenderSurface::Frame&&) noexcept -> gpu::Expected<RenderSurface::Frame>;
+        auto doRender(std::mutex&, std::atomic_bool&, RenderSurface::Frame&&) noexcept
+            -> gpu::Expected<RenderSurface::Frame>;
 
-        bool                              m_validation_layers_enabled = false;
+        bool                        m_validation_layers_enabled = false;
         DeferInit<gpu::Instance>    m_instance;
         DeferInit<gpu::Device>      m_device;
         DeferInit<RenderSurface>    m_surface;
@@ -80,8 +78,8 @@ export namespace stormkit::engine {
 
         std::vector<gpu::CommandBuffer> m_command_buffers;
 
-        std::jthread                                  m_render_thread;
-        FrameGraphBuilder                             m_graph_builder;
+        std::jthread                            m_render_thread;
+        FrameGraphBuilder                       m_graph_builder;
         std::vector<DeferInit<BakedFrameGraph>> m_framegraphs;
     };
 
@@ -95,7 +93,7 @@ namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE
-    Renderer::Renderer(std::string_view                                 application_name,
+    Renderer::Renderer(std::string_view                           application_name,
                        std::optional<NakedRef<const wsi::Window>> window,
                        Tag) {
         doInit(application_name, std::move(window)).transform_error(throwError());
@@ -116,7 +114,7 @@ namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE auto
-        Renderer::create(std::string_view                                 application_name,
+        Renderer::create(std::string_view                           application_name,
                          std::optional<NakedRef<const wsi::Window>> window) noexcept
         -> gpu::Expected<Renderer> try {
         return Renderer { application_name, std::move(window), Tag {} };
@@ -125,7 +123,7 @@ namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE auto
-        Renderer::allocate(std::string_view                                 application_name,
+        Renderer::allocate(std::string_view                           application_name,
                            std::optional<NakedRef<const wsi::Window>> window) noexcept
         -> gpu::Expected<std::unique_ptr<Renderer>> try {
         return std::make_unique<Renderer>(application_name, std::move(window), Tag {});
@@ -143,13 +141,12 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto
-        Renderer::startRendering(std::mutex&       framegraph_mutex,
-                                 std::atomic_bool& rebuild_graph) noexcept -> void {
-        m_render_thread = std::jthread { curry(&Renderer::threadLoop,
-                                                     this,
-                                                     std::ref(framegraph_mutex),
-                                                     std::ref(rebuild_graph)) };
+    STORMKIT_FORCE_INLINE auto Renderer::startRendering(std::mutex&       framegraph_mutex,
+                                                        std::atomic_bool& rebuild_graph) noexcept
+        -> void {
+        m_render_thread = std::jthread {
+            curry(&Renderer::threadLoop, this, std::ref(framegraph_mutex), std::ref(rebuild_graph))
+        };
         setThreadName(m_render_thread, "StormKit:RenderThread");
     }
 
@@ -179,8 +176,8 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto
-        Renderer::mainCommandPool() const noexcept -> const gpu::CommandPool& {
+    STORMKIT_FORCE_INLINE auto Renderer::mainCommandPool() const noexcept
+        -> const gpu::CommandPool& {
         return m_main_command_pool.get();
     }
 } // namespace stormkit::engine

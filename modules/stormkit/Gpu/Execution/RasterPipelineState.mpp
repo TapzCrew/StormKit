@@ -19,15 +19,15 @@ import :Execution.Descriptors;
 
 export namespace stormkit::gpu {
     struct VertexBindingDescription {
-        UInt32    binding;
-        UInt32    stride;
+        UInt32          binding;
+        UInt32          stride;
         VertexInputRate input_rate = VertexInputRate::Vertex;
     };
 
     struct VertexInputAttributeDescription {
         UInt32 location;
         UInt32 binding;
-        Format       format;
+        Format format;
         UInt32 offset;
     };
 
@@ -102,7 +102,7 @@ export namespace stormkit::gpu {
 
     struct RasterPipelineLayout {
         std::vector<NakedRef<const DescriptorSetLayout>> descriptor_set_layouts;
-        std::vector<PushConstantRange>                         push_constant_ranges;
+        std::vector<PushConstantRange>                   push_constant_ranges;
     };
 
     struct RasterPipelineState {

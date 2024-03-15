@@ -190,7 +190,7 @@ namespace stormkit::core {
     /////////////////////////////////////
     template<typename T>
     constexpr auto makeNakedRef(const NakedRef<T>& value) noexcept -> decltype(auto) {
-        return auto{value};
+        return auto { value };
     }
 
     /////////////////////////////////////

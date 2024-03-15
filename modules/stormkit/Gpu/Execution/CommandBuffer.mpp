@@ -38,12 +38,12 @@ export namespace stormkit::gpu {
         Queue(Queue&&) noexcept;
         auto operator=(Queue&&) noexcept -> Queue&;
 
-        [[nodiscard]] static auto
-            create(const Device&             device,
-                   const Device::QueueEntry& entry) noexcept -> Expected<Queue>;
-        [[nodiscard]] static auto
-            allocate(const Device&             device,
-                     const Device::QueueEntry& entry) noexcept -> Expected<std::unique_ptr<Queue>>;
+        [[nodiscard]] static auto create(const Device&             device,
+                                         const Device::QueueEntry& entry) noexcept
+            -> Expected<Queue>;
+        [[nodiscard]] static auto allocate(const Device&             device,
+                                           const Device::QueueEntry& entry) noexcept
+            -> Expected<std::unique_ptr<Queue>>;
 
         auto waitIdle() const noexcept -> void;
 
@@ -71,7 +71,7 @@ export namespace stormkit::gpu {
 
     struct InheritanceInfo {
         const RenderPass*  render_pass = nullptr;
-        UInt32       subpass     = 0;
+        UInt32             subpass     = 0;
         const FrameBuffer* framebuffer = nullptr;
     };
 
@@ -124,7 +124,7 @@ export namespace stormkit::gpu {
                                            Deleter) noexcept -> std::unique_ptr<CommandBuffer>;
 
         auto reset() noexcept -> void;
-        auto submit(const Queue&                                     queue,
+        auto submit(const Queue&                               queue,
                     std::span<const NakedRef<const Semaphore>> wait_semaphores   = {},
                     std::span<const NakedRef<const Semaphore>> signal_semaphores = {},
                     OptionalRef<const Fence> fence = std::nullopt) const noexcept -> void;
@@ -132,12 +132,10 @@ export namespace stormkit::gpu {
         [[nodiscard]] auto state() const noexcept -> State;
         [[nodiscard]] auto level() const noexcept -> CommandBufferLevel;
 
-        auto beginDebugRegion(std::string_view       name,
-                              const RGBColorF& color = RGBColorDef::White<float>)
-            -> void;
-        auto insertDebugLabel(std::string_view       name,
-                              const RGBColorF& color = RGBColorDef::White<float>)
-            -> void;
+        auto beginDebugRegion(std::string_view name,
+                              const RGBColorF& color = RGBColorDef::White<float>) -> void;
+        auto insertDebugLabel(std::string_view name,
+                              const RGBColorF& color = RGBColorDef::White<float>) -> void;
         auto endDebugRegion() -> void;
 
         auto begin(bool                           one_time_submit  = false,
@@ -163,9 +161,7 @@ export namespace stormkit::gpu {
         auto setStencilWriteMask(StencilFaceFlag face, UInt32 mask) -> void;
         auto setStencilReference(StencilFaceFlag face, UInt32 reference) -> void;
 
-        auto dispatch(UInt32 group_count_x,
-                      UInt32 group_count_y,
-                      UInt32 group_count_z) -> void;
+        auto dispatch(UInt32 group_count_x, UInt32 group_count_y, UInt32 group_count_z) -> void;
 
         auto draw(UInt32 vertex_count,
                   UInt32 instance_count = 1u,
@@ -176,30 +172,28 @@ export namespace stormkit::gpu {
                          UInt32 first_index    = 0u,
                          Int32  vertex_offset  = 0,
                          UInt32 first_instance = 0u) -> void;
-        auto drawIndirect(const Buffer&     buffer,
-                          RangeExtent offset,
-                          UInt32      draw_count,
-                          UInt32      stride) -> void;
-        auto drawIndexedIndirect(const Buffer&     buffer,
-                                 RangeExtent offset,
-                                 UInt32      draw_count,
-                                 UInt32      stride) -> void;
+        auto
+            drawIndirect(const Buffer& buffer, RangeExtent offset, UInt32 draw_count, UInt32 stride)
+                -> void;
+        auto drawIndexedIndirect(const Buffer& buffer,
+                                 RangeExtent   offset,
+                                 UInt32        draw_count,
+                                 UInt32        stride) -> void;
 
         auto bindVertexBuffers(std::span<NakedRef<const Buffer>> buffers,
                                std::span<const UInt64>           offsets) -> void;
-        auto bindIndexBuffer(const Buffer& buffer,
-                             UInt64  offset        = 0,
-                             bool          large_indices = false) -> void;
-        auto bindDescriptorSets(const Pipeline&                                pipeline,
-                                const PipelineLayout&                          layout,
+        auto bindIndexBuffer(const Buffer& buffer, UInt64 offset = 0, bool large_indices = false)
+            -> void;
+        auto bindDescriptorSets(const Pipeline&                          pipeline,
+                                const PipelineLayout&                    layout,
                                 std::span<NakedRef<const DescriptorSet>> descriptor_sets,
                                 std::span<const UInt32> dynamic_offsets = {}) -> void;
 
-        auto copyBuffer(const Buffer&     src,
-                        const Buffer&     dst,
-                        RangeExtent size,
-                        UInt64      src_offset = 0u,
-                        UInt64      dst_offset = 0u) -> void;
+        auto copyBuffer(const Buffer& src,
+                        const Buffer& dst,
+                        RangeExtent   size,
+                        UInt64        src_offset = 0u,
+                        UInt64        dst_offset = 0u) -> void;
         auto copyBufferToImage(const Buffer&                    src,
                                const IsImage auto&              dst,
                                std::span<const BufferImageCopy> buffer_image_copies = {}) -> void;
@@ -212,7 +206,7 @@ export namespace stormkit::gpu {
                        ImageLayout                   dst_layout,
                        const ImageSubresourceLayers& src_subresource_layers,
                        const ImageSubresourceLayers& dst_subresource_layers,
-                       const math::ExtentU&    extent) -> void;
+                       const math::ExtentU&          extent) -> void;
 
         auto resolveImage(const IsImage auto&           src,
                           const IsImage auto&           dst,
@@ -233,8 +227,8 @@ export namespace stormkit::gpu {
                                    ImageLayout                  dst_layout,
                                    const ImageSubresourceRange& subresource_range = {}) -> void;
 
-        auto executeSubCommandBuffers(
-            std::span<const NakedRef<const CommandBuffer>> commandbuffers) -> void;
+        auto executeSubCommandBuffers(std::span<const NakedRef<const CommandBuffer>> commandbuffers)
+            -> void;
 
         auto pipelineBarrier(PipelineStageFlag                    src_mask,
                              PipelineStageFlag                    dst_mask,
@@ -243,8 +237,8 @@ export namespace stormkit::gpu {
                              std::span<const BufferMemoryBarrier> buffer_memory_barriers,
                              std::span<const ImageMemoryBarrier>  image_memory_barriers) -> void;
 
-        auto pushConstants(const PipelineLayout&       pipeline_layout,
-                           ShaderStageFlag             stage,
+        auto pushConstants(const PipelineLayout& pipeline_layout,
+                           ShaderStageFlag       stage,
                            std::span<const Byte> data,
                            UInt32                offset = 0u) -> void;
 
@@ -273,35 +267,35 @@ export namespace stormkit::gpu {
         CommandPool(CommandPool&&) noexcept;
         auto operator=(CommandPool&&) noexcept -> CommandPool&;
 
-        [[nodiscard]] static auto create(const Device& device,
-                                         const Queue&  queue) noexcept -> Expected<CommandPool>;
+        [[nodiscard]] static auto create(const Device& device, const Queue& queue) noexcept
+            -> Expected<CommandPool>;
         [[nodiscard]] static auto allocate(const Device& device, const Queue& queue) noexcept
             -> Expected<std::unique_ptr<CommandPool>>;
 
         [[nodiscard]] auto createCommandBuffer(
             const Device&      device,
             CommandBufferLevel level = CommandBufferLevel::Primary) const noexcept -> CommandBuffer;
-        [[nodiscard]] auto
-            createCommandBuffers(const Device&      device,
-                                 RangeExtent  count,
-                                 CommandBufferLevel level = CommandBufferLevel::Primary)
-                const noexcept -> std::vector<CommandBuffer>;
+        [[nodiscard]] auto createCommandBuffers(
+            const Device&      device,
+            RangeExtent        count,
+            CommandBufferLevel level = CommandBufferLevel::Primary) const noexcept
+            -> std::vector<CommandBuffer>;
 
-        [[nodiscard]] auto
-            allocateCommandBuffer(const Device&      device,
-                                  CommandBufferLevel level = CommandBufferLevel::Primary)
-                const noexcept -> std::unique_ptr<CommandBuffer>;
-        [[nodiscard]] auto
-            allocateCommandBuffers(const Device&      device,
-                                   RangeExtent  count,
-                                   CommandBufferLevel level = CommandBufferLevel::Primary)
-                const noexcept -> std::vector<std::unique_ptr<CommandBuffer>>;
+        [[nodiscard]] auto allocateCommandBuffer(
+            const Device&      device,
+            CommandBufferLevel level = CommandBufferLevel::Primary) const noexcept
+            -> std::unique_ptr<CommandBuffer>;
+        [[nodiscard]] auto allocateCommandBuffers(
+            const Device&      device,
+            RangeExtent        count,
+            CommandBufferLevel level = CommandBufferLevel::Primary) const noexcept
+            -> std::vector<std::unique_ptr<CommandBuffer>>;
 
         [[nodiscard]] auto vkHandle() const noexcept -> const vk::raii::CommandPool&;
 
       private:
         auto createVkCommandBuffers(const Device&      device,
-                                    RangeExtent  count,
+                                    RangeExtent        count,
                                     CommandBufferLevel level) const noexcept
             -> std::vector<vk::raii::CommandBuffer>;
         auto deleteVkCommandBuffer(vk::raii::CommandBuffer& cmb) noexcept -> void;
@@ -404,9 +398,9 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto
-        Queue::create(const Device&             device,
-                      const Device::QueueEntry& entry) noexcept -> Expected<Queue> try {
+    STORMKIT_FORCE_INLINE auto Queue::create(const Device&             device,
+                                             const Device::QueueEntry& entry) noexcept
+        -> Expected<Queue> try {
         return Queue { device, entry, Tag {} };
     } catch (const Result& result) { return std::unexpected(result); }
 
@@ -430,7 +424,7 @@ namespace stormkit::gpu {
         Queue::submit(std::span<const NakedRef<const CommandBuffer>> command_buffers,
                       std::span<const NakedRef<const Semaphore>>     wait_semaphores,
                       std::span<const NakedRef<const Semaphore>>     signal_semaphores,
-                      OptionalRef<const Fence> fence) const noexcept -> void {
+                      OptionalRef<const Fence>                       fence) const noexcept -> void {
         const auto vk_command_buffers = command_buffers |
                                         std::views::transform(monadic::toVkHandle()) |
                                         std::ranges::to<std::vector>();
@@ -446,9 +440,8 @@ namespace stormkit::gpu {
                                                    .setSignalSemaphores(vk_signal_semaphores)
                                                    .setCommandBuffers(vk_command_buffers) };
 
-        const auto vk_fence = core::either(fence,
-                                           monadic::toVkHandle(),
-                                           core::monadic::init<vk::Fence>(nullptr));
+        const auto vk_fence =
+            core::either(fence, monadic::toVkHandle(), core::monadic::init<vk::Fence>(nullptr));
 
         vkHandle().submit(submit_infos, vk_fence);
     }
@@ -457,7 +450,7 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     auto Queue::present(std::span<const NakedRef<const Swapchain>> swapchains,
                         std::span<const NakedRef<const Semaphore>> wait_semaphores,
-                        std::span<const UInt32> image_indices) const noexcept
+                        std::span<const UInt32>                    image_indices) const noexcept
         -> Expected<gpu::Result> {
         expects(std::size(wait_semaphores) >= 1);
         expects(std::size(image_indices) >= 1);
@@ -516,11 +509,11 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto
-        CommandBuffer::allocate(const CommandPool&        pool,
-                                CommandBufferLevel        level,
-                                vk::raii::CommandBuffer&& cmb,
-                                Deleter deleter) noexcept -> std::unique_ptr<CommandBuffer> {
+    STORMKIT_FORCE_INLINE auto CommandBuffer::allocate(const CommandPool&        pool,
+                                                       CommandBufferLevel        level,
+                                                       vk::raii::CommandBuffer&& cmb,
+                                                       Deleter                   deleter) noexcept
+        -> std::unique_ptr<CommandBuffer> {
         return std::make_unique<CommandBuffer>(pool,
                                                level,
                                                std::move(cmb),
@@ -538,8 +531,8 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto
-        CommandBuffer::operator=(CommandBuffer&&) noexcept -> CommandBuffer& = default;
+    STORMKIT_FORCE_INLINE auto CommandBuffer::operator=(CommandBuffer&&) noexcept
+        -> CommandBuffer& = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
@@ -551,7 +544,7 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE
-    auto CommandBuffer::submit(const Queue&                                     queue,
+    auto CommandBuffer::submit(const Queue&                               queue,
                                std::span<const NakedRef<const Semaphore>> wait_semaphores,
                                std::span<const NakedRef<const Semaphore>> signal_semaphores,
                                OptionalRef<const Fence> fence) const noexcept -> void {
@@ -574,9 +567,8 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto
-        CommandBuffer::beginDebugRegion(std::string_view       name,
-                                        const RGBColorF& color) -> void {
+    STORMKIT_FORCE_INLINE auto CommandBuffer::beginDebugRegion(std::string_view name,
+                                                               const RGBColorF& color) -> void {
         expects(m_state == State::Recording);
 
         const auto& dispatcher = m_vk_command_buffer.getDispatcher();
@@ -591,9 +583,8 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto
-        CommandBuffer::insertDebugLabel(std::string_view       name,
-                                        const RGBColorF& color) -> void {
+    STORMKIT_FORCE_INLINE auto CommandBuffer::insertDebugLabel(std::string_view name,
+                                                               const RGBColorF& color) -> void {
         expects(m_state == State::Recording);
 
         const auto& dispatcher = m_vk_command_buffer.getDispatcher();
@@ -620,9 +611,9 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto
-        CommandBuffer::begin(bool                           one_time_submit,
-                             std::optional<InheritanceInfo> inheritance_info) -> void {
+    STORMKIT_FORCE_INLINE auto CommandBuffer::begin(bool                           one_time_submit,
+                                                    std::optional<InheritanceInfo> inheritance_info)
+        -> void {
         expects(m_state == State::Initial);
 
         const auto vk_inheritance_info = either(
@@ -731,9 +722,9 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto
-        CommandBuffer::setViewport(UInt32              first_viewport,
-                                   std::span<const Viewport> viewports) -> void {
+    STORMKIT_FORCE_INLINE auto CommandBuffer::setViewport(UInt32                    first_viewport,
+                                                          std::span<const Viewport> viewports)
+        -> void {
         expects(m_state == State::Recording);
 
         const auto vk_viewports = viewports |
@@ -745,9 +736,9 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto
-        CommandBuffer::setScissor(UInt32             first_scissor,
-                                  std::span<const Scissor> scissors) -> void {
+    STORMKIT_FORCE_INLINE auto CommandBuffer::setScissor(UInt32                   first_scissor,
+                                                         std::span<const Scissor> scissors)
+        -> void {
         expects(m_state == State::Recording);
 
         const auto vk_scissors = scissors | std::views::transform(core::monadic::as<vk::Rect2D>()) |
@@ -776,8 +767,8 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto
-        CommandBuffer::setBlendConstants(std::span<const float> constants) -> void {
+    STORMKIT_FORCE_INLINE auto CommandBuffer::setBlendConstants(std::span<const float> constants)
+        -> void {
         expects(m_state == State::Recording);
 
         float data[] = { constants[0], constants[1], constants[2], constants[3] };
@@ -796,17 +787,16 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE auto CommandBuffer::setStencilCompareMask(StencilFaceFlag face,
-                                                                    UInt32    mask) -> void {
+                                                                    UInt32          mask) -> void {
         expects(m_state == State::Recording);
 
-        m_vk_command_buffer.setStencilCompareMask(narrow<vk::StencilFaceFlagBits>(face),
-                                                  mask);
+        m_vk_command_buffer.setStencilCompareMask(narrow<vk::StencilFaceFlagBits>(face), mask);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto CommandBuffer::setStencilWriteMask(StencilFaceFlag face,
-                                                                  UInt32    mask) -> void {
+    STORMKIT_FORCE_INLINE auto CommandBuffer::setStencilWriteMask(StencilFaceFlag face, UInt32 mask)
+        -> void {
         expects(m_state == State::Recording);
 
         m_vk_command_buffer.setStencilWriteMask(narrow<vk::StencilFaceFlagBits>(face), mask);
@@ -818,8 +808,7 @@ namespace stormkit::gpu {
                                                                   UInt32 reference) -> void {
         expects(m_state == State::Recording);
 
-        m_vk_command_buffer.setStencilReference(narrow<vk::StencilFaceFlagBits>(face),
-                                                reference);
+        m_vk_command_buffer.setStencilReference(narrow<vk::StencilFaceFlagBits>(face), reference);
     }
 
     /////////////////////////////////////
@@ -863,10 +852,10 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto CommandBuffer::drawIndirect(const Buffer&     buffer,
-                                                           RangeExtent offset,
-                                                           UInt32      draw_count,
-                                                           UInt32      stride) -> void {
+    STORMKIT_FORCE_INLINE auto CommandBuffer::drawIndirect(const Buffer& buffer,
+                                                           RangeExtent   offset,
+                                                           UInt32        draw_count,
+                                                           UInt32        stride) -> void {
         expects(m_state == State::Recording);
         expects(draw_count > 0);
 
@@ -875,10 +864,10 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto CommandBuffer::drawIndexedIndirect(const Buffer&     buffer,
-                                                                  RangeExtent offset,
-                                                                  UInt32      draw_count,
-                                                                  UInt32 stride) -> void {
+    STORMKIT_FORCE_INLINE auto CommandBuffer::drawIndexedIndirect(const Buffer& buffer,
+                                                                  RangeExtent   offset,
+                                                                  UInt32        draw_count,
+                                                                  UInt32        stride) -> void {
         expects(m_state == State::Recording);
         expects(draw_count > 0);
 
@@ -903,7 +892,7 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE auto CommandBuffer::bindIndexBuffer(const Buffer& buffer,
-                                                              UInt64  offset,
+                                                              UInt64        offset,
                                                               bool          large_indices) -> void {
         expects(m_state == State::Recording);
 
@@ -915,11 +904,11 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto CommandBuffer::bindDescriptorSets(
-        const Pipeline&                                pipeline,
-        const PipelineLayout&                          layout,
-        std::span<NakedRef<const DescriptorSet>> descriptor_sets,
-        std::span<const UInt32>                  dynamic_offsets) -> void {
+    STORMKIT_FORCE_INLINE auto
+        CommandBuffer::bindDescriptorSets(const Pipeline&                          pipeline,
+                                          const PipelineLayout&                    layout,
+                                          std::span<NakedRef<const DescriptorSet>> descriptor_sets,
+                                          std::span<const UInt32> dynamic_offsets) -> void {
         expects(m_state == State::Recording);
 
         const auto bind_point = (pipeline.type() == Pipeline::Type::Raster)
@@ -939,11 +928,11 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto CommandBuffer::copyBuffer(const Buffer&     src,
-                                                         const Buffer&     dst,
-                                                         RangeExtent size,
-                                                         UInt64      src_offset,
-                                                         UInt64      dst_offset) -> void {
+    STORMKIT_FORCE_INLINE auto CommandBuffer::copyBuffer(const Buffer& src,
+                                                         const Buffer& dst,
+                                                         RangeExtent   size,
+                                                         UInt64        src_offset,
+                                                         UInt64        dst_offset) -> void {
         const auto vk_copy_buffers = std::array {
             vk::BufferCopy { .srcOffset = src_offset, .dstOffset = dst_offset, .size = size }
         };
@@ -953,10 +942,11 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto CommandBuffer::copyBufferToImage(
-        const Buffer&                    src,
-        const IsImage auto&              dst,
-        std::span<const BufferImageCopy> buffer_image_copies) -> void {
+    STORMKIT_FORCE_INLINE auto
+        CommandBuffer::copyBufferToImage(const Buffer&                    src,
+                                         const IsImage auto&              dst,
+                                         std::span<const BufferImageCopy> buffer_image_copies)
+            -> void {
         expects(m_state == State::Recording);
 
         const auto DEFAULT_COPY =
@@ -993,10 +983,11 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto CommandBuffer::copyImageToBuffer(
-        const IsImage auto&              src,
-        const Buffer&                    dst,
-        std::span<const BufferImageCopy> buffer_image_copies) -> void {
+    STORMKIT_FORCE_INLINE auto
+        CommandBuffer::copyImageToBuffer(const IsImage auto&              src,
+                                         const Buffer&                    dst,
+                                         std::span<const BufferImageCopy> buffer_image_copies)
+            -> void {
         expects(m_state == State::Recording);
 
         const auto DEFAULT_COPY =
@@ -1040,19 +1031,19 @@ namespace stormkit::gpu {
                                  ImageLayout                   dst_layout,
                                  const ImageSubresourceLayers& src_subresource_layers,
                                  const ImageSubresourceLayers& dst_subresource_layers,
-                                 const math::ExtentU&    extent) -> void {
+                                 const math::ExtentU&          extent) -> void {
         expects(m_state == State::Recording);
 
         const auto vk_src_subresource_layers = vk::ImageSubresourceLayers {
-            .aspectMask = narrow<vk::ImageAspectFlagBits>(src_subresource_layers.aspect_mask),
-            .mipLevel   = src_subresource_layers.mip_level,
+            .aspectMask     = narrow<vk::ImageAspectFlagBits>(src_subresource_layers.aspect_mask),
+            .mipLevel       = src_subresource_layers.mip_level,
             .baseArrayLayer = src_subresource_layers.base_array_layer,
             .layerCount     = src_subresource_layers.layer_count
         };
 
         const auto vk_dst_subresource_layers = vk::ImageSubresourceLayers {
-            .aspectMask = narrow<vk::ImageAspectFlagBits>(dst_subresource_layers.aspect_mask),
-            .mipLevel   = dst_subresource_layers.mip_level,
+            .aspectMask     = narrow<vk::ImageAspectFlagBits>(dst_subresource_layers.aspect_mask),
+            .mipLevel       = dst_subresource_layers.mip_level,
             .baseArrayLayer = dst_subresource_layers.base_array_layer,
             .layerCount     = dst_subresource_layers.layer_count
         };
@@ -1083,15 +1074,15 @@ namespace stormkit::gpu {
         const auto vk_extent = as<vk::Extent3D>(dst.extent());
 
         const auto vk_src_subresource_layers = vk::ImageSubresourceLayers {
-            .aspectMask = narrow<vk::ImageAspectFlagBits>(src_subresource_layers.aspect_mask),
-            .mipLevel   = src_subresource_layers.mip_level,
+            .aspectMask     = narrow<vk::ImageAspectFlagBits>(src_subresource_layers.aspect_mask),
+            .mipLevel       = src_subresource_layers.mip_level,
             .baseArrayLayer = src_subresource_layers.base_array_layer,
             .layerCount     = src_subresource_layers.layer_count
         };
 
         const auto vk_dst_subresource_layers = vk::ImageSubresourceLayers {
-            .aspectMask = narrow<vk::ImageAspectFlagBits>(dst_subresource_layers.aspect_mask),
-            .mipLevel   = dst_subresource_layers.mip_level,
+            .aspectMask     = narrow<vk::ImageAspectFlagBits>(dst_subresource_layers.aspect_mask),
+            .mipLevel       = dst_subresource_layers.mip_level,
             .baseArrayLayer = dst_subresource_layers.base_array_layer,
             .layerCount     = dst_subresource_layers.layer_count
         };
@@ -1155,11 +1146,12 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto CommandBuffer::transitionImageLayout(
-        const IsImage auto&          image,
-        ImageLayout                  src_layout,
-        ImageLayout                  dst_layout,
-        const ImageSubresourceRange& subresource_range) -> void {
+    STORMKIT_FORCE_INLINE auto
+        CommandBuffer::transitionImageLayout(const IsImage auto&          image,
+                                             ImageLayout                  src_layout,
+                                             ImageLayout                  dst_layout,
+                                             const ImageSubresourceRange& subresource_range)
+            -> void {
         expects(m_state == State::Recording);
 
         const auto vk_src_layout = narrow<vk::ImageLayout>(src_layout);
@@ -1194,13 +1186,14 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto CommandBuffer::pipelineBarrier(
-        PipelineStageFlag                    src_mask,
-        PipelineStageFlag                    dst_mask,
-        DependencyFlag                       dependency,
-        std::span<const MemoryBarrier>       memory_barriers,
-        std::span<const BufferMemoryBarrier> buffer_memory_barriers,
-        std::span<const ImageMemoryBarrier>  image_memory_barriers) -> void {
+    STORMKIT_FORCE_INLINE auto
+        CommandBuffer::pipelineBarrier(PipelineStageFlag                    src_mask,
+                                       PipelineStageFlag                    dst_mask,
+                                       DependencyFlag                       dependency,
+                                       std::span<const MemoryBarrier>       memory_barriers,
+                                       std::span<const BufferMemoryBarrier> buffer_memory_barriers,
+                                       std::span<const ImageMemoryBarrier>  image_memory_barriers)
+            -> void {
         const auto vk_memory_barriers =
             memory_barriers | std::views::transform([](auto&& barrier) noexcept -> decltype(auto) {
                 return vk::MemoryBarrier {
@@ -1229,7 +1222,7 @@ namespace stormkit::gpu {
             image_memory_barriers |
             std::views::transform([](auto&& barrier) noexcept -> decltype(auto) {
                 const auto vk_subresource_range = vk::ImageSubresourceRange {
-                    .aspectMask = narrow<vk::ImageAspectFlagBits>(barrier.range.aspect_mask),
+                    .aspectMask     = narrow<vk::ImageAspectFlagBits>(barrier.range.aspect_mask),
                     .baseMipLevel   = barrier.range.base_mip_level,
                     .levelCount     = barrier.range.level_count,
                     .baseArrayLayer = barrier.range.base_array_layer,
@@ -1262,15 +1255,14 @@ namespace stormkit::gpu {
     STORMKIT_FORCE_INLINE auto CommandBuffer::pushConstants(const PipelineLayout& pipeline_layout,
                                                             ShaderStageFlag       stage,
                                                             std::span<const Byte> data,
-                                                            UInt32 offset) -> void {
+                                                            UInt32                offset) -> void {
         expects(m_state == State::Recording);
         expects(not std::empty(data));
 
         m_vk_command_buffer.pushConstants<const Byte>(toVkHandle(pipeline_layout),
-                                                            narrow<vk::ShaderStageFlagBits>(
-                                                                stage),
-                                                            offset,
-                                                            data);
+                                                      narrow<vk::ShaderStageFlagBits>(stage),
+                                                      offset,
+                                                      data);
     }
 
     /////////////////////////////////////
@@ -1294,8 +1286,8 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto
-        CommandBuffer::vkHandle() const noexcept -> const vk::raii::CommandBuffer& {
+    STORMKIT_FORCE_INLINE auto CommandBuffer::vkHandle() const noexcept
+        -> const vk::raii::CommandBuffer& {
         return m_vk_command_buffer;
     }
 
@@ -1320,14 +1312,14 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto
-        CommandPool::operator=(CommandPool&&) noexcept -> CommandPool& = default;
+    STORMKIT_FORCE_INLINE auto CommandPool::operator=(CommandPool&&) noexcept
+        -> CommandPool& = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto
-        CommandPool::create(const Device& device,
-                            const Queue&  queue) noexcept -> Expected<CommandPool> try {
+    STORMKIT_FORCE_INLINE auto CommandPool::create(const Device& device,
+                                                   const Queue&  queue) noexcept
+        -> Expected<CommandPool> try {
         return CommandPool { device, queue, Tag {} };
     } catch (const Result& result) { return std::unexpected(result); }
 
@@ -1349,10 +1341,11 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto CommandPool::createCommandBuffers(
-        const Device&      device,
-        RangeExtent  count,
-        CommandBufferLevel level) const noexcept -> std::vector<CommandBuffer> {
+    STORMKIT_FORCE_INLINE auto
+        CommandPool::createCommandBuffers(const Device&      device,
+                                          RangeExtent        count,
+                                          CommandBufferLevel level) const noexcept
+        -> std::vector<CommandBuffer> {
         return createVkCommandBuffers(device, count, level) | std::views::as_rvalue |
                std::views::transform(
                    [this, &level](vk::raii::CommandBuffer&& cmb) noexcept -> decltype(auto) {
@@ -1360,41 +1353,43 @@ namespace stormkit::gpu {
                                                     level,
                                                     std::move(cmb),
                                                     curry(&CommandPool::deleteVkCommandBuffer,
-                                                                const_cast<CommandPool*>(this)));
+                                                          const_cast<CommandPool*>(this)));
                    }) |
                std::ranges::to<std::vector>();
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto CommandPool::allocateCommandBuffer(
-        const Device&      device,
-        CommandBufferLevel level) const noexcept -> std::unique_ptr<CommandBuffer> {
+    STORMKIT_FORCE_INLINE auto
+        CommandPool::allocateCommandBuffer(const Device&      device,
+                                           CommandBufferLevel level) const noexcept
+        -> std::unique_ptr<CommandBuffer> {
         return std::move(allocateCommandBuffers(device, 1, level).front());
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto CommandPool::allocateCommandBuffers(
-        const Device&      device,
-        RangeExtent  count,
-        CommandBufferLevel level) const noexcept -> std::vector<std::unique_ptr<CommandBuffer>> {
+    STORMKIT_FORCE_INLINE auto
+        CommandPool::allocateCommandBuffers(const Device&      device,
+                                            RangeExtent        count,
+                                            CommandBufferLevel level) const noexcept
+        -> std::vector<std::unique_ptr<CommandBuffer>> {
         return createVkCommandBuffers(device, count, level) | std::views::as_rvalue |
-               std::views::transform([this, &level](
-                                         vk::raii::CommandBuffer&& cmb) noexcept -> decltype(auto) {
-                   return CommandBuffer::allocate(*this,
-                                                  level,
-                                                  std::move(cmb),
-                                                  curry(&CommandPool::deleteVkCommandBuffer,
-                                                              const_cast<CommandPool*>(this)));
-               }) |
+               std::views::transform(
+                   [this, &level](vk::raii::CommandBuffer&& cmb) noexcept -> decltype(auto) {
+                       return CommandBuffer::allocate(*this,
+                                                      level,
+                                                      std::move(cmb),
+                                                      curry(&CommandPool::deleteVkCommandBuffer,
+                                                            const_cast<CommandPool*>(this)));
+                   }) |
                std::ranges::to<std::vector>();
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto
-        CommandPool::vkHandle() const noexcept -> const vk::raii::CommandPool& {
+    STORMKIT_FORCE_INLINE auto CommandPool::vkHandle() const noexcept
+        -> const vk::raii::CommandPool& {
         return m_vk_command_pool;
     }
 

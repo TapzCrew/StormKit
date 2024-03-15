@@ -87,10 +87,10 @@ namespace stormkit::wsi::macos {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE WindowImpl::WindowImpl(WM                         wm,
-                                                 std::string                title,
+    STORMKIT_FORCE_INLINE WindowImpl::WindowImpl(WM                   wm,
+                                                 std::string          title,
                                                  const math::ExtentU& size,
-                                                 WindowStyle                style)
+                                                 WindowStyle          style)
         : WindowImpl { wm } {
         create(std::move(title), size, style);
     }
@@ -110,24 +110,19 @@ namespace stormkit::wsi::macos {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto WindowImpl::create(std::string                title,
+    STORMKIT_FORCE_INLINE auto WindowImpl::create(std::string          title,
                                                   const math::ExtentU& size,
-                                                  WindowStyle                style) -> void {
-        m_window =
-            std::make_unique<macOSWindow>(std::move(title),
-                                          size.width,
-                                          size.height,
-                                          narrow<int>(as<Underlying>(style)));
+                                                  WindowStyle          style) -> void {
+        m_window = std::make_unique<macOSWindow>(std::move(title),
+                                                 size.width,
+                                                 size.height,
+                                                 narrow<int>(as<Underlying>(style)));
 
         m_window->mouseDownEvent = [this](int button, Int32 x, Int32 y) noexcept {
-            WindowImplBase::mouseDownEvent(as<MouseButton>(narrow<UInt8>(button)),
-                                           x,
-                                           y);
+            WindowImplBase::mouseDownEvent(as<MouseButton>(narrow<UInt8>(button)), x, y);
         };
         m_window->mouseUpEvent = [this](int button, Int32 x, Int32 y) noexcept {
-            WindowImplBase::mouseUpEvent(as<MouseButton>(narrow<UInt8>(button)),
-                                         x,
-                                         y);
+            WindowImplBase::mouseUpEvent(as<MouseButton>(narrow<UInt8>(button)), x, y);
         };
         m_window->mouseMoveEvent = [this](Int32 x, Int32 y) noexcept {
             WindowImplBase::mouseMoveEvent(x, y);
@@ -177,8 +172,7 @@ namespace stormkit::wsi::macos {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto WindowImpl::setExtent(const math::ExtentU& extent) noexcept
-        -> void {
+    STORMKIT_FORCE_INLINE auto WindowImpl::setExtent(const math::ExtentU& extent) noexcept -> void {
         expects(m_window != nullptr);
         m_window->setExtent(extent.width, extent.height);
     }
@@ -242,8 +236,8 @@ namespace stormkit::wsi::macos {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto
-        WindowImpl::setMousePosition(const math::Vector2I& position) noexcept -> void {
+    STORMKIT_FORCE_INLINE auto WindowImpl::setMousePosition(const math::Vector2I& position) noexcept
+        -> void {
         expects(m_window != nullptr);
         m_window->setMousePosition(position.x, position.y);
     }
@@ -251,9 +245,8 @@ namespace stormkit::wsi::macos {
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE auto
-        WindowImpl::setMousePositionOnDesktop([[maybe_unused]] WM         wm,
-                                              const math::Vector2U& position) noexcept
-        -> void {
+        WindowImpl::setMousePositionOnDesktop([[maybe_unused]] WM   wm,
+                                              const math::Vector2U& position) noexcept -> void {
         macOSWindow::setMousePositionOnDesktop(position.x, position.y);
     }
 

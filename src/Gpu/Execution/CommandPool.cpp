@@ -16,7 +16,7 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     auto CommandPool::createVkCommandBuffers(const Device&      device,
-                                             RangeExtent  count,
+                                             RangeExtent        count,
                                              CommandBufferLevel level) const noexcept
         -> std::vector<vk::raii::CommandBuffer> {
         auto out          = std::vector<vk::raii::CommandBuffer> {};
@@ -41,15 +41,13 @@ namespace stormkit::gpu {
         out.reserve(count);
 
         if (create_count > 0) {
-            const auto allocate_info = vk::CommandBufferAllocateInfo {
-                .commandPool        = *vkHandle(),
-                .level              = narrow<vk::CommandBufferLevel>(level),
-                .commandBufferCount = as<UInt32>(count)
-            };
+            const auto allocate_info =
+                vk::CommandBufferAllocateInfo { .commandPool = *vkHandle(),
+                                                .level = narrow<vk::CommandBufferLevel>(level),
+                                                .commandBufferCount = as<UInt32>(count) };
 
             // TODO handle error here
-            moveAndMerge(out,
-                               device.vkHandle().allocateCommandBuffers(allocate_info).value());
+            moveAndMerge(out, device.vkHandle().allocateCommandBuffers(allocate_info).value());
         }
 
         return out;

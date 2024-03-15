@@ -4,8 +4,8 @@
 
 module;
 
-#include <stormkit/Core/MemoryMacro.hpp>
 #include <stormkit/Core/HashMacro.hpp>
+#include <stormkit/Core/MemoryMacro.hpp>
 
 export module stormkit.Core:Meta.NamedType;
 
@@ -22,7 +22,7 @@ export {
         class NamedType final: public NamedTypeBase {
           public:
             using ElementType = T;
-            using RefType        = NamedType<T&, Tag>;
+            using RefType     = NamedType<T&, Tag>;
 
             using underlying_type = ElementType;
             using reference_type  = RefType;
@@ -38,8 +38,9 @@ export {
             constexpr NamedType(const NamedType&) noexcept(
                 std::is_nothrow_copy_constructible_v<ElementType>);
 
-            constexpr auto operator=(const NamedType&) noexcept(
-                std::is_nothrow_copy_assignable_v<ElementType>) -> NamedType&;
+            constexpr auto
+                operator=(const NamedType&) noexcept(std::is_nothrow_copy_assignable_v<ElementType>)
+                    -> NamedType&;
 
             constexpr NamedType(NamedType&&) noexcept(
                 std::is_nothrow_move_constructible_v<ElementType>);

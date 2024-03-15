@@ -20,9 +20,9 @@ export namespace stormkit::core {
     template<typename T, typename Storage = DeferInitDefaultStorage<T>>
     class [[nodiscard]] DeferInit {
       public:
-        using ElementType = T;
-        using PointerType    = ElementType*;
-        using ReferenceType  = ElementType&;
+        using ElementType   = T;
+        using PointerType   = ElementType*;
+        using ReferenceType = ElementType&;
 
         // STL compatible
         using element_type   = ElementType;
@@ -37,8 +37,9 @@ export namespace stormkit::core {
 
         constexpr DeferInit(DeferInit&& other) noexcept(
             noexcept(std::is_nothrow_move_constructible_v<T>));
-        constexpr auto operator=(DeferInit&& other) noexcept(
-            noexcept(std::is_nothrow_move_assignable_v<T>)) -> DeferInit&;
+        constexpr auto
+            operator=(DeferInit&& other) noexcept(noexcept(std::is_nothrow_move_assignable_v<T>))
+                -> DeferInit&;
 
         template<typename... Args>
         constexpr auto construct(Args&&... args) noexcept(
@@ -48,8 +49,9 @@ export namespace stormkit::core {
         constexpr auto constructWithNarrowing(Args&&... args) noexcept(
             noexcept(std::is_nothrow_constructible_v<T, Args...>)) -> void;
 
-        constexpr auto operator=(T&& value) noexcept(
-            noexcept(std::is_nothrow_move_constructible_v<T>)) -> void;
+        constexpr auto
+            operator=(T&& value) noexcept(noexcept(std::is_nothrow_move_constructible_v<T>))
+                -> void;
 
         constexpr auto get(this auto&& self) noexcept -> decltype(auto);
         constexpr auto operator->(this auto& self) noexcept -> decltype(auto);
@@ -173,8 +175,8 @@ namespace stormkit::core {
     ////////////////////////////////////////
     ////////////////////////////////////////
     template<typename T, typename Storage>
-    STORMKIT_FORCE_INLINE constexpr auto
-        DeferInit<T, Storage>::initialized() const noexcept -> bool {
+    STORMKIT_FORCE_INLINE constexpr auto DeferInit<T, Storage>::initialized() const noexcept
+        -> bool {
         return m_initialized;
     }
 
@@ -192,8 +194,8 @@ namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
     template<typename T, typename Storage>
-    STORMKIT_FORCE_INLINE constexpr auto
-        DeferInit<T, Storage>::get(this auto&& self) noexcept -> decltype(auto) {
+    STORMKIT_FORCE_INLINE constexpr auto DeferInit<T, Storage>::get(this auto&& self) noexcept
+        -> decltype(auto) {
         core::expects(self.m_initialized, "Underlying object is not initialized");
 
         return std::forward_like<decltype(self)>(
@@ -203,8 +205,8 @@ namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
     template<typename T, typename Storage>
-    STORMKIT_FORCE_INLINE constexpr auto
-        DeferInit<T, Storage>::operator->(this auto& self) noexcept -> decltype(auto) {
+    STORMKIT_FORCE_INLINE constexpr auto DeferInit<T, Storage>::operator->(this auto& self) noexcept
+        -> decltype(auto) {
         core::expects(self.m_initialized, "Underlying object is not initialized");
 
         return std::forward_like<decltype(self)>(
@@ -214,8 +216,8 @@ namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
     template<typename T, typename Storage>
-    STORMKIT_FORCE_INLINE constexpr auto
-        DeferInit<T, Storage>::operator*(this auto&& self) noexcept -> decltype(auto) {
+    STORMKIT_FORCE_INLINE constexpr auto DeferInit<T, Storage>::operator*(this auto&& self) noexcept
+        -> decltype(auto) {
         return std::forward_like<decltype(self)>(self.get());
     }
 

@@ -51,7 +51,8 @@ export namespace stormkit::core {
 ////////////////////////////////////////////////////////////////////
 
 namespace stormkit::core {
-    STORMKIT_INLINE auto split(std::string_view string, char delim) noexcept -> std::vector<std::string> {
+    STORMKIT_INLINE auto split(std::string_view string, char delim) noexcept
+        -> std::vector<std::string> {
         auto output = std::vector<std::string> {};
         auto first  = RangeExtent { 0u };
 
@@ -68,7 +69,8 @@ namespace stormkit::core {
         return output;
     }
 
-    STORMKIT_INLINE auto toLower(std::string_view string, std::locale locale) noexcept -> std::string {
+    STORMKIT_INLINE auto toLower(std::string_view string, std::locale locale) noexcept
+        -> std::string {
         auto& facet = std::use_facet<std::ctype<typename std::string_view::value_type>>(locale);
 
         auto result = std::string { string };
@@ -79,7 +81,8 @@ namespace stormkit::core {
 
     ////////////////////////////////////////
     ////////////////////////////////////////
-    STORMKIT_INLINE auto toUpper(std::string_view string, std::locale locale) noexcept -> std::string {
+    STORMKIT_INLINE auto toUpper(std::string_view string, std::locale locale) noexcept
+        -> std::string {
         auto& facet = std::use_facet<std::ctype<typename std::string_view::value_type>>(locale);
 
         auto result = std::string { string };

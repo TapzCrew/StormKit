@@ -69,8 +69,9 @@ namespace stormkit::gpu {
             return instance.vkHandle().createXcbSurfaceKHR(create_info, nullptr);
         };
 
-        const auto create_surface = [&make_wayland_surface, &make_xcb_surface] noexcept
-            -> FunctionRef<VulkanExpected<vk::raii::SurfaceKHR>()> {
+        const auto create_surface =
+            [&make_wayland_surface,
+             &make_xcb_surface] noexcept -> FunctionRef<VulkanExpected<vk::raii::SurfaceKHR>()> {
             const auto is_wayland = std::getenv("WAYLAND_DISPLAY") != nullptr;
 
             if (is_wayland) return make_wayland_surface;
@@ -91,7 +92,6 @@ namespace stormkit::gpu {
 
         create_surface()
             .transform(core::monadic::set(m_vk_surface))
-            .transform_error(
-                core::monadic::map(core::monadic::narrow<Result>(), throwError()));
+            .transform_error(core::monadic::map(core::monadic::narrow<Result>(), throwError()));
     }
 } // namespace stormkit::gpu

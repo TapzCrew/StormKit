@@ -31,7 +31,7 @@ namespace stormkit::core {
 #if defined(STD_STACKTRACE_SUPPORTED)
         const auto st = std::to_string(std::stacktrace::current());
 #else
-        const auto st = boost::stacktrace::to_string(boost::stacktrace::stacktrace{});
+        const auto st = boost::stacktrace::to_string(boost::stacktrace::stacktrace {});
 #endif
         std::println(stderr, "{}", st);
     }

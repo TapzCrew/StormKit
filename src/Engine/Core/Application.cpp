@@ -15,9 +15,9 @@ import stormkit.Entities;
 import :Systems.RenderSystem;
 
 namespace stormkit::engine {
-    Application::Application(std::string_view           application_name,
+    Application::Application(std::string_view     application_name,
                              const math::ExtentU& window_extent,
-                             std::string                window_title,
+                             std::string          window_title,
                              PrivateTag) {
         m_window = wsi::Window { std::move(window_title), window_extent, wsi::WindowStyle::Close };
         m_event_handler = wsi::EventHandler {};

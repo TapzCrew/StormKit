@@ -212,7 +212,7 @@ namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     auto FrameGraphBuilder::buildRenderPassPhysicalDescription(
-        const GraphTask&                          task,
+        const GraphTask&                    task,
         HashMap<GraphID, gpu::ImageLayout>& layouts) noexcept -> RenderPassData {
         auto to_remove = std::vector<GraphID> {};
 
@@ -398,10 +398,8 @@ namespace stormkit::engine {
 
                 if (image.id == m_final_resource) backbuffer = &gpu_image;
 
-                auto& gpu_image_view =
-                    output.image_views.emplace_back(gpu::ImageView::create(device, gpu_image)
-                                                        .transform_error(expects())
-                                                        .value());
+                auto& gpu_image_view = output.image_views.emplace_back(
+                    gpu::ImageView::create(device, gpu_image).transform_error(expects()).value());
                 device.setObjectName(gpu_image_view,
                                      std::format("FrameGraph:ImageView:{}", image.name));
 
@@ -437,21 +435,19 @@ namespace stormkit::engine {
         output.cmb->begin();
         const auto visitors =
             Overloaded { [&output](const BakedFrameGraph::Data::RasterTask& task) {
-                                  output.cmb->beginRenderPass(task.renderpass,
-                                                              task.framebuffer,
-                                                              task.clear_values,
-                                                              true);
+                            output.cmb->beginRenderPass(task.renderpass,
+                                                        task.framebuffer,
+                                                        task.clear_values,
+                                                        true);
 
-                                  const auto command_buffers =
-                                      makeNakedRefs<std::array>(task.cmb);
-                                  output.cmb->executeSubCommandBuffers(command_buffers);
-                                  output.cmb->endRenderPass();
-                              },
-                               [&output](const BakedFrameGraph::Data::ComputeTask& task) {
-                                   const auto command_buffers =
-                                       makeNakedRefs<std::array>(task.cmb);
-                                   output.cmb->executeSubCommandBuffers(command_buffers);
-                               } };
+                            const auto command_buffers = makeNakedRefs<std::array>(task.cmb);
+                            output.cmb->executeSubCommandBuffers(command_buffers);
+                            output.cmb->endRenderPass();
+                        },
+                         [&output](const BakedFrameGraph::Data::ComputeTask& task) {
+                             const auto command_buffers = makeNakedRefs<std::array>(task.cmb);
+                             output.cmb->executeSubCommandBuffers(command_buffers);
+                         } };
         for (auto&& task : output.tasks) std::visit(visitors, task);
         output.cmb->end();
 

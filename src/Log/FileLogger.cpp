@@ -70,8 +70,7 @@ namespace stormkit::log {
         const auto time =
             std::chrono::duration_cast<std::chrono::seconds>(now - m_start_time).count();
 
-        auto filepath =
-            m_base_path / std::filesystem::path { toNativeEncoding(LOG_FILE_NAME) };
+        auto filepath = m_base_path / std::filesystem::path { toNativeEncoding(LOG_FILE_NAME) };
         if (not std::empty(m.name)) {
             filepath = m_base_path / toNativeEncoding(m.name);
             filepath += toNativeEncoding("-") + toNativeEncoding(LOG_FILE_NAME);

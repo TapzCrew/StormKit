@@ -90,8 +90,7 @@ namespace stormkit::image::details {
         const auto  raw_header = std::span<const Byte> { std::data(data), SIZE_OF_HEADER };
         const auto* header     = std::bit_cast<const QOIHeader*>(std::data(raw_header));
 
-        const auto extent =
-            math::ExtentU { byteSwap(header->width), byteSwap(header->height) };
+        const auto extent   = math::ExtentU { byteSwap(header->width), byteSwap(header->height) };
         const auto channels = header->channels;
         const auto format   = CHANNELS_TO_FORMAT.at(header->channels)[header->colorspace];
 
@@ -117,8 +116,7 @@ namespace stormkit::image::details {
         for ([[maybe_unused]] auto _ : range(output_size, channels)) {
             const auto tag = *it;
 
-            const auto position =
-                as<RangeExtent>(std::distance(std::ranges::begin(chunks), it));
+            const auto position = as<RangeExtent>(std::distance(std::ranges::begin(chunks), it));
 
             if (run > 0) --run;
             else if (std::memcmp(&*it, std::data(END_OF_FILE), std::size(END_OF_FILE)) == 0)

@@ -32,11 +32,11 @@ export {
                                                          .binding  = 0,
                                                          .format   = stormkit::gpu::Format::Float2,
                                                          .offset   = 0 },
-        stormkit::gpu::VertexInputAttributeDescription {
-            .location = 1,
-            .binding  = 0,
-            .format   = stormkit::gpu::Format::Float2,
-            .offset   = sizeof(stormkit::math::Vector2F) }
+        stormkit::gpu::VertexInputAttributeDescription { .location = 1,
+                                                         .binding  = 0,
+                                                         .format   = stormkit::gpu::Format::Float2,
+                                                         .offset =
+                                                             sizeof(stormkit::math::Vector2F) }
     };
 
     inline constexpr auto BOARD_SIZE            = 100u;
