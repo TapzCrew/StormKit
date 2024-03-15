@@ -1073,38 +1073,6 @@ export {
         template<>
         [[nodiscard]] constexpr auto as<vk::Viewport, const gpu::Viewport&>(
             const gpu::Viewport& viewport) noexcept -> vk::Viewport;
-
-        template<>
-        [[nodiscard]] constexpr auto as<vk::Extent3D, const core::math::ExtentU&>(
-            const core::math::ExtentU& extent) noexcept -> vk::Extent3D;
-
-        template<>
-        [[nodiscard]] constexpr auto as<core::math::ExtentU, const vk::Extent3D&>(
-            const vk::Extent3D& extent) noexcept -> core::math::ExtentU;
-
-        template<>
-        [[nodiscard]] constexpr auto as<vk::Extent2D, const core::math::ExtentU&>(
-            const core::math::ExtentU& extent) noexcept -> vk::Extent2D;
-
-        template<>
-        [[nodiscard]] constexpr auto as<core::math::ExtentU, const vk::Extent2D&>(
-            const vk::Extent2D& extent) noexcept -> core::math::ExtentU;
-
-        template<>
-        [[nodiscard]] constexpr auto as<vk::Offset3D, const core::math::Vector3I&>(
-            const core::math::Vector3I& offset) noexcept -> vk::Offset3D;
-
-        template<>
-        [[nodiscard]] constexpr auto as<vk::Offset2D, const core::math::Vector2I&>(
-            const core::math::Vector2I& offset) noexcept -> vk::Offset2D;
-
-        template<>
-        [[nodiscard]] constexpr auto as<core::math::Vector3I, const vk::Offset3D&>(
-            const vk::Offset3D& offset) noexcept -> core::math::Vector3I;
-
-        template<>
-        [[nodiscard]] constexpr auto as<core::math::Vector2I, const vk::Offset2D&>(
-            const vk::Offset2D& offset) noexcept -> core::math::Vector2I;
     } // namespace stormkit::gpu
 
     FLAG_ENUM(stormkit::gpu::QueueFlag)
@@ -1427,69 +1395,5 @@ namespace stormkit::gpu {
     [[nodiscard]] constexpr auto as<vk::Viewport, const gpu::Viewport&>(
         const gpu::Viewport& viewport) noexcept -> vk::Viewport {
         return viewport.operator vk::Viewport();
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    template<>
-    STORMKIT_FORCE_INLINE constexpr auto as<vk::Extent3D, const core::math::ExtentU&>(
-        const core::math::ExtentU& extent) noexcept -> vk::Extent3D {
-        return vk::Extent3D { extent.width, extent.height, extent.depth };
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    template<>
-    STORMKIT_FORCE_INLINE constexpr auto as<core::math::ExtentU, const vk::Extent3D&>(
-        const vk::Extent3D& extent) noexcept -> core::math::ExtentU {
-        return { extent.width, extent.height, extent.depth };
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    template<>
-    STORMKIT_FORCE_INLINE constexpr auto as<vk::Extent2D, const core::math::ExtentU&>(
-        const core::math::ExtentU& extent) noexcept -> vk::Extent2D {
-        return vk::Extent2D { extent.width, extent.height };
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    template<>
-    STORMKIT_FORCE_INLINE constexpr auto as<core::math::ExtentU, const vk::Extent2D&>(
-        const vk::Extent2D& extent) noexcept -> core::math::ExtentU {
-        return { extent.width, extent.height };
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    template<>
-    STORMKIT_FORCE_INLINE constexpr auto as<vk::Offset3D, const core::math::Vector3I&>(
-        const core::math::Vector3I& extent) noexcept -> vk::Offset3D {
-        return vk::Offset3D { extent.x, extent.y, extent.z };
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    template<>
-    STORMKIT_FORCE_INLINE constexpr auto as<vk::Offset2D, const core::math::Vector2I&>(
-        const core::math::Vector2I& extent) noexcept -> vk::Offset2D {
-        return vk::Offset2D { extent.x, extent.y };
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    template<>
-    STORMKIT_FORCE_INLINE constexpr auto as<core::math::Vector3I, const vk::Offset3D&>(
-        const vk::Offset3D& offset) noexcept -> core::math::Vector3I {
-        return { offset.x, offset.y, offset.z };
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    template<>
-    STORMKIT_FORCE_INLINE constexpr auto as<core::math::Vector2I, const vk::Offset2D&>(
-        const vk::Offset2D& offset) noexcept -> core::math::Vector2I {
-        return { offset.x, offset.y };
     }
 } // namespace stormkit::gpu
