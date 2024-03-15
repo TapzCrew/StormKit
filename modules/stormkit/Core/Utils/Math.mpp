@@ -407,28 +407,44 @@ export {
 
         inline namespace casts {
             template<math::IsVectorLike To, math::IsVectorLike From>
-            constexpr auto as(const From& from) noexcept -> To;
+            struct AsCaster<To, From> {
+                [[nodiscard]] static constexpr auto operator()(const From& from) noexcept -> To;
+            };
 
             template<math::IsVectorLike To, math::IsVectorLike From>
-            constexpr auto narrow(const From& from) noexcept -> To;
+            struct NarrowCaster<To, From> {
+                [[nodiscard]] static constexpr auto operator()(const From& from) noexcept -> To;
+            };
 
             template<math::IsExtentLike To, math::IsExtentLike From>
-            constexpr auto as(const From& from) noexcept -> To;
+            struct AsCaster<To, From> {
+                [[nodiscard]] static constexpr auto operator()(const From& from) noexcept -> To;
+            };
 
             template<math::IsExtentLike To, math::IsExtentLike From>
-            constexpr auto narrow(const From& from) noexcept -> To;
+            struct NarrowCaster<To, From> {
+                [[nodiscard]] static constexpr auto operator()(const From& from) noexcept -> To;
+            };
 
             template<math::IsVectorLike To, math::IsExtentLike From>
-            constexpr auto as(const From& from) noexcept -> To;
+            struct AsCaster<To, From> {
+                [[nodiscard]] static constexpr auto operator()(const From& from) noexcept -> To;
+            };
 
             template<math::IsVectorLike To, math::IsExtentLike From>
-            constexpr auto narrow(const From& from) noexcept -> To;
+            struct NarrowCaster<To, From> {
+                [[nodiscard]] static constexpr auto operator()(const From& from) noexcept -> To;
+            };
 
             template<math::IsExtentLike To, math::IsVectorLike From>
-            constexpr auto as(const From& from) noexcept -> To;
+            struct AsCaster<To, From> {
+                [[nodiscard]] static constexpr auto operator()(const From& from) noexcept -> To;
+            };
 
             template<math::IsExtentLike To, math::IsVectorLike From>
-            constexpr auto narrow(const From& from) noexcept -> To;
+            struct NarrowCaster<To, From> {
+                [[nodiscard]] static constexpr auto operator()(const From& from) noexcept -> To;
+            };
         } // namespace casts
     } // namespace stormkit::core
 
@@ -581,7 +597,7 @@ namespace stormkit::core {
         /////////////////////////////////////
         /////////////////////////////////////
         template<math::IsVectorLike To, math::IsVectorLike From>
-        constexpr auto as(const From& from) noexcept -> To {
+        constexpr auto AsCaster<To, From>::operator()(const From& from) noexcept -> To {
             using UnderlyingType = decltype(std::declval<To>().x);
             auto to              = To {};
             to.x                 = core::as<UnderlyingType>(from.x);
@@ -599,7 +615,7 @@ namespace stormkit::core {
         /////////////////////////////////////
         /////////////////////////////////////
         template<math::IsVectorLike To, math::IsVectorLike From>
-        constexpr auto narrow(const From& from) noexcept -> To {
+        constexpr auto NarrowCaster<To, From>::operator()(const From& from) noexcept -> To {
             using UnderlyingType = decltype(std::declval<To>().x);
             auto to              = To {};
             to.x                 = core::narrow<UnderlyingType>(from.x);
@@ -617,7 +633,7 @@ namespace stormkit::core {
         /////////////////////////////////////
         /////////////////////////////////////
         template<math::IsExtentLike To, math::IsExtentLike From>
-        constexpr auto as(const From& from) noexcept -> To {
+        constexpr auto AsCaster<To, From>::operator()(const From& from) noexcept -> To {
             using UnderlyingType = decltype(std::declval<To>().width);
             auto to              = To {};
             to.width             = core::as<UnderlyingType>(from.width);
@@ -632,7 +648,7 @@ namespace stormkit::core {
         /////////////////////////////////////
         /////////////////////////////////////
         template<math::IsExtentLike To, math::IsExtentLike From>
-        constexpr auto narrow(const From& from) noexcept -> To {
+        constexpr auto NarrowCaster<To, From>::operator()(const From& from) noexcept -> To {
             using UnderlyingType = decltype(std::declval<To>().x);
             auto to              = To {};
             to.width             = core::narrow<UnderlyingType>(from.width);
@@ -647,7 +663,7 @@ namespace stormkit::core {
         /////////////////////////////////////
         /////////////////////////////////////
         template<math::IsVectorLike To, math::IsExtentLike From>
-        constexpr auto as(const From& from) noexcept -> To {
+        constexpr auto AsCaster<To, From>::operator()(const From& from) noexcept -> To {
             using UnderlyingType = decltype(std::declval<To>().x);
             auto to              = To {};
             to.x                 = core::narrow<UnderlyingType>(from.width);
@@ -662,7 +678,7 @@ namespace stormkit::core {
         /////////////////////////////////////
         /////////////////////////////////////
         template<math::IsVectorLike To, math::IsExtentLike From>
-        constexpr auto narrow(const From& from) noexcept -> To {
+        constexpr auto NarrowCaster<To, From>::operator()(const From& from) noexcept -> To {
             using UnderlyingType = decltype(std::declval<To>().x);
             auto to              = To {};
             to.x                 = core::narrow<UnderlyingType>(from.width);
@@ -677,7 +693,7 @@ namespace stormkit::core {
         /////////////////////////////////////
         /////////////////////////////////////
         template<math::IsExtentLike To, math::IsVectorLike From>
-        constexpr auto as(const From& from) noexcept -> To {
+        constexpr auto AsCaster<To, From>::operator()(const From& from) noexcept -> To {
             using UnderlyingType = decltype(std::declval<To>().x);
             auto to              = To {};
             to.width             = core::as<UnderlyingType>(from.x);
@@ -692,7 +708,7 @@ namespace stormkit::core {
         /////////////////////////////////////
         /////////////////////////////////////
         template<math::IsExtentLike To, math::IsVectorLike From>
-        constexpr auto narrow(const From& from) noexcept -> To {
+        constexpr auto NarrowCaster<To, From>::operator()(const From& from) noexcept -> To {
             using UnderlyingType = decltype(std::declval<To>().x);
             auto to              = To {};
             to.width             = core::as<UnderlyingType>(from.x);
