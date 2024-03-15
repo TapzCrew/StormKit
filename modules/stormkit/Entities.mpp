@@ -46,14 +46,14 @@ export namespace stormkit::entities {
     template<class Result>
     constexpr auto componentHash(std::string_view str) noexcept -> Result;
 
-    constexpr auto componentHash(const char* str, core::RangeExtent size) noexcept
-        -> Component::Type;
+    constexpr auto componentHash(const char*       str,
+                                 core::RangeExtent size) noexcept -> Component::Type;
 
     constexpr auto componentHash(std::string_view str) noexcept -> Component::Type;
 
     namespace literals {
-        constexpr auto operator""_component_type(const char* str, core::RangeExtent size)
-            -> Component::Type;
+        constexpr auto operator""_component_type(const char*       str,
+                                                 core::RangeExtent size) -> Component::Type;
     } // namespace literals
 
     struct Message {
@@ -110,9 +110,9 @@ export namespace stormkit::entities {
         auto removeEntity(Entity e) -> void;
 
         struct Predicate {
-            [[nodiscard]] auto operator()(const std::unique_ptr<System>& s1,
-                                          const std::unique_ptr<System>& s2) const noexcept
-                -> bool {
+            [[nodiscard]] auto
+                operator()(const std::unique_ptr<System>& s1,
+                           const std::unique_ptr<System>& s2) const noexcept -> bool {
                 return s1->priority() < s2->priority();
             }
         };
@@ -198,8 +198,8 @@ export namespace stormkit::entities {
       private:
         using ComponentKey = core::UInt64;
 
-        static constexpr auto componentKeyFor(Entity e, Component::Type type) noexcept
-            -> ComponentKey;
+        static constexpr auto componentKeyFor(Entity          e,
+                                              Component::Type type) noexcept -> ComponentKey;
         static constexpr auto isKeyEntity(Entity e, ComponentKey key) noexcept -> bool;
 
         auto purposeToSystems(Entity e) -> void;
@@ -244,8 +244,8 @@ namespace stormkit::entities {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    constexpr auto componentHash(const char* str, core::RangeExtent size) noexcept
-        -> Component::Type {
+    constexpr auto componentHash(const char*       str,
+                                 core::RangeExtent size) noexcept -> Component::Type {
         return size == 0 ? 0xcbf29ce484222325UL
                          : (core::narrow<core::RangeExtent>(str[0]) ^
                             componentHash(std::string_view { str + 1, size - 1 })) *
@@ -261,8 +261,8 @@ namespace stormkit::entities {
     namespace literals {
         /////////////////////////////////////
         /////////////////////////////////////
-        constexpr auto operator""_component_type(const char* str, core::RangeExtent size)
-            -> Component::Type {
+        constexpr auto operator""_component_type(const char*       str,
+                                                 core::RangeExtent size) -> Component::Type {
             return stormkit::entities::componentHash(str, size);
         }
     } // namespace literals
@@ -409,12 +409,7 @@ namespace stormkit::entities {
     /////////////////////////////////////
     template<core::Is<System> T>
     auto EntityManager::hasSystem() const noexcept -> bool {
-        for (auto& system : m_systems) {
-            if (auto system_ptr = dynamic_cast<const T*>(system.get()); system_ptr != nullptr)
-                return true;
-        }
-
-        return false;
+        return std::ranges::any_of(m_systems, monadic::is<T>());
     }
 
     /////////////////////////////////////
@@ -436,8 +431,7 @@ namespace stormkit::entities {
 
         auto&& systems = self.systems();
 
-        auto it =
-            std::ranges::find_if(systems, [](auto&& system) { return core::is<T>(system.get()); });
+        auto it = std::ranges::find_if(systems, monadic::is<T>());
 
         return core::as<T&>(it->get());
     }
@@ -450,8 +444,8 @@ namespace stormkit::entities {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    constexpr auto EntityManager::componentKeyFor(Entity e, Component::Type type) noexcept
-        -> ComponentKey {
+    constexpr auto EntityManager::componentKeyFor(Entity          e,
+                                                  Component::Type type) noexcept -> ComponentKey {
         return (static_cast<core::UInt64>(e) << 32) | static_cast<core::UInt64>(type);
     }
 

@@ -301,7 +301,7 @@ namespace stormkit::engine {
                                    .destination_layout = layouts.at(id)
                                };
 
-                               if (std::ranges::any_of(task.writes(), core::monadic::equal(id))) {
+                               if (std::ranges::any_of(task.writes(), core::monadic::is(id))) {
                                    to_remove.emplace_back(id);
                                    attachment_description.store_op =
                                        gpu::AttachmentStoreOperation::Store;

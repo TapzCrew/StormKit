@@ -69,8 +69,8 @@ namespace stormkit::entities {
     auto EntityManager::hasEntity(Entity entity) const -> bool {
         core::expects(entity != INVALID_ENTITY);
 
-        return std::ranges::any_of(entities(), core::monadic::equal(entity)) or
-               std::ranges::any_of(m_added_entities, core::monadic::equal(entity));
+        return std::ranges::any_of(entities(), core::monadic::is(entity)) or
+               std::ranges::any_of(m_added_entities, core::monadic::is(entity));
     }
 
     /////////////////////////////////////
@@ -79,7 +79,7 @@ namespace stormkit::entities {
         core::expects(entity != INVALID_ENTITY and type != Component::INVALID_TYPE);
 
         return std::ranges::any_of(m_registered_components_for_entities.at(entity),
-                                   core::monadic::equal(type));
+                                   core::monadic::is(type));
     }
 
     /////////////////////////////////////
@@ -101,7 +101,7 @@ namespace stormkit::entities {
 
             removeFromSystems(entity);
 
-            if (not std::ranges::any_of(m_added_entities, core::monadic::equal(entity)))
+            if (not std::ranges::any_of(m_added_entities, core::monadic::is(entity)))
                 m_free_entities.push(entity);
         }
         m_removed_entities.clear();

@@ -168,7 +168,7 @@ namespace stormkit::gpu {
             std::chrono::duration_cast<std::chrono::nanoseconds>(wait_for).count());
         const auto possible_results = std::array { vk::Result::eSuccess, vk::Result::eNotReady };
 
-        if (std::ranges::any_of(possible_results, core::monadic::equal(result))) [[likely]]
+        if (std::ranges::any_of(possible_results, core::monadic::is(result))) [[likely]]
             return core::narrow<Result>(result);
 
         return std::unexpected { core::narrow<Result>(result) };

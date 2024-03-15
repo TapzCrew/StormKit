@@ -139,7 +139,7 @@ namespace stormkit::gpu {
                                                    vk::Result::eErrorOutOfDateKHR,
                                                    vk::Result::eSuboptimalKHR };
 
-        if (not std::ranges::any_of(possible_results, core::monadic::equal(result))) [[likely]]
+        if (not std::ranges::any_of(possible_results, core::monadic::is(result))) [[likely]]
             return std::unexpected { core::narrow<gpu::Result>(result) };
 
         return std::make_pair(core::narrow<gpu::Result>(result), index);
