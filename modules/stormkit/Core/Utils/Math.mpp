@@ -195,6 +195,21 @@ export {
             /// \unique_name Vector4I
             using Vector4I = Vector4<Int32>;
 
+            template<typename T>
+            concept IsVector2Like = requires(T&& value) {
+                value.x;
+                value.y;
+            };
+
+            template<typename T>
+            concept IsVector3Like = IsVector2Like<T> and requires(T&& value) { value.z; };
+
+            template<typename T>
+            concept IsVector4Like = IsVector3Like<T> and requires(T&& value) { value.w; };
+
+            template<typename T>
+            concept IsVectorLike = IsVector2Like<T> or IsVector3Like<T> or IsVector4Like<T>;
+
             template<class T>
             concept IsVectorType = IsOneOf<T,
                                            Vector2F,
@@ -240,7 +255,7 @@ export {
             /// \unique_name ExtentBase<T>
             template<IsArithmetic T>
             struct Extent {
-                using ValueType = T;
+                using ValueType  = T;
                 using value_type = ValueType;
 
                 using OrderingType = std::
@@ -283,8 +298,8 @@ export {
                 /// \brief Move assign other to this Extent instance.
                 /// \param other ValueType extent moved.
                 /// \returns ValueType reference of the moved extent.
-                constexpr auto operator=(Extent<ValueType>&& other) noexcept
-                    -> Extent<ValueType>& = default;
+                constexpr auto
+                    operator=(Extent<ValueType>&& other) noexcept -> Extent<ValueType>& = default;
 
                 /// \brief Construct a extent from the convertion of an other extent.
                 ///
@@ -313,26 +328,26 @@ export {
                 /// \param factor ValueType factor to multiply
                 /// \returns A newly constructed extent equal to this extent multiplied with
                 /// `factor`
-                [[nodiscard]] constexpr auto operator*(ValueType factor) const noexcept
-                    -> Extent<ValueType>;
+                [[nodiscard]] constexpr auto
+                    operator*(ValueType factor) const noexcept -> Extent<ValueType>;
 
                 /// \brief Divide an extent with a factor.
                 /// \param factor ValueType factor to divide
                 /// \returns A newly constructed extent equal to this extent Divided with `factor`
-                [[nodiscard]] constexpr auto operator/(ValueType factor) const noexcept
-                    -> Extent<ValueType>;
+                [[nodiscard]] constexpr auto
+                    operator/(ValueType factor) const noexcept -> Extent<ValueType>;
 
                 /// \brief Multiply this extent with a factor.
                 /// \param factor ValueType factor to multiply
                 /// \returns A reference to this after the multiplication with `factor`
-                [[nodiscard]] constexpr auto operator*=(ValueType factor) noexcept
-                    -> Extent<ValueType>&;
+                [[nodiscard]] constexpr auto
+                    operator*=(ValueType factor) noexcept -> Extent<ValueType>&;
 
                 /// \brief Divide this extent with a factor.
                 /// \param factor ValueType factor to divide
                 /// \returns A reference to this after the division with `factor`
-                [[nodiscard]] constexpr auto operator/=(ValueType factor) noexcept
-                    -> Extent<ValueType>&;
+                [[nodiscard]] constexpr auto
+                    operator/=(ValueType factor) noexcept -> Extent<ValueType>&;
 
                 /// \output_section Publics member
                 /// \brief Width attribute.
@@ -366,7 +381,7 @@ export {
             using ExtentF = Extent<float>;
 
             template<class T>
-            concept IsExtentType = requires(T&& value) {
+            concept IsExtentLike = requires(T&& value) {
                 value.width;
                 value.height;
                 value.depth;
@@ -382,7 +397,7 @@ export {
         template<IsArithmetic T>
         auto toString(const math::Vector4<T>& data) noexcept;
 
-        template<math::IsExtentType T>
+        template<math::IsExtentLike T>
         auto toString(const T& data) noexcept;
     } // namespace stormkit::core
 
@@ -427,9 +442,7 @@ namespace stormkit::core {
         /////////////////////////////////////
         /////////////////////////////////////
         template<IsArithmetic T>
-        constexpr Extent<T>::Extent(ValueType _width,
-                                    ValueType _height,
-                                    ValueType _depth) noexcept
+        constexpr Extent<T>::Extent(ValueType _width, ValueType _height, ValueType _depth) noexcept
             : width { _width }, height { _height }, depth { _depth } {
         }
 
@@ -438,16 +451,15 @@ namespace stormkit::core {
         template<IsArithmetic T>
         template<IsArithmetic U>
         constexpr Extent<T>::Extent(const Extent<U>& other) noexcept
-            : width { narrow<ValueType>(other.width) },
-              height { narrow<ValueType>(other.height) },
+            : width { narrow<ValueType>(other.width) }, height { narrow<ValueType>(other.height) },
               depth { narrow<ValueType>(other.depth) } {
         }
 
         /////////////////////////////////////
         /////////////////////////////////////
         template<IsArithmetic T>
-        constexpr auto Extent<T>::operator<=>(const Extent<T>& other) const noexcept
-            -> OrderingType {
+        constexpr auto
+            Extent<T>::operator<=>(const Extent<T>& other) const noexcept -> OrderingType {
             if (auto ret = width <=> other.width; ret != 0) return ret;
             if (auto ret = height <=> other.height; ret != 0) return ret;
             if (auto ret = depth <=> other.depth; ret != 0) return ret;
@@ -525,7 +537,7 @@ namespace stormkit::core {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    template<math::IsExtentType T>
+    template<math::IsExtentLike T>
     auto toString(const T& data) noexcept {
         return std::format("[Extent: .width = {}, .height = {}, .depth = {}]",
                            data.width,
