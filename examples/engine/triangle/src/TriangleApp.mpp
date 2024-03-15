@@ -2,7 +2,7 @@
 // This file is subject to the license terms in the LICENSE file
 // found in the top-level of this distribution
 
-export module App;
+export module TriangleApp;
 
 import std;
 
@@ -16,9 +16,9 @@ import ShaderData;
 
 using namespace stormkit;
 
-export class App: public App {
+export class TriangleApp: public App {
   public:
-    ~App() override;
+    ~TriangleApp() override;
     auto run(std::span<const std::string_view> args) -> Int override;
 
   private:
@@ -40,15 +40,15 @@ export class App: public App {
 
 module :private;
 
-App::~App() = default;
+TriangleApp::~TriangleApp() = default;
 
 ////////////////////////////////////////
 ////////////////////////////////////////
-auto App::run(std::span<const std::string_view> _) -> Int {
+auto TriangleApp::run(std::span<const std::string_view> _) -> Int {
     m_application = engine::Application::create(APPLICATION_NAME, { 800u, 600u }, WINDOW_TITLE)
                         .transform_error(expectsWithMessage("Failed to initialize Render engine"))
                         .value();
-    m_application->setUpdateFrameGraphCallback(curry(&App::updateFrameGraph, this));
+    m_application->setUpdateFrameGraphCallback(curry(&TriangleApp::updateFrameGraph, this));
 
     auto& window        = m_application->window();
     auto& event_handler = m_application->eventHandler();
@@ -87,7 +87,7 @@ auto App::run(std::span<const std::string_view> _) -> Int {
 
 ////////////////////////////////////////
 ////////////////////////////////////////
-auto App::updateFrameGraph(engine::FrameGraphBuilder& graph, std::atomic_bool& rebuild_graph)
+auto TriangleApp::updateFrameGraph(engine::FrameGraphBuilder& graph, std::atomic_bool& rebuild_graph)
     -> void {
     static auto initialized = false;
 

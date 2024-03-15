@@ -9,7 +9,7 @@ import stormkit.Main;
 import stormkit.Log;
 import stormkit.Wsi;
 
-import App;
+import TriangleApp;
 
 #include <stormkit/Core/PlatformMacro.hpp>
 #include <stormkit/Main/MainMacro.hpp>
@@ -32,7 +32,7 @@ auto main(std::span<const std::string_view> args) -> int {
                 STORMKIT_COMPILER);
 
     try {
-        auto app = App {};
+        auto app = TriangleApp {};
         return app.run(args);
     } catch (const std::exception& e) {
         logger.flog("{}", e.what());
