@@ -279,7 +279,7 @@ namespace stormkit::core { inline namespace casts {
         requires(IsPolymorphic<RawType<From>> and IsPolymorphic<RawType<To>> and
                  Is<RawType<To>, RawType<From>>)
     STORMKIT_FORCE_INLINE constexpr auto AsCaster<To, From>::operator()(From value) -> To {
-        expects(is<RawType<To>>(value));
+        expects(is<To>(value));
 
         if constexpr (IsLValueReference<From>)
             if constexpr (IsLValueReference<To>) return static_cast<To>(std::forward<From>(value));
