@@ -1067,13 +1067,21 @@ export {
 
         [[nodiscard]] auto toString(const PhysicalDeviceInfo& data) noexcept;
 
-        template<typename To, typename From>
-        [[nodiscard]] constexpr auto as(From&&) noexcept -> To;
+    } // namespace stormkit::gpu
+
+    namespace stormkit::core { inline namespace casts {
+        template<>
+        struct AsCaster<vk::Viewport, const gpu::Viewport&> {
+            [[nodiscard]] static constexpr auto
+                operator()(const gpu::Viewport& from) noexcept -> vk::Viewport;
+        };
 
         template<>
-        [[nodiscard]] constexpr auto as<vk::Viewport, const gpu::Viewport&>(
-            const gpu::Viewport& viewport) noexcept -> vk::Viewport;
-    } // namespace stormkit::gpu
+        struct AsCaster<vk::Rect2D, const gpu::Scissor&> {
+            [[nodiscard]] static constexpr auto
+                operator()(const gpu::Scissor& from) noexcept -> vk::Rect2D;
+        };
+    }} // namespace stormkit::core::casts
 
     FLAG_ENUM(stormkit::gpu::QueueFlag)
     FLAG_ENUM(stormkit::gpu::ShaderStageFlag)
@@ -1330,8 +1338,8 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE constexpr Scissor::operator vk::Rect2D() const noexcept {
         return vk::Rect2D {}
-            .setOffset(as<vk::Offset2D>(offset))
-            .setExtent(as<vk::Extent2D>(extent));
+            .setOffset(core::as<vk::Offset2D>(offset))
+            .setExtent(core::as<vk::Extent2D>(extent));
     }
 
     /////////////////////////////////////
@@ -1380,20 +1388,20 @@ namespace stormkit::gpu {
                            data.driver_patch_version,
                            data.type);
     }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    template<typename To, typename From>
-    STORMKIT_FORCE_INLINE constexpr auto as(From&&) noexcept -> To {
-        static_assert(true, "Not yet implemented");
-        return To {};
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    template<>
-    [[nodiscard]] constexpr auto as<vk::Viewport, const gpu::Viewport&>(
-        const gpu::Viewport& viewport) noexcept -> vk::Viewport {
-        return viewport.operator vk::Viewport();
-    }
 } // namespace stormkit::gpu
+
+namespace stormkit::core { inline namespace casts {
+    /////////////////////////////////////
+    /////////////////////////////////////
+    constexpr auto AsCaster<vk::Viewport, const gpu::Viewport&>::operator()(
+        const gpu::Viewport& from) noexcept -> vk::Viewport {
+        return from.operator vk::Viewport();
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    constexpr auto AsCaster<vk::Rect2D, const gpu::Scissor&>::operator()(
+        const gpu::Scissor& from) noexcept -> vk::Rect2D {
+        return from.operator vk::Rect2D();
+    }
+}} // namespace stormkit::core::casts

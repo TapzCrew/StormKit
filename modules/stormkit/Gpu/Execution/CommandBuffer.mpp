@@ -1137,11 +1137,11 @@ namespace stormkit::gpu {
 
                 return vk::ImageBlit {
                     .srcSubresource = vk_src_subresource_layers,
-                    .srcOffsets     = std::array { as<vk::Offset3D>(region.src_offset[0]),
-                                               as<vk::Offset3D>(region.src_offset[1]) },
+                    .srcOffsets     = std::array { core::as<vk::Offset3D>(region.src_offset[0]),
+                                               core::as<vk::Offset3D>(region.src_offset[1]) },
                     .dstSubresource = vk_dst_subresource_layers,
-                    .dstOffsets     = std::array { as<vk::Offset3D>(region.dst_offset[0]),
-                                               as<vk::Offset3D>(region.dst_offset[1]) },
+                    .dstOffsets     = std::array { core::as<vk::Offset3D>(region.dst_offset[0]),
+                                               core::as<vk::Offset3D>(region.dst_offset[1]) },
                 };
             }) |
             std::ranges::to<std::vector>();
