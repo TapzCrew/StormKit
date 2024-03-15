@@ -75,7 +75,7 @@ export namespace stormkit::core {
         /////////////////////////////////////
         /////////////////////////////////////
         STORMKIT_INLINE auto doGetFunc(std::string_view name) const -> Expected<void*> {
-            core::expects(m_library_handle);
+            expects(m_library_handle);
             auto func = ::GetProcAddress(m_library_handle, std::data(name));
 
             if (not func) [[unlikely]]

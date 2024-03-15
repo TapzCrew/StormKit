@@ -107,7 +107,7 @@ export {
             std::string_view name = "";
         };
 
-        template<core::ConstexprString str>
+        template<ConstexprString str>
         [[nodiscard]] constexpr auto operator""_module() -> stormkit::log::Module;
 
         class STORMKIT_API FileLogger final: public Logger {
@@ -127,7 +127,7 @@ export {
             auto flush() -> void override;
 
           private:
-            core::StringHashMap<std::ofstream> m_streams;
+            StringHashMap<std::ofstream> m_streams;
 
             std::filesystem::path m_base_path;
         };
@@ -186,7 +186,7 @@ namespace stormkit::log {
     STORMKIT_FORCE_INLINE constexpr auto
         toStringView(Severity severity) noexcept -> std::string_view {
         const auto it = details::SEVERITY_TO_STRING.find(severity);
-        core::expects(it != std::ranges::cend(details::SEVERITY_TO_STRING));
+        expects(it != std::ranges::cend(details::SEVERITY_TO_STRING));
 
         return it->second;
     }
@@ -247,7 +247,7 @@ namespace stormkit::log {
                                            const Module&    m,
                                            std::string_view format_string,
                                            Args&&... param_args) -> void {
-        core::expects(hasLogger());
+        expects(hasLogger());
 
         const auto format        = format_string;
         auto       memory_buffer = std::string {};
@@ -345,7 +345,7 @@ namespace stormkit::log {
 
     ////////////////////////////////////////
     ////////////////////////////////////////
-    template<core::ConstexprString str>
+    template<ConstexprString str>
     STORMKIT_FORCE_INLINE constexpr auto operator"" _module() -> stormkit::log::Module {
         return Module { str.view() };
     }

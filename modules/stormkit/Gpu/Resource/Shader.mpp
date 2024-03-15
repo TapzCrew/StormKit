@@ -39,7 +39,7 @@ export namespace stormkit::gpu {
                                                const std::filesystem::path& filepath,
                                                ShaderStageFlag type) noexcept -> Expected<Shader>;
         [[nodiscard]] static auto fromBytes(const Device&               device,
-                                            std::span<const core::Byte> data,
+                                            std::span<const Byte> data,
                                             ShaderStageFlag type) noexcept -> Expected<Shader>;
         [[nodiscard]] static auto fromSpirv(const Device&            device,
                                             std::span<const SpirvID> data,
@@ -51,7 +51,7 @@ export namespace stormkit::gpu {
             -> Expected<std::unique_ptr<Shader>>;
         [[nodiscard]] static auto
             allocateFromBytes(const Device&               device,
-                              std::span<const core::Byte> data,
+                              std::span<const Byte> data,
                               ShaderStageFlag type) noexcept -> Expected<std::unique_ptr<Shader>>;
         [[nodiscard]] static auto
             allocateFromSpirv(const Device&            device,
@@ -71,7 +71,7 @@ export namespace stormkit::gpu {
         ShaderStageFlag      m_type   = ShaderStageFlag::None;
         std::vector<SpirvID> m_source = {};
 
-        core::DeferInit<vk::raii::ShaderModule> m_vk_shader_module;
+        DeferInit<vk::raii::ShaderModule> m_vk_shader_module;
     };
 } // namespace stormkit::gpu
 
@@ -93,7 +93,7 @@ namespace stormkit::gpu {
 
         m_source.resize(size);
 
-        core::read(stream, core::viewAsBytes(m_source));
+        read(stream, viewAsBytes(m_source));
 
         compile(device);
     }
@@ -134,9 +134,9 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE auto
         Shader::fromBytes(const Device&               device,
-                          std::span<const core::Byte> data,
+                          std::span<const Byte> data,
                           ShaderStageFlag             type) noexcept -> Expected<Shader> try {
-        return Shader { device, core::viewAs<const SpirvID>(data), type, Tag {} };
+        return Shader { device, viewAs<const SpirvID>(data), type, Tag {} };
     } catch (const Result& result) { return std::unexpected(result); }
 
     /////////////////////////////////////
@@ -160,10 +160,10 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE auto Shader::allocateFromBytes(const Device&               device,
-                                                         std::span<const core::Byte> data,
+                                                         std::span<const Byte> data,
                                                          ShaderStageFlag             type) noexcept
         -> Expected<std::unique_ptr<Shader>> try {
-        return std::make_unique<Shader>(device, core::viewAs<const SpirvID>(data), type, Tag {});
+        return std::make_unique<Shader>(device, viewAs<const SpirvID>(data), type, Tag {});
     } catch (const Result& result) { return std::unexpected(result); }
 
     /////////////////////////////////////
@@ -183,7 +183,7 @@ namespace stormkit::gpu {
         device.vkHandle()
             .createShaderModule(create_info)
             .transform(core::monadic::set(m_vk_shader_module))
-            .transform_error(core::monadic::map(core::monadic::as<Result>(), core::throwError()));
+            .transform_error(core::monadic::map(core::monadic::as<Result>(), throwError()));
     }
 
     /////////////////////////////////////

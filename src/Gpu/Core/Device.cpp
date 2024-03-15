@@ -56,9 +56,9 @@ namespace stormkit::gpu {
         const auto& queue_families = m_physical_device->queueFamilies();
 
         struct Queue_ {
-            std::optional<core::UInt32> id    = std::nullopt;
-            core::UInt32                count = 0u;
-            core::Byte                  _[3];
+            std::optional<UInt32> id    = std::nullopt;
+            UInt32                count = 0u;
+            Byte                  _[3];
             QueueFlag                   flags = QueueFlag {};
         };
 
@@ -66,7 +66,7 @@ namespace stormkit::gpu {
             const auto it = std::ranges::find_if(queue_families, findQueue<QueueFlag::Graphics>());
             if (it == std::ranges::cend(queue_families)) return {};
 
-            return { .id = core::as<core::UInt32>(
+            return { .id = as<UInt32>(
                          std::distance(std::ranges::cbegin(queue_families), it)),
                      .count = it->count,
                      .flags = it->flags };
@@ -78,7 +78,7 @@ namespace stormkit::gpu {
                                      findQueue<QueueFlag::Transfert, QueueFlag::Graphics>());
             if (it == std::ranges::cend(queue_families)) return {};
 
-            return { .id = core::as<core::UInt32>(
+            return { .id = as<UInt32>(
                          std::distance(std::ranges::cbegin(queue_families), it)),
                      .count = it->count,
                      .flags = it->flags };
@@ -90,7 +90,7 @@ namespace stormkit::gpu {
                 findQueue<QueueFlag::Compute, QueueFlag::Graphics, QueueFlag::Transfert>());
             if (it == std::ranges::cend(queue_families)) return {};
 
-            return { .id = core::as<core::UInt32>(
+            return { .id = as<UInt32>(
                          std::distance(std::ranges::cbegin(queue_families), it)),
                      .count = it->count,
                      .flags = it->flags };
@@ -110,7 +110,7 @@ namespace stormkit::gpu {
         auto priorities = std::vector<std::vector<float>> {};
         priorities.reserve(std::size(queues));
 
-        const auto queue_create_infos = core::transform(queues, [&priorities](auto queue) {
+        const auto queue_create_infos = transform(queues, [&priorities](auto queue) {
             auto& priority = priorities.emplace_back();
 
             priority.resize(queue->count, 1.f);
@@ -163,11 +163,11 @@ namespace stormkit::gpu {
         const auto extensions = [&] {
             constexpr auto toCZString = [](const auto& v) { return std::data(v); };
 
-            auto e = core::transform(BASE_EXTENSIONS, toCZString);
+            auto e = transform(BASE_EXTENSIONS, toCZString);
             if (swapchain_available and info.enable_swapchain)
-                core::merge(e, core::transform(SWAPCHAIN_EXTENSIONS, toCZString));
+                merge(e, transform(SWAPCHAIN_EXTENSIONS, toCZString));
             if (raytracing_available and info.enable_raytracing)
-                core::merge(e, core::transform(RAYTRACING_EXTENSIONS, toCZString));
+                merge(e, transform(RAYTRACING_EXTENSIONS, toCZString));
 
             return e;
         }();
@@ -213,7 +213,7 @@ namespace stormkit::gpu {
 
                 return {};
             })
-            .transform_error(core::monadic::map(core::monadic::as<Result>(), core::throwError()));
+            .transform_error(core::monadic::map(core::monadic::as<Result>(), throwError()));
 
         if (raster_queue.id)
             m_raster_queue = QueueEntry { .id    = *raster_queue.id,
@@ -226,7 +226,7 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto Device::waitForFences(std::span<const core::NakedRef<const Fence>> fences,
+    auto Device::waitForFences(std::span<const NakedRef<const Fence>> fences,
                                bool                                         wait_all,
                                const std::chrono::milliseconds&             timeout) const noexcept
         -> Expected<Result> {
@@ -245,7 +245,7 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto Device::resetFences(std::span<const core::NakedRef<const Fence>> fences) const noexcept
+    auto Device::resetFences(std::span<const NakedRef<const Fence>> fences) const noexcept
         -> void {
         const auto vk_fences =
             fences | std::views::transform(monadic::toVkHandle()) | std::ranges::to<std::vector>();

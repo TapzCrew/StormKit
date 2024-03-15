@@ -106,7 +106,7 @@ namespace stormkit::wsi::linux::x11 {
         constinit auto xcb_connection_reference_count    = 0u;
         constinit auto xcb_error_context_reference_count = 0u;
 
-        auto xcb_atoms = stormkit::core::StringHashMap<xcb_atom_t> {};
+        auto xcb_atoms = stormkit::StringHashMap<xcb_atom_t> {};
     } // namespace
 
     STORMKIT_XCB_SCOPED(XCBConnection,
@@ -128,7 +128,7 @@ namespace stormkit::wsi::linux::x11 {
             dlog("New xcb connection {}", std::bit_cast<void*>(xcb_connection));
         }
 
-        core::ensures(xcb_connection);
+        ensures(xcb_connection);
         return xcb_connection;
     }
 
@@ -171,7 +171,7 @@ namespace stormkit::wsi::linux::x11 {
         if (error) return std::unexpected { Error { getXCBError(error) } };
 
         return std::string { xcb_get_atom_name_name(reply.get()),
-                             core::as<std::size_t>(xcb_get_atom_name_name_length(reply.get())) };
+                             as<std::size_t>(xcb_get_atom_name_name_length(reply.get())) };
     }
 
     /////////////////////////////////////
@@ -182,14 +182,14 @@ namespace stormkit::wsi::linux::x11 {
             dlog("New xcb error context {}", std::bit_cast<void*>(xcb_error_context));
         }
 
-        core::ensures(xcb_error_context);
+        ensures(xcb_error_context);
         return xcb_error_context;
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_INLINE auto getXCBError(XCBErrorPtr error) -> std::string {
-        core::expects(error);
+        expects(error);
 
         auto guard = XCBGenericErrorScoped { error };
 

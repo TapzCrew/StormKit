@@ -31,23 +31,23 @@ namespace stormkit::wsi::linux::wayland {
     /////////////////////////////////////
     auto outputGeometryHandler(void*       data,
                                wl_output*  output,
-                               core::Int32 x,
-                               core::Int32 y,
-                               core::Int32 pwidth,
-                               core::Int32 pheight,
-                               core::Int32 subpixels,
+                               Int32 x,
+                               Int32 y,
+                               Int32 pwidth,
+                               Int32 pheight,
+                               Int32 subpixels,
                                const char* make,
                                const char* model,
-                               core::Int32 transform) noexcept -> void;
+                               Int32 transform) noexcept -> void;
 
     /////////////////////////////////////
     /////////////////////////////////////
     auto outputModeHandler(void*        data,
                            wl_output*   wl_output,
-                           core::UInt32 flags,
-                           core::Int32  width,
-                           core::Int32  height,
-                           core::Int32  refresh) noexcept -> void;
+                           UInt32 flags,
+                           Int32  width,
+                           Int32  height,
+                           Int32  refresh) noexcept -> void;
 
     /////////////////////////////////////
     /////////////////////////////////////
@@ -55,11 +55,11 @@ namespace stormkit::wsi::linux::wayland {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto outputScaleHandler(void* data, wl_output* wl_output, core::Int32 factor) noexcept -> void;
+    auto outputScaleHandler(void* data, wl_output* wl_output, Int32 factor) noexcept -> void;
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto seatCapabilitiesHandler(void* data, wl_seat* seat, core::UInt32 capabilities) noexcept
+    auto seatCapabilitiesHandler(void* data, wl_seat* seat, UInt32 capabilities) noexcept
         -> void;
 
     /////////////////////////////////////
@@ -70,7 +70,7 @@ namespace stormkit::wsi::linux::wayland {
     /////////////////////////////////////
     auto pointerEnterHandler(void*        data,
                              wl_pointer*  pointer,
-                             core::UInt32 serial,
+                             UInt32 serial,
                              wl_surface*  surface,
                              wl_fixed_t   surface_x,
                              wl_fixed_t   surface_y) noexcept -> void;
@@ -79,14 +79,14 @@ namespace stormkit::wsi::linux::wayland {
     /////////////////////////////////////
     auto pointerLeaveHandler(void*        data,
                              wl_pointer*  pointer,
-                             core::UInt32 serial,
+                             UInt32 serial,
                              wl_surface*  surface) noexcept -> void;
 
     /////////////////////////////////////
     /////////////////////////////////////
     auto pointerMotionHandler(void*        data,
                               wl_pointer*  pointer,
-                              core::UInt32 time,
+                              UInt32 time,
                               wl_fixed_t   surface_x,
                               wl_fixed_t   surface_y) noexcept -> void;
 
@@ -94,17 +94,17 @@ namespace stormkit::wsi::linux::wayland {
     /////////////////////////////////////
     auto pointerButtonHandler(void*        data,
                               wl_pointer*  pointer,
-                              core::UInt32 serial,
-                              core::UInt32 time,
-                              core::UInt32 button,
-                              core::UInt32 state) noexcept -> void;
+                              UInt32 serial,
+                              UInt32 time,
+                              UInt32 button,
+                              UInt32 state) noexcept -> void;
 
     /////////////////////////////////////
     /////////////////////////////////////
     auto pointerAxisHandler(void*        data,
                             wl_pointer*  pointer,
-                            core::UInt32 time,
-                            core::UInt32 axis,
+                            UInt32 time,
+                            UInt32 axis,
                             wl_fixed_t   value) noexcept -> void;
 
     /////////////////////////////////////
@@ -115,35 +115,35 @@ namespace stormkit::wsi::linux::wayland {
     /////////////////////////////////////
     auto pointerAxisSourceHandler(void*        data,
                                   wl_pointer*  pointer,
-                                  core::UInt32 axis_source) noexcept -> void;
+                                  UInt32 axis_source) noexcept -> void;
 
     /////////////////////////////////////
     /////////////////////////////////////
     auto pointerAxisStopHandler(void*        data,
                                 wl_pointer*  pointer,
-                                core::UInt32 time,
-                                core::UInt32 axis) noexcept -> void;
+                                UInt32 time,
+                                UInt32 axis) noexcept -> void;
 
     /////////////////////////////////////
     /////////////////////////////////////
     auto pointerAxisDiscreteHandler(void*        data,
                                     wl_pointer*  pointer,
-                                    core::UInt32 axis,
-                                    core::Int32  discrete) noexcept -> void;
+                                    UInt32 axis,
+                                    Int32  discrete) noexcept -> void;
 
     /////////////////////////////////////
     /////////////////////////////////////
     auto keyboardKeymapHandler(void*        data,
                                wl_keyboard* keyboard,
-                               core::UInt32 format,
-                               core::Int32  fd,
-                               core::UInt32 size) noexcept -> void;
+                               UInt32 format,
+                               Int32  fd,
+                               UInt32 size) noexcept -> void;
 
     /////////////////////////////////////
     /////////////////////////////////////
     auto keyboardEnterHandler(void*        data,
                               wl_keyboard* keyboard,
-                              core::UInt32 serial,
+                              UInt32 serial,
                               wl_surface*  surface,
                               wl_array*    keys) noexcept -> void;
 
@@ -151,34 +151,34 @@ namespace stormkit::wsi::linux::wayland {
     /////////////////////////////////////
     auto keyboardLeaveHandler(void*        data,
                               wl_keyboard* keyboard,
-                              core::UInt32 serial,
+                              UInt32 serial,
                               wl_surface*  surface) noexcept -> void;
 
     /////////////////////////////////////
     /////////////////////////////////////
     auto keyboardKeyHandler(void*        data,
                             wl_keyboard* keyboard,
-                            core::UInt32 serial,
-                            core::UInt32 time,
-                            core::UInt32 key,
-                            core::UInt32 state) noexcept -> void;
+                            UInt32 serial,
+                            UInt32 time,
+                            UInt32 key,
+                            UInt32 state) noexcept -> void;
 
     /////////////////////////////////////
     /////////////////////////////////////
     auto keyboardModifiersHandler(void*        data,
                                   wl_keyboard* keyboard,
-                                  core::UInt32 serial,
-                                  core::UInt32 mods_depressed,
-                                  core::UInt32 mods_latcher,
-                                  core::UInt32 mods_locked,
-                                  core::UInt32 group) noexcept -> void;
+                                  UInt32 serial,
+                                  UInt32 mods_depressed,
+                                  UInt32 mods_latcher,
+                                  UInt32 mods_locked,
+                                  UInt32 group) noexcept -> void;
 
     /////////////////////////////////////
     /////////////////////////////////////
     auto keyboardRepeatInfoHandler(void*        data,
                                    wl_keyboard* keyboard,
-                                   core::Int32  rate,
-                                   core::Int32  delay) noexcept -> void;
+                                   Int32  rate,
+                                   Int32  delay) noexcept -> void;
 
     namespace {
         auto globals = Globals {};
@@ -316,7 +316,7 @@ namespace stormkit::wsi::linux::wayland {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    WindowImpl::WindowImpl(std::string title, const core::math::ExtentU& extent, WindowStyle style)
+    WindowImpl::WindowImpl(std::string title, const math::ExtentU& extent, WindowStyle style)
         : WindowImpl {} {
         create(std::move(title), extent, style);
     }
@@ -337,7 +337,7 @@ namespace stormkit::wsi::linux::wayland {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto WindowImpl::create(std::string title, const core::math::ExtentU& extent, WindowStyle style)
+    auto WindowImpl::create(std::string title, const math::ExtentU& extent, WindowStyle style)
         -> void {
         m_title  = title;
         m_extent = extent;
@@ -473,7 +473,7 @@ namespace stormkit::wsi::linux::wayland {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto WindowImpl::setExtent([[maybe_unused]] const core::math::ExtentU& extent) noexcept
+    auto WindowImpl::setExtent([[maybe_unused]] const math::ExtentU& extent) noexcept
         -> void {
     }
 
@@ -581,7 +581,7 @@ namespace stormkit::wsi::linux::wayland {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto WindowImpl::setMousePosition(const core::math::Vector2I& position) noexcept -> void {
+    auto WindowImpl::setMousePosition(const math::Vector2I& position) noexcept -> void {
         if (!m_open) return;
         if (m_mouse_locked) {
             zwp_locked_pointer_v1_set_cursor_position_hint(m_locked_pointer.get(),
@@ -594,7 +594,7 @@ namespace stormkit::wsi::linux::wayland {
     /////////////////////////////////////
     /////////////////////////////////////
     auto WindowImpl::setMousePositionOnDesktop(
-        [[maybe_unused]] const core::math::Vector2U& position) noexcept -> void {
+        [[maybe_unused]] const math::Vector2U& position) noexcept -> void {
         elog("wayland::WindowImpl::setMousePositionOnDesktop isn't yet implemented");
     }
 
@@ -604,7 +604,7 @@ namespace stormkit::wsi::linux::wayland {
         if (!globals.display) init();
 
         auto output =
-            core::transform(globals.monitors, [](const auto& pair) { return pair.second; });
+            transform(globals.monitors, [](const auto& pair) { return pair.second; });
 
         return output;
     }
@@ -641,7 +641,7 @@ namespace stormkit::wsi::linux::wayland {
         m_visible = width > 0 && height > 0;
 
         auto data = static_cast<xdg_toplevel_state*>(state->data);
-        for (auto i : core::range(state->size)) {
+        for (auto i : range(state->size)) {
             const auto state = data[i];
 
             switch (state) {
@@ -809,7 +809,7 @@ namespace stormkit::wsi::linux::wayland {
         WindowImplBase::gainedFocusEvent();
 
         auto data = static_cast<std::uint32_t*>(keys->data);
-        for (auto i : core::range(keys->size)) {
+        for (auto i : range(keys->size)) {
             const auto keycode = data[i] + 8;
 
             auto character = char {};
@@ -915,7 +915,7 @@ namespace stormkit::wsi::linux::wayland {
         xdg_toplevel_set_title(m_xdg_toplevel.get(), m_title.c_str());
         xdg_toplevel_set_app_id(m_xdg_toplevel.get(), m_title.c_str());
 
-        if (!core::checkFlag(m_style, WindowStyle::Resizable)) {
+        if (!checkFlag(m_style, WindowStyle::Resizable)) {
             xdg_toplevel_set_min_size(m_xdg_toplevel.get(), m_extent.width, m_extent.height);
             xdg_toplevel_set_max_size(m_xdg_toplevel.get(), m_extent.width, m_extent.height);
         } else {
@@ -924,7 +924,7 @@ namespace stormkit::wsi::linux::wayland {
                 for (const auto& monitor : monitors)
                     if (monitor.flags == Monitor::Flags::Primary) return monitor.extents[0];
 
-                return core::math::ExtentU { 1, 1 };
+                return math::ExtentU { 1, 1 };
             }();
 
             xdg_toplevel_set_min_size(m_xdg_toplevel.get(), 1, 1);
@@ -1044,9 +1044,9 @@ namespace stormkit::wsi::linux::wayland {
     /////////////////////////////////////
     auto registryHandler(void*        data,
                          wl_registry* registry,
-                         core::UInt32 id,
+                         UInt32 id,
                          const char*  interface,
-                         core::UInt32 version) noexcept -> void {
+                         UInt32 version) noexcept -> void {
         auto& globals = *static_cast<Globals*>(data);
 
 #define BIND(n, t, v) n.reset(static_cast<t*>(wl_registry_bind(registry, id, &t##_interface, v)));
@@ -1085,7 +1085,7 @@ namespace stormkit::wsi::linux::wayland {
     /////////////////////////////////////
     auto registryRemoverHandler([[maybe_unused]] void*        data,
                                 [[maybe_unused]] wl_registry* registry,
-                                core::UInt32                  id) noexcept -> void {
+                                UInt32                  id) noexcept -> void {
         dlog("Wayland registry lost {}", id);
     }
 
@@ -1093,14 +1093,14 @@ namespace stormkit::wsi::linux::wayland {
     /////////////////////////////////////
     auto outputGeometryHandler(void*                        data,
                                [[maybe_unused]] wl_output*  output,
-                               [[maybe_unused]] core::Int32 x,
-                               [[maybe_unused]] core::Int32 y,
-                               [[maybe_unused]] core::Int32 pwidth,
-                               [[maybe_unused]] core::Int32 pheight,
-                               [[maybe_unused]] core::Int32 subpixels,
+                               [[maybe_unused]] Int32 x,
+                               [[maybe_unused]] Int32 y,
+                               [[maybe_unused]] Int32 pwidth,
+                               [[maybe_unused]] Int32 pheight,
+                               [[maybe_unused]] Int32 subpixels,
                                const char*                  make,
                                const char*                  model,
-                               [[maybe_unused]] core::Int32 transform) noexcept -> void {
+                               [[maybe_unused]] Int32 transform) noexcept -> void {
         auto& globals = *static_cast<Globals*>(data);
         auto& monitor = globals.monitors[output];
 
@@ -1115,14 +1115,14 @@ namespace stormkit::wsi::linux::wayland {
     /////////////////////////////////////
     auto outputModeHandler(void*                         data,
                            [[maybe_unused]] wl_output*   wl_output,
-                           [[maybe_unused]] core::UInt32 flags,
-                           core::Int32                   width,
-                           core::Int32                   height,
-                           [[maybe_unused]] core::Int32  refresh) noexcept -> void {
+                           [[maybe_unused]] UInt32 flags,
+                           Int32                   width,
+                           Int32                   height,
+                           [[maybe_unused]] Int32  refresh) noexcept -> void {
         auto& globals = *static_cast<Globals*>(data);
         auto& monitor = globals.monitors[wl_output];
 
-        monitor.extents.emplace_back(core::as<core::UInt32>(width), core::as<core::UInt32>(height));
+        monitor.extents.emplace_back(as<UInt32>(width), as<UInt32>(height));
     }
 
     /////////////////////////////////////
@@ -1135,7 +1135,7 @@ namespace stormkit::wsi::linux::wayland {
     /////////////////////////////////////
     auto outputScaleHandler([[maybe_unused]] void*       data,
                             [[maybe_unused]] wl_output*  wl_output,
-                            [[maybe_unused]] core::Int32 factor) noexcept -> void {
+                            [[maybe_unused]] Int32 factor) noexcept -> void {
     }
 
     /////////////////////////////////////
@@ -1156,8 +1156,8 @@ namespace stormkit::wsi::linux::wayland {
     /////////////////////////////////////
     auto toplevelConfigureHandler(void*         data,
                                   xdg_toplevel* xdg_tl,
-                                  core::Int32   width,
-                                  core::Int32   height,
+                                  Int32   width,
+                                  Int32   height,
                                   wl_array*     states) noexcept -> void {
         auto* window = static_cast<WindowImpl*>(data);
         window->toplevelConfigure(xdg_tl, width, height, states);
@@ -1172,7 +1172,7 @@ namespace stormkit::wsi::linux::wayland {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto surfaceConfigureHandler(void* data, xdg_surface* surface, core::UInt32 serial) noexcept
+    auto surfaceConfigureHandler(void* data, xdg_surface* surface, UInt32 serial) noexcept
         -> void {
         auto window = static_cast<WindowImpl*>(data);
         window->surfaceConfigure(surface, serial);
@@ -1182,7 +1182,7 @@ namespace stormkit::wsi::linux::wayland {
     /////////////////////////////////////
     auto shellPingHandler([[maybe_unused]] void* data,
                           xdg_wm_base*           xdg_shell,
-                          core::UInt32           serial) noexcept -> void {
+                          UInt32           serial) noexcept -> void {
         ilog("Ping received from shell");
 
         xdg_wm_base_pong(xdg_shell, serial);
@@ -1190,9 +1190,9 @@ namespace stormkit::wsi::linux::wayland {
 
     auto shellSurfaceConfigureHandler(void*             data,
                                       wl_shell_surface* shell_surface,
-                                      core::UInt32      edges,
-                                      core::Int32       width,
-                                      core::Int32       height) noexcept -> void {
+                                      UInt32      edges,
+                                      Int32       width,
+                                      Int32       height) noexcept -> void {
         auto* window = static_cast<WindowImpl*>(data);
         window->shellSurfaceConfigure(shell_surface, edges, width, height);
     }
@@ -1201,7 +1201,7 @@ namespace stormkit::wsi::linux::wayland {
     /////////////////////////////////////
     auto shellPingHandler([[maybe_unused]] void* data,
                           wl_shell_surface*      shell_surface,
-                          core::UInt32           serial) noexcept -> void {
+                          UInt32           serial) noexcept -> void {
         ilog("Ping received from shell");
 
         wl_shell_surface_pong(shell_surface, serial);
@@ -1211,7 +1211,7 @@ namespace stormkit::wsi::linux::wayland {
     /////////////////////////////////////
     auto seatCapabilitiesHandler(void*                     data,
                                  [[maybe_unused]] wl_seat* seat,
-                                 core::UInt32              capabilities) noexcept -> void {
+                                 UInt32              capabilities) noexcept -> void {
         auto& globals = *static_cast<Globals*>(data);
 
         if ((capabilities & WL_SEAT_CAPABILITY_KEYBOARD) > 0) {
@@ -1243,7 +1243,7 @@ namespace stormkit::wsi::linux::wayland {
     /////////////////////////////////////
     auto pointerEnterHandler(void*        data,
                              wl_pointer*  pointer,
-                             core::UInt32 serial,
+                             UInt32 serial,
                              wl_surface*  surface,
                              wl_fixed_t   surface_x,
                              wl_fixed_t   surface_y) noexcept -> void {
@@ -1257,7 +1257,7 @@ namespace stormkit::wsi::linux::wayland {
     /////////////////////////////////////
     auto pointerLeaveHandler(void*        data,
                              wl_pointer*  pointer,
-                             core::UInt32 serial,
+                             UInt32 serial,
                              wl_surface*  surface) noexcept -> void {
         if (data == nullptr) return;
 
@@ -1269,7 +1269,7 @@ namespace stormkit::wsi::linux::wayland {
     /////////////////////////////////////
     auto pointerMotionHandler(void*        data,
                               wl_pointer*  pointer,
-                              core::UInt32 time,
+                              UInt32 time,
                               wl_fixed_t   surface_x,
                               wl_fixed_t   surface_y) noexcept -> void {
         if (data == nullptr) return;
@@ -1282,10 +1282,10 @@ namespace stormkit::wsi::linux::wayland {
     /////////////////////////////////////
     auto pointerButtonHandler(void*        data,
                               wl_pointer*  pointer,
-                              core::UInt32 serial,
-                              core::UInt32 time,
-                              core::UInt32 button,
-                              core::UInt32 state) noexcept -> void {
+                              UInt32 serial,
+                              UInt32 time,
+                              UInt32 button,
+                              UInt32 state) noexcept -> void {
         if (data == nullptr) return;
 
         auto* window = static_cast<WindowImpl*>(data);
@@ -1296,8 +1296,8 @@ namespace stormkit::wsi::linux::wayland {
     /////////////////////////////////////
     auto pointerAxisHandler([[maybe_unused]] void*        data,
                             [[maybe_unused]] wl_pointer*  pointer,
-                            [[maybe_unused]] core::UInt32 time,
-                            [[maybe_unused]] core::UInt32 axis,
+                            [[maybe_unused]] UInt32 time,
+                            [[maybe_unused]] UInt32 axis,
                             [[maybe_unused]] wl_fixed_t   value) noexcept -> void {
     }
 
@@ -1311,32 +1311,32 @@ namespace stormkit::wsi::linux::wayland {
     /////////////////////////////////////
     auto pointerAxisSourceHandler([[maybe_unused]] void*        data,
                                   [[maybe_unused]] wl_pointer*  pointer,
-                                  [[maybe_unused]] core::UInt32 axis_source) noexcept -> void {
+                                  [[maybe_unused]] UInt32 axis_source) noexcept -> void {
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     auto pointerAxisStopHandler([[maybe_unused]] void*        data,
                                 [[maybe_unused]] wl_pointer*  pointer,
-                                [[maybe_unused]] core::UInt32 time,
-                                [[maybe_unused]] core::UInt32 axis) noexcept -> void {
+                                [[maybe_unused]] UInt32 time,
+                                [[maybe_unused]] UInt32 axis) noexcept -> void {
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     auto pointerAxisDiscreteHandler([[maybe_unused]] void*        data,
                                     [[maybe_unused]] wl_pointer*  pointer,
-                                    [[maybe_unused]] core::UInt32 axis,
-                                    [[maybe_unused]] core::Int32  discrete) noexcept -> void {
+                                    [[maybe_unused]] UInt32 axis,
+                                    [[maybe_unused]] Int32  discrete) noexcept -> void {
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     auto keyboardKeymapHandler(void*        data,
                                wl_keyboard* keyboard,
-                               core::UInt32 format,
-                               core::Int32  fd,
-                               core::UInt32 size) noexcept -> void {
+                               UInt32 format,
+                               Int32  fd,
+                               UInt32 size) noexcept -> void {
         if (data == nullptr) return;
 
         auto* window = static_cast<WindowImpl*>(data);
@@ -1347,7 +1347,7 @@ namespace stormkit::wsi::linux::wayland {
     /////////////////////////////////////
     auto keyboardEnterHandler(void*        data,
                               wl_keyboard* keyboard,
-                              core::UInt32 serial,
+                              UInt32 serial,
                               wl_surface*  surface,
                               wl_array*    keys) noexcept -> void {
         if (data == nullptr) return;
@@ -1360,7 +1360,7 @@ namespace stormkit::wsi::linux::wayland {
     /////////////////////////////////////
     auto keyboardLeaveHandler(void*        data,
                               wl_keyboard* keyboard,
-                              core::UInt32 serial,
+                              UInt32 serial,
                               wl_surface*  surface) noexcept -> void {
         if (data == nullptr) return;
 
@@ -1372,10 +1372,10 @@ namespace stormkit::wsi::linux::wayland {
     /////////////////////////////////////
     auto keyboardKeyHandler(void*        data,
                             wl_keyboard* keyboard,
-                            core::UInt32 serial,
-                            core::UInt32 time,
-                            core::UInt32 key,
-                            core::UInt32 state) noexcept -> void {
+                            UInt32 serial,
+                            UInt32 time,
+                            UInt32 key,
+                            UInt32 state) noexcept -> void {
         if (data == nullptr) return;
 
         auto* window = static_cast<WindowImpl*>(data);
@@ -1386,11 +1386,11 @@ namespace stormkit::wsi::linux::wayland {
     /////////////////////////////////////
     auto keyboardModifiersHandler(void*        data,
                                   wl_keyboard* keyboard,
-                                  core::UInt32 serial,
-                                  core::UInt32 mods_depressed,
-                                  core::UInt32 mods_latcher,
-                                  core::UInt32 mods_locked,
-                                  core::UInt32 group) noexcept -> void {
+                                  UInt32 serial,
+                                  UInt32 mods_depressed,
+                                  UInt32 mods_latcher,
+                                  UInt32 mods_locked,
+                                  UInt32 group) noexcept -> void {
         if (data == nullptr) return;
 
         auto* window = static_cast<WindowImpl*>(data);
@@ -1402,8 +1402,8 @@ namespace stormkit::wsi::linux::wayland {
     /////////////////////////////////////
     auto keyboardRepeatInfoHandler(void*        data,
                                    wl_keyboard* keyboard,
-                                   core::Int32  rate,
-                                   core::Int32  delay) noexcept -> void {
+                                   Int32  rate,
+                                   Int32  delay) noexcept -> void {
         if (data == nullptr) return;
 
         auto* window = static_cast<WindowImpl*>(data);
@@ -1414,8 +1414,8 @@ namespace stormkit::wsi::linux::wayland {
     /////////////////////////////////////
     auto relativePointerRelativeMotionHandler(void*                    data,
                                               zwp_relative_pointer_v1* pointer,
-                                              core::UInt32             time_hi,
-                                              core::UInt32             time_lw,
+                                              UInt32             time_hi,
+                                              UInt32             time_lw,
                                               wl_fixed_t               dx,
                                               wl_fixed_t               dy,
                                               wl_fixed_t               dx_unaccel,

@@ -19,7 +19,7 @@ import stormkit.Core;
 import stormkit.Image;
 
 export namespace stormkit::image::details {
-    [[nodiscard]] auto loadKTX(std::span<const core::Byte> data) noexcept
+    [[nodiscard]] auto loadKTX(std::span<const Byte> data) noexcept
         -> std::expected<image::Image, image::Image::Error>;
 
     [[nodiscard]] auto saveKTX(const image::Image&          image,
@@ -27,7 +27,7 @@ export namespace stormkit::image::details {
         -> std::expected<void, image::Image::Error>;
 
     [[nodiscard]] auto saveKTX(const image::Image& image) noexcept
-        -> std::expected<std::vector<core::Byte>, image::Image::Error>;
+        -> std::expected<std::vector<Byte>, image::Image::Error>;
 } // namespace stormkit::image::details
 
 namespace stormkit::image::details {
@@ -106,28 +106,28 @@ namespace stormkit::image::details {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto loadKTX(std::span<const core::Byte> data) noexcept
+    auto loadKTX(std::span<const Byte> data) noexcept
         -> std::expected<image::Image, image::Image::Error> {
         auto image = gli::load_ktx(reinterpret_cast<const char*>(std::data(data)), std::size(data));
 
-        const auto faces      = core::as<core::UInt32>(image.faces());
-        const auto layers     = core::as<core::UInt32>(image.layers());
-        const auto mip_levels = core::as<core::UInt32>(image.levels());
+        const auto faces      = as<UInt32>(image.faces());
+        const auto layers     = as<UInt32>(image.layers());
+        const auto mip_levels = as<UInt32>(image.levels());
         const auto format     = toStormFormat(image.format());
 
         if (format == Format::Undefined)
             return std::unexpected(Error { .reason    = Reason::Failed_To_Parse,
                                            .str_error = "Unsupported pixel format" });
 
-        auto image_memory = std::vector<core::Byte> {};
+        auto image_memory = std::vector<Byte> {};
         image_memory.resize(image.size());
 
-        std::ranges::copy(core::asByteView(image.data(), image.size()), std::begin(image_memory));
+        std::ranges::copy(asByteView(image.data(), image.size()), std::begin(image_memory));
 
         auto image_data = image::Image::ImageData {};
 
         image_data.extent =
-            core::math::ExtentI { image.extent().x, image.extent().y, image.extent().z };
+            math::ExtentI { image.extent().x, image.extent().y, image.extent().z };
         image_data.channel_count     = getChannelCountFor(format);
         image_data.bytes_per_channel = getSizeof(format);
         image_data.mip_levels        = mip_levels;
@@ -150,7 +150,7 @@ namespace stormkit::image::details {
         auto& output = *result;
 
         auto stream = std::ofstream { filepath, std::ios::binary };
-        core::write(stream, core::asByteView(output));
+        write(stream, asByteView(output));
 
         return {};
     }
@@ -158,7 +158,7 @@ namespace stormkit::image::details {
     /////////////////////////////////////
     /////////////////////////////////////
     auto saveKTX([[maybe_unused]] const image::Image& image) noexcept
-        -> std::expected<std::vector<core::Byte>, image::Image::Error> {
+        -> std::expected<std::vector<Byte>, image::Image::Error> {
         return std::unexpected(
             Error { .reason = Reason::Not_Implemented, .str_error = "save to file" });
     }

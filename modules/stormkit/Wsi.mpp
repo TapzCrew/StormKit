@@ -33,7 +33,7 @@ export {
 
         using NativeHandle = void*;
 
-        enum class Key : core::UInt8 {
+        enum class Key : UInt8 {
             A = 0,
             B,
             C,
@@ -137,21 +137,21 @@ export {
             F15,
             Pause,
             KeyCount,
-            Unknow = std::numeric_limits<core::Int8>::max(),
+            Unknow = std::numeric_limits<Int8>::max(),
         };
-        inline constexpr auto KEY_COUNT = core::as<core::Underlying>(Key::KeyCount);
+        inline constexpr auto KEY_COUNT = as<Underlying>(Key::KeyCount);
 
-        enum class MouseButton : core::UInt8 {
+        enum class MouseButton : UInt8 {
             Left,
             Right,
             Middle,
             Button1,
             Button2,
             ButtonCount,
-            Unknow = std::numeric_limits<core::Int8>::max(),
+            Unknow = std::numeric_limits<Int8>::max(),
         };
         inline constexpr auto MOUSE_BUTTON_COUNT =
-            core::as<core::Underlying>(MouseButton::ButtonCount);
+            as<Underlying>(MouseButton::ButtonCount);
 
         struct Monitor {
             enum class Flags {
@@ -162,7 +162,7 @@ export {
             Flags       flags = Flags::None;
             std::string name;
 
-            std::vector<core::math::ExtentU> extents;
+            std::vector<math::ExtentU> extents;
 
             void* handle = nullptr;
 
@@ -170,7 +170,7 @@ export {
                 operator<=>(const Monitor& other) const noexcept -> std::strong_ordering;
         };
 
-        enum class WindowStyle : core::UInt8 {
+        enum class WindowStyle : UInt8 {
             TitleBar    = 0b1,
             Close       = TitleBar | 0b10,
             Minimizable = TitleBar | 0b100,
@@ -178,7 +178,7 @@ export {
             All         = Resizable | Minimizable | Close
         };
 
-        enum class EventType : core::UInt8 {
+        enum class EventType : UInt8 {
             None,
             Closed,
             Resized,
@@ -205,7 +205,7 @@ export {
 
         struct ResizedEventData {
             static constexpr auto TYPE = EventType::Resized;
-            core::math::ExtentU   extent;
+            math::ExtentU   extent;
         };
 
         struct MinimizedEventData {
@@ -230,13 +230,13 @@ export {
 
         struct MouseButtonPushedEventData {
             static constexpr auto TYPE = EventType::MouseButtonPushed;
-            core::math::Vector2I  position;
+            math::Vector2I  position;
             MouseButton           button;
         };
 
         struct MouseButtonReleasedEventData {
             static constexpr auto TYPE = EventType::MouseButtonReleased;
-            core::math::Vector2I  position;
+            math::Vector2I  position;
             MouseButton           button;
         };
 
@@ -250,7 +250,7 @@ export {
 
         struct MouseMovedEventData {
             static constexpr auto TYPE = EventType::MouseMoved;
-            core::math::Vector2I  position;
+            math::Vector2I  position;
         };
 
         struct LostFocusEventData {
@@ -295,14 +295,14 @@ export {
         class STORMKIT_API Window {
           public:
             Window() noexcept;
-            Window(std::string title, const core::math::ExtentU& size, WindowStyle style) noexcept;
+            Window(std::string title, const math::ExtentU& size, WindowStyle style) noexcept;
             ~Window();
 
             Window(Window&&);
             auto operator=(Window&&) -> Window&;
 
             auto create(std::string                title,
-                        const core::math::ExtentU& size,
+                        const math::ExtentU& size,
                         WindowStyle                style) noexcept -> void;
             auto close() noexcept -> void;
 
@@ -313,13 +313,13 @@ export {
 
             auto setFullscreenEnabled(bool fullscreen) noexcept -> void;
 
-            auto setExtent(const core::math::ExtentU& extent) noexcept -> void;
+            auto setExtent(const math::ExtentU& extent) noexcept -> void;
 
             auto lockMouse() noexcept -> void;
             auto unlockMouse() noexcept -> void;
             auto hideMouse() noexcept -> void;
 
-            [[nodiscard]] auto extent() const noexcept -> const core::math::ExtentU&;
+            [[nodiscard]] auto extent() const noexcept -> const math::ExtentU&;
             [[nodiscard]] auto title() const noexcept -> const std::string&;
 
             [[nodiscard]] auto isOpen() const noexcept -> bool;
@@ -335,9 +335,9 @@ export {
 
             auto setVirtualKeyboardVisible(bool visible) noexcept -> void;
 
-            auto setMousePosition(const core::math::Vector2I& position) noexcept -> void;
+            auto setMousePosition(const math::Vector2I& position) noexcept -> void;
             static auto
-                setMousePositionOnDesktop(const core::math::Vector2U& position) noexcept -> void;
+                setMousePositionOnDesktop(const math::Vector2U& position) noexcept -> void;
 
             [[nodiscard]] static auto getMonitorSettings() -> std::vector<Monitor>;
             [[nodiscard]] static auto getPrimaryMonitorSettings() -> Monitor;
@@ -345,7 +345,7 @@ export {
             [[nodiscard]] static auto wm() noexcept -> WM;
 
           private:
-            using WindowImplPimpl = core::Pimpl<WindowImpl>;
+            using WindowImplPimpl = Pimpl<WindowImpl>;
             WindowImplPimpl m_impl;
         };
 
@@ -361,7 +361,7 @@ export {
             auto clearCallbacks(EventType event_type) -> void;
 
           private:
-            core::HashMap<EventType, std::vector<Callback>> m_callback;
+            HashMap<EventType, std::vector<Callback>> m_callback;
         };
     } // namespace stormkit::wsi
 
@@ -598,7 +598,7 @@ namespace stormkit::wsi {
 
         if (auto ret = std::size(extents) <=> std::size(other.extents); ret != 0) return ret;
 
-        for (auto i : core::range(std::size(extents))) {
+        for (auto i : range(std::size(extents))) {
             if (auto ret = extents[i].width <=> other.extents[i].width; ret != 0) return ret;
             if (auto ret = extents[i].height <=> other.extents[i].height; ret != 0) return ret;
         }

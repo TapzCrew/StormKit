@@ -34,9 +34,9 @@ namespace stormkit::gpu {
                          vk::ValidationFeatureEnableEXT::eGpuAssisted };
 
         constexpr auto STORMKIT_VK_VERSION =
-            vkMakeVersion<core::Int32>(core::STORMKIT_MAJOR_VERSION,
-                                       core::STORMKIT_MINOR_VERSION,
-                                       core::STORMKIT_PATCH_VERSION);
+            vkMakeVersion<Int32>(STORMKIT_MAJOR_VERSION,
+                                       STORMKIT_MINOR_VERSION,
+                                       STORMKIT_PATCH_VERSION);
 
         constexpr auto BASE_EXTENSIONS = std::array { "VK_KHR_get_physical_device_properties2" };
 
@@ -112,7 +112,7 @@ namespace stormkit::gpu {
         auto checkExtensionSupport(std::span<const std::string>      supported_extensions,
                                    std::span<const std::string_view> extensions) noexcept -> bool {
             auto required_extensions =
-                core::HashSet<std::string_view> { std::ranges::begin(extensions),
+                HashSet<std::string_view> { std::ranges::begin(extensions),
                                                   std::ranges::end(extensions) };
 
             for (const auto& extension : supported_extensions) required_extensions.erase(extension);
@@ -123,7 +123,7 @@ namespace stormkit::gpu {
         /////////////////////////////////////
         /////////////////////////////////////
         auto checkExtensionSupport(std::span<const std::string>    supported_extensions,
-                                   std::span<const core::CZString> extensions) noexcept -> bool {
+                                   std::span<const CZString> extensions) noexcept -> bool {
             const auto ext = extensions | std::views::transform([](const auto& extension) noexcept {
                                  return std::string_view { extension };
                              }) |
@@ -148,7 +148,7 @@ namespace stormkit::gpu {
         dlog("Instance extensions: {}", m_extensions);
 
         const auto validation_layers = [this]() noexcept {
-            auto output = std::vector<core::CZString> {};
+            auto output = std::vector<CZString> {};
             m_validation_layers_enabled =
                 checkValidationLayerSupport(m_vk_context, m_validation_layers_enabled);
             if (m_validation_layers_enabled) {
@@ -161,15 +161,15 @@ namespace stormkit::gpu {
         }();
 
         const auto instance_extensions = [this]() noexcept {
-            auto e = core::concat(BASE_EXTENSIONS, SURFACE_EXTENSIONS, WSI_SURFACE_EXTENSIONS);
+            auto e = concat(BASE_EXTENSIONS, SURFACE_EXTENSIONS, WSI_SURFACE_EXTENSIONS);
 
-            if (m_validation_layers_enabled) core::merge(e, std::array { "VK_EXT_debug_utils" });
+            if (m_validation_layers_enabled) merge(e, std::array { "VK_EXT_debug_utils" });
 
             return e;
         }();
 
-        core::ensures(checkExtensionSupport(m_extensions, instance_extensions));
-        core::ensures(checkExtensionSupport(m_extensions, WSI_SURFACE_EXTENSIONS));
+        ensures(checkExtensionSupport(m_extensions, instance_extensions));
+        ensures(checkExtensionSupport(m_extensions, WSI_SURFACE_EXTENSIONS));
 
         constexpr auto ENGINE_NAME = "StormKit";
 
@@ -177,7 +177,7 @@ namespace stormkit::gpu {
                                   .setPApplicationName(std::data(m_app_name))
                                   .setPEngineName(ENGINE_NAME)
                                   .setEngineVersion(STORMKIT_VK_VERSION)
-                                  .setApiVersion(vkMakeVersion<core::Int32>(1, 0, 0));
+                                  .setApiVersion(vkMakeVersion<Int32>(1, 0, 0));
 
         const auto create_info = vk::InstanceCreateInfo {}
                                      .setPApplicationInfo(&app_info)
@@ -186,7 +186,7 @@ namespace stormkit::gpu {
 
         return m_vk_context->createInstance(create_info)
             .transform(core::monadic::set(m_vk_instance))
-            .and_then(core::curry(&Instance::doInitDebugReportCallback, this))
+            .and_then(curry(&Instance::doInitDebugReportCallback, this))
             .transform(
                 [this]() noexcept { VULKAN_HPP_DEFAULT_DISPATCHER.init(*m_vk_instance.get()); });
     }

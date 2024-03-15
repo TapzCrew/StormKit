@@ -17,10 +17,10 @@ import vulkan_hpp;
 
 export namespace stormkit::gpu {
     template<std::integral T>
-    constexpr auto vkMakeVersion(T major, T minor, T patch) noexcept -> core::UInt32;
-    constexpr auto vkVersionMajor(std::integral auto version) noexcept -> core::UInt32;
-    constexpr auto vkVersionMinor(std::integral auto version) noexcept -> core::UInt32;
-    constexpr auto vkVersionPatch(std::integral auto version) noexcept -> core::UInt32;
+    constexpr auto vkMakeVersion(T major, T minor, T patch) noexcept -> UInt32;
+    constexpr auto vkVersionMajor(std::integral auto version) noexcept -> UInt32;
+    constexpr auto vkVersionMinor(std::integral auto version) noexcept -> UInt32;
+    constexpr auto vkVersionPatch(std::integral auto version) noexcept -> UInt32;
 
     template<class T>
     concept IsStormKitVulkanType = requires(T&& t) { t.vkHandle(); };
@@ -28,11 +28,11 @@ export namespace stormkit::gpu {
     // clang-format off
     template<class T>
     concept IsStormKitVulkanWrappedType =
-        (core::IsFancyPointer<core::PureType<T>> 
-           and IsStormKitVulkanType<typename core::PureType<T>::element_type>)
-         or (core::IsRawIndirection<T> 
-               and not core::IsRValueReference<T> 
-               and IsStormKitVulkanType<core::RawType<T>>);
+        (IsFancyPointer<PureType<T>> 
+           and IsStormKitVulkanType<typename PureType<T>::element_type>)
+         or (IsRawIndirection<T> 
+               and not IsRValueReference<T> 
+               and IsStormKitVulkanType<RawType<T>>);
     // clang-format on
 
     template<class T>
@@ -48,12 +48,12 @@ export namespace stormkit::gpu {
     using VulkanExpected = std::expected<T, vk::Result>;
 
     template<typename T, typename Func, typename... Args>
-        requires(core::Is<std::invoke_result_t<Func, T*, Args...>, vk::Result>)
+        requires(Is<std::invoke_result_t<Func, T*, Args...>, vk::Result>)
     auto
         vkCall(const T& object, Func&& func, Args&&... args) noexcept -> VulkanExpected<vk::Result>;
 
     template<typename T, typename Func, typename... Args>
-        requires(core::Is<std::invoke_result_t<Func, T*, Args...>, vk::Result>)
+        requires(Is<std::invoke_result_t<Func, T*, Args...>, vk::Result>)
     auto vkCall(const T&                    object,
                 Func&&                      func,
                 std::span<const vk::Result> possible_results,
@@ -80,29 +80,29 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     template<std::integral T>
     STORMKIT_FORCE_INLINE constexpr auto
-        vkMakeVersion(T major, T minor, T patch) noexcept -> core::UInt32 {
+        vkMakeVersion(T major, T minor, T patch) noexcept -> UInt32 {
         return vkVersionMajor(major) | vkVersionMinor(minor) | vkVersionPatch(patch);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE constexpr auto
-        vkVersionMajor(std::integral auto version) noexcept -> core::UInt32 {
-        return core::as<core::UInt32>(version >> 22u);
+        vkVersionMajor(std::integral auto version) noexcept -> UInt32 {
+        return as<UInt32>(version >> 22u);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE constexpr auto
-        vkVersionMinor(std::integral auto version) noexcept -> core::UInt32 {
-        return core::as<core::UInt32>((version >> 12u) & 0x3ffu);
+        vkVersionMinor(std::integral auto version) noexcept -> UInt32 {
+        return as<UInt32>((version >> 12u) & 0x3ffu);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE constexpr auto
-        vkVersionPatch(std::integral auto version) noexcept -> core::UInt32 {
-        return core::as<core::UInt32>(version & 0xfffu);
+        vkVersionPatch(std::integral auto version) noexcept -> UInt32 {
+        return as<UInt32>(version & 0xfffu);
     }
 
     /////////////////////////////////////
@@ -123,7 +123,7 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     template<typename T, typename Func, typename... Args>
-        requires(core::Is<std::invoke_result_t<Func, T*, Args...>, vk::Result>)
+        requires(Is<std::invoke_result_t<Func, T*, Args...>, vk::Result>)
     STORMKIT_FORCE_INLINE auto vkCall(const T& value,
                                       Func&&   func_ref,
                                       Args&&... args) noexcept -> VulkanExpected<vk::Result> {
@@ -136,7 +136,7 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     template<typename T, typename Func, typename... Args>
-        requires(core::Is<std::invoke_result_t<Func, T*, Args...>, vk::Result>)
+        requires(Is<std::invoke_result_t<Func, T*, Args...>, vk::Result>)
     STORMKIT_FORCE_INLINE auto vkCall(const T&                    value,
                                       Func&&                      func_ref,
                                       std::span<const vk::Result> possible_results,
@@ -154,7 +154,7 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     template<IsStormKitVulkanWrappedType T>
     STORMKIT_FORCE_INLINE auto toRaiiVkHandle(T&& value) noexcept -> decltype(auto) {
-        if constexpr (core::IsPointer<core::PureType<T>>) return std::forward<T>(value)->vkHandle();
+        if constexpr (IsPointer<PureType<T>>) return std::forward<T>(value)->vkHandle();
         else
             return std::forward<T>(value).vkHandle();
     }

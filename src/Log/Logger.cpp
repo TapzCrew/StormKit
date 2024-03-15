@@ -23,7 +23,7 @@ namespace stormkit::log {
     /////////////////////////////////////
     Logger::Logger(LogClock::time_point start_time) noexcept
         : Logger { std::move(start_time), DEFAULT_SEVERITY } {
-        core::expects(not logger);
+        expects(not logger);
 
         logger = this;
     }
@@ -51,7 +51,7 @@ namespace stormkit::log {
     /////////////////////////////////////
     /////////////////////////////////////
     auto Logger::instance() noexcept -> Logger& {
-        core::expects(logger);
+        expects(logger);
 
         return *logger;
     }

@@ -19,10 +19,10 @@ export namespace stormkit::wsi::common {
         [[nodiscard]] auto pollEvent(Event& event) noexcept -> bool;
         [[nodiscard]] auto waitEvent(Event& event) noexcept -> bool;
 
-        auto mouseDownEvent(MouseButton button, core::Int32 x, core::Int32 y) noexcept -> void;
-        auto mouseUpEvent(MouseButton button, core::Int32 x, core::Int32 y) noexcept -> void;
+        auto mouseDownEvent(MouseButton button, Int32 x, Int32 y) noexcept -> void;
+        auto mouseUpEvent(MouseButton button, Int32 x, Int32 y) noexcept -> void;
 
-        auto mouseMoveEvent(core::Int32 x, core::Int32 y) noexcept -> void;
+        auto mouseMoveEvent(Int32 x, Int32 y) noexcept -> void;
 
         auto mouseEnteredEvent() noexcept -> void;
         auto mouseExitedEvent() noexcept -> void;
@@ -32,7 +32,7 @@ export namespace stormkit::wsi::common {
 
         auto closeEvent() noexcept -> void;
 
-        auto resizeEvent(core::UInt32 width, core::UInt32 height) noexcept -> void;
+        auto resizeEvent(UInt32 width, UInt32 height) noexcept -> void;
         auto minimizeEvent() noexcept -> void;
         auto maximizeEvent() noexcept -> void;
 
@@ -80,8 +80,8 @@ namespace stormkit::wsi::common {
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_INLINE auto WindowImplBase::mouseDownEvent(MouseButton button,
-                                                        core::Int32 x,
-                                                        core::Int32 y) noexcept -> void {
+                                                        Int32 x,
+                                                        Int32 y) noexcept -> void {
         auto event = Event {};
         event.type = EventType::MouseButtonPushed;
         event.data = MouseButtonPushedEventData { .position = { x, y }, .button = button };
@@ -92,8 +92,8 @@ namespace stormkit::wsi::common {
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_INLINE auto WindowImplBase::mouseUpEvent(MouseButton button,
-                                                      core::Int32 x,
-                                                      core::Int32 y) noexcept -> void {
+                                                      Int32 x,
+                                                      Int32 y) noexcept -> void {
         auto event = Event {};
         event.type = EventType::MouseButtonReleased;
         event.data = MouseButtonReleasedEventData { .position = { x, y }, .button = button };
@@ -103,7 +103,7 @@ namespace stormkit::wsi::common {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_INLINE auto WindowImplBase::mouseMoveEvent(core::Int32 x, core::Int32 y) noexcept
+    STORMKIT_INLINE auto WindowImplBase::mouseMoveEvent(Int32 x, Int32 y) noexcept
         -> void {
         auto event = Event {};
         event.type = EventType::MouseMoved;
@@ -164,8 +164,8 @@ namespace stormkit::wsi::common {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_INLINE auto WindowImplBase::resizeEvent(core::UInt32 width,
-                                                     core::UInt32 height) noexcept -> void {
+    STORMKIT_INLINE auto WindowImplBase::resizeEvent(UInt32 width,
+                                                     UInt32 height) noexcept -> void {
         auto event = Event {};
         event.type = EventType::Resized;
         event.data = ResizedEventData { .extent { width, height } };

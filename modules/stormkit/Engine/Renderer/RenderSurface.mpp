@@ -20,12 +20,12 @@ export namespace stormkit::engine {
 
       public:
         struct Frame {
-            core::UInt32 current_frame;
-            core::UInt32 image_index;
+            UInt32 current_frame;
+            UInt32 image_index;
 
-            core::NakedRef<const gpu::Semaphore> image_available;
-            core::NakedRef<const gpu::Semaphore> render_finished;
-            core::NakedRef<const gpu::Fence>     in_flight;
+            NakedRef<const gpu::Semaphore> image_available;
+            NakedRef<const gpu::Semaphore> render_finished;
+            NakedRef<const gpu::Fence>     in_flight;
         };
 
         RenderSurface(const gpu::Instance& instance,
@@ -56,16 +56,16 @@ export namespace stormkit::engine {
         [[nodiscard]] auto presentFrame(const gpu::Queue& queue,
                                         const Frame&      frame) -> gpu::Expected<void>;
 
-        [[nodiscard]] auto bufferingCount() const noexcept -> core::UInt32;
+        [[nodiscard]] auto bufferingCount() const noexcept -> UInt32;
 
         [[nodiscard]] auto images() const noexcept -> const std::vector<gpu::SwapchainImage>&;
 
       private:
-        core::DeferInit<gpu::Surface>   m_surface;
-        core::DeferInit<gpu::Swapchain> m_swapchain;
+        DeferInit<gpu::Surface>   m_surface;
+        DeferInit<gpu::Swapchain> m_swapchain;
         std::optional<gpu::Swapchain>   m_old_swapchain;
 
-        core::RangeExtent           m_current_frame = 0;
+        RangeExtent           m_current_frame = 0;
         std::vector<gpu::Semaphore> m_image_availables;
         std::vector<gpu::Semaphore> m_render_finisheds;
         std::vector<gpu::Fence>     m_in_flight_fences;
@@ -115,8 +115,8 @@ namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE
-    auto RenderSurface::bufferingCount() const noexcept -> core::UInt32 {
-        return core::narrow<core::UInt32>(std::size(images()));
+    auto RenderSurface::bufferingCount() const noexcept -> UInt32 {
+        return narrow<UInt32>(std::size(images()));
     }
 
     /////////////////////////////////////

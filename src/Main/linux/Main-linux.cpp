@@ -12,7 +12,7 @@ extern auto userMain(std::span<const std::string_view>) -> int;
 auto main(int argc, char** argv) -> int {
     auto args = std::vector<std::string_view> {};
 
-    for (auto i : stormkit::core::range(argc)) args.emplace_back(argv[i]);
+    for (auto i : stormkit::range(argc)) args.emplace_back(argv[i]);
 
     return userMain(args);
 }

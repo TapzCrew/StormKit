@@ -57,7 +57,7 @@ export namespace stormkit::wsi::linux::x11 {
         };
 
         WindowImpl();
-        WindowImpl(std::string title, const core::math::ExtentU& size, WindowStyle style);
+        WindowImpl(std::string title, const math::ExtentU& size, WindowStyle style);
         ~WindowImpl();
 
         WindowImpl(const WindowImpl&) noexcept                    = delete;
@@ -66,14 +66,14 @@ export namespace stormkit::wsi::linux::x11 {
         WindowImpl(WindowImpl&&) noexcept;
         auto operator=(WindowImpl&&) noexcept -> WindowImpl&;
 
-        auto create(std::string title, const core::math::ExtentU& size, WindowStyle style) -> void;
+        auto create(std::string title, const math::ExtentU& size, WindowStyle style) -> void;
         auto close() noexcept -> void;
 
         [[nodiscard]] auto pollEvent(Event& event) noexcept -> bool;
         [[nodiscard]] auto waitEvent(Event& event) noexcept -> bool;
 
         auto setTitle(std::string title) noexcept -> void;
-        auto setExtent(const core::math::ExtentU& size) noexcept -> void;
+        auto setExtent(const math::ExtentU& size) noexcept -> void;
         auto setFullscreenEnabled(bool enabled) noexcept -> void;
 
         auto lockMouse() noexcept -> void;
@@ -82,7 +82,7 @@ export namespace stormkit::wsi::linux::x11 {
         auto hideMouse() noexcept -> void;
         auto unhideMouse() noexcept -> void;
 
-        [[nodiscard]] auto extent() const noexcept -> const core::math::ExtentU&;
+        [[nodiscard]] auto extent() const noexcept -> const math::ExtentU&;
         [[nodiscard]] auto title() const noexcept -> const std::string&;
 
         [[nodiscard]] auto isOpen() const noexcept -> bool;
@@ -100,8 +100,8 @@ export namespace stormkit::wsi::linux::x11 {
 
         auto setVirtualKeyboardVisible(bool visible) noexcept -> void;
 
-        auto        setMousePosition(const core::math::Vector2I& position) noexcept -> void;
-        static auto setMousePositionOnDesktop(const core::math::Vector2U& position) noexcept
+        auto        setMousePosition(const math::Vector2I& position) noexcept -> void;
+        static auto setMousePositionOnDesktop(const math::Vector2U& position) noexcept
             -> void;
 
         [[nodiscard]] static auto getMonitorSettings() -> std::vector<Monitor>;
@@ -135,7 +135,7 @@ export namespace stormkit::wsi::linux::x11 {
         bool        m_mouse_hided  = false;
         bool        m_fullscreen   = false;
 
-        core::math::ExtentU m_extent;
+        math::ExtentU m_extent;
 
         int m_xi_opcode;
 
@@ -145,8 +145,8 @@ export namespace stormkit::wsi::linux::x11 {
 
         Handles m_handles;
 
-        core::math::Vector2I         m_locked_mouse_position;
-        mutable core::math::Vector2I m_mouse_position;
+        math::Vector2I         m_locked_mouse_position;
+        mutable math::Vector2I m_mouse_position;
     };
 } // namespace stormkit::wsi::linux::x11
 
@@ -158,7 +158,7 @@ namespace stormkit::wsi::linux::x11 {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_INLINE auto WindowImpl::setExtent(const core::math::ExtentU& extent) noexcept -> void {
+    STORMKIT_INLINE auto WindowImpl::setExtent(const math::ExtentU& extent) noexcept -> void {
         m_extent = extent;
     }
 
@@ -206,7 +206,7 @@ namespace stormkit::wsi::linux::x11 {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_INLINE auto WindowImpl::extent() const noexcept -> const core::math::ExtentU& {
+    STORMKIT_INLINE auto WindowImpl::extent() const noexcept -> const math::ExtentU& {
         return m_extent;
     }
 
@@ -230,16 +230,16 @@ namespace stormkit::wsi::linux::x11 {
         constexpr auto _NET_WM_STATE_TOGGLE = 2; // toggle property
 
         constexpr auto MOUSE_RAW_EVENTS =
-            core::UInt32 { XCB_INPUT_XI_EVENT_MASK_RAW_BUTTON_PRESS |
+            UInt32 { XCB_INPUT_XI_EVENT_MASK_RAW_BUTTON_PRESS |
                            XCB_INPUT_XI_EVENT_MASK_RAW_BUTTON_RELEASE |
                            XCB_INPUT_XI_EVENT_MASK_RAW_MOTION };
         constexpr auto KEYBOARD_RAW_EVENTS =
-            core::UInt32 { XCB_INPUT_XI_EVENT_MASK_RAW_KEY_PRESS |
+            UInt32 { XCB_INPUT_XI_EVENT_MASK_RAW_KEY_PRESS |
                            XCB_INPUT_XI_EVENT_MASK_RAW_KEY_RELEASE };
-        constexpr auto KEYBOARD_EVENTS = core::UInt32 { XCB_INPUT_XI_EVENT_MASK_KEY_PRESS |
+        constexpr auto KEYBOARD_EVENTS = UInt32 { XCB_INPUT_XI_EVENT_MASK_KEY_PRESS |
                                                         XCB_INPUT_XI_EVENT_MASK_KEY_RELEASE };
 
-        constexpr auto XINPUT_MASK_MODIFIERS = core::UInt32 { XCB_INPUT_MODIFIER_MASK_ANY };
+        constexpr auto XINPUT_MASK_MODIFIERS = UInt32 { XCB_INPUT_MODIFIER_MASK_ANY };
     } // namespace
 
     auto isExtEvent(xcb_generic_event_t* event, int opcode) noexcept -> bool {
@@ -255,7 +255,7 @@ namespace stormkit::wsi::linux::x11 {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    WindowImpl::WindowImpl(std::string title, const core::math::ExtentU& extent, WindowStyle style)
+    WindowImpl::WindowImpl(std::string title, const math::ExtentU& extent, WindowStyle style)
         : WindowImpl {} {
         create(std::move(title), extent, style);
     }
@@ -276,7 +276,7 @@ namespace stormkit::wsi::linux::x11 {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto WindowImpl::create(std::string title, const core::math::ExtentU& extent, WindowStyle style)
+    auto WindowImpl::create(std::string title, const math::ExtentU& extent, WindowStyle style)
         -> void {
         static constexpr const auto EVENTS =
             XCB_EVENT_MASK_FOCUS_CHANGE | XCB_EVENT_MASK_BUTTON_PRESS |
@@ -289,7 +289,7 @@ namespace stormkit::wsi::linux::x11 {
         auto screen = xcb_setup_roots_iterator(xcb_get_setup(m_connection)).data;
         m_window.reset(xcb_generate_id(m_connection));
 
-        core::UInt32 value_list[] = { screen->white_pixel, screen->black_pixel, EVENTS };
+        UInt32 value_list[] = { screen->white_pixel, screen->black_pixel, EVENTS };
         auto         cookie =
             xcb_create_window_checked(m_connection,
                                       XCB_COPY_FROM_PARENT,
@@ -318,19 +318,19 @@ namespace stormkit::wsi::linux::x11 {
         m_key_symbols.reset(xcb_key_symbols_alloc(m_connection));
 
         auto xkb_ext_reply = xcb_get_extension_data(m_connection, &xcb_xkb_id);
-        core::ensures(xkb_ext_reply);
+        ensures(xkb_ext_reply);
         {
             STORMKIT_RAII_CAPSULE(Reply, xcb_xkb_use_extension_reply_t, std::free)
             auto cookie =
                 xcb_xkb_use_extension(m_connection, XCB_XKB_MAJOR_VERSION, XCB_XKB_MINOR_VERSION);
             auto reply = ReplyScoped { xcb_xkb_use_extension_reply(m_connection, cookie, nullptr) };
 
-            core::ensures(reply != nullptr);
-            core::ensures(reply->supported, "The XKB extension is not supported on this X server");
+            ensures(reply != nullptr);
+            ensures(reply->supported, "The XKB extension is not supported on this X server");
         }
 
         auto xfixes_ext_reply = xcb_get_extension_data(m_connection, &xcb_xfixes_id);
-        core::ensures(xfixes_ext_reply);
+        ensures(xfixes_ext_reply);
         {
             STORMKIT_RAII_CAPSULE(Reply, xcb_xfixes_query_version_reply_t, std::free)
 
@@ -338,11 +338,11 @@ namespace stormkit::wsi::linux::x11 {
             auto reply =
                 ReplyScoped { xcb_xfixes_query_version_reply(m_connection, cookie, nullptr) };
 
-            core::ensures(reply != nullptr);
+            ensures(reply != nullptr);
         }
 
         auto xcb_input_ext_reply = xcb_get_extension_data(m_connection, &xcb_input_id);
-        core::ensures(xcb_input_ext_reply);
+        ensures(xcb_input_ext_reply);
         {
             STORMKIT_RAII_CAPSULE(Reply, xcb_input_xi_query_version_reply_t, std::free)
 
@@ -350,7 +350,7 @@ namespace stormkit::wsi::linux::x11 {
             auto reply =
                 ReplyScoped { xcb_input_xi_query_version_reply(m_connection, cookie, nullptr) };
 
-            core::ensures(reply != nullptr);
+            ensures(reply != nullptr);
 
             m_xi_opcode = xcb_input_ext_reply->major_opcode;
         }
@@ -358,13 +358,13 @@ namespace stormkit::wsi::linux::x11 {
         updateKeymap();
 
         constexpr auto required_map_parts =
-            core::UInt16 { XCB_XKB_MAP_PART_KEY_TYPES | XCB_XKB_MAP_PART_KEY_SYMS |
+            UInt16 { XCB_XKB_MAP_PART_KEY_TYPES | XCB_XKB_MAP_PART_KEY_SYMS |
                            XCB_XKB_MAP_PART_MODIFIER_MAP | XCB_XKB_MAP_PART_EXPLICIT_COMPONENTS |
                            XCB_XKB_MAP_PART_KEY_ACTIONS | XCB_XKB_MAP_PART_KEY_BEHAVIORS |
                            XCB_XKB_MAP_PART_VIRTUAL_MODS | XCB_XKB_MAP_PART_VIRTUAL_MOD_MAP };
 
         constexpr auto required_events =
-            core::UInt16 { XCB_XKB_EVENT_TYPE_NEW_KEYBOARD_NOTIFY | XCB_XKB_EVENT_TYPE_MAP_NOTIFY |
+            UInt16 { XCB_XKB_EVENT_TYPE_NEW_KEYBOARD_NOTIFY | XCB_XKB_EVENT_TYPE_MAP_NOTIFY |
                            XCB_XKB_EVENT_TYPE_STATE_NOTIFY };
 
         // XKB events are reported to all interested clients without regard
@@ -418,22 +418,22 @@ namespace stormkit::wsi::linux::x11 {
 
         m_window_hints.flags = MWM_HINTS_FUNCTIONS | MWM_HINTS_DECORATIONS;
 
-        if (core::checkFlag(style, WindowStyle::TitleBar)) {
+        if (checkFlag(style, WindowStyle::TitleBar)) {
             m_window_hints.decorations |= MWM_DECOR_BORDER | MWM_DECOR_TITLE | MWM_DECOR_MENU;
             m_window_hints.functions |= MWM_FUNC_MOVE;
         }
 
-        if (core::checkFlag(style, WindowStyle::Close)) {
+        if (checkFlag(style, WindowStyle::Close)) {
             m_window_hints.decorations |= 0;
             m_window_hints.functions |= MWM_FUNC_CLOSE;
         }
 
-        if (core::checkFlag(style, WindowStyle::Minimizable)) {
+        if (checkFlag(style, WindowStyle::Minimizable)) {
             m_window_hints.decorations |= MWM_DECOR_MINIMIZE;
             m_window_hints.functions |= MWM_FUNC_MINIMIZE;
         }
 
-        if (core::checkFlag(style, WindowStyle::Resizable)) {
+        if (checkFlag(style, WindowStyle::Resizable)) {
             m_window_hints.decorations |= MWM_DECOR_RESIZE | MWM_DECOR_MAXIMIZE;
             m_window_hints.functions |= MWM_FUNC_RESIZE | MWM_FUNC_MAXIMIZE;
         } else {
@@ -538,7 +538,7 @@ namespace stormkit::wsi::linux::x11 {
                             XCB_ATOM_WM_NAME,
                             XCB_ATOM_STRING,
                             8,
-                            core::as<core::UInt32>(title.length()),
+                            as<UInt32>(title.length()),
                             title.c_str());
 
         xcb_flush(m_connection);
@@ -685,7 +685,7 @@ namespace stormkit::wsi::linux::x11 {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto WindowImpl::setMousePosition(const core::math::Vector2I& position) noexcept -> void {
+    auto WindowImpl::setMousePosition(const math::Vector2I& position) noexcept -> void {
         auto connection = getXCBConnection();
 
         xcb_warp_pointer(connection, XCB_NONE, m_window, 0, 0, 0, 0, position.x, position.y);
@@ -695,7 +695,7 @@ namespace stormkit::wsi::linux::x11 {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto WindowImpl::setMousePositionOnDesktop(const core::math::Vector2U& position) noexcept
+    auto WindowImpl::setMousePositionOnDesktop(const math::Vector2U& position) noexcept
         -> void {
         auto connection = getXCBConnection();
 
@@ -742,7 +742,7 @@ namespace stormkit::wsi::linux::x11 {
             auto len     = xcb_randr_monitor_info_outputs_length(monitor_info);
             auto outputs = xcb_randr_monitor_info_outputs(monitor_info);
 
-            for (auto i : core::range(len)) {
+            for (auto i : range(len)) {
                 auto output = OutputScoped { xcb_randr_get_output_info_reply(
                     connection,
                     xcb_randr_get_output_info(connection, outputs[i], xcb_monitors->timestamp),
@@ -760,8 +760,8 @@ namespace stormkit::wsi::linux::x11 {
                 if (crtc == nullptr) continue;
 
                 monitor.extents.emplace_back(
-                    core::math::ExtentU { core::as<core::UInt32>(crtc->width),
-                                          core::as<core::UInt32>(crtc->height) });
+                    math::ExtentU { as<UInt32>(crtc->width),
+                                          as<UInt32>(crtc->height) });
             }
         }
 
@@ -788,8 +788,8 @@ namespace stormkit::wsi::linux::x11 {
             case XCB_MOTION_NOTIFY: {
                 auto mouse_event = reinterpret_cast<xcb_motion_notify_event_t*>(xevent);
 
-                const auto x = core::as<core::UInt32>(mouse_event->event_x);
-                const auto y = core::as<core::UInt32>(mouse_event->event_y);
+                const auto x = as<UInt32>(mouse_event->event_x);
+                const auto y = as<UInt32>(mouse_event->event_y);
 
                 if (m_mouse_locked) {
                     if (x != m_extent.width / 2 || y != m_extent.height / 2) {

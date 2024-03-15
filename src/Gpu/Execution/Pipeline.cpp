@@ -21,8 +21,8 @@ namespace stormkit::gpu {
         const Device&                          device,
         const PipelineLayout&                  layout,
         const RenderPass&                      render_pass,
-        core::OptionalRef<const PipelineCache> pipeline_cache) noexcept -> VulkanExpected<void> {
-        const auto& state = core::as<RasterPipelineState>(m_state);
+        OptionalRef<const PipelineCache> pipeline_cache) noexcept -> VulkanExpected<void> {
+        const auto& state = as<RasterPipelineState>(m_state);
 
         const auto binding_descriptions =
             state.vertex_input_state.binding_descriptions |
@@ -31,7 +31,7 @@ namespace stormkit::gpu {
                     .setBinding(binding_description.binding)
                     .setStride(binding_description.stride)
                     .setInputRate(
-                        core::narrow<vk::VertexInputRate>(binding_description.input_rate));
+                        narrow<vk::VertexInputRate>(binding_description.input_rate));
             }) |
             std::ranges::to<std::vector>();
 
@@ -41,7 +41,7 @@ namespace stormkit::gpu {
                 return vk::VertexInputAttributeDescription {}
                     .setLocation(input_attribute_description.location)
                     .setBinding(input_attribute_description.binding)
-                    .setFormat(core::narrow<vk::Format>(input_attribute_description.format))
+                    .setFormat(narrow<vk::Format>(input_attribute_description.format))
                     .setOffset(input_attribute_description.offset);
             }) |
             std::ranges::to<std::vector>();
@@ -53,7 +53,7 @@ namespace stormkit::gpu {
         const auto input_assembly =
             vk::PipelineInputAssemblyStateCreateInfo {}
                 .setTopology(
-                    core::narrow<vk::PrimitiveTopology>(state.input_assembly_state.topology))
+                    narrow<vk::PrimitiveTopology>(state.input_assembly_state.topology))
                 .setPrimitiveRestartEnable(state.input_assembly_state.primitive_restart_enable);
 
         const auto viewports = state.viewport_state.viewports |
@@ -84,15 +84,15 @@ namespace stormkit::gpu {
                 .setDepthClampEnable(state.rasterization_state.depth_clamp_enable)
                 .setRasterizerDiscardEnable(state.rasterization_state.rasterizer_discard_enable)
                 .setPolygonMode(
-                    core::narrow<vk::PolygonMode>(state.rasterization_state.polygon_mode))
+                    narrow<vk::PolygonMode>(state.rasterization_state.polygon_mode))
                 .setCullMode(
-                    core::narrow<vk::CullModeFlagBits>(state.rasterization_state.cull_mode))
-                .setFrontFace(core::narrow<vk::FrontFace>(state.rasterization_state.front_face))
+                    narrow<vk::CullModeFlagBits>(state.rasterization_state.cull_mode))
+                .setFrontFace(narrow<vk::FrontFace>(state.rasterization_state.front_face))
                 .setLineWidth(state.rasterization_state.line_width);
 
         const auto multisampling =
             vk::PipelineMultisampleStateCreateInfo {}
-                .setRasterizationSamples(core::narrow<vk::SampleCountFlagBits>(
+                .setRasterizationSamples(narrow<vk::SampleCountFlagBits>(
                     state.multisample_state.rasterization_samples))
                 .setSampleShadingEnable(state.multisample_state.sample_shading_enable);
 
@@ -102,24 +102,24 @@ namespace stormkit::gpu {
                 return vk::PipelineColorBlendAttachmentState {}
                     .setBlendEnable(attachment.blend_enable)
                     .setSrcColorBlendFactor(
-                        core::narrow<vk::BlendFactor>(attachment.src_color_blend_factor))
+                        narrow<vk::BlendFactor>(attachment.src_color_blend_factor))
                     .setDstColorBlendFactor(
-                        core::narrow<vk::BlendFactor>(attachment.dst_color_blend_factor))
-                    .setColorBlendOp(core::narrow<vk::BlendOp>(attachment.color_blend_operation))
+                        narrow<vk::BlendFactor>(attachment.dst_color_blend_factor))
+                    .setColorBlendOp(narrow<vk::BlendOp>(attachment.color_blend_operation))
                     .setSrcAlphaBlendFactor(
-                        core::narrow<vk::BlendFactor>(attachment.src_alpha_blend_factor))
+                        narrow<vk::BlendFactor>(attachment.src_alpha_blend_factor))
                     .setDstAlphaBlendFactor(
-                        core::narrow<vk::BlendFactor>(attachment.dst_alpha_blend_factor))
-                    .setAlphaBlendOp(core::narrow<vk::BlendOp>(attachment.alpha_blend_operation))
+                        narrow<vk::BlendFactor>(attachment.dst_alpha_blend_factor))
+                    .setAlphaBlendOp(narrow<vk::BlendOp>(attachment.alpha_blend_operation))
                     .setColorWriteMask(
-                        core::narrow<vk::ColorComponentFlagBits>(attachment.color_write_mask));
+                        narrow<vk::ColorComponentFlagBits>(attachment.color_write_mask));
             }) |
             std::ranges::to<std::vector>();
 
         const auto color_blending =
             vk::PipelineColorBlendStateCreateInfo {}
                 .setLogicOpEnable(state.color_blend_state.logic_operation_enable)
-                .setLogicOp(core::narrow<vk::LogicOp>(state.color_blend_state.logic_operation))
+                .setLogicOp(narrow<vk::LogicOp>(state.color_blend_state.logic_operation))
                 .setAttachments(blend_attachments)
                 .setBlendConstants({ state.color_blend_state.blend_constants[0],
                                      state.color_blend_state.blend_constants[1],
@@ -128,7 +128,7 @@ namespace stormkit::gpu {
 
         const auto states = state.dynamic_state.dynamics |
                             std::views::transform([](auto&& s) noexcept {
-                                return core::narrow<vk::DynamicState>(s);
+                                return narrow<vk::DynamicState>(s);
                             }) |
                             std::ranges::to<std::vector>();
 
@@ -138,7 +138,7 @@ namespace stormkit::gpu {
             state.shader_state.shaders | std::views::transform([](auto&& shader) noexcept {
                 static auto NAME = "main";
                 return vk::PipelineShaderStageCreateInfo {}
-                    .setStage(core::narrow<vk::ShaderStageFlagBits>(shader->type()))
+                    .setStage(narrow<vk::ShaderStageFlagBits>(shader->type()))
                     .setModule(toVkHandle(shader))
                     .setPName(NAME);
             }) |
@@ -149,7 +149,7 @@ namespace stormkit::gpu {
                 .setDepthTestEnable(state.depth_stencil_state.depth_test_enable)
                 .setDepthWriteEnable(state.depth_stencil_state.depth_write_enable)
                 .setDepthCompareOp(
-                    core::narrow<vk::CompareOp>(state.depth_stencil_state.depth_compare_op))
+                    narrow<vk::CompareOp>(state.depth_stencil_state.depth_compare_op))
                 .setDepthBoundsTestEnable(state.depth_stencil_state.depth_bounds_test_enable)
                 .setStencilTestEnable(false)
                 .setMinDepthBounds(state.depth_stencil_state.min_depth_bounds)
@@ -171,7 +171,7 @@ namespace stormkit::gpu {
                                      .setBasePipelineHandle(nullptr)
                                      .setBasePipelineIndex(-1);
 
-        using PipelineCacheRef = core::NakedRef<const vk::raii::PipelineCache>;
+        using PipelineCacheRef = NakedRef<const vk::raii::PipelineCache>;
 
         const auto vk_pipeline_cache = [&pipeline_cache] -> const vk::raii::PipelineCache & {
             if(pipeline_cache) return toRaiiVkHandle(*pipeline_cache);

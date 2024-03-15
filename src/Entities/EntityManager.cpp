@@ -47,7 +47,7 @@ namespace stormkit::entities {
     /////////////////////////////////////
     /////////////////////////////////////
     auto EntityManager::destroyEntity(Entity entity) -> void {
-        core::expects(entity != INVALID_ENTITY);
+        expects(entity != INVALID_ENTITY);
 
         if (hasEntity(entity)) {
             m_removed_entities.emplace(entity);
@@ -67,30 +67,30 @@ namespace stormkit::entities {
     /////////////////////////////////////
     /////////////////////////////////////
     auto EntityManager::hasEntity(Entity entity) const -> bool {
-        core::expects(entity != INVALID_ENTITY);
+        expects(entity != INVALID_ENTITY);
 
-        return std::ranges::any_of(entities(), core::monadic::is(entity)) or
-               std::ranges::any_of(m_added_entities, core::monadic::is(entity));
+        return std::ranges::any_of(entities(), monadic::is(entity)) or
+               std::ranges::any_of(m_added_entities, monadic::is(entity));
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     auto EntityManager::hasComponent(Entity entity, Component::Type type) const -> bool {
-        core::expects(entity != INVALID_ENTITY and type != Component::INVALID_TYPE);
+        expects(entity != INVALID_ENTITY and type != Component::INVALID_TYPE);
 
         return std::ranges::any_of(m_registered_components_for_entities.at(entity),
-                                   core::monadic::is(type));
+                                   monadic::is(type));
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto EntityManager::step(core::Secondf delta) -> void {
+    auto EntityManager::step(Secondf delta) -> void {
         for (auto entity : m_removed_entities) {
             m_cached_entities_dirty = true;
 
             auto it = m_registered_components_for_entities.find(entity);
             // a this point, all entities should be valid
-            core::ensures(it != std::ranges::cend(m_registered_components_for_entities));
+            ensures(it != std::ranges::cend(m_registered_components_for_entities));
 
             for (auto&& key : it->second | std::views::transform([entity](auto&& type) {
                                   return componentKeyFor(entity, type);
@@ -101,7 +101,7 @@ namespace stormkit::entities {
 
             removeFromSystems(entity);
 
-            if (not std::ranges::any_of(m_added_entities, core::monadic::is(entity)))
+            if (not std::ranges::any_of(m_added_entities, monadic::is(entity)))
                 m_free_entities.push(entity);
         }
         m_removed_entities.clear();
@@ -128,7 +128,7 @@ namespace stormkit::entities {
     /////////////////////////////////////
     /////////////////////////////////////
     auto EntityManager::purposeToSystems(Entity e) -> void {
-        core::expects(e != INVALID_ENTITY);
+        expects(e != INVALID_ENTITY);
 
         const auto reliable_system_filter = [e, this](auto&& system) {
             for (auto component_type : system->componentsUsed())
@@ -144,7 +144,7 @@ namespace stormkit::entities {
     /////////////////////////////////////
     /////////////////////////////////////
     auto EntityManager::removeFromSystems(Entity e) -> void {
-        core::expects(e != INVALID_ENTITY);
+        expects(e != INVALID_ENTITY);
 
         for (auto& s : m_systems) { s->removeEntity(e); }
     }

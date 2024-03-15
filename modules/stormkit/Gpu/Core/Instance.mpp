@@ -40,11 +40,11 @@ export {
 
             [[nodiscard]] static auto
                 create(std::string app_name = "",
-                       bool        verbose  = (core::STORMKIT_BUILD_TYPE ==
+                       bool        verbose  = (STORMKIT_BUILD_TYPE ==
                                        "DEBUG")) noexcept -> Expected<Instance>;
             [[nodiscard]] static auto
                 allocate(std::string app_name = "",
-                         bool        verbose  = (core::STORMKIT_BUILD_TYPE ==
+                         bool        verbose  = (STORMKIT_BUILD_TYPE ==
                                          "DEBUG")) noexcept -> Expected<std::unique_ptr<Instance>>;
 
             [[nodiscard]] auto
@@ -68,15 +68,15 @@ export {
             // #endif
 
             //[[nodiscard]] auto createOffscreenSurface(
-            // const core::math::ExtentU& extent,
+            // const math::ExtentU& extent,
             // Surface::Buffering buffering = Surface::Buffering::Triple) const
             //-> OffscreenSurface;
             //[[nodiscard]] auto allocateOffscreenSurface(
-            // const core::math::ExtentU& extent,
+            // const math::ExtentU& extent,
             // Surface::Buffering buffering = Surface::Buffering::Triple) const
             //-> std::unique_ptr<OffscreenSurface>;
             //[[nodiscard]] auto allocateRefCountedOffscreenSurface(
-            // const core::math::ExtentU& extent,
+            // const math::ExtentU& extent,
             // Surface::Buffering buffering = Surface::Buffering::Triple) const
             //-> std::shared_ptr<OffscreenSurface>;
 
@@ -88,9 +88,9 @@ export {
             std::string m_app_name;
             bool        m_validation_layers_enabled;
 
-            core::DeferInit<vk::raii::Context>                m_vk_context;
-            core::DeferInit<vk::raii::Instance>               m_vk_instance;
-            core::DeferInit<vk::raii::DebugUtilsMessengerEXT> m_vk_messenger;
+            DeferInit<vk::raii::Context>                m_vk_context;
+            DeferInit<vk::raii::Instance>               m_vk_instance;
+            DeferInit<vk::raii::DebugUtilsMessengerEXT> m_vk_messenger;
 
             std::vector<std::string>    m_extensions;
             std::vector<PhysicalDevice> m_physical_devices;
@@ -113,7 +113,7 @@ export {
             [[nodiscard]] auto checkExtensionSupport(
                 std::span<const std::string_view> extensions) const noexcept -> bool;
             [[nodiscard]] auto checkExtensionSupport(
-                std::span<const core::CZString> extensions) const noexcept -> bool;
+                std::span<const CZString> extensions) const noexcept -> bool;
 
             [[nodiscard]] auto info() const noexcept -> const PhysicalDeviceInfo&;
             [[nodiscard]] auto capabilities() const noexcept -> const RenderCapabilities&;
@@ -173,7 +173,7 @@ export {
             [[nodiscard]] auto vkHandle() const noexcept -> const vk::raii::SurfaceKHR&;
 
           private:
-            core::DeferInit<vk::raii::SurfaceKHR> m_vk_surface;
+            DeferInit<vk::raii::SurfaceKHR> m_vk_surface;
         };
     } // namespace stormkit::gpu
 
@@ -217,10 +217,10 @@ namespace stormkit::gpu {
     STORMKIT_FORCE_INLINE Instance::Instance(std::string app_name, bool enable_validation, Tag)
         : m_app_name { std::move(app_name) }, m_validation_layers_enabled { enable_validation } {
         doInitInstance()
-            .and_then(core::curry(&Instance::doInitDebugReportCallback, this))
-            .and_then(core::curry(&Instance::doRetrievePhysicalDevices, this))
+            .and_then(curry(&Instance::doInitDebugReportCallback, this))
+            .and_then(curry(&Instance::doRetrievePhysicalDevices, this))
             .transform_error(
-                core::monadic::map(core::monadic::narrow<Result>(), core::throwError()));
+                core::monadic::map(core::monadic::narrow<Result>(), throwError()));
     }
 
     /////////////////////////////////////
@@ -294,7 +294,7 @@ namespace stormkit::gpu {
 
     // /////////////////////////////////////
     // /////////////////////////////////////
-    // STORMKIT_FORCE_INLINE auto Instance::createOffscreenSurface(const core::math::ExtentU&
+    // STORMKIT_FORCE_INLINE auto Instance::createOffscreenSurface(const math::ExtentU&
     // extent, Surface::Buffering buffering) const
     // -> OffscreenSurface {
     // return OffscreenSurface { extent, instance(), buffering };
@@ -302,7 +302,7 @@ namespace stormkit::gpu {
 
     // /////////////////////////////////////
     // /////////////////////////////////////
-    // STORMKIT_FORCE_INLINE auto Instance::allocateOffscreenSurface(const core::math::ExtentU&
+    // STORMKIT_FORCE_INLINE auto Instance::allocateOffscreenSurface(const math::ExtentU&
     // extent, Surface::Buffering buffering) const
     // -> std::unique_ptr<OffscreenSurface> {
     // return std::make_unique<OffscreenSurface>(extent, instance(), buffering);
@@ -311,7 +311,7 @@ namespace stormkit::gpu {
     // /////////////////////////////////////
     // /////////////////////////////////////
     // STORMKIT_FORCE_INLINE auto Instance::allocateRefCountedOffscreenSurface(
-    // const core::math::ExtentU& extent,
+    // const math::ExtentU& extent,
     // Surface::Buffering buffering) const -> std::shared_ptr<OffscreenSurface> {
     // return std::make_shared<OffscreenSurface>(extent, instance(), buffering);
     // }

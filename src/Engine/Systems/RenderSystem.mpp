@@ -26,12 +26,12 @@ namespace stormkit::engine {
         RenderSystem(RenderSystem&&) noexcept;
         auto operator=(RenderSystem&&) noexcept -> RenderSystem&;
 
-        auto update(core::Secondf delta) -> void override;
+        auto update(Secondf delta) -> void override;
 
       private:
         auto onMessageReceived(const entities::Message& message) -> void override;
 
-        core::NakedRef<Renderer> m_renderer;
+        NakedRef<Renderer> m_renderer;
     };
 } // namespace stormkit::engine
 
@@ -61,7 +61,7 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_INLINE auto RenderSystem::update(core::Secondf delta) -> void {
+    STORMKIT_INLINE auto RenderSystem::update(Secondf delta) -> void {
     }
 
     /////////////////////////////////////

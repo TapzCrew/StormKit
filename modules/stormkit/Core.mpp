@@ -18,5 +18,5 @@ export import :String;
 export import :Utils;
 
 export namespace stormkit {
-    using namespace core;
-}
+    using namespace stormkit::core;
+} // namespace stormkit

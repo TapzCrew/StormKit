@@ -70,7 +70,7 @@ namespace stormkit::gpu {
         };
 
         const auto create_surface = [&make_wayland_surface, &make_xcb_surface] noexcept
-            -> core::FunctionRef<VulkanExpected<vk::raii::SurfaceKHR>()> {
+            -> FunctionRef<VulkanExpected<vk::raii::SurfaceKHR>()> {
             const auto is_wayland = std::getenv("WAYLAND_DISPLAY") != nullptr;
 
             if (is_wayland) return make_wayland_surface;
@@ -86,12 +86,12 @@ namespace stormkit::gpu {
             CHECK_VK_ERROR(vkCreateIOSSurfaceMVK(instance, &create_info, &m_surface));
         };
 #else
-        core::assertWithMessage(true, "This platform WSI is not supported !");
+        assertWithMessage(true, "This platform WSI is not supported !");
 #endif
 
         create_surface()
             .transform(core::monadic::set(m_vk_surface))
             .transform_error(
-                core::monadic::map(core::monadic::narrow<Result>(), core::throwError()));
+                core::monadic::map(core::monadic::narrow<Result>(), throwError()));
     }
 } // namespace stormkit::gpu

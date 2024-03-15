@@ -32,11 +32,11 @@ namespace stormkit::engine {
 
         /////////////////////////////////////
         /////////////////////////////////////
-        auto scorePhysicalDevice(const gpu::PhysicalDevice& physical_device) -> core::UInt64 {
+        auto scorePhysicalDevice(const gpu::PhysicalDevice& physical_device) -> UInt64 {
             const auto support_raytracing =
                 physical_device.checkExtensionSupport(RAYTRACING_EXTENSIONS);
 
-            auto score = core::UInt64 { 0u };
+            auto score = UInt64 { 0u };
 
             const auto& info         = physical_device.info();
             const auto& capabilities = physical_device.capabilities();
@@ -64,9 +64,9 @@ namespace stormkit::engine {
         /////////////////////////////////////
         /////////////////////////////////////
         auto pickPhysicalDevice(std::span<const gpu::PhysicalDevice> physical_devices) noexcept
-            -> std::optional<core::NakedRef<const gpu::PhysicalDevice>> {
+            -> std::optional<NakedRef<const gpu::PhysicalDevice>> {
             auto ranked_devices =
-                std::multimap<core::UInt64, core::NakedRef<const gpu::PhysicalDevice>> {};
+                std::multimap<UInt64, NakedRef<const gpu::PhysicalDevice>> {};
 
             for (const auto& physical_device : physical_devices) {
                 if (not physical_device.checkExtensionSupport(BASE_EXTENSIONS)) {
@@ -114,20 +114,20 @@ namespace stormkit::engine {
         /////////////////////////////////////
         /////////////////////////////////////
         // auto
-        //     chooseSwapExtent(const core::math::ExtentU&      extent,
+        //     chooseSwapExtent(const math::ExtentU&      extent,
         //                      const gpu::SurfaceCapabilities& capabilities) noexcept ->
         //                      gpu::ExtentU {
-        //     constexpr static auto int_max = std::numeric_limits<core::UInt32>::max();
+        //     constexpr static auto int_max = std::numeric_limits<UInt32>::max();
         //
         //     if (capabilities.currentExtent.width != int_max &&
         //         capabilities.currentExtent.height != int_max)
         //         return capabilities.currentExtent;
         //
         //     auto actual_extent   = extent;
-        //     actual_extent.width  = core::math::clamp(actual_extent.width,
+        //     actual_extent.width  = math::clamp(actual_extent.width,
         //                                             capabilities.minImageExtent.width,
         //                                             capabilities.maxImageExtent.width);
-        //     actual_extent.height = core::math::clamp(actual_extent.height,
+        //     actual_extent.height = math::clamp(actual_extent.height,
         //                                              capabilities.minImageExtent.height,
         //                                              capabilities.maxImageExtent.height);
         //
@@ -137,9 +137,9 @@ namespace stormkit::engine {
         // /////////////////////////////////////
         // /////////////////////////////////////
         // auto chooseImageCount(const gpu::SurfaceCapabilities& capabilities) noexcept
-        //     -> core::UInt32 {
+        //     -> UInt32 {
         //     auto image_count = capabilities.minImageCount + 1;
-        //     return core::math::clamp(image_count,
+        //     return math::clamp(image_count,
         //                              capabilities.minImageCount,
         //                              capabilities.maxImageCount);
         // }
@@ -148,19 +148,19 @@ namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     auto Renderer::doInit(std::string_view                                 application_name,
-                          std::optional<core::NakedRef<const wsi::Window>> window) noexcept
+                          std::optional<NakedRef<const wsi::Window>> window) noexcept
         -> gpu::Expected<void> {
         ilog("Initializing Renderer");
         return doInitInstance(application_name)
-            .and_then(core::curry(&Renderer::doInitDevice, this))
+            .and_then(curry(&Renderer::doInitDevice, this))
             .and_then(
-                core::curry(gpu::Queue::create, std::cref(*m_device), m_device->rasterQueueEntry()))
-            .transform(core::monadic::set(m_raster_queue))
-            .and_then(core::curry(gpu::CommandPool::create,
+                curry(gpu::Queue::create, std::cref(*m_device), m_device->rasterQueueEntry()))
+            .transform(monadic::set(m_raster_queue))
+            .and_then(curry(gpu::CommandPool::create,
                                   std::cref(*m_device),
                                   std::cref(*m_raster_queue)))
-            .transform(core::monadic::set(m_main_command_pool))
-            .and_then(core::curry(&Renderer::doInitRenderSurface, this, std::move(window)));
+            .transform(monadic::set(m_main_command_pool))
+            .and_then(curry(&Renderer::doInitRenderSurface, this, std::move(window)));
     }
 
     /////////////////////////////////////
@@ -168,7 +168,7 @@ namespace stormkit::engine {
     auto Renderer::doInitInstance(std::string_view application_name) noexcept
         -> gpu::Expected<void> {
         return gpu::Instance::create(std::string { application_name })
-            .transform(core::monadic::set(m_instance));
+            .transform(monadic::set(m_instance));
     }
 
     /////////////////////////////////////
@@ -177,28 +177,28 @@ namespace stormkit::engine {
         const auto& physical_devices = m_instance->physicalDevices();
         auto        physical_device =
             pickPhysicalDevice(physical_devices)
-                .or_else(core::expectsWithMessage<core::NakedRef<const gpu::PhysicalDevice>>(
+                .or_else(expectsWithMessage<NakedRef<const gpu::PhysicalDevice>>(
                     "No suitable GPU found !"))
                 .value();
 
         ilog("Using physical device {}", *physical_device);
 
         return gpu::Device::create(*physical_device, *m_instance)
-            .transform(core::monadic::set(m_device));
+            .transform(monadic::set(m_device));
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     auto Renderer::doInitRenderSurface(
-        std::optional<core::NakedRef<const wsi::Window>> window) noexcept -> gpu::Expected<void> {
+        std::optional<NakedRef<const wsi::Window>> window) noexcept -> gpu::Expected<void> {
         if (window)
             return RenderSurface::createFromWindow(*m_instance,
                                                    *m_device,
                                                    *m_raster_queue,
                                                    *(window.value()))
-                .transform(core::monadic::set(m_surface));
+                .transform(monadic::set(m_surface));
 
-        core::ensures(not window, "Offscreen rendering not yet implemented");
+        ensures(not window, "Offscreen rendering not yet implemented");
         return {};
     }
 
@@ -216,14 +216,14 @@ namespace stormkit::engine {
             if (token.stop_requested()) return;
 
             m_surface->beginFrame(m_device)
-                .and_then(core::curry(&Renderer::doRender,
+                .and_then(curry(&Renderer::doRender,
                                       this,
                                       std::ref(framegraph_mutex),
                                       std::ref(rebuild_graph)))
-                .and_then(core::curry(&RenderSurface::presentFrame,
+                .and_then(curry(&RenderSurface::presentFrame,
                                       &m_surface.get(),
                                       std::cref(*m_raster_queue)))
-                .transform_error(core::expectsWithMessage("Failed to render frame"));
+                .transform_error(expectsWithMessage("Failed to render frame"));
         }
 
         m_device->waitIdle();
@@ -268,10 +268,10 @@ namespace stormkit::engine {
             std::array { gpu::BlitRegion {
                 .src        = {},
                 .dst        = {},
-                .src_offset = { core::math::Vector3F { 0.f, 0.f, 0.f },
-                                core::as<core::math::Vector3F>(backbuffer.extent()) },
-                .dst_offset = { core::math::Vector3F { 0.f, 0.f, 0.f },
-                                core::as<core::math::Vector3F>(present_image.extent()) } } },
+                .src_offset = { math::Vector3F { 0.f, 0.f, 0.f },
+                                as<math::Vector3F>(backbuffer.extent()) },
+                .dst_offset = { math::Vector3F { 0.f, 0.f, 0.f },
+                                as<math::Vector3F>(present_image.extent()) } } },
             gpu::Filter::Linear);
         blit_cmb.transitionImageLayout(backbuffer,
                                        gpu::ImageLayout::Transfer_Src_Optimal,
@@ -281,8 +281,8 @@ namespace stormkit::engine {
                                        gpu::ImageLayout::Present_Src);
         blit_cmb.end();
 
-        auto wait   = core::makeNakedRefs<std::array>(semaphore, *frame.image_available);
-        auto signal = core::makeNakedRefs<std::array>(*frame.render_finished);
+        auto wait   = makeNakedRefs<std::array>(semaphore, *frame.image_available);
+        auto signal = makeNakedRefs<std::array>(*frame.render_finished);
 
         blit_cmb.submit(m_raster_queue, wait, signal, frame.in_flight);
         return frame;

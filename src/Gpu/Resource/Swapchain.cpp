@@ -42,8 +42,8 @@ namespace stormkit::gpu {
         /////////////////////////////////////
         /////////////////////////////////////
         auto chooseSwapExtent(const vk::SurfaceCapabilitiesKHR& capabilities,
-                              const core::math::ExtentU&        extent) noexcept -> vk::Extent2D {
-            constexpr static auto int_max = std::numeric_limits<core::UInt32>::max();
+                              const math::ExtentU&        extent) noexcept -> vk::Extent2D {
+            constexpr static auto int_max = std::numeric_limits<UInt32>::max();
 
             if (capabilities.currentExtent.width != int_max &&
                 capabilities.currentExtent.height != int_max)
@@ -63,7 +63,7 @@ namespace stormkit::gpu {
         /////////////////////////////////////
         /////////////////////////////////////
         auto chooseImageCount(const vk::SurfaceCapabilitiesKHR& capabilities) noexcept
-            -> core::UInt32 {
+            -> UInt32 {
             auto image_count = capabilities.minImageCount + 1;
 
             if (capabilities.maxImageCount > 0 && image_count > capabilities.maxImageCount)
@@ -78,7 +78,7 @@ namespace stormkit::gpu {
     Swapchain::Swapchain(Tag,
                          const Device&                         device,
                          const Surface&                        surface,
-                         const core::math::ExtentU&            extent,
+                         const math::ExtentU&            extent,
                          std::optional<vk::raii::SwapchainKHR> old_swapchain) {
         const auto& physical_device = device.physicalDevice();
         const auto  capabilities =
@@ -116,23 +116,23 @@ namespace stormkit::gpu {
             .createSwapchainKHR(create_info)
             .transform(core::monadic::set(m_vk_swapchain))
             .transform_error(
-                core::monadic::map(core::monadic::narrow<Result>(), core::throwError()));
+                core::monadic::map(core::monadic::narrow<Result>(), throwError()));
 
         m_images = m_vk_swapchain->getImages() |
                    std::views::transform([&, this](auto&& image) noexcept {
                        return SwapchainImage::create(m_extent, m_pixel_format, image);
                    }) |
                    std::ranges::to<std::vector>();
-        m_image_count  = core::as<core::UInt32>(std::size(m_images));
-        m_pixel_format = core::narrow<PixelFormat>(format.format);
-        m_extent       = as<core::math::ExtentU>(swapchain_extent);
+        m_image_count  = as<UInt32>(std::size(m_images));
+        m_pixel_format = narrow<PixelFormat>(format.format);
+        m_extent       = as<math::ExtentU>(swapchain_extent);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     auto Swapchain::acquireNextImage(std::chrono::nanoseconds wait,
                                      const Semaphore&         image_available) const noexcept
-        -> Expected<std::pair<gpu::Result, core::UInt32>> {
+        -> Expected<std::pair<gpu::Result, UInt32>> {
         auto&& [result, index] =
             m_vk_swapchain->acquireNextImage(wait.count(), toVkHandle(image_available));
         const auto possible_results = std::array { vk::Result::eSuccess,
@@ -140,9 +140,9 @@ namespace stormkit::gpu {
                                                    vk::Result::eSuboptimalKHR };
 
         if (not std::ranges::any_of(possible_results, core::monadic::is(result))) [[likely]]
-            return std::unexpected { core::narrow<gpu::Result>(result) };
+            return std::unexpected { narrow<gpu::Result>(result) };
 
-        return std::make_pair(core::narrow<gpu::Result>(result), index);
+        return std::make_pair(narrow<gpu::Result>(result), index);
     }
 
 } // namespace stormkit::gpu

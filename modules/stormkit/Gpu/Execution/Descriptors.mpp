@@ -21,18 +21,18 @@ export {
     namespace stormkit::gpu {
         struct BufferDescriptor {
             DescriptorType               type = DescriptorType::Uniform_Buffer;
-            core::UInt32                 binding;
-            core::NakedRef<const Buffer> buffer;
-            core::UInt32                 range;
-            core::UInt32                 offset;
+            UInt32                 binding;
+            NakedRef<const Buffer> buffer;
+            UInt32                 range;
+            UInt32                 offset;
         };
 
         struct ImageDescriptor {
             DescriptorType                  type = DescriptorType::Combined_Image_Sampler;
-            core::UInt32                    binding;
+            UInt32                    binding;
             ImageLayout                     layout;
-            core::NakedRef<const ImageView> image_view;
-            core::NakedRef<const Sampler>   sampler;
+            NakedRef<const ImageView> image_view;
+            NakedRef<const Sampler>   sampler;
         };
 
         using Descriptor = std::variant<BufferDescriptor, ImageDescriptor>;
@@ -72,10 +72,10 @@ export {
         };
 
         struct DescriptorSetLayoutBinding {
-            core::UInt32      binding;
+            UInt32      binding;
             DescriptorType    type;
             ShaderStageFlag   stages;
-            core::RangeExtent descriptor_count;
+            RangeExtent descriptor_count;
         };
 
         class STORMKIT_API DescriptorSetLayout {
@@ -98,7 +98,7 @@ export {
             DescriptorSetLayout(DescriptorSetLayout&&) noexcept;
             auto operator=(DescriptorSetLayout&&) noexcept -> DescriptorSetLayout&;
 
-            [[nodiscard]] auto hash() const noexcept -> core::Hash64;
+            [[nodiscard]] auto hash() const noexcept -> Hash64;
             [[nodiscard]] auto
                 bindings() const noexcept -> const std::vector<DescriptorSetLayoutBinding>&;
 
@@ -111,8 +111,8 @@ export {
 
             std::vector<DescriptorSetLayoutBinding> m_bindings;
 
-            core::Hash64                                   m_hash = 0;
-            core::DeferInit<vk::raii::DescriptorSetLayout> m_vk_descriptor_set_layout;
+            Hash64                                   m_hash = 0;
+            DeferInit<vk::raii::DescriptorSetLayout> m_vk_descriptor_set_layout;
         };
 
         class STORMKIT_API DescriptorPool {
@@ -123,12 +123,12 @@ export {
 
             struct Size {
                 DescriptorType type;
-                core::UInt32   descriptor_count;
+                UInt32   descriptor_count;
             };
 
             DescriptorPool(const Device&         device,
                            std::span<const Size> sizes,
-                           core::UInt32          max_sets,
+                           UInt32          max_sets,
                            Tag);
             ~DescriptorPool();
 
@@ -141,29 +141,29 @@ export {
             [[nodiscard]] static auto
                 create(const Device&         device,
                        std::span<const Size> sizes,
-                       core::UInt32          max_sets) noexcept -> Expected<DescriptorPool>;
+                       UInt32          max_sets) noexcept -> Expected<DescriptorPool>;
 
             [[nodiscard]] static auto allocate(const Device&         device,
                                                std::span<const Size> sizes,
-                                               core::UInt32          max_sets) noexcept
+                                               UInt32          max_sets) noexcept
                 -> Expected<std::unique_ptr<DescriptorPool>>;
 
             [[nodiscard]] auto vkHandle() const noexcept -> const vk::raii::DescriptorPool&;
 
           private:
-            auto createDescriptorSets(core::RangeExtent          count,
+            auto createDescriptorSets(RangeExtent          count,
                                       const DescriptorSetLayout& layout) const
                 -> std::pair<std::vector<vk::raii::DescriptorSet>, std::vector<DescriptorType>>;
             auto deleteDescriptorSet(vk::raii::DescriptorSet& set) const -> void;
 
-            core::DeferInit<vk::raii::DescriptorPool> m_vk_descriptor_pool;
+            DeferInit<vk::raii::DescriptorPool> m_vk_descriptor_pool;
         };
     } // namespace stormkit::gpu
 
     template<>
     struct STORMKIT_API std::hash<stormkit::gpu::DescriptorSetLayout> {
         [[nodiscard]] auto operator()(const stormkit::gpu::DescriptorSetLayout& value)
-            const noexcept -> stormkit::core::Hash64 {
+            const noexcept -> stormkit::Hash64 {
             return value.hash();
         }
     };
@@ -189,10 +189,10 @@ export {
     template<>
     struct STORMKIT_API std::hash<stormkit::gpu::Descriptor> {
         [[nodiscard]] auto operator()(const stormkit::gpu::Descriptor& value) const noexcept
-            -> stormkit::core::Hash64 {
-            auto hash = stormkit::core::Hash64 { 0 };
+            -> stormkit::Hash64 {
+            auto hash = stormkit::Hash64 { 0 };
 
-            std::visit([&hash](auto& descriptor) { stormkit::core::hashCombine(hash, descriptor); },
+            std::visit([&hash](auto& descriptor) { stormkit::hashCombine(hash, descriptor); },
                        value);
 
             return hash;
@@ -253,7 +253,7 @@ namespace stormkit::gpu {
                             vk::DescriptorImageInfo {}
                                 .setSampler(toVkHandle(descriptor.sampler))
                                 .setImageView(toVkHandle(descriptor.image_view))
-                                .setImageLayout(core::narrow<vk::ImageLayout>(descriptor.layout)));
+                                .setImageLayout(narrow<vk::ImageLayout>(descriptor.layout)));
                     }));
 
             return std::pair { std::move(buffers), std::move(images) };
@@ -281,9 +281,9 @@ namespace stormkit::gpu {
             m_bindings | std::views::transform([](auto&& binding) noexcept {
                 return vk::DescriptorSetLayoutBinding {}
                     .setBinding(binding.binding)
-                    .setDescriptorType(core::narrow<vk::DescriptorType>(binding.type))
-                    .setDescriptorCount(core::as<core::UInt32>(binding.descriptor_count))
-                    .setStageFlags(core::narrow<vk::ShaderStageFlagBits>(binding.stages));
+                    .setDescriptorType(narrow<vk::DescriptorType>(binding.type))
+                    .setDescriptorCount(as<UInt32>(binding.descriptor_count))
+                    .setStageFlags(narrow<vk::ShaderStageFlagBits>(binding.stages));
             }) |
             std::ranges::to<std::vector>();
 
@@ -292,7 +292,7 @@ namespace stormkit::gpu {
         device.vkHandle()
             .createDescriptorSetLayout(create_info)
             .transform(core::monadic::set(m_vk_descriptor_set_layout))
-            .transform_error(core::monadic::map(core::monadic::as<Result>(), core::throwError()));
+            .transform_error(core::monadic::map(core::monadic::as<Result>(), throwError()));
     }
 
     /////////////////////////////////////
@@ -332,7 +332,7 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto DescriptorSetLayout::hash() const noexcept -> core::Hash64 {
+    STORMKIT_FORCE_INLINE auto DescriptorSetLayout::hash() const noexcept -> Hash64 {
         return m_hash;
     }
 
@@ -361,11 +361,11 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE DescriptorPool::DescriptorPool(const Device&         device,
                                                          std::span<const Size> sizes,
-                                                         core::UInt32          max_sets,
+                                                         UInt32          max_sets,
                                                          Tag) {
         const auto pool_sizes = sizes | std::views::transform([&](const auto& size) {
                                     return vk::DescriptorPoolSize {}
-                                        .setType(core::narrow<vk::DescriptorType>(size.type))
+                                        .setType(narrow<vk::DescriptorType>(size.type))
                                         .setDescriptorCount(size.descriptor_count);
                                 }) |
                                 std::ranges::to<std::vector>();
@@ -378,7 +378,7 @@ namespace stormkit::gpu {
         device.vkHandle()
             .createDescriptorPool(create_info)
             .transform(core::monadic::set(m_vk_descriptor_pool))
-            .transform_error(core::monadic::map(core::monadic::as<Result>(), core::throwError()));
+            .transform_error(core::monadic::map(core::monadic::as<Result>(), throwError()));
     }
 
     /////////////////////////////////////
@@ -399,7 +399,7 @@ namespace stormkit::gpu {
     STORMKIT_FORCE_INLINE auto
         DescriptorPool::create(const Device&         device,
                                std::span<const Size> extents,
-                               core::UInt32 max_sets) noexcept -> Expected<DescriptorPool> try {
+                               UInt32 max_sets) noexcept -> Expected<DescriptorPool> try {
         return DescriptorPool { device, extents, max_sets, Tag {} };
     } catch (const Result& result) { return std::unexpected(result); }
 
@@ -407,7 +407,7 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE auto DescriptorPool::allocate(const Device&         device,
                                                         std::span<const Size> extents,
-                                                        core::UInt32          max_sets) noexcept
+                                                        UInt32          max_sets) noexcept
         -> Expected<std::unique_ptr<DescriptorPool>> try {
         return std::make_unique<DescriptorPool>(device, extents, max_sets, Tag {});
     } catch (const Result& result) { return std::unexpected(result); }

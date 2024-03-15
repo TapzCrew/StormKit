@@ -28,7 +28,7 @@ namespace stormkit::log::details {
     /////////////////////////////////////
     /////////////////////////////////////
     auto colorifyBegin(Severity severity, bool to_stderr) noexcept -> void {
-        auto output = (to_stderr) ? core::getSTDErr() : core::getSTDOut();
+        auto output = (to_stderr) ? getSTDErr() : getSTDOut();
         switch (severity) {
             case Severity::Info: std::print(output, "{}{}{}", KBLCK, KINV, KGRN); break;
             case Severity::Warning: std::print(output, "{}{}{}", KBLCK, KINV, KMAG); break;
@@ -42,7 +42,7 @@ namespace stormkit::log::details {
     /////////////////////////////////////
     /////////////////////////////////////
     auto colorifyEnd(bool to_stderr) noexcept -> void {
-        auto output = (to_stderr) ? core::getSTDErr() : core::getSTDOut();
+        auto output = (to_stderr) ? getSTDErr() : getSTDOut();
         std::print(output, KNRM);
     }
 } // namespace stormkit::log::details

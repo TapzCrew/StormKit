@@ -16,14 +16,14 @@ import :Systems.RenderSystem;
 
 namespace stormkit::engine {
     Application::Application(std::string_view           application_name,
-                             const core::math::ExtentU& window_extent,
+                             const math::ExtentU& window_extent,
                              std::string                window_title,
                              PrivateTag) {
         m_window = wsi::Window { std::move(window_title), window_extent, wsi::WindowStyle::Close };
         m_event_handler = wsi::EventHandler {};
 
         m_renderer = Renderer::create(application_name, m_window.get())
-                         .transform_error(core::expectsWithMessage("Failed to initialize renderer"))
+                         .transform_error(expectsWithMessage("Failed to initialize renderer"))
                          .value();
 
         m_world = entities::EntityManager {};
@@ -39,7 +39,7 @@ namespace stormkit::engine {
         while (m_window->isOpen()) {
             m_renderer->updateFrameGraph(framegraph_mutex, rebuild_graph, m_update_framegraph);
             m_event_handler->update(m_window);
-            m_world->step(core::Secondf { 0 });
+            m_world->step(Secondf { 0 });
             // if (m_surf0ace->needRecreate()) {
             // m_surface->recreate();
             // doInitPerFrameObjects();

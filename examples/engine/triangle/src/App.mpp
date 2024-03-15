@@ -16,22 +16,22 @@ import ShaderData;
 
 using namespace stormkit;
 
-export class App: public core::App {
+export class App: public App {
   public:
     ~App() override;
-    auto run(std::span<const std::string_view> args) -> core::Int override;
+    auto run(std::span<const std::string_view> args) -> Int override;
 
   private:
     auto updateFrameGraph(engine::FrameGraphBuilder&, std::atomic_bool&) -> void;
 
-    core::DeferInit<engine::Application> m_application;
+    DeferInit<engine::Application> m_application;
 
     bool m_fullscreen_enabled = false;
 
-    core::DeferInit<gpu::Shader> m_vertex_shader;
-    core::DeferInit<gpu::Shader> m_fragment_shader;
+    DeferInit<gpu::Shader> m_vertex_shader;
+    DeferInit<gpu::Shader> m_fragment_shader;
 
-    core::math::ExtentU m_window_extent;
+    math::ExtentU m_window_extent;
 };
 
 ////////////////////////////////////////////////////////////////////
@@ -44,12 +44,12 @@ App::~App() = default;
 
 ////////////////////////////////////////
 ////////////////////////////////////////
-auto App::run(std::span<const std::string_view> _) -> core::Int {
+auto App::run(std::span<const std::string_view> _) -> Int {
     m_application =
         engine::Application::create(APPLICATION_NAME, { 800u, 600u }, WINDOW_TITLE)
-            .transform_error(core::expectsWithMessage("Failed to initialize Render engine"))
+            .transform_error(expectsWithMessage("Failed to initialize Render engine"))
             .value();
-    m_application->setUpdateFrameGraphCallback(core::curry(&App::updateFrameGraph, this));
+    m_application->setUpdateFrameGraphCallback(curry(&App::updateFrameGraph, this));
 
     auto& window        = m_application->window();
     auto& event_handler = m_application->eventHandler();
@@ -59,18 +59,18 @@ auto App::run(std::span<const std::string_view> _) -> core::Int {
 
     m_vertex_shader =
         gpu::Shader::fromBytes(renderer.device(), SHADER_DATA, gpu::ShaderStageFlag::Vertex)
-            .transform_error(core::expectsWithMessage("Failed to load vertex shader"))
+            .transform_error(expectsWithMessage("Failed to load vertex shader"))
             .value();
 
     m_fragment_shader =
         gpu::Shader::fromBytes(renderer.device(), SHADER_DATA, gpu::ShaderStageFlag::Fragment)
-            .transform_error(core::expectsWithMessage("Failed to load fragment shader"))
+            .transform_error(expectsWithMessage("Failed to load fragment shader"))
             .value();
 
     event_handler.setCallbacks(
         { { wsi::EventType::Closed, [&window](const wsi::Event& _) noexcept { window.close(); } },
           { wsi::EventType::KeyReleased, [this, &window](const wsi::Event& event) noexcept {
-               const auto& event_data = core::as<wsi::KeyReleasedEventData>(event.data);
+               const auto& event_data = as<wsi::KeyReleasedEventData>(event.data);
 
                if (event_data.key == wsi::Key::Escape) [[unlikely]]
                    window.close();
@@ -111,7 +111,7 @@ auto App::updateFrameGraph(engine::FrameGraphBuilder& graph,
                 graph.setFinalResource(task_data.backbuffer);
             },
             [](const DrawTask&                    task_data,
-               core::OptionalRef<gpu::RenderPass> render_pass,
+               OptionalRef<gpu::RenderPass> render_pass,
                gpu::CommandBuffer&                cmb) {});
 
         render_task.setCullImune(true);

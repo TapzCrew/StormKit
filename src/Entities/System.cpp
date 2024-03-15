@@ -11,7 +11,7 @@ import stormkit.Core;
 namespace stormkit::entities {
     /////////////////////////////////////
     /////////////////////////////////////
-    System::System(EntityManager& manager, core::UInt32 priority, ComponentTypes types)
+    System::System(EntityManager& manager, UInt32 priority, ComponentTypes types)
         : m_manager { &manager }, m_priority { priority }, m_types { std::move(types) } {
     }
 
@@ -40,7 +40,7 @@ namespace stormkit::entities {
     /////////////////////////////////////
     /////////////////////////////////////
     auto System::addEntity(Entity e) -> void {
-        core::expects(e != INVALID_ENTITY);
+        expects(e != INVALID_ENTITY);
 
         m_entities.insert(e);
     }
@@ -48,7 +48,7 @@ namespace stormkit::entities {
     /////////////////////////////////////
     /////////////////////////////////////
     auto System::removeEntity(Entity e) -> void {
-        core::expects(e != INVALID_ENTITY);
+        expects(e != INVALID_ENTITY);
 
         m_entities.erase(e);
     }

@@ -28,7 +28,7 @@ auto Renderer::operator=(Renderer&&) noexcept -> Renderer& = default;
 
 auto Renderer::renderFrame() -> void {
     const auto& surface_extent  = m_surface->extent();
-    const auto  surface_extentf = core::math::ExtentF { surface_extent };
+    const auto  surface_extentf = math::ExtentF { surface_extent };
 
     if (m_surface->needRecreate()) {
         m_surface->recreate();
@@ -49,14 +49,14 @@ auto Renderer::renderFrame() -> void {
         return s;
     }();
 
-    auto sets = core::makeConstObserverStaticArray(m_board.descriptor_set);
+    auto sets = makeConstObserverStaticArray(m_board.descriptor_set);
 
     auto  frame         = std::move(m_surface->acquireNextFrame().value());
     auto& framebuffer   = m_framebuffers[frame.image_index];
     auto& commandbuffer = m_command_buffers[frame.image_index];
 
-    auto wait   = core::makeConstObserverStaticArray(frame.image_available);
-    auto signal = core::makeConstObserverStaticArray(frame.render_finished);
+    auto wait   = makeConstObserverStaticArray(frame.image_available);
+    auto signal = makeConstObserverStaticArray(frame.render_finished);
 
     m_current_fence = frame.in_flight;
 
@@ -85,12 +85,12 @@ auto Renderer::updateBoard(const stormkit::image::Image& board) -> void {
 
     if (m_current_fence) m_current_fence->wait();
 
-    const auto descriptors = core::makeStaticArray(gpu::Descriptor { gpu::ImageDescriptor {
+    const auto descriptors = makeStaticArray(gpu::Descriptor { gpu::ImageDescriptor {
         .type       = gpu::DescriptorType::Combined_Image_Sampler,
         .binding    = 0,
         .layout     = gpu::ImageLayout::Shader_Read_Only_Optimal,
-        .image_view = core::makeConstObserver(m_board.image_views[m_board.current_image]),
-        .sampler    = core::makeConstObserver(m_board.sampler) } });
+        .image_view = makeConstObserver(m_board.image_views[m_board.current_image]),
+        .sampler    = makeConstObserver(m_board.sampler) } });
     m_board.descriptor_set->update(descriptors);
 }
 
@@ -99,11 +99,11 @@ auto Renderer::doInitBaseRenderObjects() -> void {
     m_instance = std::make_unique<gpu::Instance>();
     ilog("Render backend successfully initialized");
     ilog("Using StormKit {}.{}.{} {} {}, built with {}",
-         core::STORMKIT_MAJOR_VERSION,
-         core::STORMKIT_MINOR_VERSION,
-         core::STORMKIT_PATCH_VERSION,
-         core::STORMKIT_GIT_BRANCH,
-         core::STORMKIT_GIT_COMMIT_HASH,
+         STORMKIT_MAJOR_VERSION,
+         STORMKIT_MINOR_VERSION,
+         STORMKIT_PATCH_VERSION,
+         STORMKIT_GIT_BRANCH,
+         STORMKIT_GIT_COMMIT_HASH,
          STORMKIT_COMPILER);
 
     ilog("--------- Physical Devices ----------");
@@ -125,13 +125,13 @@ auto Renderer::doInitBaseRenderObjects() -> void {
 
     m_surface->initialize(*m_device);
 
-    m_queue           = core::makeConstObserver(m_device->graphicsQueue());
+    m_queue           = makeConstObserver(m_device->graphicsQueue());
     m_command_buffers = m_queue->createCommandBuffers(m_surface->bufferingCount());
 }
 
 auto Renderer::doInitMeshRenderObjects() -> void {
     const auto& surface_extent  = m_surface->extent();
-    const auto  surface_extentf = core::math::ExtentF { surface_extent };
+    const auto  surface_extentf = math::ExtentF { surface_extent };
 
     m_board.vertex_shader   = m_device->allocateShader(SHADER_DATA, gpu::ShaderStageFlag::Vertex);
     m_board.fragment_shader = m_device->allocateShader(SHADER_DATA, gpu::ShaderStageFlag::Fragment);
@@ -174,14 +174,14 @@ auto Renderer::doInitMeshRenderObjects() -> void {
                                                      .alpha_blend_operation =
                                                          gpu::BlendOperation::Add } } },
         .dynamic_state        = { { gpu::DynamicState::Viewport, gpu::DynamicState::Scissor } },
-        .shader_state         = { .shaders = core::makeConstObserverArray(m_board.vertex_shader,
+        .shader_state         = { .shaders = makeConstObserverArray(m_board.vertex_shader,
                                                                   m_board.fragment_shader) },
         /*.vertex_input_state   = { .binding_descriptions =
-                                    core::toArray(MESH_VERTEX_BINDING_DESCRIPTIONS),
+                                    toArray(MESH_VERTEX_BINDING_DESCRIPTIONS),
                                   .input_attribute_descriptions =
-                                    core::toArray(MESH_VERTEX_ATTRIBUTE_DESCRIPTIONS) },*/
+                                    toArray(MESH_VERTEX_ATTRIBUTE_DESCRIPTIONS) },*/
         .layout = { .descriptor_set_layouts =
-                        core::makeConstObserverArray(m_descriptor_set_layout) }
+                        makeConstObserverArray(m_descriptor_set_layout) }
 
     };
 
@@ -189,7 +189,7 @@ auto Renderer::doInitMeshRenderObjects() -> void {
     m_board.pipeline->setRenderPass(*m_render_pass);
     m_board.pipeline->bake();
 
-    for (auto i : core::range(BOARD_BUFFERING_COUNT)) {
+    for (auto i : range(BOARD_BUFFERING_COUNT)) {
         auto& img = m_board.images.emplace_back(*m_device,
                                                 gpu::Image::CreateInfo {
                                                     .extent = { BOARD_SIZE, BOARD_SIZE } });
@@ -210,7 +210,7 @@ auto Renderer::doInitMeshRenderObjects() -> void {
 
 auto Renderer::doInitPerFrameObjects() -> void {
     const auto& surface_extent  = m_surface->extent();
-    const auto  surface_extentf = core::math::ExtentF { surface_extent };
+    const auto  surface_extentf = math::ExtentF { surface_extent };
     const auto  buffering_count = m_surface->bufferingCount();
 
     m_surface_views.clear();
@@ -220,9 +220,9 @@ auto Renderer::doInitPerFrameObjects() -> void {
     m_framebuffers.clear();
     m_framebuffers.reserve(buffering_count);
 
-    for (auto i : core::range(buffering_count)) {
+    for (auto i : range(buffering_count)) {
         const auto& image_view  = m_surface_views[i];
-        auto        attachments = core::makeConstRefArray(image_view);
+        auto        attachments = makeConstRefArray(image_view);
 
         m_framebuffers.emplace_back(*m_render_pass, surface_extent, std::move(attachments));
     }

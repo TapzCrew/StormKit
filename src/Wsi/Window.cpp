@@ -77,7 +77,7 @@ namespace stormkit::wsi {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    Window::Window(std::string title, const core::math::ExtentU& size, WindowStyle style) noexcept
+    Window::Window(std::string title, const math::ExtentU& size, WindowStyle style) noexcept
         : m_impl { wm() } {
         create(std::move(title), size, style);
     }
@@ -97,7 +97,7 @@ namespace stormkit::wsi {
     /////////////////////////////////////
     /////////////////////////////////////
     auto Window::create(std::string                title,
-                        const core::math::ExtentU& size,
+                        const math::ExtentU& size,
                         WindowStyle                style) noexcept -> void {
         m_impl->create(std::move(title), size, style);
     }
@@ -128,7 +128,7 @@ namespace stormkit::wsi {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto Window::setExtent(const core::math::ExtentU& extent) noexcept -> void {
+    auto Window::setExtent(const math::ExtentU& extent) noexcept -> void {
         m_impl->setExtent(extent);
     }
 
@@ -158,7 +158,7 @@ namespace stormkit::wsi {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto Window::extent() const noexcept -> const core::math::ExtentU& {
+    auto Window::extent() const noexcept -> const math::ExtentU& {
         return m_impl->extent();
     }
 
@@ -242,13 +242,13 @@ namespace stormkit::wsi {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto Window::setMousePosition(const core::math::Vector2I& position) noexcept -> void {
+    auto Window::setMousePosition(const math::Vector2I& position) noexcept -> void {
         m_impl->setMousePosition(position);
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto Window::setMousePositionOnDesktop(const core::math::Vector2U& position) noexcept -> void {
+    auto Window::setMousePositionOnDesktop(const math::Vector2U& position) noexcept -> void {
         WindowImpl::setMousePositionOnDesktop(wm(), position);
     }
 
@@ -264,10 +264,10 @@ namespace stormkit::wsi {
         const auto settings = getMonitorSettings();
 
         const auto it = std::ranges::find_if(settings, [](const auto& monitor) {
-            return core::checkFlag(monitor.flags, Monitor::Flags::Primary);
+            return checkFlag(monitor.flags, Monitor::Flags::Primary);
         });
 
-        core::ensures(it != std::ranges::cend(settings));
+        ensures(it != std::ranges::cend(settings));
 
         return *it;
     }

@@ -21,15 +21,15 @@ auto main(std::span<const std::string_view> args) -> int {
     using namespace stormkit;
 
     wsi::parseArgs(args);
-    // core::setupSignalHandler();
+    // setupSignalHandler();
 
     auto logger = log::Logger::createLoggerInstance<log::ConsoleLogger>();
     logger.ilog("Using StormKit {}.{}.{}\n    branch: {}\n    commit_hash: {}\n    built with {}",
-                core::STORMKIT_MAJOR_VERSION,
-                core::STORMKIT_MINOR_VERSION,
-                core::STORMKIT_PATCH_VERSION,
-                core::STORMKIT_GIT_BRANCH,
-                core::STORMKIT_GIT_COMMIT_HASH,
+                STORMKIT_MAJOR_VERSION,
+                STORMKIT_MINOR_VERSION,
+                STORMKIT_PATCH_VERSION,
+                STORMKIT_GIT_BRANCH,
+                STORMKIT_GIT_COMMIT_HASH,
                 STORMKIT_COMPILER);
 
     try {
