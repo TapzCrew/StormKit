@@ -391,10 +391,19 @@ namespace stormkit::gpu {
 
                 auto&& allocator = device.vmaAllocator();
 
-                auto&& [error, m_vma_allocation] =
+                auto&& [error, allocation] =
                     allocator.allocateMemoryUnique(requirements, allocate_info);
-                if (error != vk::Result::eSuccess)
+
+                m_vma_allocation = std::move(allocation);
+
+                if (error != vk::Result::eSuccess) [[unlikely]]
                     return std::unexpected { core::narrow<vk::Result>(error) };
+
+                error = allocator.bindImageMemory(*m_vma_allocation, **m_vk_image);
+
+                if (error != vk::Result::eSuccess) [[unlikely]]
+                    return std::unexpected { core::narrow<vk::Result>(error) };
+
                 return {};
             })
             .transform_error(core::monadic::map(core::monadic::as<Result>(), core::throwError()));
