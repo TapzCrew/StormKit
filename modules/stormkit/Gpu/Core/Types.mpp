@@ -4,9 +4,9 @@
 
 module;
 
-#include <stormkit/Core/PlatformMacro.hpp>
 #include <stormkit/Core/FlagsMacro.hpp>
 #include <stormkit/Core/HashMacro.hpp>
+#include <stormkit/Core/PlatformMacro.hpp>
 
 export module stormkit.Gpu:Core.Types;
 
@@ -975,8 +975,8 @@ export {
             ImageSubresourceLayers src;
             ImageSubresourceLayers dst;
 
-            std::array<core::math::ExtentI, 2> src_offset;
-            std::array<core::math::ExtentI, 2> dst_offset;
+            std::array<core::math::Vector3F, 2> src_offset;
+            std::array<core::math::Vector3F, 2> dst_offset;
         };
 
         struct PushConstantRange {
