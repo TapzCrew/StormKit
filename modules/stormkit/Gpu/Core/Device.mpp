@@ -6,6 +6,8 @@ module;
 
 #include <stormkit/Core/PlatformMacro.hpp>
 
+#include <vulkan/vulkan_core.h>
+
 export module stormkit.Gpu:Core.Device;
 
 import std;
@@ -235,7 +237,10 @@ namespace stormkit::gpu {
     template<class T>
     STORMKIT_FORCE_INLINE auto Device::setObjectName(const T&         object,
                                                      std::string_view name) const -> void {
-        setObjectName(*std::bit_cast<core::UInt64*>(&toVkHandle(object)), T::DEBUG_TYPE, name);
+        auto&& vk_object  = toVkHandle(object);
+        setObjectName(std::bit_cast<core::UInt64>(static_cast<const void *>(vk_object)),
+                      T::DEBUG_TYPE,
+                      name);
     }
 
     /////////////////////////////////////
