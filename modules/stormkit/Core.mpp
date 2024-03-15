@@ -16,3 +16,7 @@ export import :Meta;
 export import :Parallelism;
 export import :String;
 export import :Utils;
+
+export namespace stormkit {
+    using namespace core;
+}
