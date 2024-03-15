@@ -56,11 +56,13 @@ export namespace stormkit::core {
     using MaybeBorrowed = std::optional<Borrowed<T>>;
 
     template<IsRawIndirection T>
-        requires(not IsRValueReference<T>)
+        requires(not IsRValueReference<T> and not IsFancyPointer<PureType<T>>)
     [[nodiscard]] constexpr auto borrow(T&& value) noexcept -> decltype(auto);
     template<typename T>
+        requires(not IsFancyPointer<PureType<T>>)
     [[nodiscard]] constexpr auto borrow(const Borrowed<T>& value) noexcept -> decltype(auto);
-    template<IsFancyPointer T>
+    template<typename T>
+        requires IsFancyPointer<PureType<T>>
     [[nodiscard]] constexpr auto borrow(T&& value) noexcept -> decltype(auto);
 
     template<template<typename...> typename Out = std::vector, typename... Args>
@@ -178,7 +180,7 @@ namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
     template<IsRawIndirection T>
-        requires(not IsRValueReference<T>)
+        requires(not IsRValueReference<T> and not IsFancyPointer<PureType<T>>)
     constexpr auto borrow(T&& value) noexcept -> decltype(auto) {
         using PureT = PureType<T>;
         using Out =
@@ -189,13 +191,15 @@ namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
     template<typename T>
+        requires(not IsFancyPointer<PureType<T>>)
     constexpr auto borrow(const Borrowed<T>& value) noexcept -> decltype(auto) {
         return auto { value };
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    template<IsFancyPointer T>
+    template<typename T>
+        requires IsFancyPointer<PureType<T>>
     constexpr auto borrow(T&& value) noexcept -> decltype(auto) {
         using PureT = PureType<typename PureType<T>::element_type>;
         using Out =
