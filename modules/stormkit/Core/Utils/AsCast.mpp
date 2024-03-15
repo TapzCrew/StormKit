@@ -14,7 +14,7 @@ import :Utils.Assert;
 import :Meta.Concepts;
 import :Meta.Traits;
 
-export namespace stormkit::core {
+export namespace stormkit::core { inline namespace casts {
     template<IsNotReference To, typename... Args>
     [[nodiscard]] constexpr auto is(const std::variant<Args...>& variant) noexcept -> bool;
 
@@ -125,7 +125,7 @@ export namespace stormkit::core {
     //     requires(not std::convertible_to<From, To> and not IsArithmetic<To> and
     //              not IsArithmetic<From>)
     // [[nodiscard]] constexpr auto as(From&& value) noexcept -> To;
-} // namespace stormkit::core
+}} // namespace stormkit::core::casts
 
 ////////////////////////////////////////////////////////////////////
 ///                      IMPLEMENTATION                          ///
@@ -207,7 +207,7 @@ auto test() {
     INSTANCIATE_AS(ldouble {})
 }
 
-namespace stormkit::core {
+namespace stormkit::core { inline namespace casts {
     /////////////////////////////////////
     /////////////////////////////////////
     template<IsNotReference To, typename... Args>
@@ -465,5 +465,4 @@ namespace stormkit::core {
         expects(value < std::numeric_limits<std::byte>::max());
         return static_cast<To>(value);
     }
-
-} // namespace stormkit::core
+}} // namespace stormkit::core::casts
