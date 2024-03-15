@@ -94,21 +94,20 @@ namespace stormkit::gpu {
         const auto image_sharing_mode = vk::SharingMode::eExclusive;
 
         const auto create_info = [&] noexcept -> decltype(auto) {
-            auto info = vk::SwapchainCreateInfoKHR {
-                .surface          = *surface.vkHandle(),
-                .minImageCount    = image_count,
-                .imageFormat      = format.format,
-                .imageColorSpace  = format.colorSpace,
-                .imageExtent      = swapchain_extent,
-                .imageArrayLayers = 1,
-                .imageUsage =
-                    vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransferDst,
-                .imageSharingMode = image_sharing_mode,
-                .preTransform     = capabilities.currentTransform,
-                .compositeAlpha   = vk::CompositeAlphaFlagBitsKHR::eOpaque,
-                .presentMode      = present_mode,
-                .clipped          = true
-            };
+            auto info =
+                vk::SwapchainCreateInfoKHR { .surface          = *surface.vkHandle(),
+                                             .minImageCount    = image_count,
+                                             .imageFormat      = format.format,
+                                             .imageColorSpace  = format.colorSpace,
+                                             .imageExtent      = swapchain_extent,
+                                             .imageArrayLayers = 1,
+                                             .imageUsage = vk::ImageUsageFlagBits::eTransferDst,
+                                             .imageSharingMode = image_sharing_mode,
+                                             .preTransform     = capabilities.currentTransform,
+                                             .compositeAlpha =
+                                                 vk::CompositeAlphaFlagBitsKHR::eOpaque,
+                                             .presentMode = present_mode,
+                                             .clipped     = true };
             if (old_swapchain) info.oldSwapchain = **old_swapchain;
             return info;
         }();

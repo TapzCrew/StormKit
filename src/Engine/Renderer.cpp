@@ -254,17 +254,29 @@ namespace stormkit::engine {
         blit_cmb.begin(true);
         auto&& semaphore  = framegraph->execute(m_raster_queue, frame);
         auto&& backbuffer = framegraph->backbuffer();
+        blit_cmb.transitionImageLayout(backbuffer,
+                                       gpu::ImageLayout::Color_Attachment_Optimal,
+                                       gpu::ImageLayout::Transfer_Src_Optimal);
+        blit_cmb.transitionImageLayout(present_image,
+                                       gpu::ImageLayout::Present_Src,
+                                       gpu::ImageLayout::Transfer_Dst_Optimal);
         blit_cmb.blitImage(
             backbuffer,
             present_image,
-            gpu::ImageLayout::Color_Attachment_Optimal,
-            gpu::ImageLayout::Present_Src,
+            gpu::ImageLayout::Transfer_Src_Optimal,
+            gpu::ImageLayout::Transfer_Dst_Optimal,
             std::array { gpu::BlitRegion {
                 .src        = {},
                 .dst        = {},
                 .src_offset = { core::math::ExtentI { 0, 0, 0 }, backbuffer.extent() },
                 .dst_offset = { core::math::ExtentI { 0, 0, 0 }, present_image.extent() } } },
             gpu::Filter::Linear);
+        blit_cmb.transitionImageLayout(backbuffer,
+                                       gpu::ImageLayout::Transfer_Src_Optimal,
+                                       gpu::ImageLayout::Color_Attachment_Optimal);
+        blit_cmb.transitionImageLayout(present_image,
+                                       gpu::ImageLayout::Transfer_Dst_Optimal,
+                                       gpu::ImageLayout::Present_Src);
         blit_cmb.end();
 
         auto wait   = core::makeNakedRefs<std::array>(semaphore, *frame.image_available);
