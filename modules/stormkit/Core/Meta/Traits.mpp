@@ -25,6 +25,22 @@ export namespace stormkit::core {
     template<class T>
     using RawType = typename RawTypeTrait<T>::Type;
 
+    template<class T>
+    struct ElementTypeTrait;
+
+    template<IsFancyPointer T>
+    struct ElementTypeTrait<T> {
+        using Type = std::remove_pointer_t<typename T::element_type>;
+    };
+
+    template<IsRawPointer T>
+    struct ElementTypeTrait<T> {
+        using Type = std::remove_pointer_t<T>;
+    };
+
+    template<class T>
+    using ElementType = typename ElementTypeTrait<T>::Type;
+
     template<std::ranges::range Range>
     struct IteratorTypeTrait {
         using Type = decltype(std::cbegin(std::declval<Range>()));
