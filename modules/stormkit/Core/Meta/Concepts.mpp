@@ -29,13 +29,13 @@ namespace stormkit::core {
         concept Is = std::same_as<T, U> or std::derived_from<T, U>;
 
         template<class T, class... U>
-        concept Are = ((std::same_as<T, U> or std::derived_from<T, U>)and...);
+        concept Are = ((std::same_as<T, U> or std::derived_from<T, U>) and ...);
 
         template<class T, class U>
         concept IsPure = Is<std::remove_cvref_t<T>, std::remove_cvref_t<U>>;
 
         template<class T, class... U>
-        concept ArePures = ((std::same_as<T, U> or std::derived_from<T, U>)and...);
+        concept ArePures = ((std::same_as<T, U> or std::derived_from<T, U>) and ...);
 
         template<class T, class... U>
         concept IsOneOf = (Is<T, U> or ...);
@@ -67,6 +67,14 @@ namespace stormkit::core {
         template<class T>
         concept IsPointer = IsRawPointer<T> or IsFancyPointer<T>;
 
+        template<class T>
+        concept IsPolymorphic = std::is_polymorphic_v<T>;
+
+        template<class T>
+        concept IsPolymorphicPointer =
+            (IsRawPointer<T> and IsPolymorphic<std::remove_pointer_t<T>>) or
+            (IsFancyPointer<T> and IsPolymorphic<typename T::element_type>);
+
         // clang-format off
         template<class T>
         concept IsNotPointer = not IsPointer<T>;
@@ -81,6 +89,9 @@ namespace stormkit::core {
         template<class T>
         concept IsReference = IsLValueReference<T> or IsRValueReference<T>;
 
+        template<class T>
+        concept IsPolymorphicReference = IsReference<T> and IsPolymorphic<std::remove_reference_t<T>>;
+
         // clang-format off
         template<class T>
         concept IsNotReference = not IsReference<T>;
@@ -90,13 +101,10 @@ namespace stormkit::core {
         concept IsIndirection = IsLValueReference<T> or IsPointer<T>;
 
         template<class... T>
-        concept AreIndirections = ((IsLValueReference<T> or IsPointer<T>)&&...);
+        concept AreIndirections = ((IsLValueReference<T> or IsPointer<T>) && ...);
 
         template<class T>
         concept IsRawIndirection = IsLValueReference<T> or IsRawPointer<T>;
-
-        template<class T>
-        concept IsPolymorphic = std::is_polymorphic_v<T>;
 
         template<class T>
         concept IsNotIndirection = not IsIndirection<T>;
@@ -121,7 +129,7 @@ namespace stormkit::core {
 
         template<class T>
         concept IsArithmetic =
-            (IsIntegral<T> or IsFloatingPoint<T>)and not IsPointer<T> and not IsEnumeration<T>;
+            (IsIntegral<T> or IsFloatingPoint<T>) and not IsPointer<T> and not IsEnumeration<T>;
 
         template<class T>
         concept IsArithmeticPure = IsArithmetic<std::remove_cvref_t<T>>;
