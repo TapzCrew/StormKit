@@ -94,8 +94,7 @@ namespace stormkit::core::monadic {
     template<typename T>
     STORMKIT_FORCE_INLINE constexpr auto as() noexcept -> decltype(auto) {
         return [](auto&& value) noexcept -> decltype(auto) {
-            using core::as;
-            return as<T>(std::forward<decltype(value)>(value));
+            return core::as<T>(std::forward<decltype(value)>(value));
         };
     }
 
@@ -104,8 +103,7 @@ namespace stormkit::core::monadic {
     template<typename T>
     STORMKIT_FORCE_INLINE constexpr auto narrow() noexcept -> decltype(auto) {
         return [](auto&& value) noexcept -> decltype(auto) {
-            using core::narrow;
-            return narrow<T>(std::forward<decltype(value)>(value));
+            return core::narrow<T>(std::forward<decltype(value)>(value));
         };
     }
 
@@ -145,7 +143,7 @@ namespace stormkit::core::monadic {
     ////////////////////////////////////////
     ////////////////////////////////////////
     STORMKIT_FORCE_INLINE constexpr auto asByte() noexcept {
-        return [](auto&& val) { return static_cast<std::byte>(val); };
+        return [](auto&& val) { return core::as<std::byte>(val); };
     }
 
     /////////////////////////////////////
@@ -229,7 +227,7 @@ namespace stormkit::core::monadic {
     /////////////////////////////////////
     template<typename T>
     STORMKIT_FORCE_INLINE constexpr auto is() noexcept -> decltype(auto) {
-        return [](auto&& value) static noexcept { return core::is<T>(value); };
+        return []<typename U>(U&& value) static noexcept { return core::is<T>(std::forward<U>(value)); };
     }
 
     /////////////////////////////////////
