@@ -39,21 +39,21 @@ export namespace stormkit::core {
 
     template<IsFloatingPoint T>
     [[nodiscard]] constexpr auto
-        equal(const T& a, const T& b, const T& epsilon = Epsilon<T>) noexcept -> bool;
+        is(const T& a, const T& b, const T& epsilon = Epsilon<T>) noexcept -> bool;
 
     template<IsFloatingPoint T,
              IsFloatingPoint U,
              IsFloatingPoint V = SafeNarrowHelperOtherType<T, U>>
     [[nodiscard]] constexpr auto
-        equal(const T& a, const U& b, const V& epsilon = Epsilon<V>) noexcept -> bool;
+        is(const T& a, const U& b, const V& epsilon = Epsilon<V>) noexcept -> bool;
 
     template<IsIntegral T, IsIntegral U>
         requires Is<T, U>
-    [[nodiscard]] constexpr auto equal(const T& a, const U& b) noexcept -> bool;
+    [[nodiscard]] constexpr auto is(const T& a, const U& b) noexcept -> bool;
 
     template<IsIntegral T, IsIntegral U>
         requires IsNot<T, U>
-    [[nodiscard]] constexpr auto equal(const T& a, const U& b) noexcept -> bool;
+    [[nodiscard]] constexpr auto is(const T& a, const U& b) noexcept -> bool;
 
     template<IsArithmetic U, IsArithmetic T>
     [[nodiscard]] constexpr auto map(const T& x,
@@ -214,7 +214,7 @@ namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
     template<IsFloatingPoint T>
-    constexpr auto equal(const T& a, const T& b, const T& epsilon) noexcept -> bool {
+    constexpr auto is(const T& a, const T& b, const T& epsilon) noexcept -> bool {
         const auto diff   = std::abs(a - b);
         const auto max_ab = std::max(std::abs(a), std::abs(b));
 
@@ -230,18 +230,18 @@ namespace stormkit::core {
     template<IsFloatingPoint T,
              IsFloatingPoint U,
              IsFloatingPoint V = SafeNarrowHelperOtherType<T, U>>
-    STORMKIT_FORCE_INLINE constexpr auto equal(const T& a, const U& b, const V& epsilon) noexcept
+    STORMKIT_FORCE_INLINE constexpr auto is(const T& a, const U& b, const V& epsilon) noexcept
         -> bool {
         using Type = SafeNarrowHelperType<T, U>;
 
-        return equal<Type>(narrow<Type>(a), narrow<Type>(b), narrow<Type>(epsilon));
+        return is<Type>(narrow<Type>(a), narrow<Type>(b), narrow<Type>(epsilon));
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
     template<IsIntegral T, IsIntegral U>
         requires Is<T, U>
-    STORMKIT_FORCE_INLINE constexpr auto equal(const T& a, const U& b) noexcept -> bool {
+    STORMKIT_FORCE_INLINE constexpr auto is(const T& a, const U& b) noexcept -> bool {
         return a == b;
     }
 
@@ -249,10 +249,10 @@ namespace stormkit::core {
     /////////////////////////////////////
     template<IsIntegral T, IsIntegral U>
         requires IsNot<T, U>
-    STORMKIT_FORCE_INLINE constexpr auto equal(const T& a, const U& b) noexcept -> bool {
+    STORMKIT_FORCE_INLINE constexpr auto is(const T& a, const U& b) noexcept -> bool {
         using Type = SafeNarrowHelperType<T, U>;
 
-        return equal<Type>(narrow<Type>(a), narrow<Type>(b));
+        return is<Type>(narrow<Type>(a), narrow<Type>(b));
     }
 
     /////////////////////////////////////
