@@ -51,8 +51,8 @@ export namespace stormkit::entities {
     constexpr auto componentHash(std::string_view str) noexcept -> Component::Type;
 
     namespace literals {
-        constexpr auto operator""_component_type(const char* str, RangeExtent size)
-            -> Component::Type;
+        constexpr auto operator""_component_type(const char* str,
+                                                 RangeExtent size) -> Component::Type;
     } // namespace literals
 
     struct Message {
@@ -109,9 +109,9 @@ export namespace stormkit::entities {
         auto removeEntity(Entity e) -> void;
 
         struct Predicate {
-            [[nodiscard]] auto operator()(const std::unique_ptr<System>& s1,
-                                          const std::unique_ptr<System>& s2) const noexcept
-                -> bool {
+            [[nodiscard]] auto
+                operator()(const std::unique_ptr<System>& s1,
+                           const std::unique_ptr<System>& s2) const noexcept -> bool {
                 return s1->priority() < s2->priority();
             }
         };
@@ -168,8 +168,8 @@ export namespace stormkit::entities {
         auto getComponent(this Self& self, Entity entity) -> LikeType<Self, T&>;
 
         template<class Self>
-        auto components(this Self& self, Entity entity)
-            -> std::vector<Borrowed<LikeType<Self, Component>>>;
+        auto components(this Self& self,
+                        Entity     entity) -> std::vector<Borrowed<LikeType<Self, Component>>>;
 
         template<IsComponentTypeOrFail T, class Self>
         auto componentsOfType(this Self& self) noexcept -> std::vector<Borrowed<LikeType<Self, T>>>;
@@ -195,8 +195,8 @@ export namespace stormkit::entities {
       private:
         using ComponentKey = UInt64;
 
-        static constexpr auto componentKeyFor(Entity e, Component::Type type) noexcept
-            -> ComponentKey;
+        static constexpr auto componentKeyFor(Entity          e,
+                                              Component::Type type) noexcept -> ComponentKey;
         static constexpr auto isKeyEntity(Entity e, ComponentKey key) noexcept -> bool;
 
         auto purposeToSystems(Entity e) -> void;
@@ -257,8 +257,8 @@ namespace stormkit::entities {
     namespace literals {
         /////////////////////////////////////
         /////////////////////////////////////
-        constexpr auto operator""_component_type(const char* str, RangeExtent size)
-            -> Component::Type {
+        constexpr auto operator""_component_type(const char* str,
+                                                 RangeExtent size) -> Component::Type {
             return stormkit::entities::componentHash(str, size);
         }
     } // namespace literals
@@ -342,9 +342,11 @@ namespace stormkit::entities {
     /////////////////////////////////////
     template<IsComponentTypeOrFail T>
     auto EntityManager::entitiesWithComponent() const -> std::vector<Entity> {
-        return entities() |
-               std::views::filter([](auto&& entity) { std::ranges::any_of(entity, T::TYPE); }) |
-               std::ranges::to<std::vector>();
+        // clang-format off
+        return entities() 
+               | std::views::filter([](auto&& entity) static noexcept { return std::ranges::any_of(entity, T::TYPE); })
+               | std::ranges::to<std::vector>();
+        // clang-format on
     }
 
     /////////////////////////////////////
@@ -355,7 +357,7 @@ namespace stormkit::entities {
         expects(self.hasEntity(entity));
 
         const auto key = componentKeyFor(entity, T::TYPE);
-        return *static_cast<T*>(self.m_components.at(key).get());
+        return *std::bit_cast<T*>(self.m_components.at(key).get());
     }
 
     /////////////////////////////////////
@@ -365,14 +367,15 @@ namespace stormkit::entities {
         -> std::vector<Borrowed<LikeType<Self, Component>>> {
         if (not self.hasEntity(entity)) [[unlikely]]
             return {};
-
-        return self.m_components | std::views::filter([entity](auto&& pair) {
+        // clang-format off
+        return self.m_components 
+               | std::views::filter([entity](auto&& pair) noexcept {
                    return EntityManager::isKeyEntity(entity, pair.first);
-               }) |
-               std::views::values | std::views::transform([](auto&& component) {
-                   return Borrowed<Component> { component.get() };
-               }) |
-               std::ranges::to<std::vector>();
+               }) 
+               | std::views::values 
+               | std::views::transform(monadic::borrow()) 
+               | std::ranges::to<std::vector>();
+        // clang-format on
     }
 
     /////////////////////////////////////
@@ -380,11 +383,14 @@ namespace stormkit::entities {
     template<IsComponentTypeOrFail T, class Self>
     auto EntityManager::componentsOfType(this Self& self) noexcept
         -> std::vector<Borrowed<LikeType<Self, T>>> {
-        return self.m_entities |
-               std::views::filter([&self](auto&& e) { return self.template hasComponent<T>(e); }) |
-               std::views::transform(
-                   [&self](auto&& e) { return Borrowed { self.template getComponent<T>(e) }; }) |
-               std::ranges::to<std::vector>();
+        // clang-format off
+        return self.m_entities 
+               | std::views::filter(curry(&EntityManager::hasComponent<T>, &self))
+               | std::views::transform(curry(&EntityManager::getComponent<T>, &self))
+               | std::views::transform(monadic::forwardLike<Self>())
+               | std::views::transform(monadic::borrow())
+               | std::ranges::to<std::vector>();
+        // clang-format on
     }
 
     /////////////////////////////////////
@@ -412,9 +418,12 @@ namespace stormkit::entities {
     template<class Self>
     auto EntityManager::systems(this Self& self) noexcept
         -> std::vector<Borrowed<LikeType<Self, System>>> {
-        return self.m_systems |
-               std::views::transform([](auto&& system) { return Borrowed { system.get() }; }) |
-               std::ranges::to<std::vector>();
+        // clang-format off
+        return self.m_systems 
+               | std::views::transform(monadic::forwardLike<Self>())
+               | std::views::transform(monadic::borrow())
+               | std::ranges::to<std::vector>();
+        // clang-format on
     }
 
     /////////////////////////////////////
@@ -423,11 +432,9 @@ namespace stormkit::entities {
     auto EntityManager::getSystem(this Self& self) noexcept -> LikeType<Self, T&> {
         expects(self.template hasSystem<T>());
 
-        auto&& systems = self.systems();
+        auto it = std::ranges::find_if(self.m_systems, monadic::is<T>());
 
-        auto it = std::ranges::find_if(systems, monadic::is<T>());
-
-        return as<T&>(it->get());
+        return as<LikeType<Self, T&>>(*it->get());
     }
 
     /////////////////////////////////////
@@ -438,8 +445,8 @@ namespace stormkit::entities {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    constexpr auto EntityManager::componentKeyFor(Entity e, Component::Type type) noexcept
-        -> ComponentKey {
+    constexpr auto EntityManager::componentKeyFor(Entity          e,
+                                                  Component::Type type) noexcept -> ComponentKey {
         return (static_cast<UInt64>(e) << 32) | static_cast<UInt64>(type);
     }
 
