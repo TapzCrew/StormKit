@@ -418,10 +418,8 @@ namespace stormkit::engine {
             device.setObjectName(cmb, std::format("FrameGraph:CommandBuffer:{}", pass.name));
 
             cmb.begin(false, gpu::InheritanceInfo { &renderpass, 0, &framebuffer });
-            cmb.beginRenderPass(renderpass, framebuffer, clear_values);
             auto&& graph_task = getTask(pass.id);
             graph_task.onExecute(m_datas[pass.id].front(), &renderpass, cmb);
-            cmb.endRenderPass();
             cmb.end();
 
             output.tasks.emplace_back(
