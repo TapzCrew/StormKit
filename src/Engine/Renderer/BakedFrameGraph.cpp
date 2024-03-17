@@ -23,9 +23,9 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto BakedFrameGraph::execute(const gpu::Queue& queue, const RenderSurface::Frame& frame)
+    auto BakedFrameGraph::execute(const gpu::Queue& queue, const RenderSurface::Frame& _)
         -> const gpu::Semaphore& {
-        auto signal = borrows<std::array>(*m_data.semaphore);
+        auto signal = borrows<std::array>(m_data.semaphore);
         m_data.cmb->submit(queue, {}, signal);
 
         return *m_data.semaphore;
