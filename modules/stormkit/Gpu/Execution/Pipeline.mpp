@@ -351,6 +351,7 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE auto
         Pipeline::rasterState() const noexcept -> const RasterPipelineState& {
+        expects(m_type == Type::Raster);
         expects(is<RasterPipelineState>(m_state));
         return as<RasterPipelineState>(m_state);
     }
