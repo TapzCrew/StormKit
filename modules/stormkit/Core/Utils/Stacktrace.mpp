@@ -16,7 +16,7 @@ export module stormkit.Core:Utils.Stacktrace;
 import std;
 
 export namespace stormkit::core {
-    STORMKIT_API auto printStacktrace() noexcept -> void;
+    STORMKIT_API auto printStacktrace(int ignore_count = 0) noexcept -> void;
 } // namespace stormkit::core
 
 ////////////////////////////////////////////////////////////////////
@@ -26,13 +26,36 @@ export namespace stormkit::core {
 namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto printStacktrace() noexcept -> void {
+    STORMKIT_FORCE_INLINE auto printStacktrace(int ignore_count) noexcept -> void {
         std::println(stderr, "================= CALLSTACK =================");
+// #if defined(STD_STACKTRACE_SUPPORTED)
+//         const auto st = std::to_string(std::stacktrace::current());
+// #else
+//         const auto st = boost::stacktrace::to_string(boost::stacktrace::stacktrace {});
+// #endif
+//         std::println(stderr, "{}", st);
 #if defined(STD_STACKTRACE_SUPPORTED)
-        const auto st = std::to_string(std::stacktrace::current());
+        const auto st = std::stacktrace::current();
+
+        auto i = 0;
+        for (auto&& frame : st) {
+            if (i < ignore_count) {
+                i += 1;
+                continue;
+            }
+            std::println("{}# {}", (i++ - ignore_count), frame);
+        }
 #else
-        const auto st = boost::stacktrace::to_string(boost::stacktrace::stacktrace {});
+        const auto st = boost::stacktrace::stacktrace {};
+
+        auto i = 0;
+        for (auto&& frame : st) {
+            if (i < ignore_count) {
+                i += 1;
+                continue;
+            }
+            std::println("{}# {}", (i++ - ignore_count), boost::stacktrace::to_string(frame));
+        }
 #endif
-        std::println(stderr, "{}", st);
     }
 } // namespace stormkit::core

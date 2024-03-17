@@ -123,7 +123,7 @@ namespace stormkit::core {
                              location.function_name(),
                              message);
 
-                if (show_callstack) printStacktrace();
+                if (show_callstack) printStacktrace(1);
 
                 std::terminate();
             }
