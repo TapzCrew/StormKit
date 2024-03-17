@@ -23,11 +23,15 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto BakedFrameGraph::execute(const gpu::Queue& queue, const RenderSurface::Frame& _)
-        -> const gpu::Semaphore& {
-        auto signal = borrows<std::array>(m_data.semaphore);
-        m_data.cmb->submit(queue, {}, {}, signal);
+    auto BakedFrameGraph::execute(const gpu::Queue& queue) noexcept
+        -> gpu::Expected<Borrowed<const gpu::Semaphore>> {
+        return m_data.fence->wait().transform([&](auto&& _) noexcept {
+            m_data.fence->reset();
 
-        return *m_data.semaphore;
+            auto signal = borrows<std::array>(m_data.semaphore);
+            m_data.cmb->submit(queue, {}, {}, signal, *m_data.fence);
+
+            return borrow(*m_data.semaphore);
+        });
     }
 } // namespace stormkit::engine

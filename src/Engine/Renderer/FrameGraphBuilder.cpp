@@ -361,7 +361,10 @@ namespace stormkit::engine {
         device.setObjectName(*output.cmb, "FrameGraph:CommandBuffer:Main");
 
         output.semaphore = *gpu::Semaphore::create(device);
-        device.setObjectName(*output.cmb, "FrameGraph:Semaphore:Main");
+        device.setObjectName(*output.semaphore, "FrameGraph:Semaphore:Main");
+
+        output.fence = *gpu::Fence::createSignaled(device);
+        device.setObjectName(*output.fence, "FrameGraph:Fence:Main");
 
         output.tasks.reserve(std::size(m_preprocessed_framegraph));
 

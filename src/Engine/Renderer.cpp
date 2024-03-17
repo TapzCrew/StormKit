@@ -250,7 +250,10 @@ namespace stormkit::engine {
 
         blit_cmb.reset();
         blit_cmb.begin(true);
-        auto&& semaphore  = framegraph->execute(m_raster_queue, frame);
+        auto&& result  = framegraph->execute(m_raster_queue);
+        if(not result) return std::unexpected{ result.error() };
+        
+        auto &&semaphore = *result;
         auto&& backbuffer = framegraph->backbuffer();
         blit_cmb.transitionImageLayout(backbuffer,
                                        gpu::ImageLayout::Color_Attachment_Optimal,

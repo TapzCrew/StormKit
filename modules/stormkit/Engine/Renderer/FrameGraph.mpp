@@ -159,6 +159,7 @@ export namespace stormkit::engine {
             std::vector<gpu::Buffer>    buffers     = {};
 
             DeferInit<gpu::CommandBuffer> cmb;
+            DeferInit<gpu::Fence>         fence;
             DeferInit<gpu::Semaphore>     semaphore;
         };
 
@@ -172,10 +173,10 @@ export namespace stormkit::engine {
         BakedFrameGraph(BakedFrameGraph&&) noexcept;
         auto operator=(BakedFrameGraph&&) noexcept -> BakedFrameGraph&;
 
-        auto execute(const gpu::Queue&           queue,
-                     const RenderSurface::Frame& frame) -> const gpu::Semaphore&;
+        auto execute(const gpu::Queue& queue) noexcept
+            -> gpu::Expected<Borrowed<const gpu::Semaphore>>;
 
-        auto backbuffer() -> const gpu::Image&;
+        auto backbuffer() noexcept -> const gpu::Image&;
 
       private:
         Borrowed<const gpu::Image> m_backbuffer;
@@ -539,7 +540,9 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE BakedFrameGraph::~BakedFrameGraph() = default;
+    STORMKIT_FORCE_INLINE BakedFrameGraph::~BakedFrameGraph() {
+        if (m_data.fence) auto _ = m_data.fence->wait();
+    }
 
     /////////////////////////////////////
     /////////////////////////////////////
@@ -553,7 +556,7 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto BakedFrameGraph::backbuffer() -> const gpu::Image& {
+    STORMKIT_FORCE_INLINE auto BakedFrameGraph::backbuffer() noexcept -> const gpu::Image& {
         return *m_backbuffer;
     }
 
