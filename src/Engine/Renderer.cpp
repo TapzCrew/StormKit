@@ -275,10 +275,12 @@ namespace stormkit::engine {
                                        gpu::ImageLayout::Present_Src);
         blit_cmb.end();
 
-        auto wait   = borrows<std::array>(semaphore, frame.image_available);
-        auto signal = borrows<std::array>(frame.render_finished);
+        auto wait       = borrows<std::array>(semaphore, frame.image_available);
+        auto stage_mask = std::array { gpu::PipelineStageFlag::Color_Attachment_Output,
+                                       gpu::PipelineStageFlag::Transfer };
+        auto signal     = borrows<std::array>(frame.render_finished);
 
-        blit_cmb.submit(m_raster_queue, wait, signal, frame.in_flight);
+        blit_cmb.submit(m_raster_queue, wait, stage_mask, signal, frame.in_flight);
         return frame;
     }
 } // namespace stormkit::engine

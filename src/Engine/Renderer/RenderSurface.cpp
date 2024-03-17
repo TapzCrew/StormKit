@@ -64,7 +64,7 @@ namespace stormkit::engine {
                 .value();
 
         auto cmbs = toBorroweds(transition_command_buffers);
-        raster_queue.submit(cmbs, {}, {}, fence);
+        raster_queue.submit({ .command_buffers = cmbs }, fence);
 
         fence.wait().transform_error(monadic::map(monadic::narrow<gpu::Result>(), throwError()));
     }
@@ -97,8 +97,8 @@ namespace stormkit::engine {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto RenderSurface::presentFrame(const gpu::Queue& queue, const Frame& frame)
-        -> gpu::Expected<void> {
+    auto RenderSurface::presentFrame(const gpu::Queue& queue,
+                                     const Frame&      frame) -> gpu::Expected<void> {
         const auto image_indices   = std::array { frame.image_index };
         const auto wait_semaphores = borrows<std::array>(*frame.render_finished);
         const auto swapchains      = borrows<std::array>(*m_swapchain);
