@@ -131,17 +131,18 @@ export namespace stormkit::gpu {
         Pipeline(Pipeline&&) noexcept;
         auto operator=(Pipeline&&) noexcept -> Pipeline&;
 
+        [[nodiscard]] static auto create(
+            const Device&                      device,
+            const RasterPipelineState&         state,
+            const PipelineLayout&              layout,
+            const RenderPass&                  render_pass,
+            MaybeBorrowed<const PipelineCache> cache = std::nullopt) noexcept -> Expected<Pipeline>;
         [[nodiscard]] static auto
-                                  create(const Device&                      device,
-                                         const RasterPipelineState&         state,
-                                         const PipelineLayout&              layout,
-                                         const RenderPass&                  render_pass,
-                                         MaybeBorrowed<const PipelineCache> cache) noexcept -> Expected<Pipeline>;
-        [[nodiscard]] static auto allocate(const Device&                      device,
-                                           const RasterPipelineState&         state,
-                                           const PipelineLayout&              layout,
-                                           const RenderPass&                  render_pass,
-                                           MaybeBorrowed<const PipelineCache> cache) noexcept
+            allocate(const Device&                      device,
+                     const RasterPipelineState&         state,
+                     const PipelineLayout&              layout,
+                     const RenderPass&                  render_pass,
+                     MaybeBorrowed<const PipelineCache> cache = std::nullopt) noexcept
             -> Expected<std::unique_ptr<Pipeline>>;
 
         // auto bind(CommandBuffer& commandbuffer) const noexcept -> void;
