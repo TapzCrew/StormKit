@@ -11,13 +11,13 @@ import :Parallelism.ThreadUtils;
 namespace stormkit::core {
     ////////////////////////////////////////
     ////////////////////////////////////////
-    auto setCurrentThreadName(std::string_view name) -> void {
+    auto setCurrentThreadName(std::string_view name) noexcept -> void {
         setCurrentThreadName(std::data(name));
     }
 
     ////////////////////////////////////////
     ////////////////////////////////////////
-    auto setThreadName([[maybe_unused]] std::thread& thread, [[maybe_unused]] std::string_view name)
+    auto setThreadName([[maybe_unused]] std::thread& thread, [[maybe_unused]] std::string_view name) noexcept
         -> void {
         // auto id = thread.native_handle();
         // details::setThreadName(id, name);
@@ -26,7 +26,7 @@ namespace stormkit::core {
     ////////////////////////////////////////
     ////////////////////////////////////////
     auto setThreadName([[maybe_unused]] std::jthread&    thread,
-                       [[maybe_unused]] std::string_view name) -> void {
+                       [[maybe_unused]] std::string_view name) noexcept -> void {
         // auto id = thread.native_handle();
         // details::setThreadName(id, name);
     }

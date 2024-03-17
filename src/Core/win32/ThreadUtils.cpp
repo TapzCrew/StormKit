@@ -24,7 +24,7 @@ namespace stormkit::core {
     namespace details {
         ////////////////////////////////////////
         ////////////////////////////////////////
-        auto setThreadName(DWORD id, std::string_view name) -> void {
+        auto setThreadName(DWORD id, std::string_view name) noexcept -> void {
             auto info = ThreadNameInfo { .szName = std::data(name), .dwThreadID = id };
 
             __try {
@@ -38,21 +38,21 @@ namespace stormkit::core {
 
     ////////////////////////////////////////
     ////////////////////////////////////////
-    auto setCurrentThreadName(std::string_view name) -> void {
+    auto setCurrentThreadName(std::string_view name) noexcept -> void {
         const auto id = ::GetCurrentThreadId();
         details::setThreadName(id, name);
     }
 
     ////////////////////////////////////////
     ////////////////////////////////////////
-    auto setThreadName(std::thread& thread, std::string_view name) -> void {
+    auto setThreadName(std::thread& thread, std::string_view name) noexcept -> void {
         const auto id = ::GetThreadId(reinterpret_cast<HANDLE>(thread.native_handle()));
         details::setThreadName(id, name);
     }
 
     ////////////////////////////////////////
     ////////////////////////////////////////
-    auto setThreadName(std::jthread& thread, std::string_view name) -> void {
+    auto setThreadName(std::jthread& thread, std::string_view name) noexcept -> void {
         const auto id = ::GetThreadId(reinterpret_cast<HANDLE>(thread.native_handle()));
         details::setThreadName(id, name);
     }
