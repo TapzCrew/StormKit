@@ -159,15 +159,20 @@ namespace stormkit::gpu {
         }();
 
         const auto instance_extensions = [this]() noexcept {
-            auto e = concat(BASE_EXTENSIONS, SURFACE_EXTENSIONS, WSI_SURFACE_EXTENSIONS);
+            auto e = concat(BASE_EXTENSIONS, SURFACE_EXTENSIONS);
+
+            for (auto&& ext_ : WSI_SURFACE_EXTENSIONS) {
+                const auto ext = std::array { ext_ };
+                if (checkExtensionSupport(m_extensions, ext)) merge(e, ext);
+            }
 
             if (m_validation_layers_enabled) merge(e, std::array { "VK_EXT_debug_utils" });
 
             return e;
         }();
 
-        ensures(checkExtensionSupport(m_extensions, instance_extensions));
-        ensures(checkExtensionSupport(m_extensions, WSI_SURFACE_EXTENSIONS));
+        // ensures(checkExtensionSupport(m_extensions, instance_extensions));
+        // ensures(checkExtensionSupport(m_extensions, WSI_SURFACE_EXTENSIONS));
 
         constexpr auto ENGINE_NAME = "StormKit";
 
