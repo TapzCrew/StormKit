@@ -15,6 +15,8 @@ export module stormkit.Core:Utils.Stacktrace;
 
 import std;
 
+import :Parallelism.ThreadUtils;
+
 export namespace stormkit::core {
     STORMKIT_API auto printStacktrace(int ignore_count = 0) noexcept -> void;
 } // namespace stormkit::core
@@ -27,7 +29,16 @@ namespace stormkit::core {
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE auto printStacktrace(int ignore_count) noexcept -> void {
-        std::println(stderr, "================= CALLSTACK =================");
+        const auto thread_name = getCurrentThreadName();
+        if (not std::empty(thread_name))
+            std::println(stderr,
+                         "================= CALLSTACK (thread name: {}, id: {}) =================",
+                         thread_name,
+                         std::this_thread::get_id());
+        else
+            std::println(stderr,
+                         "================= CALLSTACK (thread id: {}) =================",
+                         std::this_thread::get_id());
 // #if defined(STD_STACKTRACE_SUPPORTED)
 //         const auto st = std::to_string(std::stacktrace::current());
 // #else
