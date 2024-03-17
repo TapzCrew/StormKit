@@ -14,4 +14,7 @@ export namespace stormkit::core {
     STORMKIT_API auto setCurrentThreadName(std::string_view name) noexcept -> void;
     STORMKIT_API auto setThreadName(std::thread& thread, std::string_view name) noexcept -> void;
     STORMKIT_API auto setThreadName(std::jthread& thread, std::string_view name) noexcept -> void;
+    STORMKIT_API auto getCurrentThreadName() noexcept -> std::string;
+    STORMKIT_API auto getThreadName(const std::thread &thread) noexcept -> std::string;
+    STORMKIT_API auto getThreadName(const std::jthread &thread) noexcept -> std::string;
 } // namespace stormkit::core
