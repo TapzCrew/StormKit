@@ -66,7 +66,7 @@ namespace stormkit::wsi {
         if (hint != std::ranges::cend(args)) {
             if (*hint == "--x11") wm_hint = WM::X11;
             else if (*hint == "--wayland")
-                wm_hint = WM::X11;
+                wm_hint = WM::Wayland;
         }
     }
 
