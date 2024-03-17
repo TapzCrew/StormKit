@@ -1,0 +1,38 @@
+module;
+
+#include <stormkit/Core/PlatformMacro.hpp>
+
+#include <csignal>
+
+export module stormkit.Core:Utils.SignalHandler;
+
+import std;
+import :Utils.Stacktrace;
+
+export namespace stormkit::core {
+    STORMKIT_API auto setupSignalHandler() noexcept -> void;
+}
+
+////////////////////////////////////////////////////////////////////
+///                      IMPLEMENTATION                          ///
+////////////////////////////////////////////////////////////////////
+
+namespace stormkit::core {
+    extern "C" auto terminateHandler() noexcept -> void {
+        printStacktrace(1);
+    }
+
+    extern "C" auto signalHandler(int signum) noexcept -> void {
+        std::signal(signum, SIG_DFL);
+        printStacktrace(1);
+        std::raise(SIGABRT);
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto setupSignalHandler() noexcept -> void {
+        std::set_terminate(&terminateHandler);
+        std::signal(SIGSEGV, &signalHandler);
+        std::signal(SIGABRT, &signalHandler);
+    }
+} // namespace stormkit::core

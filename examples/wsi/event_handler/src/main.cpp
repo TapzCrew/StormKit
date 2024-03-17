@@ -19,8 +19,6 @@ auto main(std::span<const std::string_view> args) -> int {
 
     wsi::parseArgs(args);
 
-    // setupSignalHandler();
-
     auto logger_singleton = log::Logger::createLoggerInstance<log::ConsoleLogger>();
 
     const auto monitors = wsi::Window::getMonitorSettings();

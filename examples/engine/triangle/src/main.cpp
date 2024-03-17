@@ -20,7 +20,6 @@ auto main(std::span<const std::string_view> args) -> int {
     using namespace stormkit;
 
     wsi::parseArgs(args);
-    // setupSignalHandler();
 
     auto logger = log::Logger::createLoggerInstance<log::ConsoleLogger>();
     logger.ilog("Using StormKit {}.{}.{}\n    branch: {}\n    commit_hash: {}\n    built with {}",

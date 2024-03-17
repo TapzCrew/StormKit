@@ -53,8 +53,6 @@ auto main([[maybe_unused]] std::span<const std::string_view> args) -> int {
     using namespace stormkit;
     using log::operator""_module;
 
-    // setupSignalHandler();
-
     auto logger = log::Logger::createLoggerInstance<log::FileLogger>(LOG_DIR);
 
     log::Logger::ilog("This is an information");

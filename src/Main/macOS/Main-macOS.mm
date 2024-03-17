@@ -11,6 +11,8 @@ auto main(const int argc, const char **argv) -> int {
     [[NSFileManager defaultManager]
         changeCurrentDirectoryPath:[[NSBundle mainBundle] resourcePath]];
 
+    stormkit::setupSignalHandler();
+
     auto args = std::vector<std::string_view> {};
 
     for (auto i = 0u; i < argc; ++i) args.emplace_back(argv[i]);

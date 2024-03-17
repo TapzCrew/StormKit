@@ -44,8 +44,6 @@ struct std::formatter<Foo, CharT>: std::formatter<std::basic_string<CharT>, Char
 auto main([[maybe_unused]] std::span<const std::string_view> args) -> int {
     using log::operator""_module;
 
-    // setupSignalHandler();
-
     auto logger = log::Logger::createLoggerInstance<log::ConsoleLogger>();
 
     log::Logger::ilog("This is an information");

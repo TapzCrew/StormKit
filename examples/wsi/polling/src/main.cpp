@@ -20,7 +20,6 @@ auto main(std::span<const std::string_view> args) -> int {
     using namespace std::literals;
 
     wsi::parseArgs(args);
-    // setupSignalHandler();
 
     auto logger = log::Logger::createLoggerInstance<log::ConsoleLogger>();
 
