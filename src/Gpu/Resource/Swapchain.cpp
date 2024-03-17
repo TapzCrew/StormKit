@@ -116,14 +116,16 @@ namespace stormkit::gpu {
             .transform(core::monadic::set(m_vk_swapchain))
             .transform_error(core::monadic::map(core::monadic::narrow<Result>(), throwError()));
 
-        m_images = m_vk_swapchain->getImages() |
-                   std::views::transform([&, this](auto&& image) noexcept {
-                       return SwapchainImage::create(m_extent, m_pixel_format, image);
-                   }) |
-                   std::ranges::to<std::vector>();
+        m_extent       = as<math::ExtentU>(swapchain_extent);
         m_image_count  = as<UInt32>(std::size(m_images));
         m_pixel_format = narrow<PixelFormat>(format.format);
-        m_extent       = as<math::ExtentU>(swapchain_extent);
+        // clang-format off
+        m_images       = m_vk_swapchain->getImages() 
+        | std::views::transform([&, this](auto&& image) noexcept {
+             return SwapchainImage::create(m_extent, m_pixel_format, image);
+        }) 
+        | std::ranges::to<std::vector>();
+        // clang-format on
     }
 
     /////////////////////////////////////
