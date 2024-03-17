@@ -27,3 +27,4 @@ export import :Utils.Pimpl;
 export import :Utils.Random;
 export import :Utils.Singleton;
 export import :Utils.Stacktrace;
+export import :Utils.SignalHandler;

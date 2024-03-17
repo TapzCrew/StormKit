@@ -30,9 +30,8 @@ namespace stormkit::core {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto setupSignalHandler() noexcept -> void {
+    auto setupSignalHandler() noexcept -> void {
         std::set_terminate(&terminateHandler);
         std::signal(SIGSEGV, &signalHandler);
-        std::signal(SIGABRT, &signalHandler);
     }
 } // namespace stormkit::core
