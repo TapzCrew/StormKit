@@ -194,6 +194,7 @@ namespace stormkit::engine {
                 .transform(monadic::set(m_surface));
 
         ensures(not window, "Offscreen rendering not yet implemented");
+
         return {};
     }
 

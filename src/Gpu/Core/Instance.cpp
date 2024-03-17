@@ -122,10 +122,11 @@ namespace stormkit::gpu {
         /////////////////////////////////////
         auto checkExtensionSupport(std::span<const std::string> supported_extensions,
                                    std::span<const CZString>    extensions) noexcept -> bool {
-            const auto ext = extensions | std::views::transform([](const auto& extension) noexcept {
-                                 return std::string_view { extension };
-                             }) |
-                             std::ranges::to<std::vector>();
+            // clang-format off
+            const auto ext = extensions 
+                             | std::views::transform(core::monadic::init<std::string_view>())
+                             | std::ranges::to<std::vector>();
+            // clang-format on
             return checkExtensionSupport(supported_extensions, ext);
         }
     } // namespace
@@ -171,19 +172,14 @@ namespace stormkit::gpu {
             return e;
         }();
 
-        // ensures(checkExtensionSupport(m_extensions, instance_extensions));
-        // ensures(checkExtensionSupport(m_extensions, WSI_SURFACE_EXTENSIONS));
-
         constexpr auto ENGINE_NAME = "StormKit";
 
-        const auto app_info = vk::ApplicationInfo {}
-                                  .setPApplicationName(std::data(m_app_name))
-                                  .setPEngineName(ENGINE_NAME)
-                                  .setEngineVersion(STORMKIT_VK_VERSION)
-                                  .setApiVersion(vkMakeVersion<Int32>(1, 0, 0));
+        const auto app_info = vk::ApplicationInfo { .pApplicationName = std::data(m_app_name),
+                                                    .pEngineName      = ENGINE_NAME,
+                                                    .engineVersion    = STORMKIT_VK_VERSION,
+                                                    .apiVersion = vkMakeVersion<Int32>(1, 0, 0) };
 
-        const auto create_info = vk::InstanceCreateInfo {}
-                                     .setPApplicationInfo(&app_info)
+        const auto create_info = vk::InstanceCreateInfo { .pApplicationInfo = &app_info }
                                      .setPEnabledExtensionNames(instance_extensions)
                                      .setPEnabledLayerNames(validation_layers);
 
@@ -206,13 +202,13 @@ namespace stormkit::gpu {
                               vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation |
                               vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance;
 
-        const auto create_info =
-            vk::DebugUtilsMessengerCreateInfoEXT {}
-                .setMessageSeverity(severity)
-                .setMessageType(type)
-                .setPfnUserCallback(
-                    std::bit_cast<decltype(vk::DebugUtilsMessengerCreateInfoEXT::pfnUserCallback)>(
-                        &debugCallback));
+        const auto create_info = vk::DebugUtilsMessengerCreateInfoEXT {
+            .messageSeverity = severity,
+            .messageType     = type,
+            .pfnUserCallback =
+                std::bit_cast<decltype(vk::DebugUtilsMessengerCreateInfoEXT::pfnUserCallback)>(
+                    &debugCallback)
+        };
 
         return m_vk_instance->createDebugUtilsMessengerEXT(create_info)
             .transform(core::monadic::set(m_vk_messenger))
@@ -223,11 +219,13 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     auto Instance::doRetrievePhysicalDevices() noexcept -> VulkanExpected<void> {
         return m_vk_instance->enumeratePhysicalDevices().transform([this](auto&& physical_devices) {
-            m_physical_devices = std::forward<decltype(physical_devices)>(physical_devices) |
-                                 std::views::transform([this](auto&& physical_device) {
-                                     return PhysicalDevice { std::move(physical_device), *this };
-                                 }) |
-                                 std::ranges::to<std::vector>();
+            // clang-format off
+            m_physical_devices = std::forward<decltype(physical_devices)>(physical_devices) 
+              | std::views::transform([this](auto&& physical_device) {
+                       return PhysicalDevice { std::move(physical_device), *this };
+              })
+              | std::ranges::to<std::vector>();
+            // clang-format on
         });
     }
 } // namespace stormkit::gpu
