@@ -11,6 +11,7 @@ extern auto userMain(std::span<const std::string_view>) -> int;
 
 auto main(int argc, char** argv) -> int {
     stormkit::setupSignalHandler();
+    stormkit::setCurrentThreadName("Main");
 
     auto args = std::vector<std::string_view> {};
 

@@ -32,6 +32,7 @@ auto __stdcall main(int argc, char** argv) -> int {
     setvbuf(stdout, nullptr, _IOFBF, BUF_SIZE);
 
     stormkit::setupSignalHandler();
+    stormkit::setCurrentThreadName("Main");
 
     auto args = std::vector<std::string_view> {};
     args.reserve(argc);
@@ -56,6 +57,7 @@ auto __stdcall WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) -> int {
     setvbuf(stdout, nullptr, _IOFBF, BUF_SIZE);
 
     stormkit::setupSignalHandler();
+    stormkit::setCurrentThreadName("Main");
 
     auto args = std::vector<std::string_view> {};
     args.reserve(argc);
