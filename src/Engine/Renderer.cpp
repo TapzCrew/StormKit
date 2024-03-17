@@ -203,6 +203,8 @@ namespace stormkit::engine {
     auto Renderer::threadLoop(std::mutex&       framegraph_mutex,
                               std::atomic_bool& rebuild_graph,
                               std::stop_token   token) noexcept -> void {
+        setCurrentThreadName("StormKit:RenderThread");
+
         m_command_buffers =
             m_main_command_pool->createCommandBuffers(m_device, m_surface->bufferingCount());
 
