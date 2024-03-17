@@ -1017,10 +1017,9 @@ export {
         [[nodiscard]] constexpr auto getArraySizeByChannelFor(PixelFormat format) noexcept -> UInt8;
 
         [[nodiscard]] auto computeMipLevel(const math::ExtentU& extent) noexcept -> UInt32;
-        [[nodiscard]] constexpr auto
-            computeUniformBufferOffsetAlignement(RangeExtent               size,
-                                                 const RenderCapabilities& capabilities) noexcept
-            -> RangeExtent;
+        [[nodiscard]] constexpr auto computeUniformBufferOffsetAlignement(
+            RangeExtent               size,
+            const RenderCapabilities& capabilities) noexcept -> RangeExtent;
 
         [[nodiscard]] auto toString(const PhysicalDeviceInfo& data) noexcept;
 
@@ -1029,14 +1028,14 @@ export {
     namespace stormkit::core { inline namespace casts {
         template<>
         struct AsCaster<vk::Viewport, const gpu::Viewport&> {
-            [[nodiscard]] static constexpr auto operator()(const gpu::Viewport& from) noexcept
-                -> vk::Viewport;
+            [[nodiscard]] static constexpr auto
+                operator()(const gpu::Viewport& from) noexcept -> vk::Viewport;
         };
 
         template<>
         struct AsCaster<vk::Rect2D, const gpu::Scissor&> {
-            [[nodiscard]] static constexpr auto operator()(const gpu::Scissor& from) noexcept
-                -> vk::Rect2D;
+            [[nodiscard]] static constexpr auto
+                operator()(const gpu::Scissor& from) noexcept -> vk::Rect2D;
         };
     }} // namespace stormkit::core::casts
 
@@ -1083,8 +1082,8 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     template<typename T>
-    STORMKIT_FORCE_INLINE auto ParentRef<T>::operator=(const ParentRef&) noexcept
-        -> ParentRef& = default;
+    STORMKIT_FORCE_INLINE auto
+        ParentRef<T>::operator=(const ParentRef&) noexcept -> ParentRef& = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
@@ -1094,8 +1093,8 @@ namespace stormkit::gpu {
     /////////////////////////////////////
     /////////////////////////////////////
     template<typename T>
-    STORMKIT_FORCE_INLINE auto ParentRef<T>::operator=(ParentRef&&) noexcept
-        -> ParentRef& = default;
+    STORMKIT_FORCE_INLINE auto
+        ParentRef<T>::operator=(ParentRef&&) noexcept -> ParentRef& = default;
 
     /////////////////////////////////////
     /////////////////////////////////////
@@ -1214,8 +1213,8 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE constexpr auto getArraySizeByChannelFor(PixelFormat format) noexcept
-        -> UInt8 {
+    STORMKIT_FORCE_INLINE constexpr auto
+        getArraySizeByChannelFor(PixelFormat format) noexcept -> UInt8 {
         switch (format) {
             case PixelFormat::R8_SNorm:
             case PixelFormat::R8_UNorm:
@@ -1309,10 +1308,9 @@ namespace stormkit::gpu {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE constexpr auto
-        computeUniformBufferOffsetAlignement(RangeExtent               size,
-                                             const RenderCapabilities& capabilities) noexcept
-        -> RangeExtent {
+    STORMKIT_FORCE_INLINE constexpr auto computeUniformBufferOffsetAlignement(
+        RangeExtent               size,
+        const RenderCapabilities& capabilities) noexcept -> RangeExtent {
         const auto min_ubo_align = capabilities.limits.min_uniform_buffer_offset_alignment;
 
         if (min_ubo_align > 0) size = (size + min_ubo_align - 1) & ~(min_ubo_align - 1);
@@ -1348,17 +1346,15 @@ namespace stormkit::gpu {
 namespace stormkit::core { inline namespace casts {
     /////////////////////////////////////
     /////////////////////////////////////
-    constexpr auto
-        AsCaster<vk::Viewport, const gpu::Viewport&>::operator()(const gpu::Viewport& from) noexcept
-        -> vk::Viewport {
+    constexpr auto AsCaster<vk::Viewport, const gpu::Viewport&>::operator()(
+        const gpu::Viewport& from) noexcept -> vk::Viewport {
         return from.operator vk::Viewport();
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    constexpr auto
-        AsCaster<vk::Rect2D, const gpu::Scissor&>::operator()(const gpu::Scissor& from) noexcept
-        -> vk::Rect2D {
+    constexpr auto AsCaster<vk::Rect2D, const gpu::Scissor&>::operator()(
+        const gpu::Scissor& from) noexcept -> vk::Rect2D {
         return from.operator vk::Rect2D();
     }
 }} // namespace stormkit::core::casts
