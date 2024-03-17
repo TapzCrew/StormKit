@@ -12,7 +12,7 @@ auto main(const int argc, const char **argv) -> int {
         changeCurrentDirectoryPath:[[NSBundle mainBundle] resourcePath]];
 
     stormkit::setupSignalHandler();
-    stormkit::setCurrentThreadName("Main");
+    stormkit::setCurrentThreadName("MainThread");
 
     auto args = std::vector<std::string_view> {};
 
