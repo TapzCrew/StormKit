@@ -27,7 +27,8 @@ export class TriangleApp: public App {
     bool          m_fullscreen_enabled = false;
     math::ExtentU m_window_extent;
 
-    DeferInit<engine::Application> m_application;
+    DeferInit<engine::Application>   m_application;
+    DeferInit<engine::ShapeRenderer> m_shape_renderer;
 
     DeferInit<gpu::Shader>         m_vertex_shader;
     DeferInit<gpu::Shader>         m_fragment_shader;
@@ -50,6 +51,8 @@ auto TriangleApp::run(std::span<const std::string_view> _) -> Int {
                         .transform_error(expectsWithMessage("Failed to initialize Render engine"))
                         .value();
     m_application->setUpdateFrameGraphCallback(curry(&TriangleApp::updateFrameGraph, this));
+
+    m_shape_renderer = engine::ShapeRenderer::create(m_application);
 
     auto& window        = m_application->window();
     auto& event_handler = m_application->eventHandler();
@@ -97,6 +100,8 @@ auto TriangleApp::updateFrameGraph(engine::FrameGraphBuilder& graph,
     static auto initialized = false;
 
     if (not initialized) {
+        m_shape_renderer->updateFrameGraph(graph, rebuild_graph);
+
         struct DrawTask {
             engine::GraphID backbuffer;
         };

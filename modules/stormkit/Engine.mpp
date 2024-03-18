@@ -6,3 +6,4 @@ export module stormkit.Engine;
 
 export import :Core;
 export import :Renderer;
+export import :ShapeRenderer;

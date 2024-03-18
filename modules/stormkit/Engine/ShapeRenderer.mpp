@@ -1,0 +1,78 @@
+// Copyright (C) 2024 Arthur LAURENT <arthur.laurent4@gmail.com>
+// This file is subject to the license terms in the LICENSE file
+// found in the top-level of this distribution
+
+module;
+
+#include <stormkit/Core/PlatformMacro.hpp>
+
+export module stormkit.Engine:ShapeRenderer;
+
+import :Core;
+
+export namespace stormkit::engine {
+    class ShapeRenderer {
+        struct Tag {};
+
+      public:
+        ShapeRenderer(const Application& application, Tag);
+        ~ShapeRenderer();
+
+        ShapeRenderer(const ShapeRenderer&)                    = delete;
+        auto operator=(const ShapeRenderer&) -> ShapeRenderer& = delete;
+
+        ShapeRenderer(ShapeRenderer&&) noexcept;
+        auto operator=(ShapeRenderer&&) noexcept -> ShapeRenderer&;
+
+        [[nodiscard]] static auto create(const Application& application) noexcept -> ShapeRenderer;
+        [[nodiscard]] static auto
+            allocate(const Application& application) noexcept -> std::unique_ptr<ShapeRenderer>;
+
+        auto updateFrameGraph(FrameGraphBuilder& graph,
+                              std::atomic_bool&  rebuild_graph) noexcept -> void;
+
+      private:
+        Borrowed<const Application> m_application;
+    };
+} // namespace stormkit::engine
+
+////////////////////////////////////////////////////////////////////
+///                      IMPLEMENTATION                          ///
+////////////////////////////////////////////////////////////////////
+
+namespace stormkit::engine {
+    ShapeRenderer::ShapeRenderer(const Application& application, Tag)
+        : m_application { application } {
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE ShapeRenderer::~ShapeRenderer() = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE ShapeRenderer::ShapeRenderer(ShapeRenderer&&) noexcept = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto
+        ShapeRenderer::operator=(ShapeRenderer&&) noexcept -> ShapeRenderer& = default;
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto
+        ShapeRenderer::create(const Application& application) noexcept -> ShapeRenderer {
+        return ShapeRenderer { application, Tag {} };
+    }
+
+    /////////////////////////////////////
+    /////////////////////////////////////
+    STORMKIT_FORCE_INLINE auto ShapeRenderer::allocate(const Application& application) noexcept
+        -> std::unique_ptr<ShapeRenderer> {
+        return std::make_unique<ShapeRenderer>(application, Tag {});
+    }
+
+    auto ShapeRenderer::updateFrameGraph(FrameGraphBuilder& graph,
+                                         std::atomic_bool&  rebuild_graph) noexcept -> void {
+    }
+} // namespace stormkit::engine

@@ -1,5 +1,5 @@
 for name, _ in pairs(modules) do
-	if name == "core" or has_config("enable_" .. name) and os.isdir("src/" .. name) then
+	if has_config("tests_" .. name) then
 		target(name .. "-tests")
 		do
 			on_config(function(target)
