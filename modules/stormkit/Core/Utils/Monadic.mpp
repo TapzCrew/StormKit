@@ -217,8 +217,8 @@ namespace stormkit::core::monadic {
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE constexpr auto is() noexcept -> decltype(auto) {
-        return [](const auto& first, const auto& second) static noexcept {
-            return core::is(first, second);
+        return []<typename T, typename U>(T&& first, U&& second) static noexcept {
+            return core::is(std::forward<T>(first), std::forward<U>(second));
         };
     }
 

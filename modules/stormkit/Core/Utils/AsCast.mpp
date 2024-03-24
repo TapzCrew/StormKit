@@ -34,19 +34,19 @@ export namespace stormkit::core { inline namespace casts {
     template<IsNotReference To, typename From>
         requires IsVariantType<PureType<From>>
     struct IsQueryer<To, From> {
-        [[nodiscard]] static constexpr auto operator()(From variant) noexcept -> bool;
+        [[nodiscard]] static constexpr auto operator()(const From& variant) noexcept -> bool;
     };
 
     template<IsPolymorphic To, typename From>
         requires(IsPolymorphicReference<From> and Is<To, PureType<From>>)
     struct IsQueryer<To, From> {
-        [[nodiscard]] static constexpr auto operator()(From value) noexcept -> bool;
+        [[nodiscard]] static constexpr auto operator()(From&& value) noexcept -> bool;
     };
 
     template<IsPolymorphic To, typename From>
         requires(IsPolymorphicPointer<PureType<From>> and Is<To, ElementType<PureType<From>>>)
     struct IsQueryer<To, From> {
-        [[nodiscard]] static constexpr auto operator()(From value) noexcept -> bool;
+        [[nodiscard]] static constexpr auto operator()(From&& value) noexcept -> bool;
     };
 
     // default
@@ -250,8 +250,8 @@ namespace stormkit::core { inline namespace casts {
     template<IsNotReference To, typename From>
         requires IsVariantType<PureType<From>>
     STORMKIT_FORCE_INLINE constexpr auto
-        IsQueryer<To, From>::operator()(From variant) noexcept -> bool {
-        return std::holds_alternative<To>(std::forward<From>(variant));
+        IsQueryer<To, From>::operator()(const From& variant) noexcept -> bool {
+        return std::holds_alternative<To>(variant);
     }
 
     /////////////////////////////////////
@@ -259,7 +259,7 @@ namespace stormkit::core { inline namespace casts {
     template<IsPolymorphic To, typename From>
         requires(IsPolymorphicReference<From> and Is<To, PureType<From>>)
     STORMKIT_FORCE_INLINE constexpr auto
-        IsQueryer<To, From>::operator()(From value) noexcept -> bool {
+        IsQueryer<To, From>::operator()(From&& value) noexcept -> bool {
         return dynamic_cast<const To*>(&value) != nullptr;
     }
 
@@ -268,7 +268,7 @@ namespace stormkit::core { inline namespace casts {
     template<IsPolymorphic To, typename From>
         requires(IsPolymorphicPointer<PureType<From>> and Is<To, ElementType<PureType<From>>>)
     STORMKIT_FORCE_INLINE constexpr auto
-        IsQueryer<To, From>::operator()(From value) noexcept -> bool {
+        IsQueryer<To, From>::operator()(From&& value) noexcept -> bool {
         return dynamic_cast<const To*>(std::to_address(value)) != nullptr;
     }
 
