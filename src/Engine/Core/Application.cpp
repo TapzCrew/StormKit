@@ -12,8 +12,6 @@ import stormkit.Core;
 import stormkit.Wsi;
 import stormkit.Entities;
 
-import :Systems.RenderSystem;
-
 namespace stormkit::engine {
     Application::Application(std::string_view     application_name,
                              const math::ExtentU& window_extent,
@@ -32,8 +30,6 @@ namespace stormkit::engine {
     auto Application::run() -> void {
         auto framegraph_mutex = std::mutex {};
         auto rebuild_graph    = std::atomic_bool { true };
-
-        m_world->addSystem<RenderSystem>(m_renderer);
 
         m_renderer->startRendering(framegraph_mutex, rebuild_graph);
         while (m_window->isOpen()) {
