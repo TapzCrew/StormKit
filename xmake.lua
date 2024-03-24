@@ -46,10 +46,6 @@ modules = {
                 target:add("syslinks", "dl", {public = true})
             end
         end
-
-        if is_mode("debug") and target:is_plat("linux") then
-            -- target:add("cxflags", "-no-pie", "-fno-pie")
-        end
       end)
     end,
   },
@@ -218,7 +214,7 @@ if not is_plat("windows") or not is_plat("mingw") then
   add_rules("mode.valgrind")
 end
 
----------------------------- global options ----------------------------
+---------------------------- options ----------------------------
 option("examples_engine",
   {
     default = false,
@@ -282,7 +278,7 @@ option("engine", {
 option("compile_commands", { default = false, category = "root menu/support" })
 option("vsxmake", { default = false, category = "root menu/support" })
 
----------------------------- global config ----------------------------
+---------------------------- global configs ----------------------------
 set_allowedmodes(allowedmodes)
 set_allowedplats("windows", "mingw", "linux", "macosx")
 set_allowedarchs("windows|x64", "mingw|x86_64", "linux|x86_64", "macosx|x86_64")
@@ -372,7 +368,6 @@ if has_config("gpu") then
     { override = true, version = "master", system = false, configs = { use_vulkanheaders = true } })
 end
 
--- add_defines("FROZEN_DONT_INCLUDE_STL", "ANKERL_UNORDERED_DENSE_USE_STD_IMPORT")
 add_requireconfs("*", { configs = { modules = true, std_import = true } })
 
 if get_config("lto") then
