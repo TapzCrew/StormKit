@@ -9,13 +9,14 @@ module;
 export module stormkit.Engine:ShapeRenderer;
 
 import :Core;
+import :Renderer;
 
 export namespace stormkit::engine {
     class ShapeRenderer {
         struct Tag {};
 
       public:
-        ShapeRenderer(const Application& application, Tag);
+        ShapeRenderer(const Renderer& renderer, Tag);
         ~ShapeRenderer();
 
         ShapeRenderer(const ShapeRenderer&)                    = delete;
@@ -24,15 +25,15 @@ export namespace stormkit::engine {
         ShapeRenderer(ShapeRenderer&&) noexcept;
         auto operator=(ShapeRenderer&&) noexcept -> ShapeRenderer&;
 
-        [[nodiscard]] static auto create(const Application& application) noexcept -> ShapeRenderer;
+        [[nodiscard]] static auto create(const Renderer& renderer) noexcept -> ShapeRenderer;
         [[nodiscard]] static auto
-            allocate(const Application& application) noexcept -> std::unique_ptr<ShapeRenderer>;
+            allocate(const Renderer& renderer) noexcept -> std::unique_ptr<ShapeRenderer>;
 
         auto updateFrameGraph(FrameGraphBuilder& graph,
                               std::atomic_bool&  rebuild_graph) noexcept -> void;
 
       private:
-        Borrowed<const Application> m_application;
+        Borrowed<const Renderer> m_renderer;
     };
 } // namespace stormkit::engine
 
@@ -41,8 +42,7 @@ export namespace stormkit::engine {
 ////////////////////////////////////////////////////////////////////
 
 namespace stormkit::engine {
-    ShapeRenderer::ShapeRenderer(const Application& application, Tag)
-        : m_application { application } {
+    ShapeRenderer::ShapeRenderer(const Renderer& renderer, Tag) : m_renderer { renderer } {
     }
 
     /////////////////////////////////////
@@ -61,17 +61,19 @@ namespace stormkit::engine {
     /////////////////////////////////////
     /////////////////////////////////////
     STORMKIT_FORCE_INLINE auto
-        ShapeRenderer::create(const Application& application) noexcept -> ShapeRenderer {
-        return ShapeRenderer { application, Tag {} };
+        ShapeRenderer::create(const Renderer& renderer) noexcept -> ShapeRenderer {
+        return ShapeRenderer { renderer, Tag {} };
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    STORMKIT_FORCE_INLINE auto ShapeRenderer::allocate(const Application& application) noexcept
+    STORMKIT_FORCE_INLINE auto ShapeRenderer::allocate(const Renderer& renderer) noexcept
         -> std::unique_ptr<ShapeRenderer> {
-        return std::make_unique<ShapeRenderer>(application, Tag {});
+        return std::make_unique<ShapeRenderer>(renderer, Tag {});
     }
 
+    /////////////////////////////////////
+    /////////////////////////////////////
     auto ShapeRenderer::updateFrameGraph(FrameGraphBuilder& graph,
                                          std::atomic_bool&  rebuild_graph) noexcept -> void {
     }

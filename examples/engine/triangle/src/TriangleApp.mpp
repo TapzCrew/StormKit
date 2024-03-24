@@ -27,13 +27,14 @@ export class TriangleApp: public App {
     bool          m_fullscreen_enabled = false;
     math::ExtentU m_window_extent;
 
-    DeferInit<engine::Application>   m_application;
-    DeferInit<engine::ShapeRenderer> m_shape_renderer;
+    DeferInit<engine::Application> m_application;
 
     DeferInit<gpu::Shader>         m_vertex_shader;
     DeferInit<gpu::Shader>         m_fragment_shader;
     DeferInit<gpu::PipelineLayout> m_pipeline_layout;
     DeferInit<gpu::Pipeline>       m_pipeline;
+
+    MaybeBorrowed<engine::ShapeRenderSystem> m_render_system;
 };
 
 ////////////////////////////////////////////////////////////////////
@@ -52,11 +53,12 @@ auto TriangleApp::run(std::span<const std::string_view> _) -> Int {
                         .value();
     m_application->setUpdateFrameGraphCallback(curry(&TriangleApp::updateFrameGraph, this));
 
-    m_shape_renderer = engine::ShapeRenderer::create(m_application);
-
     auto& window        = m_application->window();
     auto& event_handler = m_application->eventHandler();
     auto& renderer      = m_application->renderer();
+    auto& world         = m_application->world();
+
+    m_render_system = world.addSystem<engine::ShapeRenderSystem>(renderer);
 
     m_window_extent = window.extent();
 
@@ -100,8 +102,6 @@ auto TriangleApp::updateFrameGraph(engine::FrameGraphBuilder& graph,
     static auto initialized = false;
 
     if (not initialized) {
-        m_shape_renderer->updateFrameGraph(graph, rebuild_graph);
-
         struct DrawTask {
             engine::GraphID backbuffer;
         };
