@@ -12,6 +12,7 @@ module;
 
 #include <pointer-constraints-unstable-v1.h>
 #include <relative-pointer-unstable-v1.h>
+#include <viewporter.h>
 #include <xdg-decoration-unstable-v1.h>
 #include <xdg-shell.h>
 
@@ -23,160 +24,189 @@ import stormkit.Core;
 
 import :Linux.Common.XKB;
 import :Linux.Wayland.WindowImpl;
-import :Linux.Wayland.Callbacks;
 import :Linux.Wayland.Log;
 
 namespace stormkit::wsi::linux::wayland {
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto outputGeometryHandler(void*       data,
-                               wl_output*  output,
-                               Int32       x,
-                               Int32       y,
-                               Int32       pwidth,
-                               Int32       pheight,
-                               Int32       subpixels,
-                               const char* make,
-                               const char* model,
-                               Int32       transform) noexcept -> void;
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto outputModeHandler(void*      data,
-                           wl_output* wl_output,
-                           UInt32     flags,
-                           Int32      width,
-                           Int32      height,
-                           Int32      refresh) noexcept -> void;
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto outputDoneHandler(void* data, wl_output* wl_output) noexcept -> void;
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto outputScaleHandler(void* data, wl_output* wl_output, Int32 factor) noexcept -> void;
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto seatCapabilitiesHandler(void* data, wl_seat* seat, UInt32 capabilities) noexcept -> void;
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto seatNameHandler(void* data, wl_seat* seat, const char* name) noexcept -> void;
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto pointerEnterHandler(void*       data,
-                             wl_pointer* pointer,
-                             UInt32      serial,
-                             wl_surface* surface,
-                             wl_fixed_t  surface_x,
-                             wl_fixed_t  surface_y) noexcept -> void;
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto pointerLeaveHandler(void*       data,
-                             wl_pointer* pointer,
-                             UInt32      serial,
-                             wl_surface* surface) noexcept -> void;
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto pointerMotionHandler(void*       data,
-                              wl_pointer* pointer,
-                              UInt32      time,
-                              wl_fixed_t  surface_x,
-                              wl_fixed_t  surface_y) noexcept -> void;
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto pointerButtonHandler(void*       data,
-                              wl_pointer* pointer,
-                              UInt32      serial,
-                              UInt32      time,
-                              UInt32      button,
-                              UInt32      state) noexcept -> void;
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto pointerAxisHandler(void*       data,
-                            wl_pointer* pointer,
-                            UInt32      time,
-                            UInt32      axis,
-                            wl_fixed_t  value) noexcept -> void;
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto pointerFrameHandler(void* data, wl_pointer* pointer) noexcept -> void;
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto pointerAxisSourceHandler(void* data, wl_pointer* pointer, UInt32 axis_source) noexcept
-        -> void;
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto pointerAxisStopHandler(void* data, wl_pointer* pointer, UInt32 time, UInt32 axis) noexcept
-        -> void;
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto pointerAxisDiscreteHandler(void*       data,
-                                    wl_pointer* pointer,
-                                    UInt32      axis,
-                                    Int32       discrete) noexcept -> void;
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto keyboardKeymapHandler(void*        data,
-                               wl_keyboard* keyboard,
-                               UInt32       format,
-                               Int32        fd,
-                               UInt32       size) noexcept -> void;
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto keyboardEnterHandler(void*        data,
-                              wl_keyboard* keyboard,
-                              UInt32       serial,
-                              wl_surface*  surface,
-                              wl_array*    keys) noexcept -> void;
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto keyboardLeaveHandler(void*        data,
-                              wl_keyboard* keyboard,
-                              UInt32       serial,
-                              wl_surface*  surface) noexcept -> void;
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto keyboardKeyHandler(void*        data,
-                            wl_keyboard* keyboard,
-                            UInt32       serial,
-                            UInt32       time,
-                            UInt32       key,
-                            UInt32       state) noexcept -> void;
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto keyboardModifiersHandler(void*        data,
-                                  wl_keyboard* keyboard,
-                                  UInt32       serial,
-                                  UInt32       mods_depressed,
-                                  UInt32       mods_latcher,
-                                  UInt32       mods_locked,
-                                  UInt32       group) noexcept -> void;
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto keyboardRepeatInfoHandler(void*        data,
-                                   wl_keyboard* keyboard,
-                                   Int32        rate,
-                                   Int32        delay) noexcept -> void;
-
     namespace {
+        extern "C" {
+            auto registryHandler(void*        data,
+                                 wl_registry* registry,
+                                 UInt32       id,
+                                 const char*  interface,
+                                 UInt32       version) noexcept -> void;
+
+            auto registryRemoverHandler(void*        data,
+                                        wl_registry* registry,
+                                        UInt32       id) noexcept -> void;
+
+            auto surfaceEnterHandler(void*       data,
+                                     wl_surface* surface,
+                                     wl_output*  output) noexcept -> void;
+
+            auto surfaceLeaveHandler(void*       data,
+                                     wl_surface* surface,
+                                     wl_output*  output) noexcept -> void;
+
+            auto toplevelConfigureHandler(void*         data,
+                                          xdg_toplevel* xdg_tl,
+                                          Int32         width,
+                                          Int32         height,
+                                          wl_array*     states) noexcept -> void;
+
+            auto toplevelCloseHandler(void* data, xdg_toplevel* xdg_tl) noexcept -> void;
+
+            auto surfaceConfigureHandler(void*        data,
+                                         xdg_surface* surface,
+                                         UInt32       serial) noexcept -> void;
+
+            auto xdgShellPingHandler(void*        data,
+                                     xdg_wm_base* xdg_wm_base,
+                                     UInt32       serial) noexcept -> void;
+
+            auto xdgDecorationConfigureHandler(void*                        data,
+                                               zxdg_toplevel_decoration_v1* decoration,
+                                               uint32_t                     mode) -> void;
+
+            auto shellSurfaceConfigureHandler(void*             data,
+                                              wl_shell_surface* shell_surface,
+                                              UInt32            edges,
+                                              Int32             width,
+                                              Int32             height) noexcept -> void;
+
+            auto shellPingHandler(void*             data,
+                                  wl_shell_surface* shell_surface,
+                                  UInt32            serial) noexcept -> void;
+
+            auto relativePointerRelativeMotionHandler(void*                    data,
+                                                      zwp_relative_pointer_v1* pointer,
+                                                      UInt32                   time_hi,
+                                                      UInt32                   time_lw,
+                                                      wl_fixed_t               dx,
+                                                      wl_fixed_t               dy,
+                                                      wl_fixed_t               dx_unaccel,
+                                                      wl_fixed_t dy_unaccel) noexcept -> void;
+
+            auto lockedPointerLockedHandler(void*                  data,
+                                            zwp_locked_pointer_v1* locked_pointer) noexcept -> void;
+
+            auto lockedPointerUnlockedHandler(void*                  data,
+                                              zwp_locked_pointer_v1* locked_pointer) noexcept
+                -> void;
+
+            auto outputGeometryHandler(void*       data,
+                                       wl_output*  output,
+                                       Int32       x,
+                                       Int32       y,
+                                       Int32       pwidth,
+                                       Int32       pheight,
+                                       Int32       subpixels,
+                                       const char* make,
+                                       const char* model,
+                                       Int32       transform) noexcept -> void;
+
+            auto outputModeHandler(void*      data,
+                                   wl_output* wl_output,
+                                   UInt32     flags,
+                                   Int32      width,
+                                   Int32      height,
+                                   Int32      refresh) noexcept -> void;
+
+            auto outputDoneHandler(void* data, wl_output* wl_output) noexcept -> void;
+
+            auto
+                outputScaleHandler(void* data, wl_output* wl_output, Int32 factor) noexcept -> void;
+
+            auto seatCapabilitiesHandler(void*    data,
+                                         wl_seat* seat,
+                                         UInt32   capabilities) noexcept -> void;
+
+            auto seatNameHandler(void* data, wl_seat* seat, const char* name) noexcept -> void;
+
+            auto pointerEnterHandler(void*       data,
+                                     wl_pointer* pointer,
+                                     UInt32      serial,
+                                     wl_surface* surface,
+                                     wl_fixed_t  surface_x,
+                                     wl_fixed_t  surface_y) noexcept -> void;
+
+            auto pointerLeaveHandler(void*       data,
+                                     wl_pointer* pointer,
+                                     UInt32      serial,
+                                     wl_surface* surface) noexcept -> void;
+
+            auto pointerMotionHandler(void*       data,
+                                      wl_pointer* pointer,
+                                      UInt32      time,
+                                      wl_fixed_t  surface_x,
+                                      wl_fixed_t  surface_y) noexcept -> void;
+
+            auto pointerButtonHandler(void*       data,
+                                      wl_pointer* pointer,
+                                      UInt32      serial,
+                                      UInt32      time,
+                                      UInt32      button,
+                                      UInt32      state) noexcept -> void;
+
+            auto pointerAxisHandler(void*       data,
+                                    wl_pointer* pointer,
+                                    UInt32      time,
+                                    UInt32      axis,
+                                    wl_fixed_t  value) noexcept -> void;
+
+            auto pointerFrameHandler(void* data, wl_pointer* pointer) noexcept -> void;
+
+            auto pointerAxisSourceHandler(void*       data,
+                                          wl_pointer* pointer,
+                                          UInt32      axis_source) noexcept -> void;
+
+            auto pointerAxisStopHandler(void*       data,
+                                        wl_pointer* pointer,
+                                        UInt32      time,
+                                        UInt32      axis) noexcept -> void;
+
+            auto pointerAxisDiscreteHandler(void*       data,
+                                            wl_pointer* pointer,
+                                            UInt32      axis,
+                                            Int32       discrete) noexcept -> void;
+
+            auto keyboardKeymapHandler(void*        data,
+                                       wl_keyboard* keyboard,
+                                       UInt32       format,
+                                       Int32        fd,
+                                       UInt32       size) noexcept -> void;
+
+            auto keyboardEnterHandler(void*        data,
+                                      wl_keyboard* keyboard,
+                                      UInt32       serial,
+                                      wl_surface*  surface,
+                                      wl_array*    keys) noexcept -> void;
+
+            auto keyboardLeaveHandler(void*        data,
+                                      wl_keyboard* keyboard,
+                                      UInt32       serial,
+                                      wl_surface*  surface) noexcept -> void;
+
+            auto keyboardKeyHandler(void*        data,
+                                    wl_keyboard* keyboard,
+                                    UInt32       serial,
+                                    UInt32       time,
+                                    UInt32       key,
+                                    UInt32       state) noexcept -> void;
+
+            auto keyboardModifiersHandler(void*        data,
+                                          wl_keyboard* keyboard,
+                                          UInt32       serial,
+                                          UInt32       mods_depressed,
+                                          UInt32       mods_latcher,
+                                          UInt32       mods_locked,
+                                          UInt32       group) noexcept -> void;
+
+            auto keyboardRepeatInfoHandler(void*        data,
+                                           wl_keyboard* keyboard,
+                                           Int32        rate,
+                                           Int32        delay) noexcept -> void;
+        }
+
         auto globals = Globals {};
 
         constinit const auto stormkit_registry_listener =
@@ -194,7 +224,7 @@ namespace stormkit::wsi::linux::wayland {
                                     .close     = toplevelCloseHandler };
 
         constinit const auto stormkit_shell_listener =
-            xdg_wm_base_listener { .ping = shellPingHandler };
+            xdg_wm_base_listener { .ping = xdgShellPingHandler };
 
         constinit const auto stormkit_shell_surface_listener =
             wl_shell_surface_listener { .ping       = shellPingHandler,
@@ -208,6 +238,39 @@ namespace stormkit::wsi::linux::wayland {
         constinit const auto stormkit_locked_pointer_listener =
             zwp_locked_pointer_v1_listener { .locked   = lockedPointerLockedHandler,
                                              .unlocked = lockedPointerUnlockedHandler };
+
+        constinit const auto stormkit_decoration_listener =
+            zxdg_toplevel_decoration_v1_listener { xdgDecorationConfigureHandler };
+
+        constinit const auto stormkit_output_listener =
+            wl_output_listener { .geometry = outputGeometryHandler,
+                                 .mode     = outputModeHandler,
+                                 .done     = outputDoneHandler,
+                                 .scale    = outputScaleHandler };
+
+        constinit const auto stormkit_seat_listener =
+            wl_seat_listener { .capabilities = seatCapabilitiesHandler, .name = seatNameHandler };
+
+        constinit const auto stormkit_pointer_listener =
+            wl_pointer_listener { .enter         = pointerEnterHandler,
+                                  .leave         = pointerLeaveHandler,
+                                  .motion        = pointerMotionHandler,
+                                  .button        = pointerButtonHandler,
+                                  .axis          = pointerAxisHandler,
+                                  .frame         = pointerFrameHandler,
+                                  .axis_source   = pointerAxisSourceHandler,
+                                  .axis_stop     = pointerAxisStopHandler,
+                                  .axis_discrete = pointerAxisDiscreteHandler };
+
+        constinit const auto stormkit_keyboard_listener =
+            wl_keyboard_listener { .keymap      = keyboardKeymapHandler,
+                                   .enter       = keyboardEnterHandler,
+                                   .leave       = keyboardLeaveHandler,
+                                   .key         = keyboardKeyHandler,
+                                   .modifiers   = keyboardModifiersHandler,
+                                   .repeat_info = keyboardRepeatInfoHandler };
+
+        constinit const auto stormkit_touchscreen_listener = wl_touch_listener {};
     } // namespace
 
     void init() {
@@ -333,8 +396,9 @@ namespace stormkit::wsi::linux::wayland {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto WindowImpl::create(std::string title, const math::ExtentU& extent, WindowStyle style)
-        -> void {
+    auto WindowImpl::create(std::string          title,
+                            const math::ExtentU& extent,
+                            WindowStyle          style) -> void {
         m_title  = title;
         m_extent = extent;
         m_style  = style;
@@ -360,17 +424,12 @@ namespace stormkit::wsi::linux::wayland {
         } else
             wlog("No touchscreen found");
 
-        if (globals.xdg_shell) {
+        if (globals.xdg_wm_base) {
             dlog("XDG shell found !");
-            createXDGShell();
+            createXDGWMBase();
         } else {
-            dlog("XDGShell not found, falling back to WLShell");
-
-            if (globals.wayland_shell) createWaylandShell();
-            else {
-                flog("WLShell not found, aborting...");
-                std::exit(EXIT_FAILURE);
-            }
+            flog("WLShell not found, aborting...");
+            std::exit(EXIT_FAILURE);
         }
 
         wl_surface_add_listener(m_surface.get(), &stormkit_surface_listener, this);
@@ -412,12 +471,9 @@ namespace stormkit::wsi::linux::wayland {
         m_xdg_toplevel.reset();
         m_xdg_surface.reset();
 
-        // WL_Shell
-        m_wlshell_surface.reset();
-
         // Base_Surface
+        m_shm_pool.reset();
         m_surface.reset();
-
         m_current_output.reset();
 
         m_title.clear();
@@ -462,8 +518,6 @@ namespace stormkit::wsi::linux::wayland {
         if (m_xdg_toplevel) {
             xdg_toplevel_set_title(m_xdg_toplevel.get(), m_title.c_str());
             xdg_toplevel_set_app_id(m_xdg_toplevel.get(), m_title.c_str());
-        } else {
-            wl_shell_surface_set_title(m_wlshell_surface.get(), m_title.c_str());
         }
     }
 
@@ -684,9 +738,9 @@ namespace stormkit::wsi::linux::wayland {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto WindowImpl::seatCapabilities([[maybe_unused]] wl_seat*      seat,
-                                      [[maybe_unused]] std::uint32_t capabilities) noexcept
-        -> void {
+    auto
+        WindowImpl::seatCapabilities([[maybe_unused]] wl_seat*      seat,
+                                     [[maybe_unused]] std::uint32_t capabilities) noexcept -> void {
     }
 
     /////////////////////////////////////
@@ -895,10 +949,11 @@ namespace stormkit::wsi::linux::wayland {
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto WindowImpl::createXDGShell() noexcept -> void {
-        xdg_wm_base_add_listener(globals.xdg_shell.get(), &stormkit_shell_listener, nullptr);
+    auto WindowImpl::createXDGWMBase() noexcept -> void {
+        xdg_wm_base_add_listener(globals.xdg_wm_base.get(), &stormkit_shell_listener, nullptr);
 
-        m_xdg_surface.reset(xdg_wm_base_get_xdg_surface(globals.xdg_shell.get(), m_surface.get()));
+        m_xdg_surface.reset(
+            xdg_wm_base_get_xdg_surface(globals.xdg_wm_base.get(), m_surface.get()));
 
         xdg_surface_add_listener(m_xdg_surface.get(), &stormkit_xdg_surface_listener, this);
 
@@ -928,24 +983,34 @@ namespace stormkit::wsi::linux::wayland {
         }
 
         if (globals.xdg_decoration_manager) {
-            zxdg_decoration_manager_v1_get_toplevel_decoration(globals.xdg_decoration_manager.get(),
-                                                               m_xdg_toplevel.get());
+            m_xdg_decoration.reset(zxdg_decoration_manager_v1_get_toplevel_decoration(
+                globals.xdg_decoration_manager.get(),
+                m_xdg_toplevel.get()));
+            zxdg_toplevel_decoration_v1_add_listener(m_xdg_decoration.get(),
+                                                     &stormkit_decoration_listener,
+                                                     this);
+
+            zxdg_toplevel_decoration_v1_set_mode(m_xdg_decoration.get(),
+                                                 ZXDG_TOPLEVEL_DECORATION_V1_MODE_SERVER_SIDE);
         }
+
+        wl_surface_commit(m_surface.get());
+        wl_display_roundtrip(globals.display.get());
     }
 
     /////////////////////////////////////
     /////////////////////////////////////
-    auto WindowImpl::createWaylandShell() noexcept -> void {
-        m_wlshell_surface.reset(
-            wl_shell_get_shell_surface(globals.wayland_shell.get(), m_surface.get()));
-        wl_shell_surface_add_listener(m_wlshell_surface.get(),
-                                      &stormkit_shell_surface_listener,
-                                      this);
-        wl_shell_surface_set_toplevel(m_wlshell_surface.get());
-
-        wl_surface_damage(m_surface.get(), 0, 0, m_extent.width, m_extent.height);
-        createPixelBuffer();
-    }
+    // auto WindowImpl::createWaylandShell() noexcept -> void {
+    //     m_wlshell_surface.reset(
+    //         wl_shell_get_shell_surface(globals.wayland_shell.get(), m_surface.get()));
+    //     wl_shell_surface_add_listener(m_wlshell_surface.get(),
+    //                                   &stormkit_shell_surface_listener,
+    //                                   this);
+    //     wl_shell_surface_set_toplevel(m_wlshell_surface.get());
+    //
+    //     wl_surface_damage(m_surface.get(), 0, 0, m_extent.width, m_extent.height);
+    //     createPixelBuffer();
+    // }
 
     auto WindowImpl::createPixelBuffer() noexcept -> void {
         const auto buffer_size   = m_extent.width * m_extent.height * 4;
@@ -964,7 +1029,7 @@ namespace stormkit::wsi::linux::wayland {
                                                  m_extent.width,
                                                  m_extent.height,
                                                  buffer_stride,
-                                                 WL_SHM_FORMAT_XRGB8888));
+                                                 WL_SHM_FORMAT_ARGB8888));
 
         wl_surface_attach(m_surface.get(), m_buffer.get(), 0, 0);
         wl_surface_commit(m_surface.get());
@@ -1002,48 +1067,16 @@ namespace stormkit::wsi::linux::wayland {
         };
     }
 
-    namespace {
-        constinit const auto stormkit_output_listener =
-            wl_output_listener { .geometry = outputGeometryHandler,
-                                 .mode     = outputModeHandler,
-                                 .done     = outputDoneHandler,
-                                 .scale    = outputScaleHandler };
-
-        constinit const auto stormkit_seat_listener =
-            wl_seat_listener { .capabilities = seatCapabilitiesHandler, .name = seatNameHandler };
-
-        constinit const auto stormkit_pointer_listener =
-            wl_pointer_listener { .enter         = pointerEnterHandler,
-                                  .leave         = pointerLeaveHandler,
-                                  .motion        = pointerMotionHandler,
-                                  .button        = pointerButtonHandler,
-                                  .axis          = pointerAxisHandler,
-                                  .frame         = pointerFrameHandler,
-                                  .axis_source   = pointerAxisSourceHandler,
-                                  .axis_stop     = pointerAxisStopHandler,
-                                  .axis_discrete = pointerAxisDiscreteHandler };
-
-        constinit const auto stormkit_keyboard_listener =
-            wl_keyboard_listener { .keymap      = keyboardKeymapHandler,
-                                   .enter       = keyboardEnterHandler,
-                                   .leave       = keyboardLeaveHandler,
-                                   .key         = keyboardKeyHandler,
-                                   .modifiers   = keyboardModifiersHandler,
-                                   .repeat_info = keyboardRepeatInfoHandler };
-
-        constinit const auto stormkit_touchscreen_listener = wl_touch_listener {};
-    } // namespace
-
     /////////////////////////////////////
     /////////////////////////////////////
-    auto registryHandler(void*        data,
-                         wl_registry* registry,
-                         UInt32       id,
-                         const char*  interface,
-                         UInt32       version) noexcept -> void {
+    extern "C" auto registryHandler(void*        data,
+                                    wl_registry* registry,
+                                    UInt32       id,
+                                    const char*  interface,
+                                    UInt32       version) noexcept -> void {
         auto& globals = *static_cast<Globals*>(data);
 
-#define BIND(n, t, v) n.reset(static_cast<t*>(wl_registry_bind(registry, id, &t##_interface, v)));
+#define BIND(n, t, v) n.reset(std::bit_cast<t*>(wl_registry_bind(registry, id, &t##_interface, v)));
 
         dlog("Wayland registry acquired {} (id: {}, version: {})", interface, id, version);
 
@@ -1053,387 +1086,414 @@ namespace stormkit::wsi::linux::wayland {
 
         if (interface_name == wl_compositor_interface.name)
             BIND(globals.compositor, wl_compositor, 3)
+        if (interface_name == wl_subcompositor_interface.name)
+            BIND(globals.subcompositor, wl_subcompositor, 3)
+        else if (interface_name == wl_shm_interface.name)
+            BIND(globals.shm, wl_shm, 1)
         else if (interface_name == wl_output_interface.name) {
             auto& output = globals.outputs.emplace_back(
                 static_cast<wl_output*>(wl_registry_bind(registry, id, &wl_output_interface, 2)));
             wl_output_add_listener(output.get(), &stormkit_output_listener, &globals);
-        } else if (interface_name == xdg_wm_base_interface.name)
-            BIND(globals.xdg_shell, xdg_wm_base, 1)
-        else if (interface_name == zxdg_decoration_manager_v1_interface.name)
-            BIND(globals.xdg_decoration_manager, zxdg_decoration_manager_v1, 1)
-        else if (interface_name == wl_shell_interface.name)
-            BIND(globals.wayland_shell, wl_shell, 1)
-        else if (interface_name == wl_shm_interface.name)
-            BIND(globals.shm, wl_shm, 1)
-        else if (interface_name == wl_seat_interface.name) {
+        } else if (interface_name == wl_seat_interface.name) {
             BIND(globals.seat, wl_seat, 5)
             wl_seat_add_listener(globals.seat.get(), &stormkit_seat_listener, &globals);
-        } else if (interface_name == zwp_pointer_constraints_v1_interface.name)
+        } else if (interface_name == wp_viewporter_interface.name)
+            BIND(globals.viewporter, wp_viewporter, 1)
+        else if (interface_name == xdg_wm_base_interface.name)
+            BIND(globals.xdg_wm_base, xdg_wm_base, 1)
+        else if (interface_name == zxdg_decoration_manager_v1_interface.name)
+            BIND(globals.xdg_decoration_manager, zxdg_decoration_manager_v1, 1)
+        else if (interface_name == zwp_pointer_constraints_v1_interface.name)
             BIND(globals.pointer_constraints, zwp_pointer_constraints_v1, 1)
         else if (interface_name == zwp_relative_pointer_manager_v1_interface.name)
             BIND(globals.relative_pointer_manager, zwp_relative_pointer_manager_v1, 1)
 #undef BIND
     }
 
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto registryRemoverHandler([[maybe_unused]] void*        data,
-                                [[maybe_unused]] wl_registry* registry,
-                                UInt32                        id) noexcept -> void {
-        dlog("Wayland registry lost {}", id);
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto outputGeometryHandler(void*                       data,
-                               [[maybe_unused]] wl_output* output,
-                               [[maybe_unused]] Int32      x,
-                               [[maybe_unused]] Int32      y,
-                               [[maybe_unused]] Int32      pwidth,
-                               [[maybe_unused]] Int32      pheight,
-                               [[maybe_unused]] Int32      subpixels,
-                               const char*                 make,
-                               const char*                 model,
-                               [[maybe_unused]] Int32      transform) noexcept -> void {
-        auto& globals = *static_cast<Globals*>(data);
-        auto& monitor = globals.monitors[output];
-
-        monitor.name = std::format("{} {}", make, model);
-
-        for (auto& [_, m] : globals.monitors) { m.flags = Monitor::Flags::None; }
-
-        if (&monitor == &globals.monitors.begin()->second) monitor.flags = Monitor::Flags::Primary;
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto outputModeHandler(void*                       data,
-                           [[maybe_unused]] wl_output* wl_output,
-                           [[maybe_unused]] UInt32     flags,
-                           Int32                       width,
-                           Int32                       height,
-                           [[maybe_unused]] Int32      refresh) noexcept -> void {
-        auto& globals = *static_cast<Globals*>(data);
-        auto& monitor = globals.monitors[wl_output];
-
-        monitor.extents.emplace_back(as<UInt32>(width), as<UInt32>(height));
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto outputDoneHandler([[maybe_unused]] void*      data,
-                           [[maybe_unused]] wl_output* wl_output) noexcept -> void {
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto outputScaleHandler([[maybe_unused]] void*      data,
-                            [[maybe_unused]] wl_output* wl_output,
-                            [[maybe_unused]] Int32      factor) noexcept -> void {
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto surfaceEnterHandler(void* data, wl_surface* surface, wl_output* output) noexcept -> void {
-        auto* window = static_cast<WindowImpl*>(data);
-        window->surfaceOutputEnter(surface, output);
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto surfaceLeaveHandler([[maybe_unused]] void*       data,
-                             [[maybe_unused]] wl_surface* surface,
-                             [[maybe_unused]] wl_output*  output) noexcept -> void {
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto toplevelConfigureHandler(void*         data,
-                                  xdg_toplevel* xdg_tl,
-                                  Int32         width,
-                                  Int32         height,
-                                  wl_array*     states) noexcept -> void {
-        auto* window = static_cast<WindowImpl*>(data);
-        window->toplevelConfigure(xdg_tl, width, height, states);
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto toplevelCloseHandler(void* data, xdg_toplevel* xdg_tl) noexcept -> void {
-        auto* window = static_cast<WindowImpl*>(data);
-        window->toplevelClose(xdg_tl);
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto surfaceConfigureHandler(void* data, xdg_surface* surface, UInt32 serial) noexcept -> void {
-        auto window = static_cast<WindowImpl*>(data);
-        window->surfaceConfigure(surface, serial);
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto shellPingHandler([[maybe_unused]] void* data,
-                          xdg_wm_base*           xdg_shell,
-                          UInt32                 serial) noexcept -> void {
-        ilog("Ping received from shell");
-
-        xdg_wm_base_pong(xdg_shell, serial);
-    }
-
-    auto shellSurfaceConfigureHandler(void*             data,
-                                      wl_shell_surface* shell_surface,
-                                      UInt32            edges,
-                                      Int32             width,
-                                      Int32             height) noexcept -> void {
-        auto* window = static_cast<WindowImpl*>(data);
-        window->shellSurfaceConfigure(shell_surface, edges, width, height);
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto shellPingHandler([[maybe_unused]] void* data,
-                          wl_shell_surface*      shell_surface,
-                          UInt32                 serial) noexcept -> void {
-        ilog("Ping received from shell");
-
-        wl_shell_surface_pong(shell_surface, serial);
-    }
-
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto seatCapabilitiesHandler(void*                     data,
-                                 [[maybe_unused]] wl_seat* seat,
-                                 UInt32                    capabilities) noexcept -> void {
-        auto& globals = *static_cast<Globals*>(data);
-
-        if ((capabilities & WL_SEAT_CAPABILITY_KEYBOARD) > 0) {
-            auto& keyboard =
-                globals.keyboards.emplace_back(wl_seat_get_keyboard(globals.seat.get()));
-            wl_keyboard_add_listener(keyboard.get(), &stormkit_keyboard_listener, nullptr);
+    namespace {
+        /////////////////////////////////////
+        /////////////////////////////////////
+        extern "C" auto registryRemoverHandler([[maybe_unused]] void*        data,
+                                               [[maybe_unused]] wl_registry* registry,
+                                               UInt32                        id) noexcept -> void {
+            dlog("Wayland registry lost {}", id);
         }
 
-        if ((capabilities & WL_SEAT_CAPABILITY_POINTER) > 0) {
-            auto& pointer = globals.pointers.emplace_back(wl_seat_get_pointer(globals.seat.get()));
-            wl_pointer_add_listener(pointer.get(), &stormkit_pointer_listener, nullptr);
+        /////////////////////////////////////
+        /////////////////////////////////////
+        extern "C" auto outputGeometryHandler(void*                       data,
+                                              [[maybe_unused]] wl_output* output,
+                                              [[maybe_unused]] Int32      x,
+                                              [[maybe_unused]] Int32      y,
+                                              [[maybe_unused]] Int32      pwidth,
+                                              [[maybe_unused]] Int32      pheight,
+                                              [[maybe_unused]] Int32      subpixels,
+                                              const char*                 make,
+                                              const char*                 model,
+                                              [[maybe_unused]] Int32 transform) noexcept -> void {
+            auto& globals = *static_cast<Globals*>(data);
+            auto& monitor = globals.monitors[output];
+
+            monitor.name = std::format("{} {}", make, model);
+
+            for (auto& [_, m] : globals.monitors) { m.flags = Monitor::Flags::None; }
+
+            if (&monitor == &globals.monitors.begin()->second)
+                monitor.flags = Monitor::Flags::Primary;
         }
 
-        if ((capabilities & WL_SEAT_CAPABILITY_TOUCH) > 0) {
-            globals.touchscreens.emplace_back(wl_seat_get_touch(globals.seat.get()));
-            // wl_touch_add_listener(touchscreen, &stormkit_touchscreen_listener, this);
+        /////////////////////////////////////
+        /////////////////////////////////////
+        extern "C" auto outputModeHandler(void*                       data,
+                                          [[maybe_unused]] wl_output* wl_output,
+                                          [[maybe_unused]] UInt32     flags,
+                                          Int32                       width,
+                                          Int32                       height,
+                                          [[maybe_unused]] Int32      refresh) noexcept -> void {
+            auto& globals = *static_cast<Globals*>(data);
+            auto& monitor = globals.monitors[wl_output];
+
+            monitor.extents.emplace_back(as<UInt32>(width), as<UInt32>(height));
         }
-    }
 
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto seatNameHandler([[maybe_unused]] void*    data,
-                         [[maybe_unused]] wl_seat* seat,
-                         const char*               name) noexcept -> void {
-        dlog("WL Seat found! {}", name);
-    }
+        /////////////////////////////////////
+        /////////////////////////////////////
+        extern "C" auto outputDoneHandler([[maybe_unused]] void*      data,
+                                          [[maybe_unused]] wl_output* wl_output) noexcept -> void {
+        }
 
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto pointerEnterHandler(void*       data,
-                             wl_pointer* pointer,
-                             UInt32      serial,
-                             wl_surface* surface,
-                             wl_fixed_t  surface_x,
-                             wl_fixed_t  surface_y) noexcept -> void {
-        if (data == nullptr) return;
+        /////////////////////////////////////
+        /////////////////////////////////////
+        extern "C" auto outputScaleHandler([[maybe_unused]] void*      data,
+                                           [[maybe_unused]] wl_output* wl_output,
+                                           [[maybe_unused]] Int32      factor) noexcept -> void {
+        }
 
-        auto* window = static_cast<WindowImpl*>(data);
-        window->pointerEnter(pointer, serial, surface, surface_x, surface_y);
-    }
+        /////////////////////////////////////
+        /////////////////////////////////////
+        extern "C" auto surfaceEnterHandler(void*       data,
+                                            wl_surface* surface,
+                                            wl_output*  output) noexcept -> void {
+            auto* window = static_cast<WindowImpl*>(data);
+            window->surfaceOutputEnter(surface, output);
+        }
 
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto pointerLeaveHandler(void*       data,
-                             wl_pointer* pointer,
-                             UInt32      serial,
-                             wl_surface* surface) noexcept -> void {
-        if (data == nullptr) return;
+        /////////////////////////////////////
+        /////////////////////////////////////
+        extern "C" auto surfaceLeaveHandler([[maybe_unused]] void*       data,
+                                            [[maybe_unused]] wl_surface* surface,
+                                            [[maybe_unused]] wl_output*  output) noexcept -> void {
+        }
 
-        auto* window = static_cast<WindowImpl*>(data);
-        window->pointerLeave(pointer, serial, surface);
-    }
+        /////////////////////////////////////
+        /////////////////////////////////////
+        extern "C" auto toplevelConfigureHandler(void*         data,
+                                                 xdg_toplevel* xdg_tl,
+                                                 Int32         width,
+                                                 Int32         height,
+                                                 wl_array*     states) noexcept -> void {
+            auto* window = static_cast<WindowImpl*>(data);
+            window->toplevelConfigure(xdg_tl, width, height, states);
+        }
 
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto pointerMotionHandler(void*       data,
-                              wl_pointer* pointer,
-                              UInt32      time,
-                              wl_fixed_t  surface_x,
-                              wl_fixed_t  surface_y) noexcept -> void {
-        if (data == nullptr) return;
+        /////////////////////////////////////
+        /////////////////////////////////////
+        extern "C" auto toplevelCloseHandler(void* data, xdg_toplevel* xdg_tl) noexcept -> void {
+            auto* window = static_cast<WindowImpl*>(data);
+            window->toplevelClose(xdg_tl);
+        }
 
-        auto* window = static_cast<WindowImpl*>(data);
-        window->pointerMotion(pointer, time, surface_x, surface_y);
-    }
+        /////////////////////////////////////
+        /////////////////////////////////////
+        extern "C" auto surfaceConfigureHandler(void*        data,
+                                                xdg_surface* surface,
+                                                UInt32       serial) noexcept -> void {
+            auto window = static_cast<WindowImpl*>(data);
+            window->surfaceConfigure(surface, serial);
+        }
 
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto pointerButtonHandler(void*       data,
-                              wl_pointer* pointer,
-                              UInt32      serial,
-                              UInt32      time,
-                              UInt32      button,
-                              UInt32      state) noexcept -> void {
-        if (data == nullptr) return;
+        /////////////////////////////////////
+        /////////////////////////////////////
+        extern "C" auto xdgShellPingHandler([[maybe_unused]] void* data,
+                                            xdg_wm_base*           xdg_wm_base,
+                                            UInt32                 serial) noexcept -> void {
+            ilog("Ping received from shell");
 
-        auto* window = static_cast<WindowImpl*>(data);
-        window->pointerButton(pointer, serial, time, button, state);
-    }
+            xdg_wm_base_pong(xdg_wm_base, serial);
+        }
 
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto pointerAxisHandler([[maybe_unused]] void*       data,
-                            [[maybe_unused]] wl_pointer* pointer,
-                            [[maybe_unused]] UInt32      time,
-                            [[maybe_unused]] UInt32      axis,
-                            [[maybe_unused]] wl_fixed_t  value) noexcept -> void {
-    }
+        /////////////////////////////////////
+        /////////////////////////////////////
+        extern "C" void xdgDecorationConfigureHandler(void*                        data,
+                                                      zxdg_toplevel_decoration_v1* decoration,
+                                                      uint32_t                     mode) {
+            auto* window = static_cast<WindowImpl*>(data);
+        }
 
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto pointerFrameHandler([[maybe_unused]] void*       data,
-                             [[maybe_unused]] wl_pointer* pointer) noexcept -> void {
-    }
+        /////////////////////////////////////
+        /////////////////////////////////////
+        extern "C" auto shellSurfaceConfigureHandler(void*             data,
+                                                     wl_shell_surface* shell_surface,
+                                                     UInt32            edges,
+                                                     Int32             width,
+                                                     Int32             height) noexcept -> void {
+            auto* window = static_cast<WindowImpl*>(data);
+            window->shellSurfaceConfigure(shell_surface, edges, width, height);
+        }
 
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto pointerAxisSourceHandler([[maybe_unused]] void*       data,
-                                  [[maybe_unused]] wl_pointer* pointer,
-                                  [[maybe_unused]] UInt32      axis_source) noexcept -> void {
-    }
+        /////////////////////////////////////
+        /////////////////////////////////////
+        extern "C" auto shellPingHandler([[maybe_unused]] void* data,
+                                         wl_shell_surface*      shell_surface,
+                                         UInt32                 serial) noexcept -> void {
+            ilog("Ping received from shell");
 
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto pointerAxisStopHandler([[maybe_unused]] void*       data,
-                                [[maybe_unused]] wl_pointer* pointer,
-                                [[maybe_unused]] UInt32      time,
-                                [[maybe_unused]] UInt32      axis) noexcept -> void {
-    }
+            wl_shell_surface_pong(shell_surface, serial);
+        }
 
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto pointerAxisDiscreteHandler([[maybe_unused]] void*       data,
-                                    [[maybe_unused]] wl_pointer* pointer,
-                                    [[maybe_unused]] UInt32      axis,
-                                    [[maybe_unused]] Int32       discrete) noexcept -> void {
-    }
+        /////////////////////////////////////
+        /////////////////////////////////////
+        extern "C" auto seatCapabilitiesHandler(void*                     data,
+                                                [[maybe_unused]] wl_seat* seat,
+                                                UInt32 capabilities) noexcept -> void {
+            auto& globals = *static_cast<Globals*>(data);
 
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto keyboardKeymapHandler(void*        data,
-                               wl_keyboard* keyboard,
-                               UInt32       format,
-                               Int32        fd,
-                               UInt32       size) noexcept -> void {
-        if (data == nullptr) return;
+            if ((capabilities & WL_SEAT_CAPABILITY_KEYBOARD) > 0) {
+                auto& keyboard =
+                    globals.keyboards.emplace_back(wl_seat_get_keyboard(globals.seat.get()));
+                wl_keyboard_add_listener(keyboard.get(), &stormkit_keyboard_listener, nullptr);
+            }
 
-        auto* window = static_cast<WindowImpl*>(data);
-        window->keyboardKeymap(keyboard, format, fd, size);
-    }
+            if ((capabilities & WL_SEAT_CAPABILITY_POINTER) > 0) {
+                auto& pointer =
+                    globals.pointers.emplace_back(wl_seat_get_pointer(globals.seat.get()));
+                wl_pointer_add_listener(pointer.get(), &stormkit_pointer_listener, nullptr);
+            }
 
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto keyboardEnterHandler(void*        data,
-                              wl_keyboard* keyboard,
-                              UInt32       serial,
-                              wl_surface*  surface,
-                              wl_array*    keys) noexcept -> void {
-        if (data == nullptr) return;
+            if ((capabilities & WL_SEAT_CAPABILITY_TOUCH) > 0) {
+                globals.touchscreens.emplace_back(wl_seat_get_touch(globals.seat.get()));
+                // wl_touch_add_listener(touchscreen, &stormkit_touchscreen_listener, this);
+            }
+        }
 
-        auto* window = static_cast<WindowImpl*>(data);
-        window->keyboardEnter(keyboard, serial, surface, keys);
-    }
+        /////////////////////////////////////
+        /////////////////////////////////////
+        extern "C" auto seatNameHandler([[maybe_unused]] void*    data,
+                                        [[maybe_unused]] wl_seat* seat,
+                                        const char*               name) noexcept -> void {
+            dlog("WL Seat found! {}", name);
+        }
 
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto keyboardLeaveHandler(void*        data,
-                              wl_keyboard* keyboard,
-                              UInt32       serial,
-                              wl_surface*  surface) noexcept -> void {
-        if (data == nullptr) return;
+        /////////////////////////////////////
+        /////////////////////////////////////
+        extern "C" auto pointerEnterHandler(void*       data,
+                                            wl_pointer* pointer,
+                                            UInt32      serial,
+                                            wl_surface* surface,
+                                            wl_fixed_t  surface_x,
+                                            wl_fixed_t  surface_y) noexcept -> void {
+            if (data == nullptr) return;
 
-        auto* window = static_cast<WindowImpl*>(data);
-        window->keyboardLeave(keyboard, serial, surface);
-    }
+            auto* window = static_cast<WindowImpl*>(data);
+            window->pointerEnter(pointer, serial, surface, surface_x, surface_y);
+        }
 
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto keyboardKeyHandler(void*        data,
-                            wl_keyboard* keyboard,
-                            UInt32       serial,
-                            UInt32       time,
-                            UInt32       key,
-                            UInt32       state) noexcept -> void {
-        if (data == nullptr) return;
+        /////////////////////////////////////
+        /////////////////////////////////////
+        extern "C" auto pointerLeaveHandler(void*       data,
+                                            wl_pointer* pointer,
+                                            UInt32      serial,
+                                            wl_surface* surface) noexcept -> void {
+            if (data == nullptr) return;
 
-        auto* window = static_cast<WindowImpl*>(data);
-        window->keyboardKey(keyboard, serial, time, key, state);
-    }
+            auto* window = static_cast<WindowImpl*>(data);
+            window->pointerLeave(pointer, serial, surface);
+        }
 
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto keyboardModifiersHandler(void*        data,
-                                  wl_keyboard* keyboard,
-                                  UInt32       serial,
-                                  UInt32       mods_depressed,
-                                  UInt32       mods_latcher,
-                                  UInt32       mods_locked,
-                                  UInt32       group) noexcept -> void {
-        if (data == nullptr) return;
+        /////////////////////////////////////
+        /////////////////////////////////////
+        extern "C" auto pointerMotionHandler(void*       data,
+                                             wl_pointer* pointer,
+                                             UInt32      time,
+                                             wl_fixed_t  surface_x,
+                                             wl_fixed_t  surface_y) noexcept -> void {
+            if (data == nullptr) return;
 
-        auto* window = static_cast<WindowImpl*>(data);
-        window
-            ->keyboardModifiers(keyboard, serial, mods_depressed, mods_latcher, mods_locked, group);
-    }
+            auto* window = static_cast<WindowImpl*>(data);
+            window->pointerMotion(pointer, time, surface_x, surface_y);
+        }
 
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto keyboardRepeatInfoHandler(void*        data,
-                                   wl_keyboard* keyboard,
-                                   Int32        rate,
-                                   Int32        delay) noexcept -> void {
-        if (data == nullptr) return;
+        /////////////////////////////////////
+        /////////////////////////////////////
+        extern "C" auto pointerButtonHandler(void*       data,
+                                             wl_pointer* pointer,
+                                             UInt32      serial,
+                                             UInt32      time,
+                                             UInt32      button,
+                                             UInt32      state) noexcept -> void {
+            if (data == nullptr) return;
 
-        auto* window = static_cast<WindowImpl*>(data);
-        window->keyboardRepeatInfo(keyboard, rate, delay);
-    }
+            auto* window = static_cast<WindowImpl*>(data);
+            window->pointerButton(pointer, serial, time, button, state);
+        }
 
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto relativePointerRelativeMotionHandler(void*                    data,
-                                              zwp_relative_pointer_v1* pointer,
-                                              UInt32                   time_hi,
-                                              UInt32                   time_lw,
-                                              wl_fixed_t               dx,
-                                              wl_fixed_t               dy,
-                                              wl_fixed_t               dx_unaccel,
-                                              wl_fixed_t dy_unaccel) noexcept -> void {
-        auto* window = static_cast<WindowImpl*>(data);
-        window->relativePointerRelativeMotion(pointer,
-                                              time_hi,
-                                              time_lw,
-                                              dx,
-                                              dy,
-                                              dx_unaccel,
-                                              dy_unaccel);
-    }
+        /////////////////////////////////////
+        /////////////////////////////////////
+        extern "C" auto pointerAxisHandler([[maybe_unused]] void*       data,
+                                           [[maybe_unused]] wl_pointer* pointer,
+                                           [[maybe_unused]] UInt32      time,
+                                           [[maybe_unused]] UInt32      axis,
+                                           [[maybe_unused]] wl_fixed_t  value) noexcept -> void {
+        }
 
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto lockedPointerLockedHandler([[maybe_unused]] void*                  data,
-                                    [[maybe_unused]] zwp_locked_pointer_v1* locked_pointer) noexcept
-        -> void {
-    }
+        /////////////////////////////////////
+        /////////////////////////////////////
+        extern "C" auto pointerFrameHandler([[maybe_unused]] void*       data,
+                                            [[maybe_unused]] wl_pointer* pointer) noexcept -> void {
+        }
 
-    /////////////////////////////////////
-    /////////////////////////////////////
-    auto lockedPointerUnlockedHandler(
-        [[maybe_unused]] void*                  data,
-        [[maybe_unused]] zwp_locked_pointer_v1* locked_pointer) noexcept -> void {
-    }
+        /////////////////////////////////////
+        /////////////////////////////////////
+        extern "C" auto
+            pointerAxisSourceHandler([[maybe_unused]] void*       data,
+                                     [[maybe_unused]] wl_pointer* pointer,
+                                     [[maybe_unused]] UInt32      axis_source) noexcept -> void {
+        }
+
+        /////////////////////////////////////
+        /////////////////////////////////////
+        extern "C" auto pointerAxisStopHandler([[maybe_unused]] void*       data,
+                                               [[maybe_unused]] wl_pointer* pointer,
+                                               [[maybe_unused]] UInt32      time,
+                                               [[maybe_unused]] UInt32      axis) noexcept -> void {
+        }
+
+        /////////////////////////////////////
+        /////////////////////////////////////
+        extern "C" auto
+            pointerAxisDiscreteHandler([[maybe_unused]] void*       data,
+                                       [[maybe_unused]] wl_pointer* pointer,
+                                       [[maybe_unused]] UInt32      axis,
+                                       [[maybe_unused]] Int32       discrete) noexcept -> void {
+        }
+
+        /////////////////////////////////////
+        /////////////////////////////////////
+        extern "C" auto keyboardKeymapHandler(void*        data,
+                                              wl_keyboard* keyboard,
+                                              UInt32       format,
+                                              Int32        fd,
+                                              UInt32       size) noexcept -> void {
+            if (data == nullptr) return;
+
+            auto* window = static_cast<WindowImpl*>(data);
+            window->keyboardKeymap(keyboard, format, fd, size);
+        }
+
+        /////////////////////////////////////
+        /////////////////////////////////////
+        extern "C" auto keyboardEnterHandler(void*        data,
+                                             wl_keyboard* keyboard,
+                                             UInt32       serial,
+                                             wl_surface*  surface,
+                                             wl_array*    keys) noexcept -> void {
+            if (data == nullptr) return;
+
+            auto* window = static_cast<WindowImpl*>(data);
+            window->keyboardEnter(keyboard, serial, surface, keys);
+        }
+
+        /////////////////////////////////////
+        /////////////////////////////////////
+        extern "C" auto keyboardLeaveHandler(void*        data,
+                                             wl_keyboard* keyboard,
+                                             UInt32       serial,
+                                             wl_surface*  surface) noexcept -> void {
+            if (data == nullptr) return;
+
+            auto* window = static_cast<WindowImpl*>(data);
+            window->keyboardLeave(keyboard, serial, surface);
+        }
+
+        /////////////////////////////////////
+        /////////////////////////////////////
+        extern "C" auto keyboardKeyHandler(void*        data,
+                                           wl_keyboard* keyboard,
+                                           UInt32       serial,
+                                           UInt32       time,
+                                           UInt32       key,
+                                           UInt32       state) noexcept -> void {
+            if (data == nullptr) return;
+
+            auto* window = static_cast<WindowImpl*>(data);
+            window->keyboardKey(keyboard, serial, time, key, state);
+        }
+
+        /////////////////////////////////////
+        /////////////////////////////////////
+        extern "C" auto keyboardModifiersHandler(void*        data,
+                                                 wl_keyboard* keyboard,
+                                                 UInt32       serial,
+                                                 UInt32       mods_depressed,
+                                                 UInt32       mods_latcher,
+                                                 UInt32       mods_locked,
+                                                 UInt32       group) noexcept -> void {
+            if (data == nullptr) return;
+
+            auto* window = static_cast<WindowImpl*>(data);
+            window->keyboardModifiers(keyboard,
+                                      serial,
+                                      mods_depressed,
+                                      mods_latcher,
+                                      mods_locked,
+                                      group);
+        }
+
+        /////////////////////////////////////
+        /////////////////////////////////////
+        extern "C" auto keyboardRepeatInfoHandler(void*        data,
+                                                  wl_keyboard* keyboard,
+                                                  Int32        rate,
+                                                  Int32        delay) noexcept -> void {
+            if (data == nullptr) return;
+
+            auto* window = static_cast<WindowImpl*>(data);
+            window->keyboardRepeatInfo(keyboard, rate, delay);
+        }
+
+        /////////////////////////////////////
+        /////////////////////////////////////
+        extern "C" auto
+            relativePointerRelativeMotionHandler(void*                    data,
+                                                 zwp_relative_pointer_v1* pointer,
+                                                 UInt32                   time_hi,
+                                                 UInt32                   time_lw,
+                                                 wl_fixed_t               dx,
+                                                 wl_fixed_t               dy,
+                                                 wl_fixed_t               dx_unaccel,
+                                                 wl_fixed_t dy_unaccel) noexcept -> void {
+            auto* window = static_cast<WindowImpl*>(data);
+            window->relativePointerRelativeMotion(pointer,
+                                                  time_hi,
+                                                  time_lw,
+                                                  dx,
+                                                  dy,
+                                                  dx_unaccel,
+                                                  dy_unaccel);
+        }
+
+        /////////////////////////////////////
+        /////////////////////////////////////
+        extern "C" auto lockedPointerLockedHandler(
+            [[maybe_unused]] void*                  data,
+            [[maybe_unused]] zwp_locked_pointer_v1* locked_pointer) noexcept -> void {
+        }
+
+        /////////////////////////////////////
+        /////////////////////////////////////
+        extern "C" auto lockedPointerUnlockedHandler(
+            [[maybe_unused]] void*                  data,
+            [[maybe_unused]] zwp_locked_pointer_v1* locked_pointer) noexcept -> void {
+        }
+    } // namespace
 } // namespace stormkit::wsi::linux::wayland

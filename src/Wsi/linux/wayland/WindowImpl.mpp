@@ -11,6 +11,7 @@ module;
 
 #include <pointer-constraints-unstable-v1.h>
 #include <relative-pointer-unstable-v1.h>
+#include <viewporter.h>
 #include <xdg-decoration-unstable-v1.h>
 #include <xdg-shell.h>
 
@@ -28,39 +29,50 @@ import :Common.WindowImplBase;
 import :Linux.Common.XKB;
 
 namespace stormkit::wsi::linux::wayland {
-    // Base
+    // Context
     STORMKIT_RAII_CAPSULE(WLDisplay, wl_display, wl_display_disconnect)
     STORMKIT_RAII_CAPSULE(WLRegistry, wl_registry, wl_registry_destroy)
+
+    // Base
     STORMKIT_RAII_CAPSULE(WLCompositor, wl_compositor, wl_compositor_destroy)
+    STORMKIT_RAII_CAPSULE(WLSubCompositor, wl_subcompositor, wl_subcompositor_destroy)
     STORMKIT_RAII_CAPSULE(WLShm, wl_shm, wl_shm_destroy)
     STORMKIT_RAII_CAPSULE(WLShmPool, wl_shm_pool, wl_shm_pool_destroy)
     STORMKIT_RAII_CAPSULE(WLSeat, wl_seat, wl_seat_release)
+
+    // monitor
     STORMKIT_RAII_CAPSULE(WLOutput, wl_output, wl_output_release)
 
-    // Base Surface
+    // Fallback Surface
     STORMKIT_RAII_CAPSULE(WLSurface, wl_surface, wl_surface_destroy)
+    STORMKIT_RAII_CAPSULE(WLSubSurface, wl_subsurface, wl_subsurface_destroy)
 
-    // Cursor
-    STORMKIT_RAII_CAPSULE(WLCursorTheme, wl_cursor_theme, wl_cursor_theme_destroy)
+    // Viewport
+    STORMKIT_RAII_CAPSULE(WPViewport, wp_viewport, wp_viewport_destroy)
+    STORMKIT_RAII_CAPSULE(WPViewporter, wp_viewporter, wp_viewporter_destroy)
 
-    // WL_Shell
-    STORMKIT_RAII_CAPSULE(WLShell, wl_shell, wl_shell_destroy)
-    STORMKIT_RAII_CAPSULE(WLShellSurface, wl_shell_surface, wl_shell_surface_destroy)
-
-    // XDG
-    STORMKIT_RAII_CAPSULE(XDGShell, xdg_wm_base, xdg_wm_base_destroy)
-    STORMKIT_RAII_CAPSULE(XDGSurface, xdg_surface, xdg_surface_destroy)
+    // XDG Shell
+    STORMKIT_RAII_CAPSULE(XDGWMBase, xdg_wm_base, xdg_wm_base_destroy)
     STORMKIT_RAII_CAPSULE(XDGTopLevel, xdg_toplevel, xdg_toplevel_destroy)
     STORMKIT_RAII_CAPSULE(XDGDecorationManager,
                           zxdg_decoration_manager_v1,
                           zxdg_decoration_manager_v1_destroy)
+    STORMKIT_RAII_CAPSULE(XDGTopLevelDecoration,
+                          zxdg_toplevel_decoration_v1,
+                          zxdg_toplevel_decoration_v1_destroy)
+
+    // XDG Surface
+    STORMKIT_RAII_CAPSULE(XDGSurface, xdg_surface, xdg_surface_destroy)
+
+    // Cursor
+    STORMKIT_RAII_CAPSULE(WLCursorTheme, wl_cursor_theme, wl_cursor_theme_destroy)
 
     // Events
     STORMKIT_RAII_CAPSULE(WLPointer, wl_pointer, wl_pointer_release)
     STORMKIT_RAII_CAPSULE(WLKeyboard, wl_keyboard, wl_keyboard_release)
     STORMKIT_RAII_CAPSULE(WLTouch, wl_touch, wl_touch_release)
 
-    // WP
+    // Pointer
     STORMKIT_RAII_CAPSULE(WPRelativePointerManager,
                           zwp_relative_pointer_manager_v1,
                           zwp_relative_pointer_manager_v1_destroy)
@@ -101,23 +113,30 @@ namespace stormkit::wsi::linux::wayland {
         nullptr);
 
     struct Globals {
-        WLDisplayScoped             display;
-        WLRegistryScoped            registry;
-        WLCompositorScoped          compositor;
-        std::vector<WLOutputScoped> outputs;
+        // Context
+        WLDisplayScoped  display;
+        WLRegistryScoped registry;
 
-        XDGShellScoped             xdg_shell;
+        // Base
+        WLCompositorScoped          compositor;
+        WLSubCompositorScoped       subcompositor;
+        WLShmScoped                 shm;
+        std::vector<WLOutputScoped> outputs;
+        WLSeatScoped                seat;
+
+        // viewport
+        WPViewporterScoped viewporter;
+
+        // XDG Shell
+        XDGWMBaseScoped            xdg_wm_base;
         XDGDecorationManagerScoped xdg_decoration_manager;
 
-        WLShellScoped wayland_shell;
-
-        WLShmScoped                    shm;
-        WLSeatScoped                   seat;
+        // HID
+        WPPointerConstraintsScoped     pointer_constraints;
+        WPRelativePointerManagerScoped relative_pointer_manager;
         std::vector<WLPointerScoped>   pointers;
         std::vector<WLKeyboardScoped>  keyboards;
         std::vector<WLTouchScoped>     touchscreens;
-        WPPointerConstraintsScoped     pointer_constraints;
-        WPRelativePointerManagerScoped relative_pointer_manager;
 
         HashMap<wl_output*, Monitor> monitors;
     };
@@ -218,8 +237,9 @@ export namespace stormkit::wsi::linux::wayland {
                           wl_surface*   surface,
                           wl_fixed_t    surface_x,
                           wl_fixed_t    surface_y) noexcept -> void;
-        auto pointerLeave(wl_pointer* pointer, std::uint32_t serial, wl_surface* surface) noexcept
-            -> void;
+        auto pointerLeave(wl_pointer*   pointer,
+                          std::uint32_t serial,
+                          wl_surface*   surface) noexcept -> void;
         auto pointerMotion(wl_pointer*   pointer,
                            std::uint32_t time,
                            wl_fixed_t    surface_x,
@@ -265,7 +285,7 @@ export namespace stormkit::wsi::linux::wayland {
                                            wl_fixed_t               dy_unaccel) noexcept -> void;
 
       private:
-        auto createXDGShell() noexcept -> void;
+        auto createXDGWMBase() noexcept -> void;
         auto createWaylandShell() noexcept -> void;
         auto createPixelBuffer() noexcept -> void;
         auto updateKeymap(std::string_view keymap_string) noexcept -> void;
@@ -280,12 +300,10 @@ export namespace stormkit::wsi::linux::wayland {
         WLSurfaceScoped     m_cursor_surface;
         WLBufferScoped      m_cursor_buffer;
 
-        // WL_Shell
-        WLShellSurfaceScoped m_wlshell_surface;
-
         // XDG
-        XDGSurfaceScoped  m_xdg_surface;
-        XDGTopLevelScoped m_xdg_toplevel;
+        XDGSurfaceScoped            m_xdg_surface;
+        XDGTopLevelScoped           m_xdg_toplevel;
+        XDGTopLevelDecorationScoped m_xdg_decoration;
 
         // Events
         WLPointerRefScoped  m_pointer;

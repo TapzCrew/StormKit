@@ -102,6 +102,7 @@ modules = {
 
           local protocols = {
             path.join("stable", "xdg-shell", "xdg-shell.xml"),
+            path.join("stable", "viewporter", "viewporter.xml"),
             path.join("unstable", "xdg-decoration", "xdg-decoration-unstable-v1.xml"),
             path.join("unstable", "pointer-constraints", "pointer-constraints-unstable-v1.xml"),
             path.join("unstable", "relative-pointer", "relative-pointer-unstable-v1.xml"),
@@ -321,6 +322,8 @@ set_optimize("fastest")
 if is_mode("debug") then
   set_symbols("debug", "hidden")
   add_defines("_GLIBCXX_DEBUG")
+  add_cxflags("-fno-omit-frame-pointer", { tools = { "clang", "gcc" } })
+  add_mxflags("-fno-omit-frame-pointer", { tools = { "clang", "gcc" } })
   add_cxflags("-ggdb3", { tools = { "clang", "gcc" } })
   add_mxflags("-ggdb3", { tools = { "clang", "gcc" } })
 elseif is_mode("releasedbg") then
